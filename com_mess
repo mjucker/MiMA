@@ -1,6 +1,0 @@
-spectral_rrtm, contains RRTM radiation and gravity wave drag (cg_drag).
-
-In addition to Dargan's surface, have option to have N-S symmetric step 
-in surface albedo. Also, surface can be initialized isothermally with Tm<0: 
-Tm=-265 means surface will be initialized isothermally with 265K.
-
