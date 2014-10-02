@@ -6,3 +6,6 @@
 # to negate anything, add !: !index.txt to not ignore index.txt but all other .txt files
 exec.nyu
 git_message
+*.o
+*.mod
+*.tmp
