@@ -1,2 +1,8 @@
+# Examples
+# to ignore all text files: *.txt
+# to ignore all directories with name dir: dir
+# to ignore only one specifig directory: /path/to/directory
+# to ignore all files with dir: dir/
+# to negate anything, add !: !index.txt to not ignore index.txt but all other .txt files
 exec.nyu
-
+git_message
