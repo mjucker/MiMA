@@ -1,10 +1,24 @@
-# Examples
+# for help, see help.github.com/articles/ignoring-files
+#            or github.com/github/gitignore
+#
+# To ignore globally, git config --global core.excludesfile ~/.gitignore_global
+#   then, add anything to always ignore into the file ~/.gitignore_global
+#
+# To ignore a file already being tracked:
+#   add file to .gitignore
+#   un-track file:
+#     git rm file (to remove the file altogether), or
+#     git rm --cached file (to leave file in the repo and the working dir, but not track anymore)
+#
+# Note: git ignores empty folders
+#
+# Examples:
 # to ignore all text files: *.txt
 # to ignore all directories with name dir: dir
 # to ignore only one specifig directory: /path/to/directory
 # to ignore all files with dir: dir/
 # to negate anything, add !: !index.txt to not ignore index.txt but all other .txt files
-exec.nyu
+exec.*
 git_message
 *.o
 *.mod
