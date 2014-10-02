@@ -1,0 +1,19 @@
+# test tracers for spectral core (with Held-Suarez forcing)
+
+"TRACER", "atmos_mod", "tracer1"
+          "longname",  "grid tracer"
+          "units",     "none"
+          "numerical_representation", "grid"
+	  "hole_filling",             "off"
+          "advect_vert",              "finite_volume_parabolic"
+          "robert_filter",            "on"
+          "tracer_sms",               "on" /
+
+"TRACER", "atmos_mod", "tracer2"
+          "longname",  "spectral tracer"
+          "units",     "none"
+          "numerical_representation", "spectral"
+	  "hole_filling",             "on"
+          "advect_vert",              "finite_volume_parabolic"
+          "robert_filter",            "on"
+          "tracer_sms",               "on" /

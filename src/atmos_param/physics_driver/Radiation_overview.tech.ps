@@ -1,0 +1,3890 @@
+%!PS-Adobe-3.0
+%%BoundingBox: (atend)
+%%Pages: (atend)
+%%PageOrder: (atend)
+%%DocumentFonts: (atend)
+%%DocumentNeedsFonts: (atend)
+%%DocumentSuppliedFonts: (atend)
+%%Creator: Frame 5.5
+%%DocumentData: Clean7Bit
+%%EndComments
+%%BeginProlog
+%
+% Frame ps_prolog 5.5, for use with Adobe Unix Frame 5.5 products
+%
+% This ps_prolog file is Copyright (c) 1986-1996 Adobe Systems, Incoporated.
+% All rights reserved.  This ps_prolog file may be freely copied and 
+% distributed in conjunction with documents created using FrameMaker, 
+% FrameMaker+SGML, FrameReader, and FrameViewer as long as this 
+% copyright notice is preserved.
+/FMDocSave save def
+%
+% FrameMaker users specify the proper paper size for each print job in the
+% "Print" dialog's "Printer Paper Size" "Width" and "Height~ fields.  If the
+% printer that the PS file is sent to does not support the requested paper
+% size, or if there is no paper tray of the proper size currently installed, 
+% then the job will not be printed.  The following flag, if set to true, will
+% cause the job to print on the default paper in such cases.
+/FMAllowPaperSizeMismatch            false def
+%
+% Frame products normally print colors as their true color on a color printer
+% or as shades of gray, based on luminance, on a black-and white printer. The
+% following flag, if set to true, forces all non-white colors to print as pure
+% black. This has no effect on bitmap images.
+/FMPrintAllColorsAsBlack             false def
+%
+% Frame products can either set their own line screens or use a printer's 
+% default settings. Three flags below control this separately for no 
+% separations, spot separations and process separations. If a flag
+% is true, then the default printer settings will not be changed. If it is
+% false, Frame products will use their own settings from a table based on
+% the printer's resolution.
+/FMUseDefaultNoSeparationScreen      true  def
+/FMUseDefaultSpotSeparationScreen    true  def
+/FMUseDefaultProcessSeparationScreen false def
+%
+% For any given PostScript printer resolution, Frame products have two sets of 
+% screen angles and frequencies for printing process separations, which are 
+% recomended by Adobe. The following variable chooses the higher frequencies
+% when set to true or the lower frequencies when set to false. This is only
+% effective if the appropriate FMUseDefault...SeparationScreen flag is false.
+/FMUseHighFrequencyScreens true def
+%
+% The following is a set of predefined optimal frequencies and angles for various
+% common dpi settings. This is taken from "Advances in Color Separation Using
+% PostScript Software Technology," from Adobe Systems (3/13/89 P.N. LPS 0043)
+% and corrolated with information which is in various PPD (4.0) files.
+%
+% The "dpiranges" figure is the minimum dots per inch device resolution which
+% can support this setting. The "low" and "high" values are controlled by the
+% setting of the FMUseHighFrequencyScreens flag above. The "TDot" flags control
+% the use of the "Yellow Triple Dot" feature whereby the frequency id divided by
+% three, but the dot function is "trippled" giving a block of 3x3 dots per cell.
+%
+% PatFreq is a compromise pattern frequency for ps Level 2 printers which is close
+% to the ideal WYSIWYG pattern frequency of 9 repetitions/inch but does not beat
+% (too badly) against the screen frequencies of any separations for that DPI.
+/dpiranges   [  2540    2400    1693     1270    1200     635      600      0      ] def
+/CMLowFreqs  [ 100.402  94.8683 89.2289 100.402  94.8683  66.9349  63.2456 47.4342 ] def
+/YLowFreqs   [  95.25   90.0    84.65    95.25   90.0     70.5556  66.6667 50.0    ] def
+/KLowFreqs   [  89.8026 84.8528 79.8088  89.8026 84.8528  74.8355  70.7107 53.033  ] def
+/CLowAngles  [  71.5651 71.5651 71.5651 71.5651  71.5651  71.5651  71.5651 71.5651 ] def
+/MLowAngles  [  18.4349 18.4349 18.4349 18.4349  18.4349  18.4349  18.4349 18.4349 ] def
+/YLowTDot    [  true    true    false    true    true     false    false   false   ] def
+/CMHighFreqs [ 133.87  126.491 133.843  108.503 102.523  100.402   94.8683 63.2456 ] def
+/YHighFreqs  [ 127.0   120.0   126.975  115.455 109.091   95.25    90.0    60.0    ] def
+/KHighFreqs  [ 119.737 113.137 119.713  128.289 121.218   89.8026  84.8528 63.6395 ] def
+/CHighAngles [  71.5651 71.5651 71.5651  70.0169 70.0169  71.5651  71.5651 71.5651 ] def
+/MHighAngles [  18.4349 18.4349 18.4349  19.9831 19.9831  18.4349  18.4349 18.4349 ] def
+/YHighTDot   [  false   false   true     false   false    true     true    false   ] def
+/PatFreq     [	10.5833 10.0     9.4055  10.5833 10.0	  10.5833  10.0	   9.375   ] def
+%
+% PostScript Level 2 printers contain an "Accurate Screens" feature which can
+% improve process separation rendering at the expense of compute time. This 
+% flag is ignored by PostScript Level 1 printers.
+/FMUseAcccurateScreens true def
+%
+% The following PostScript procedure defines the spot function that Frame
+% products will use for process separations. You may un-comment-out one of
+% the alternative functions below, or use your own.
+%
+% Dot function
+/FMSpotFunction {abs exch abs 2 copy add 1 gt 
+		{1 sub dup mul exch 1 sub dup mul add 1 sub }
+		{dup mul exch dup mul add 1 exch sub }ifelse } def
+%
+% Line function
+% /FMSpotFunction { pop } def
+%
+% Elipse function
+% /FMSpotFunction { dup 5 mul 8 div mul exch dup mul exch add 
+%		sqrt 1 exch sub } def
+%
+%
+/FMversion (5.5) def 
+/fMLevel1 /languagelevel where {pop languagelevel} {1} ifelse 2 lt def
+/FMPColor
+	fMLevel1 {
+		false
+		/colorimage where {pop pop true} if
+	} {
+		true
+	} ifelse
+def
+/FrameDict 400 dict def 
+systemdict /errordict known not {/errordict 10 dict def
+		errordict /rangecheck {stop} put} if
+% The readline in PS 23.0 doesn't recognize cr's as nl's on AppleTalk
+FrameDict /tmprangecheck errordict /rangecheck get put 
+errordict /rangecheck {FrameDict /bug true put} put 
+FrameDict /bug false put 
+mark 
+% Some PS machines read past the CR, so keep the following 3 lines together!
+currentfile 5 string readline
+00
+0000000000
+cleartomark 
+errordict /rangecheck FrameDict /tmprangecheck get put 
+FrameDict /bug get { 
+	/readline {
+		/gstring exch def
+		/gfile exch def
+		/gindex 0 def
+		{
+			gfile read pop 
+			dup 10 eq {exit} if 
+			dup 13 eq {exit} if 
+			gstring exch gindex exch put 
+			/gindex gindex 1 add def 
+		} loop
+		pop 
+		gstring 0 gindex getinterval true 
+		} bind def
+	} if
+/FMshowpage /showpage load def
+/FMquit /quit load def
+/FMFAILURE { 
+	2 copy exch = = flush 
+	FMshowpage 
+	/Helvetica findfont 12 scalefont setfont
+	72 200 moveto show
+	72 220 moveto show
+	FMshowpage 
+	FMquit 
+	} def 
+/FMVERSION {
+	FMversion ne {
+		(Adobe Frame product version does not match ps_prolog!  Check installation;)
+		(also check ~/fminit and ./fminit for old versions) FMFAILURE
+		} if
+	} def 
+/fmConcatProcs
+	{
+	/proc2 exch cvlit def/proc1 exch cvlit def/newproc proc1 length proc2 length add array def
+	newproc 0 proc1 putinterval newproc proc1 length proc2 putinterval newproc cvx
+}def
+FrameDict begin [
+	/ALDsave
+	/FMdicttop
+	/FMoptop
+	/FMpointsize
+	/FMsetsize
+	/FMsaveobject
+	/b
+	/bitmapsave
+	/blut
+	/bpside
+	/bs
+	/bstring
+	/bwidth
+	/c
+	/cf
+	/cs
+	/cynu
+	/depth
+	/edown
+	/fh
+	/fillvals
+	/fw
+	/fx
+	/fy
+	/g
+	/gfile
+	/gindex
+	/grnt
+	/gryt
+	/gstring
+	/height
+	/hh
+	/i
+	/im
+	/indx
+	/is
+	/k
+	/kk
+	/landscape
+	/lb
+	/len
+	/llx
+	/lly
+	/m
+	/magu
+	/manualfeed
+	/n
+	/offbits
+	/onbits
+	/organgle
+	/orgbangle
+	/orgbfreq
+	/orgbproc
+	/orgbxfer
+	/orgfreq
+	/orggangle
+	/orggfreq
+	/orggproc
+	/orggxfer
+	/orghalftone
+	/orgmatrix
+	/orgproc
+	/orgrangle
+	/orgrfreq
+	/orgrproc
+	/orgrxfer
+	/orgxfer
+	/pagesave
+	/paperheight
+	/papersizedict
+	/paperwidth
+	/pos
+	/pwid
+	/r
+	/rad
+	/redt
+	/sl
+	/str
+	/tran
+	/u
+	/urx
+	/ury
+	/val
+	/width
+	/width
+	/ws
+	/ww
+	/x
+	/x1
+	/x2
+	/xindex
+	/xpoint
+	/xscale
+	/xx
+	/y
+	/y1
+	/y2
+	/yelu
+	/yindex
+	/ypoint
+	/yscale
+	/yy
+	/tintGray
+] { 0 def } forall
+/FmBD {bind def} bind def
+systemdict /pdfmark known systemdict /currentdistillerparams known and {
+	/fMAcrobat true def
+	
+	/FmPD /pdfmark load def
+	
+	
+	/FmPT /show load def
+	
+	
+	currentdistillerparams /CoreDistVersion get 2000 ge {
+	
+		
+		/FmPD2 /pdfmark load def
+		
+		
+		
+		
+		
+%     
+% Procedure /FmPA defines named destinations. 
+% In order to accommodate all possible scenarios, FrameMaker defines named destinations
+% for each paragraph, which allows links to arbitrary points in already generated
+% PDF documents. This feature may cause larger PDF files to be created. 
+% The fmCG flag tells Distiller whether to create named destinations for each 
+% paragraph. This prolog defines two versions of this flag. One of these versions must be
+% commented out, and the other must be uncommented.
+%     
+% The following fmCG flag will cause Distiller to create a named destination for
+% each paragraph. 
+%     
+/fmCG { false } FmBD
+%     
+% The following fmCG flag will cause Distiller to create a named destination only
+% for each paragraph known to be a destination. If you do not want Distiller to create
+% named destinations for each paragraph (thus creating smaller sized PDF documents), 
+% uncomment the following statement and comment out the previous statement. 
+% CAUTION: By making the following statement active, you may lose some links in the
+%          resulting PDF documents.
+%     
+%%/fmCG { dup 127 string cvs 0 get (G) 0 get eq } FmBD 
+% 
+	  /FmND
+	  { mark exch /Dest exch 5 3 roll /View [ /XYZ 5 -2 roll FmDC null ] /DEST FmPD 
+	  }FmBD
+	  /FmPA 
+	  { fmCG
+	    { pop pop pop }
+	    { FmND } ifelse
+	  } FmBD
+	} {
+		
+		/FmPD2 /cleartomark load def
+		/FmPA {pop pop pop}FmBD
+		/FmND {pop pop pop}FmBD
+	} ifelse
+} {
+	
+	/fMAcrobat false def
+	/FmPD /cleartomark load def
+	/FmPD2 /cleartomark load def
+	/FmPT /pop load def
+	/FmPA {pop pop pop}FmBD
+	/FmND {pop pop pop}FmBD
+} ifelse
+/FmDC {
+	transform fMDefaultMatrix defaultmatrix itransform cvi exch cvi exch
+}FmBD
+/FmBx {
+	dup 3 index lt {3 1 roll exch} if 
+	1 index 4 index lt {4 -1 roll 3 1 roll exch 4 1 roll} if
+}FmBD
+/FMnone 0 def
+/FMcyan 1 def
+/FMmagenta 2 def
+/FMyellow 3 def
+/FMblack 4 def
+/FMcustom 5 def
+/fMNegative false def 
+/FrameSepIs FMnone def 
+/FrameSepBlack 0 def
+/FrameSepYellow 0 def
+/FrameSepMagenta 0 def
+/FrameSepCyan 0 def
+/FrameSepRed 1 def
+/FrameSepGreen 1 def
+/FrameSepBlue 1 def
+/FrameCurGray 1 def
+/FrameCurPat null def
+/FrameCurColors [ 0 0 0 1 0 0 0 1] def 
+/FrameColorEpsilon .001 def	
+/eqepsilon {		
+	sub dup 0 lt {neg} if
+	FrameColorEpsilon le
+} bind def
+/FrameCmpColorsCMYK { 
+	2 copy 0 get exch 0 get eqepsilon {
+		2 copy 1 get exch 1 get eqepsilon {
+			2 copy 2 get exch 2 get eqepsilon {
+				3 get exch 3 get eqepsilon
+			} {pop pop false} ifelse
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/FrameCmpColorsRGB { 
+	2 copy 4 get exch 0 get eqepsilon {
+		2 copy 5 get exch 1 get eqepsilon {
+			6 get exch 2 get eqepsilon
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/RGBtoCMYK { 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	3 copy 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	dup dup dup 
+	6 1 roll 
+	4 1 roll 
+	7 1 roll 
+	sub 
+	6 1 roll 
+	sub 
+	5 1 roll 
+	sub 
+	4 1 roll 
+} bind def
+/CMYKtoRGB { 
+	dup dup 4 -1 roll add 						  
+	5 1 roll 3 -1 roll add 						  
+	4 1 roll add 								  
+	1 exch sub dup 0 lt {pop 0} if 3 1 roll 	  
+	1 exch sub dup 0 lt {pop 0} if exch 	      
+	1 exch sub dup 0 lt {pop 0} if exch	  		  
+} bind def
+/FrameSepInit {
+	1.0 RealSetgray
+} bind def
+/FrameSetSepColor { 
+	/FrameSepBlue exch def
+	/FrameSepGreen exch def
+	/FrameSepRed exch def
+	/FrameSepBlack exch def
+	/FrameSepYellow exch def
+	/FrameSepMagenta exch def
+	/FrameSepCyan exch def
+	/FrameSepIs FMcustom def
+	setCurrentScreen	
+} bind def
+/FrameSetCyan {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 1.0 def
+	/FrameSepIs FMcyan def
+	setCurrentScreen	
+} bind def
+ 
+/FrameSetMagenta {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 1.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMmagenta def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetYellow {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 1.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMyellow def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetBlack {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 1.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMblack def
+	setCurrentScreen
+} bind def
+ 
+/FrameNoSep { 
+	/FrameSepIs FMnone def
+	setCurrentScreen
+} bind def
+/FrameSetSepColors { 
+	FrameDict begin
+	[ exch 1 add 1 roll ]
+	/FrameSepColors  
+	exch def end
+	} bind def
+/FrameColorInSepListCMYK { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsCMYK 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/FrameColorInSepListRGB { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsRGB 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/RealSetgray /setgray load def
+/RealSetrgbcolor /setrgbcolor load def
+/RealSethsbcolor /sethsbcolor load def
+end 
+/setgray { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+		{ RealSetgray } 
+		{ 
+		FrameSepIs FMblack eq 
+			{ RealSetgray } 
+			{ FrameSepIs FMcustom eq 
+			  FrameSepRed 0 eq and
+			  FrameSepGreen 0 eq and
+			  FrameSepBlue 0 eq and {
+			  	RealSetgray
+			  } {
+				1 RealSetgray pop 
+			  } ifelse
+			} ifelse
+		} ifelse
+	end
+} bind def
+/setrgbcolor { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+	{  RealSetrgbcolor }
+	{
+		3 copy [ 4 1 roll ] 
+		FrameColorInSepListRGB
+		{
+				FrameSepBlue eq exch 
+			 	FrameSepGreen eq and exch 
+			 	FrameSepRed eq and
+			 	{ 0 } { 1 } ifelse
+		}
+		{
+			FMPColor {
+				RealSetrgbcolor
+				currentcmykcolor
+			} {
+				RGBtoCMYK
+			} ifelse
+			FrameSepIs FMblack eq
+			{1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		RealSetgray
+	} 
+	ifelse
+	end
+} bind def
+/sethsbcolor {
+	FrameDict begin
+	FrameSepIs FMnone eq 
+	{ RealSethsbcolor } 
+	{
+		RealSethsbcolor 
+		currentrgbcolor  
+		setrgbcolor 
+	} 
+	ifelse
+	end
+} bind def
+FrameDict begin
+/setcmykcolor where {
+	pop /RealSetcmykcolor /setcmykcolor load def
+} {
+	/RealSetcmykcolor {
+		4 1 roll
+		3 { 3 index add 0 max 1 min 1 exch sub 3 1 roll} repeat 
+		RealSetrgbcolor pop
+	} bind def
+} ifelse
+userdict /setcmykcolor { 
+		FrameDict begin
+		FrameSepIs FMnone eq
+		{ RealSetcmykcolor } 
+		{
+			4 copy [ 5 1 roll ]
+			FrameColorInSepListCMYK
+			{
+				FrameSepBlack eq exch 
+				FrameSepYellow eq and exch 
+				FrameSepMagenta eq and exch 
+				FrameSepCyan eq and 
+				{ 0 } { 1 } ifelse
+			}
+			{
+				FrameSepIs FMblack eq
+				{1.0 exch sub 4 1 roll pop pop pop} {
+				FrameSepIs FMyellow eq
+				{pop 1.0 exch sub 3 1 roll pop pop} {
+				FrameSepIs FMmagenta eq
+				{pop pop 1.0 exch sub exch pop } {
+				FrameSepIs FMcyan eq
+				{pop pop pop 1.0 exch sub } 
+				{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+			} ifelse
+			RealSetgray
+		}
+		ifelse
+		end
+	} bind put
+fMLevel1 { 
+	
+	
+	
+	/patScreenDict 7 dict dup begin
+		<0f1e3c78f0e1c387> [ 45  { pop } {exch pop} 		.5   2 sqrt] FmBD
+		<0f87c3e1f0783c1e> [ 135 { pop } {exch pop}			.5   2 sqrt] FmBD
+		<cccccccccccccccc> [ 0   { pop } dup				.5   2	   ] FmBD
+		<ffff0000ffff0000> [ 90  { pop } dup				.5   2	   ] FmBD
+		<8142241818244281> [ 45  { 2 copy lt {exch} if pop}	dup .75  2 sqrt] FmBD
+		<03060c183060c081> [ 45  { pop } {exch pop}			.875 2 sqrt] FmBD
+		<8040201008040201> [ 135 { pop } {exch pop}			.875 2 sqrt] FmBD
+	end def
+} { 
+	
+	/patProcDict 5 dict dup begin
+		<0f1e3c78f0e1c387> { 3 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<0f87c3e1f0783c1e> { 3 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+		<8142241818244281> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke
+											-1 -1 moveto 9 9 lineto stroke } bind def
+		<03060c183060c081> { 1 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<8040201008040201> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+	end def
+	/patDict 15 dict dup begin
+		/PatternType 1 def		
+		/PaintType 2 def		
+		/TilingType 3 def		
+		/BBox [ 0 0 8 8 ] def 	
+		/XStep 8 def			
+		/YStep 8 def			
+		/PaintProc {
+			begin
+			patProcDict bstring known {
+				patProcDict bstring get exec
+			} {
+				8 8 true [1 0 0 -1 0 8] bstring imagemask
+			} ifelse
+			end
+		} bind def
+	end def
+} ifelse
+/tintCMYK {
+	1 tintGray sub FrameCurColors 0 4 getinterval aload pop 	
+	4 index mul 5 1 roll										
+	3 index mul 5 1 roll										
+	2 index mul 5 1 roll										
+	mul 4 1 roll												
+}bind def
+/tintRGB {
+	1 tintGray sub FrameCurColors 4 3 getinterval aload pop 	
+	1 exch sub 3 index mul 1 exch sub 4 1 roll					
+	1 exch sub 2 index mul 1 exch sub 4 1 roll					
+	1 exch sub mul 1 exch sub 3 1 roll							
+}bind def
+/combineColor {
+	/tintGray 1 1 FrameCurGray sub FrameCurColors 7 get mul sub def
+    FrameSepIs FMnone eq
+	{
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceCMYK]] setcolorspace
+			tintCMYK FrameCurPat setcolor
+		} {
+			FrameCurColors 3 get 1.0 ge {
+				tintGray RealSetgray
+			} {
+				fMAcrobat not FMPColor graymode and and {
+					tintCMYK
+					RealSetcmykcolor
+				} {
+					tintRGB
+					RealSetrgbcolor
+				} ifelse
+			} ifelse
+		} ifelse
+	} { 
+		FrameCurColors 0 4 getinterval aload
+		FrameColorInSepListCMYK {
+			FrameSepBlack eq exch 
+			FrameSepYellow eq and exch 
+			FrameSepMagenta eq and exch 
+			FrameSepCyan eq and
+			FrameSepIs FMcustom eq and
+			{ tintGray } { 1 } ifelse
+		} {
+			FrameSepIs FMblack eq
+			{tintGray 1.0 exch sub mul 1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop tintGray 1.0 exch sub mul 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop tintGray 1.0 exch sub mul 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop tintGray 1.0 exch sub mul 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceGray]] setcolorspace
+			FrameCurPat setcolor
+		} { 
+			graymode not fMLevel1 and {
+				
+				dup 1 lt {pop FrameCurGray} if
+			} if
+			RealSetgray
+		} ifelse
+	} ifelse
+} bind def
+/savematrix {
+	orgmatrix currentmatrix pop
+	} bind def
+/restorematrix {
+	orgmatrix setmatrix
+	} bind def
+/fMDefaultMatrix matrix def
+/fMatrix2 matrix def
+/dpi    72 0 fMDefaultMatrix defaultmatrix dtransform
+    dup mul exch   dup mul add   sqrt def
+	
+/freq dpi dup 72 div round dup 0 eq {pop 1} if 8 mul div def
+/sangle 1 0 fMDefaultMatrix defaultmatrix dtransform exch atan def
+	sangle fMatrix2 rotate 
+	fMDefaultMatrix defaultmatrix fMatrix2 concatmatrix 
+	dup 0 get /sflipx exch def
+	    3 get /sflipy exch def
+/screenIndex {
+	0 1 dpiranges length 1 sub { dup dpiranges exch get 1 sub dpi le {exit} {pop} ifelse } for
+} bind def
+/getCyanScreen {
+	FMUseHighFrequencyScreens { CHighAngles CMHighFreqs} {CLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getMagentaScreen {
+	FMUseHighFrequencyScreens { MHighAngles CMHighFreqs } {MLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getYellowScreen {
+	FMUseHighFrequencyScreens { YHighTDot YHighFreqs} { YLowTDot YLowFreqs } ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get { 3 div
+			{2 { 1 add 2 div 3 mul dup floor sub 2 mul 1 sub exch} repeat
+			FMSpotFunction } } {/FMSpotFunction load } ifelse
+			0.0 exch
+} bind def
+/getBlackScreen  {
+	FMUseHighFrequencyScreens { KHighFreqs } { KLowFreqs } ifelse
+		screenIndex get 45.0 /FMSpotFunction load 
+} bind def
+/getSpotScreen {
+	getBlackScreen
+} bind def
+/getCompositeScreen {
+	getBlackScreen
+} bind def
+/FMSetScreen 
+	fMLevel1 { /setscreen load 
+	}{ {
+		8 dict begin
+		/HalftoneType 1 def
+		/SpotFunction exch def
+		/Angle exch def
+		/Frequency exch def
+		/AccurateScreens FMUseAcccurateScreens def
+		currentdict end sethalftone
+	} bind } ifelse
+def
+/setDefaultScreen {
+	fMLevel1 {
+		FMPColor {
+			orgrxfer cvx orggxfer cvx orgbxfer cvx orgxfer cvx setcolortransfer
+		}
+		{
+			orgxfer cvx settransfer
+		} ifelse
+		orgfreq organgle orgproc cvx setscreen
+	} {
+		orghalftone sethalftone
+	}ifelse
+} bind def
+/setCurrentScreen {
+	FrameSepIs FMnone eq {
+		FMUseDefaultNoSeparationScreen {
+			setDefaultScreen
+		} {
+			getCompositeScreen FMSetScreen
+		} ifelse
+	} {
+		FrameSepIs FMcustom eq {
+			FMUseDefaultSpotSeparationScreen {
+				setDefaultScreen
+			} {
+				getSpotScreen FMSetScreen
+			} ifelse
+		} {
+			FMUseDefaultProcessSeparationScreen {
+				setDefaultScreen
+			} {
+				FrameSepIs FMcyan eq {
+					getCyanScreen FMSetScreen
+				} {
+					FrameSepIs FMmagenta eq {
+						getMagentaScreen FMSetScreen
+					} {
+						FrameSepIs FMyellow eq {
+							getYellowScreen FMSetScreen
+						} {
+							getBlackScreen FMSetScreen
+						} ifelse
+					} ifelse
+				} ifelse
+			} ifelse
+		} ifelse
+	} ifelse 
+} bind def
+end
+	
+/FMDOCUMENT { 
+	array /FMfonts exch def 
+	dup 1 gt {/#copies exch def} {pop} ifelse
+	FrameDict begin
+	0 ne /manualfeed exch def
+	/paperheight exch def
+	/paperwidth exch def
+	0 ne /fMNegative exch def 
+	0 ne /edown exch def 
+	/yscale exch def
+	/xscale exch def
+	fMLevel1 {
+		manualfeed {setmanualfeed} if
+		/FMdicttop countdictstack 1 add def 
+		/FMoptop count def 
+		setpapername 
+		manualfeed {true} {papersize} ifelse 
+		{manualpapersize} {false} ifelse 
+		{desperatepapersize} {false} ifelse 
+		{papersizefailure} if
+		count -1 FMoptop {pop pop} for
+		countdictstack -1 FMdicttop {pop end} for 
+		}
+		{2 dict
+		 dup /PageSize [paperwidth paperheight] put
+		 manualfeed {dup /ManualFeed manualfeed put} if
+		 {setpagedevice} stopped {papersizefailure} if
+		}
+	ifelse 
+	
+	fMLevel1 not {
+		/orghalftone currenthalftone def
+	}if 
+	
+	FMPColor {
+		currentcolorscreen
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+			cvlit /orgbproc exch def
+				  /orgbangle exch def 
+				  /orgbfreq exch def
+			cvlit /orggproc exch def
+				  /orggangle exch def 
+				  /orggfreq exch def
+			cvlit /orgrproc exch def
+				  /orgrangle exch def 
+				  /orgrfreq exch def
+			currentcolortransfer 
+			fMNegative {
+				1 1 4 { 
+					pop { 1 exch sub } fmConcatProcs 4 1 roll
+				} for
+				4 copy
+				setcolortransfer
+			} if
+			cvlit /orgxfer exch def
+			cvlit /orgbxfer exch def
+			cvlit /orggxfer exch def
+			cvlit /orgrxfer exch def
+	} {
+		currentscreen 
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+				  
+		currenttransfer 
+		fMNegative {
+			{ 1 exch sub } fmConcatProcs
+			dup settransfer
+		} if 
+		cvlit /orgxfer exch def
+	} ifelse
+	end 
+} def 
+/FMENDDOCUMENT {
+	FMDocSave restore	
+} def
+/FMBEGINPAGE { 
+	FrameDict begin 
+	/pagesave save def
+	3.86 setmiterlimit
+	0 0 moveto paperwidth 0 lineto paperwidth paperheight lineto 
+	0 paperheight lineto 0 0 lineto 1 setgray fill
+	/landscape exch 0 ne def
+	landscape { 
+		90 rotate 0 exch dup /pwid exch def neg translate pop 
+	}{
+		pop /pwid exch def
+	} ifelse
+	edown { [-1 0 0 1 pwid 0] concat } if
+	xscale yscale scale
+	/orgmatrix matrix def
+	gsave 
+} def 
+/FMENDPAGE {
+	grestore 
+	pagesave restore
+	end 
+	showpage
+	} def 
+/FMFONTDEFINE { 
+	FrameDict begin
+	findfont 
+	ReEncode 
+	1 index exch 
+	definefont 
+	FMfonts 3 1 roll 
+	put
+	end 
+	} def 
+/FMFILLS {
+	FrameDict begin dup
+	array /fillvals exch def
+	dict /patCache exch def
+	end 
+	} def 
+/FMFILL {
+	FrameDict begin
+	 fillvals 3 1 roll put
+	end 
+	} def 
+/FMNORMALIZEGRAPHICS { 
+	newpath
+	1 setlinewidth
+	0 setlinecap
+	0 0 0 sethsbcolor
+	0 setgray 
+	} bind def
+/FMBEGINEPSF { 
+	end 
+	/FMEPSF save def 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	[/fy /fx /fh /fw /ury /urx /lly /llx] {exch def} forall 
+	fx fw 2 div add fy fh 2 div add  translate
+	rotate
+	fw 2 div neg fh 2 div neg translate
+	fw urx llx sub div fh ury lly sub div scale 
+	llx neg lly neg translate 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count def 
+	} bind def
+/FMENDEPSF {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMEPSF restore
+	FrameDict begin 
+	} bind def
+FrameDict begin 
+/setmanualfeed {
+%%BeginFeature: *ManualFeed True
+	 statusdict /manualfeed true put
+%%EndFeature
+	} bind def
+/max {2 copy lt {exch} if pop} bind def
+/min {2 copy gt {exch} if pop} bind def
+/inch {72 mul} def
+/pagedimen { 
+	paperheight sub abs 16 lt exch 
+	paperwidth sub abs 16 lt and
+	{/papername exch def} {pop} ifelse
+	} bind def
+/setpapername { 
+	/papersizedict 14 dict def 
+	papersizedict begin
+	/papername /unknown def 
+		/Letter 8.5 inch 11.0 inch pagedimen
+		/LetterSmall 7.68 inch 10.16 inch pagedimen
+		/Tabloid 11.0 inch 17.0 inch pagedimen
+		/Ledger 17.0 inch 11.0 inch pagedimen
+		/Legal 8.5 inch 14.0 inch pagedimen
+		/Statement 5.5 inch 8.5 inch pagedimen
+		/Executive 7.5 inch 10.0 inch pagedimen
+		/A3 11.69 inch 16.5 inch pagedimen
+		/A4 8.26 inch 11.69 inch pagedimen
+		/A4Small 7.47 inch 10.85 inch pagedimen
+		/B4 10.125 inch 14.33 inch pagedimen
+		/B5 7.16 inch 10.125 inch pagedimen
+	end
+	} bind def
+/papersize {
+	papersizedict begin
+		/Letter {lettertray letter} def
+		/LetterSmall {lettertray lettersmall} def
+		/Tabloid {11x17tray 11x17} def
+		/Ledger {ledgertray ledger} def
+		/Legal {legaltray legal} def
+		/Statement {statementtray statement} def
+		/Executive {executivetray executive} def
+		/A3 {a3tray a3} def
+		/A4 {a4tray a4} def
+		/A4Small {a4tray a4small} def
+		/B4 {b4tray b4} def
+		/B5 {b5tray b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	statusdict begin stopped end 
+	} bind def
+/manualpapersize {
+	papersizedict begin
+		/Letter {letter} def
+		/LetterSmall {lettersmall} def
+		/Tabloid {11x17} def
+		/Ledger {ledger} def
+		/Legal {legal} def
+		/Statement {statement} def
+		/Executive {executive} def
+		/A3 {a3} def
+		/A4 {a4} def
+		/A4Small {a4small} def
+		/B4 {b4} def
+		/B5 {b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	stopped 
+	} bind def
+/desperatepapersize {
+	
+	mark
+	statusdict begin 
+		/setpageparams where {
+			pop
+			paperwidth paperheight 0 1 
+			{setpageparams} stopped 
+		} { 
+			true 
+		} ifelse
+		
+		{
+			
+			/setpagedevice where {
+				pop 
+				1 dict dup begin
+					/PageSize [ paperwidth paperheight ] def
+				end 
+				{setpagedevice} stopped
+			} {
+				true	
+			} ifelse
+		} {
+			false		
+		} ifelse 
+	end
+	{cleartomark true}{cleartomark false}ifelse
+} bind def
+/papersizefailure {
+	FMAllowPaperSizeMismatch not
+		{
+(The requested paper size is not available in any currently-installed tray)
+(Edit the PS file to "FMAllowPaperSizeMismatch true" to use default tray)
+		 FMFAILURE } if
+	} def
+/DiacriticEncoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl
+/numbersign /dollar /percent /ampersand /quotesingle /parenleft
+/parenright /asterisk /plus /comma /hyphen /period /slash /zero /one
+/two /three /four /five /six /seven /eight /nine /colon /semicolon
+/less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K
+/L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash
+/bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h
+/i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar
+/braceright /asciitilde /.notdef /Adieresis /Aring /Ccedilla /Eacute
+/Ntilde /Odieresis /Udieresis /aacute /agrave /acircumflex /adieresis
+/atilde /aring /ccedilla /eacute /egrave /ecircumflex /edieresis
+/iacute /igrave /icircumflex /idieresis /ntilde /oacute /ograve
+/ocircumflex /odieresis /otilde /uacute /ugrave /ucircumflex
+/udieresis /dagger /.notdef /cent /sterling /section /bullet
+/paragraph /germandbls /registered /copyright /trademark /acute
+/dieresis /.notdef /AE /Oslash /.notdef /.notdef /.notdef /.notdef
+/yen /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/ordfeminine /ordmasculine /.notdef /ae /oslash /questiondown
+/exclamdown /logicalnot /.notdef /florin /.notdef /.notdef
+/guillemotleft /guillemotright /ellipsis /.notdef /Agrave /Atilde
+/Otilde /OE /oe /endash /emdash /quotedblleft /quotedblright
+/quoteleft /quoteright /.notdef /.notdef /ydieresis /Ydieresis
+/fraction /currency /guilsinglleft /guilsinglright /fi /fl /daggerdbl
+/periodcentered /quotesinglbase /quotedblbase /perthousand
+/Acircumflex /Ecircumflex /Aacute /Edieresis /Egrave /Iacute
+/Icircumflex /Idieresis /Igrave /Oacute /Ocircumflex /.notdef /Ograve
+/Uacute /Ucircumflex /Ugrave /dotlessi /circumflex /tilde /macron
+/breve /dotaccent /ring /cedilla /hungarumlaut /ogonek /caron
+] def
+/ReEncode { 
+	dup 
+	length 
+	dict begin 
+	{
+	1 index /FID ne 
+		{def} 
+		{pop pop} ifelse 
+	} forall 
+	0 eq {/Encoding DiacriticEncoding def} if 
+	currentdict 
+	end 
+	} bind def
+FMPColor 
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPCOLOR} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPCOLORc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUECOLOR } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUECOLORc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYK } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKc } def
+	}
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPGRAY} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPGRAYc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUEGRAY } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUEGRAYc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYKGRAY } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKGRAYc } def
+	}
+ifelse
+/K { 
+	FMPrintAllColorsAsBlack {
+		8 1 roll
+		dup 1 eq 2 index 1 eq and 3 index 1 eq and not
+			{7 {pop} repeat 0 0 0 1 0 0 0} if
+		8 -1 roll
+	} if 
+	FrameCurColors astore 
+	pop combineColor
+} bind def
+/graymode true def
+fMLevel1 {
+	/fmGetFlip {
+		fMatrix2 exch get mul 0 lt { -1 } { 1 } ifelse
+	} FmBD
+} if
+/setPatternMode {
+	fMLevel1 {
+		2 index patScreenDict exch known {
+			pop pop
+			patScreenDict exch get aload pop 
+			freq 								
+			mul									
+			5 2 roll							
+			fMatrix2 currentmatrix 1 get 0 ne {
+				3 -1 roll 90 add 3 1 roll 		
+				sflipx 1 fmGetFlip sflipy 2 fmGetFlip neg mul
+			} {  								
+				sflipx 0 fmGetFlip sflipy 3 fmGetFlip mul 
+			} ifelse
+			0 lt {exch pop} {pop} ifelse 		
+			fMNegative { 
+				{neg} fmConcatProcs 			
+			} if
+			bind
+			
+			
+			
+			systemdict /setscreen get exec		
+			/FrameCurGray exch def
+		} {
+			/bwidth  exch def
+			/bpside  exch def
+			/bstring exch def
+			/onbits 0 def  /offbits 0 def
+			freq sangle landscape {90 add} if 
+				{/ypoint exch def
+				 /xpoint exch def
+				 /xindex xpoint 1 add 2 div bpside mul cvi def
+				 /yindex ypoint 1 add 2 div bpside mul cvi def
+				 bstring yindex bwidth mul xindex 8 idiv add get
+				 1 7 xindex 8 mod sub bitshift and 0 ne fMNegative {not} if
+				 {/onbits  onbits  1 add def 1}
+				 {/offbits offbits 1 add def 0}
+				 ifelse
+				}
+				setscreen
+			offbits offbits onbits add dup 0 ne {div} {pop pop .5} ifelse fMNegative {1.0 exch sub} if
+			/FrameCurGray exch def
+		} ifelse
+	} { 
+		pop pop
+		dup patCache exch known {
+			patCache exch get
+		} { 
+			dup
+			patDict /bstring 3 -1 roll put
+			patDict 
+			9 PatFreq screenIndex get div dup matrix scale
+			makepattern
+			dup 
+			patCache 4 -1 roll 3 -1 roll put
+		} ifelse
+		/FrameCurGray 0 def
+		/FrameCurPat exch def
+	} ifelse
+	/graymode false def
+	combineColor
+} bind def
+/setGrayScaleMode {
+	graymode not {
+		/graymode true def
+		fMLevel1 {
+			setCurrentScreen
+		} if
+	} if
+	/FrameCurGray exch def
+	combineColor
+} bind def
+/normalize {
+	transform round exch round exch itransform
+	} bind def
+/dnormalize {
+	dtransform round exch round exch idtransform
+	} bind def
+/lnormalize { 
+	0 dtransform exch cvi 2 idiv 2 mul 1 add exch idtransform pop
+	} bind def
+/H { 
+	lnormalize setlinewidth
+	} bind def
+/Z {
+	setlinecap
+	} bind def
+	
+/PFill {
+	graymode fMLevel1 or not {
+		gsave 1 setgray eofill grestore
+	} if
+} bind def
+/PStroke {
+	graymode fMLevel1 or not {
+		gsave 1 setgray stroke grestore
+	} if
+	stroke
+} bind def
+/X { 
+	fillvals exch get
+	dup type /stringtype eq
+	{8 1 setPatternMode} 
+	{setGrayScaleMode}
+	ifelse
+	} bind def
+/V { 
+	PFill gsave eofill grestore
+	} bind def
+/Vclip {
+	clip
+	} bind def
+/Vstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/N { 
+	PStroke
+	} bind def
+/Nclip {
+	strokepath clip newpath
+	} bind def
+/Nstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/M {newpath moveto} bind def
+/E {lineto} bind def
+/D {curveto} bind def
+/O {closepath} bind def
+/L { 
+ 	/n exch def
+	newpath
+	normalize
+	moveto 
+	2 1 n {pop normalize lineto} for
+	} bind def
+/Y { 
+	L 
+	closepath
+	} bind def
+/R { 
+	/y2 exch def
+	/x2 exch def
+	/y1 exch def
+	/x1 exch def
+	x1 y1
+	x2 y1
+	x2 y2
+	x1 y2
+	4 Y 
+	} bind def
+/rarc 
+	{rad 
+	 arcto
+	} bind def
+/RR { 
+	/rad exch def
+	normalize
+	/y2 exch def
+	/x2 exch def
+	normalize
+	/y1 exch def
+	/x1 exch def
+	mark
+	newpath
+	{
+	x1 y1 rad add moveto
+	x1 y2 x2 y2 rarc
+	x2 y2 x2 y1 rarc
+	x2 y1 x1 y1 rarc
+	x1 y1 x1 y2 rarc
+	closepath
+	} stopped {x1 y1 x2 y2 R} if 
+	cleartomark
+	} bind def
+/RRR { 
+	/rad exch def
+	normalize /y4 exch def /x4 exch def
+	normalize /y3 exch def /x3 exch def
+	normalize /y2 exch def /x2 exch def
+	normalize /y1 exch def /x1 exch def
+	newpath
+	normalize moveto 
+	mark
+	{
+	x2 y2 x3 y3 rarc
+	x3 y3 x4 y4 rarc
+	x4 y4 x1 y1 rarc
+	x1 y1 x2 y2 rarc
+	closepath
+	} stopped
+	 {x1 y1 x2 y2 x3 y3 x4 y4 newpath moveto lineto lineto lineto closepath} if
+	cleartomark
+	} bind def
+/C { 
+	grestore
+	gsave
+	R 
+	clip
+	setCurrentScreen
+} bind def
+/CP { 
+	grestore
+	gsave
+	Y 
+	clip
+	setCurrentScreen
+} bind def
+/F { 
+	FMfonts exch get
+	[FMsetsize 0 0 FMpointsize 0 0] makefont
+	setfont
+	} bind def
+/Q { 
+	/FMpointsize exch def
+	/FMsetsize FMpointsize def
+	F 
+	} bind def
+/QQ { 
+	/FMsetsize exch def
+	/FMpointsize exch def
+	F 
+	} bind def
+/T { 
+	moveto show
+	} bind def
+/RF { 
+	rotate
+	0 ne {-1 1 scale} if
+	} bind def
+/TF { 
+	gsave
+	moveto 
+	RF
+	show
+	grestore
+	} bind def
+/P { 
+	moveto
+	0 32 3 2 roll widthshow
+	} bind def
+/PF { 
+	gsave
+	moveto 
+	RF
+	0 32 3 2 roll widthshow
+	grestore
+	} bind def
+/S { 
+	moveto
+	0 exch ashow
+	} bind def
+/SF { 
+	gsave
+	moveto
+	RF
+	0 exch ashow
+	grestore
+	} bind def
+/B { 
+	moveto
+	0 32 4 2 roll 0 exch awidthshow
+	} bind def
+/BF { 
+	gsave
+	moveto
+	RF
+	0 32 4 2 roll 0 exch awidthshow
+	grestore
+	} bind def
+/G { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	PFill fill
+	grestore
+	} bind def
+/Gstrk {
+	savematrix
+    newpath
+    2 index 2 div add exch 3 index 2 div sub exch 
+    normalize 2 index 2 div sub exch 3 index 2 div add exch 
+    translate
+    scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+    } bind def
+/Gclip { 
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	clip newpath
+	restorematrix
+	} bind def
+/GG { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	rotate 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath
+	PFill
+	fill
+	grestore
+	} bind def
+/GGclip { 
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	clip newpath
+	restorematrix
+	} bind def
+/GGstrk { 
+	savematrix
+    newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath 
+	restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/A { 
+	gsave
+	savematrix
+	newpath
+	2 index 2 div add exch 3 index 2 div sub exch 
+	normalize 2 index 2 div sub exch 3 index 2 div add exch 
+	translate 
+	scale 
+	2 copy 0.0 0.0 1.0 5 3 roll arc 
+	round cvi 360 mod exch round cvi 360 mod eq {closepath} if 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/Aclip {
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	strokepath clip newpath
+	restorematrix
+} bind def
+/Astrk {
+	Gstrk
+} bind def
+/AA { 
+	gsave
+	savematrix
+	newpath
+	
+	3 index 2 div add exch 4 index 2 div sub exch 
+	
+	normalize 3 index 2 div sub exch 4 index 2 div add exch
+	translate 
+	rotate 
+	scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/AAclip {
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	strokepath clip newpath
+	restorematrix
+} bind def
+/AAstrk {
+	GGstrk
+} bind def
+/BEGINPRINTCODE { 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count 7 sub def 
+	/FMsaveobject save def
+	userdict begin 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	3 index neg 3 index neg translate
+	} bind def
+/ENDPRINTCODE {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMsaveobject restore 
+	} bind def
+/gn { 
+	0 
+	{	46 mul 
+		cf read pop 
+		32 sub 
+		dup 46 lt {exit} if 
+		46 sub add 
+		} loop
+	add 
+	} bind def
+/cfs { 
+	/str sl string def 
+	0 1 sl 1 sub {str exch val put} for 
+	str def 
+	} bind def
+/ic [ 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0
+	{0 hx} {1 hx} {2 hx} {3 hx} {4 hx} {5 hx} {6 hx} {7 hx} {8 hx} {9 hx}
+	{10 hx} {11 hx} {12 hx} {13 hx} {14 hx} {15 hx} {16 hx} {17 hx} {18 hx}
+	{19 hx} {gn hx} {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}
+	{13} {14} {15} {16} {17} {18} {19} {gn} {0 wh} {1 wh} {2 wh} {3 wh}
+	{4 wh} {5 wh} {6 wh} {7 wh} {8 wh} {9 wh} {10 wh} {11 wh} {12 wh}
+	{13 wh} {14 wh} {gn wh} {0 bl} {1 bl} {2 bl} {3 bl} {4 bl} {5 bl} {6 bl}
+	{7 bl} {8 bl} {9 bl} {10 bl} {11 bl} {12 bl} {13 bl} {14 bl} {gn bl}
+	{0 fl} {1 fl} {2 fl} {3 fl} {4 fl} {5 fl} {6 fl} {7 fl} {8 fl} {9 fl}
+	{10 fl} {11 fl} {12 fl} {13 fl} {14 fl} {gn fl}
+	] def
+/ms { 
+	/sl exch def 
+	/val 255 def 
+	/ws cfs 
+	/im cfs 
+	/val 0 def 
+	/bs cfs 
+	/cs cfs 
+	} bind def
+400 ms 
+/ip { 
+	is 
+	0 
+	cf cs readline pop 
+	{	ic exch get exec 
+		add 
+		} forall 
+	pop 
+	
+	} bind def
+/rip { 
+	   
+	  
+	  bis ris copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  ris gis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  gis bis copy pop 
+	  dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/rip4 { 
+	   
+	  
+	  kis cis copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  cis mis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  mis yis copy pop 
+	  dup dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  yis kis copy pop 
+	  3 mul is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/wh { 
+	/len exch def 
+	/pos exch def 
+	ws 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/bl { 
+	/len exch def 
+	/pos exch def 
+	bs 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/s1 1 string def
+/fl { 
+	/len exch def 
+	/pos exch def 
+	/val cf s1 readhexstring pop 0 get def
+	pos 1 pos len add 1 sub {im exch val put} for
+	pos len 
+	} bind def
+/hx { 
+	3 copy getinterval 
+	cf exch readhexstring pop pop 
+	} bind def
+/wbytes { 
+      dup dup
+      8 gt { pop 8 idiv mul }
+      { 8 eq {pop} {1 eq {7 add 8 idiv} {3 add 4 idiv} ifelse} ifelse } ifelse
+	} bind def
+/BEGINBITMAPBWc { 
+	1 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAPGRAYc { 
+	8 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAP2BITc { 
+	2 {} COMMONBITMAPc
+	} bind def
+/COMMONBITMAPc { 
+		 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	cvtProc                
+	/is im 0 lb getinterval def 
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{ip} image 
+	bitmapsave restore 
+	grestore
+	} bind def
+/BEGINBITMAPBW { 
+	1 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAPGRAY { 
+	8 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAP2BIT { 
+	2 {} COMMONBITMAP
+	} bind def
+/COMMONBITMAP { 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def 
+	cvtProc              
+	/is width depth wbytes string def
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{cf is readhexstring pop} image
+	bitmapsave restore 
+	grestore
+	} bind def
+/ngrayt 256 array def
+/nredt 256 array def
+/nbluet 256 array def
+/ngreent 256 array def
+fMLevel1 {
+/colorsetup {
+	currentcolortransfer
+	/gryt exch def
+	/blut exch def
+	/grnt exch def
+	/redt exch def
+	0 1 255 {
+		/indx exch def
+		/cynu 1 red indx get 255 div sub def
+		/magu 1 green indx get 255 div sub def
+		/yelu 1 blue indx get 255 div sub def
+		/kk cynu magu min yelu min def
+		/u kk currentundercolorremoval exec def
+%		/u 0 def
+		nredt indx 1 0 cynu u sub max sub redt exec put
+		ngreent indx 1 0 magu u sub max sub grnt exec put
+		nbluet indx 1 0 yelu u sub max sub blut exec put
+		ngrayt indx 1 kk currentblackgeneration exec sub gryt exec put
+	} for
+	{255 mul cvi nredt exch get}
+	{255 mul cvi ngreent exch get}
+	{255 mul cvi nbluet exch get}
+	{255 mul cvi ngrayt exch get}
+	setcolortransfer
+	{pop 0} setundercolorremoval
+	{} setblackgeneration
+	} bind def
+}
+{
+/colorSetup2 {
+	[ /Indexed /DeviceRGB 255 
+		{dup red exch get 255 div 
+		 exch dup green exch get 255 div 
+		 exch blue exch get 255 div}
+	] setcolorspace
+} bind def
+} ifelse
+/fakecolorsetup {
+	/tran 256 string def
+	0 1 255 {/indx exch def 
+		tran indx
+		red indx get 77 mul
+		green indx get 151 mul
+		blue indx get 28 mul
+		add add 256 idiv put} for
+	currenttransfer
+	{255 mul cvi tran exch get 255.0 div}
+	exch fmConcatProcs settransfer
+} bind def
+/BITMAPCOLOR { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def
+	fMLevel1 {	
+		colorsetup
+		/is width depth wbytes string def
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{cf is readhexstring pop} {is} {is} true 3 colorimage 
+	} {
+		colorSetup2
+		/is width depth wbytes string def
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {cf is readhexstring pop} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCOLORc { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	fMLevel1 {	
+		colorsetup
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{ip} {is} {is} true 3 colorimage
+	} {
+		colorSetup2
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {ip} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLORc { 
+	/depth 24 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip pop ris} {gis} {bis} true 3 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCMYKc { 
+	/depth 32 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip4 pop cis} {mis} {yis} {kis} true 4 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLOR { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf gis readhexstring pop } 
+        { cf bis readhexstring pop } 
+        true 3 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYK { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /mis width string def
+        /yis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf mis readhexstring pop } 
+        { cf yis readhexstring pop } 
+        { cf kis readhexstring pop } 
+        true 4 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPTRUEGRAYc { 
+	/depth 24 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop ris gis bis width gray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAYc { 
+	/depth 32 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop cis mis yis kis width cgray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/cgray { 
+        /ww exch def
+        /k exch def
+        /y exch def
+        /m exch def
+        /c exch def
+        0 1 ww 1 sub { /i exch def c i get m i get y i get k i get CMYKtoRGB
+				.144 mul 3 1 roll .587 mul 3 1 roll .299 mul add add
+				c i 3 -1 roll floor cvi put } for
+        c
+ 		} bind def
+/gray { 
+        /ww exch def
+        /b exch def
+        /g exch def
+        /r exch def
+        0 1 ww 1 sub { /i exch def r i get .299 mul g i get .587 mul
+			b i get .114 mul add add r i 3 -1 roll floor cvi put } for
+        r
+        } bind def
+/BITMAPTRUEGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf gis readhexstring pop 
+          cf bis readhexstring pop width gray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /yis width string def
+        /mis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf mis readhexstring pop 
+          cf yis readhexstring pop 
+          cf kis readhexstring pop width cgray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPGRAY { 
+	8 {fakecolorsetup} COMMONBITMAP
+	} bind def
+/BITMAPGRAYc { 
+	8 {fakecolorsetup} COMMONBITMAPc
+	} bind def
+/ENDBITMAP {
+	} bind def
+end 
+	/ALDmatrix matrix def ALDmatrix currentmatrix pop
+/StartALD {
+	/ALDsave save def
+	 savematrix
+	 ALDmatrix setmatrix
+	} bind def
+/InALD {
+	 restorematrix
+	} bind def
+/DoneALD {
+	 ALDsave restore
+	} bind def
+/I { setdash } bind def
+/J { [] 0 setdash } bind def
+%%EndProlog
+%%BeginSetup
+(5.5) FMVERSION
+1 1 0 0 612 792 0 1 3 FMDOCUMENT
+%%IncludeFont: Times-Bold
+0 0 /Times-Bold FMFONTDEFINE
+%%IncludeFont: Times-Roman
+1 0 /Times-Roman FMFONTDEFINE
+32 FMFILLS
+0 0 FMFILL
+1 0.1 FMFILL
+2 0.3 FMFILL
+3 0.5 FMFILL
+4 0.7 FMFILL
+5 0.9 FMFILL
+6 0.97 FMFILL
+7 1 FMFILL
+8 <0f1e3c78f0e1c387> FMFILL
+9 <0f87c3e1f0783c1e> FMFILL
+10 <cccccccccccccccc> FMFILL
+11 <ffff0000ffff0000> FMFILL
+12 <8142241818244281> FMFILL
+13 <03060c183060c081> FMFILL
+14 <8040201008040201> FMFILL
+16 1 FMFILL
+17 0.9 FMFILL
+18 0.7 FMFILL
+19 0.5 FMFILL
+20 0.3 FMFILL
+21 0.1 FMFILL
+22 0.03 FMFILL
+23 0 FMFILL
+24 <f0e1c3870f1e3c78> FMFILL
+25 <f0783c1e0f87c3e1> FMFILL
+26 <3333333333333333> FMFILL
+27 <0000ffff0000ffff> FMFILL
+28 <7ebddbe7e7dbbd7e> FMFILL
+29 <fcf9f3e7cf9f3f7e> FMFILL
+30 <7fbfdfeff7fbfdfe> FMFILL
+%%EndSetup
+%%Page: "1" 1
+%%BeginPaperSize: Letter
+%%EndPaperSize
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+[
+/Creator (FrameMaker 5.5.6.)
+/Title (Radiation_overview)
+/CreationDate (D:20030917073159)
+/ModDate (D:20040816121243)
+/DOCINFO FmPD2
+FrameNoSep
+0 0 0 1 0 0 0 1 K
+J
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+0 18 Q
+0 X
+(The Ph) 78.01 666 T
+(ysics_dri) 133.25 666 T
+(v) 201.08 666 T
+(er_mod - Radiation_dri) 209.9 666 T
+(v) 391.72 666 T
+(er_mod Interface) 400.54 666 T
+(Khartoum Release) 234.26 622 T
+1 F
+(Rick Hemler) 259.76 578 T
+(August 17, 2004) 246.25 534 T
+1 14 Q
+(This) 92.14 480.67 T
+(document) 120.38 480.67 T
+(pro) 178.96 480.67 T
+(vides) 197.41 480.67 T
+(an) 230.32 480.67 T
+(o) 246.89 480.67 T
+(v) 253.68 480.67 T
+(ervie) 260.47 480.67 T
+(w) 288.11 480.67 T
+(of) 301.57 480.67 T
+(the) 316.59 480.67 T
+(w) 337.05 480.67 T
+(ay) 347.02 480.67 T
+(that) 363.59 480.67 T
+(the) 387.95 480.67 T
+(calculation) 408.41 480.67 T
+(of) 473.2 480.67 T
+(radiati) 488.22 480.67 T
+(v) 523.64 480.67 T
+(e) 530.43 480.67 T
+(heating rates and \337ux) 72 463.67 T
+(es  is currently implemented in the FMS. The structure has) 191.94 463.67 T
+(been designed so that it may be con) 72 446.67 T
+(v) 270.91 446.67 T
+(eniently connected either to the atmospheric) 277.7 446.67 T
+(GCM,) 72 429.67 T
+(or) 110.48 429.67 T
+(to) 125.23 429.67 T
+(a) 139.21 429.67 T
+(program) 148.52 429.67 T
+(used) 199.04 429.67 T
+(to) 227.79 429.67 T
+(diagnose) 241.77 429.67 T
+(radiati) 294.63 429.67 T
+(v) 330.05 429.67 T
+(e) 336.84 429.67 T
+(feedbacks,) 346.15 429.67 T
+(or) 408.71 429.67 T
+(to) 423.46 429.67 T
+(a) 437.44 429.67 T
+(program) 446.75 429.67 T
+(used) 497.27 429.67 T
+(to) 526.02 429.67 T
+(dri) 72 412.67 T
+(v) 87.2 412.67 T
+(e the radiation code in standalone columns mode, which is used primarily for) 93.99 412.67 T
+(parameterization) 72 395.67 T
+(de) 168.98 395.67 T
+(v) 181.85 395.67 T
+(elopment) 188.64 395.67 T
+(and) 243.65 395.67 T
+(studies,) 266.77 395.67 T
+(or) 312.06 395.67 T
+(to) 326.63 395.67 T
+(a) 340.42 395.67 T
+(program) 349.54 395.67 T
+(to) 399.87 395.67 T
+(calculate) 413.67 395.67 T
+(intantaneous) 466.33 395.67 T
+(radiati) 72 378.67 T
+(v) 107.42 378.67 T
+(e) 114.21 378.67 T
+(forcings.) 123.66 378.67 T
+(This) 176.26 378.67 T
+(document) 204.39 378.67 T
+(will) 262.83 378.67 T
+(focus) 287.85 378.67 T
+(on) 321.4 378.67 T
+(the) 338.63 378.67 T
+(connection) 358.97 378.67 T
+(to) 423.63 378.67 T
+(the) 437.76 378.67 T
+(GCM) 458.09 378.67 T
+(through) 493.21 378.67 T
+(ph) 72 361.67 T
+(ysics_dri) 85.93 361.67 T
+(v) 136.13 361.67 T
+(er_mod, although the form of this connection is in part determined by) 142.92 361.67 T
+(the need for connection to the other programs mentioned abo) 72 344.67 T
+(v) 413.56 344.67 T
+(e.) 420.35 344.67 T
+(      The \336rst section pro) 72 310.67 T
+(vides an o) 205.17 310.67 T
+(v) 261.73 310.67 T
+(ervie) 268.52 310.67 T
+(w of the connection. Section 2 describes in) 296.15 310.67 T
+(more detail the deri) 72 293.67 T
+(v) 180.91 293.67 T
+(ed-type v) 187.7 293.67 T
+(ariables used to pass ar) 239.83 293.67 T
+(guments between) 368.66 293.67 T
+(ph) 72 276.67 T
+(ysics_dri) 85.93 276.67 T
+(v) 136.13 276.67 T
+(er_mod and both the modules pro) 142.92 276.67 T
+(viding input \336elds for) 331.31 276.67 T
+(radiation_dri) 72 259.67 T
+(v) 143.97 259.67 T
+(er_mod and radiation_dri) 150.76 259.67 T
+(v) 292.72 259.67 T
+(er_mod itself.) 299.51 259.67 T
+(A.  Ov) 72 225.67 T
+(ervie) 109.51 225.67 T
+(w) 137.14 225.67 T
+(      Ph) 72 191.67 T
+(ysics_dri) 107.71 191.67 T
+(v) 157.92 191.67 T
+(er_mod is the module which accesses the radiation code through) 164.71 191.67 T
+(the radiation interf) 72 174.67 T
+(ace module radiation_dri) 176.06 174.67 T
+(v) 315.68 174.67 T
+(er_mod.  Input ar) 322.47 174.67 T
+(guments to the radia-) 419.42 174.67 T
+(tion code are assembled by ph) 72 157.67 T
+(ysics_dri) 241.06 157.67 T
+(v) 291.27 157.67 T
+(er_mod and then passed to) 298.06 157.67 T
+(radiation_dri) 72 140.67 T
+(v) 143.97 140.67 T
+(er_mod.) 150.76 140.67 T
+(Lik) 200.18 140.67 T
+(e) 219.49 140.67 T
+(wise) 225.35 140.67 T
+(output) 254.16 140.67 T
+(from) 293.09 140.67 T
+(radiation_dri) 323.46 140.67 T
+(v) 395.43 140.67 T
+(er_mod) 402.22 140.67 T
+(needed) 448.14 140.67 T
+(by) 490.93 140.67 T
+(other) 508.08 140.67 T
+(modules) 72 123.67 T
+(is) 122.85 123.67 T
+(passed) 135.59 123.67 T
+(out) 176.32 123.67 T
+(to) 197.62 123.67 T
+(ph) 211.92 123.67 T
+(ysics_dri) 225.85 123.67 T
+(v) 276.05 123.67 T
+(er_mod,) 282.84 123.67 T
+(and) 332.52 123.67 T
+(from) 356.14 123.67 T
+(there) 386.76 123.67 T
+(made) 418.15 123.67 T
+(a) 451.88 123.67 T
+(v) 457.81 123.67 T
+(ailable) 464.46 123.67 T
+(to) 505.19 123.67 T
+(the) 519.49 123.67 T
+(appropriate modules.) 72 106.67 T
+FMENDPAGE
+%%EndPage: "1" 1
+%%Page: "2" 2
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(       Man) 72 710.67 T
+(y of the input ar) 121.95 710.67 T
+(guments for the radiation calculation are collected and) 211.13 710.67 T
+(stored in deri) 72 693.67 T
+(v) 145.53 693.67 T
+(ed type v) 152.32 693.67 T
+(ariables, each of which may contain dif) 203.29 693.67 T
+(ferent actual ar) 423.39 693.67 T
+(gu-) 507.09 693.67 T
+(ments, dependent on the namelist-supplied options that ha) 72 676.67 T
+(v) 396.81 676.67 T
+(e been selected. These) 403.6 676.67 T
+(deri) 72 659.67 T
+(v) 93.42 659.67 T
+(ed-type) 100.21 659.67 T
+(v) 145.36 659.67 T
+(ariables) 152.01 659.67 T
+(ha) 198.71 659.67 T
+(v) 211.65 659.67 T
+(e) 218.44 659.67 T
+(generic) 227.82 659.67 T
+(names) 272.18 659.67 T
+(\050Atmos_input) 311.12 659.67 T
+(for) 392.06 659.67 T
+(atmospheric) 411.55 659.67 T
+(v) 483.15 659.67 T
+(ariables,) 489.8 659.67 T
+(Surf) 72 642.67 T
+(ace for surf) 95.97 642.67 T
+(ace v) 159.57 642.67 T
+(ariables, Aerosol for an) 188.37 642.67 T
+(y aerosol input \336elds that the radiation) 319.56 642.67 T
+(code is to consider) 72 625.67 T
+(, Cld_spec which de\336nes the cloud \336elds seen by the radiation) 176.03 625.67 T
+(code, Rad_g) 72 608.67 T
+(ases de\336ning the radiati) 141.92 608.67 T
+(v) 274.16 608.67 T
+(ely-acti) 280.95 608.67 T
+(v) 322.59 608.67 T
+(e g) 329.38 608.67 T
+(ases that the code will include) 346.02 608.67 T
+(ef) 72 591.67 T
+(fects of,  Lsc_microph) 82.53 591.67 T
+(ys, Meso_microph) 208.43 591.67 T
+(ys and Cell_microph) 312.58 591.67 T
+(ys de\336ning the) 429.17 591.67 T
+(microph) 72 574.67 T
+(ysical properties \050sizes and concentrations\051 for an) 118.59 574.67 T
+(y lar) 395.97 574.67 T
+(ge-scale, mesoscale) 420.99 574.67 T
+(or) 72 557.67 T
+(cell-scale) 86.58 557.67 T
+(clouds) 142.36 557.67 T
+(that) 181.83 557.67 T
+(are) 205.75 557.67 T
+(present\051) 225.76 557.67 T
+(that) 273.77 557.67 T
+(conceptually) 297.69 557.67 T
+(describe) 372.14 557.67 T
+(the) 421.71 557.67 T
+(rele) 441.73 557.67 T
+(v) 462.37 557.67 T
+(ant) 469.02 557.67 T
+(inputs) 489.04 557.67 T
+(to) 526.19 557.67 T
+(an) 72 540.67 T
+(y radiation parameterization a) 85.01 540.67 T
+(v) 252.29 540.67 T
+(ailable in the FMS. The speci\336c v) 258.94 540.67 T
+(ariables de\336ned) 447.97 540.67 T
+(within these types will v) 72 523.67 T
+(ary) 208.54 523.67 T
+(, dependent on the needs of the particular radiation) 225.51 523.67 T
+(parameterization and the implementation options selected.  An adv) 72 506.67 T
+(antage of this) 446.09 506.67 T
+(approach is that the ar) 72 489.67 T
+(gument list is much shorter and much more lik) 195.38 489.67 T
+(ely to remain) 456.57 489.67 T
+(unchanged as modi\336cations to the parameterization are made, or as ne) 72 472.67 T
+(w parameter-) 464.73 472.67 T
+(izations) 72 455.67 T
+(are) 118.97 455.67 T
+(de) 139.47 455.67 T
+(v) 152.34 455.67 T
+(eloped.) 159.13 455.67 T
+(This) 203.37 455.67 T
+(feature) 231.67 455.67 T
+(also) 273.95 455.67 T
+(allo) 299.92 455.67 T
+(ws) 320.56 455.67 T
+(the) 339.53 455.67 T
+(ar) 360.05 455.67 T
+(gument) 370.68 455.67 T
+(list) 416.09 455.67 T
+(to) 436.63 455.67 T
+(be) 450.93 455.67 T
+(the) 467.56 455.67 T
+(same) 488.08 455.67 T
+(for) 520.26 455.67 T
+(the three en) 72 438.67 T
+(vironments mentioned abo) 136.75 438.67 T
+(v) 285.86 438.67 T
+(e in which the radiation code is run. The) 292.65 438.67 T
+(additional ar) 72 421.67 T
+(guments passed to subroutine radiation_dri) 142.13 421.67 T
+(v) 382.87 421.67 T
+(er include the starting and) 389.66 421.67 T
+(ending \050i,j\051 indices of the current ph) 72 404.67 T
+(ysics_windo) 273.73 404.67 T
+(w) 343.38 404.67 T
+(, the time at which the radiation) 352.57 404.67 T
+(calculation is to apply) 72 387.67 T
+(, the time stamp for diagnostics generated on this step, and) 194.36 387.67 T
+(arrays de\336ning the latitude and longitude of the points present in this ph) 72 370.67 T
+(ysics win-) 474.79 370.67 T
+(do) 72 353.67 T
+(w) 85.65 353.67 T
+(.) 94.85 353.67 T
+(         In this implementation of the radiation code, all inputs to) 72 319.67 T
+(radiation_dri) 72 302.67 T
+(v) 143.97 302.67 T
+(er_mod are suplied through the ar) 150.76 302.67 T
+(gument lists. Prior to the Jakarta) 339.86 302.67 T
+(release, v) 72 285.67 T
+(arious ar) 124.51 285.67 T
+(guments were obtained by calls to other ph) 172.86 285.67 T
+(ysics modules from) 413.47 285.67 T
+(within) 72 268.67 T
+(radiation_dri) 110.86 268.67 T
+(v) 182.84 268.67 T
+(er_mod.) 189.63 268.67 T
+(This) 238.98 268.67 T
+(necessitated) 266.95 268.67 T
+(radiation_dri) 337.68 268.67 T
+(v) 409.66 268.67 T
+(er_mod) 416.45 268.67 T
+(\322using\323) 462.3 268.67 T
+(other) 508.15 268.67 T
+(unrelated ph) 72 251.67 T
+(ysics modules. Other than making it some) 141.52 251.67 T
+(what dif) 376.44 251.67 T
+(\336cult to determine) 422.36 251.67 T
+(what the needed input \336elds were, this procedure w) 72 234.67 T
+(ork) 359.97 234.67 T
+(ed satisf) 378.49 234.67 T
+(actorily in the FMS) 424.62 234.67 T
+(GCM en) 72 217.67 T
+(vironment. Ho) 120.05 217.67 T
+(we) 201.36 217.67 T
+(v) 217.33 217.67 T
+(er) 224.12 217.67 T
+(, it w) 234.44 217.67 T
+(as cumbersome to connect this code to either of) 262.69 217.67 T
+(the standalone programs \050or to an) 72 200.67 T
+(y other numerical model\051, since an interf) 259.59 200.67 T
+(ace to) 487.67 200.67 T
+(these) 72 183.67 T
+(unrelated) 103.77 183.67 T
+(ph) 158.86 183.67 T
+(ysics) 172.79 183.67 T
+(modules) 203.79 183.67 T
+(needed) 254.23 183.67 T
+(to) 296.88 183.67 T
+(be) 310.77 183.67 T
+(included.) 326.98 183.67 T
+(The) 381.7 183.67 T
+(current) 406.46 183.67 T
+(implementation) 449.11 183.67 T
+(of radiation_dri) 72 166.67 T
+(v) 159.14 166.67 T
+(er_mod uses only modules from the FMS /shared directories and) 165.93 166.67 T
+(radiation-related ph) 72 149.67 T
+(ysics modules.) 181.96 149.67 T
+(         Just as cloud information may no) 72 115.67 T
+(w be prognostic and pro) 289.42 115.67 T
+(vided by a cloud) 424.52 115.67 T
+(parameterization package, aerosols and radiati) 72 98.67 T
+(v) 330.96 98.67 T
+(e g) 337.75 98.67 T
+(ases may also someday become) 354.39 98.67 T
+(prognostic v) 72 81.67 T
+(ariables. Ev) 141.26 81.67 T
+(en though currently in FMS these v) 207.14 81.67 T
+(ariables are not prog-) 405.12 81.67 T
+FMENDPAGE
+%%EndPage: "2" 2
+%%Page: "3" 3
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(nostic, the aerosol and radiati) 72 710.67 T
+(v) 236.12 710.67 T
+(e g) 242.91 710.67 T
+(as inputs to radiation are obtained from their o) 259.56 710.67 T
+(wn) 518.95 710.67 T
+(modules) 72 693.67 T
+(by) 122.7 693.67 T
+(ph) 139.95 693.67 T
+(ysics_dri) 153.88 693.67 T
+(v) 204.08 693.67 T
+(er_mod) 210.87 693.67 T
+(and) 256.9 693.67 T
+(supplied) 280.36 693.67 T
+(to) 331.06 693.67 T
+(radiation_dri) 345.21 693.67 T
+(v) 417.18 693.67 T
+(er_mod) 423.97 693.67 T
+(via) 469.99 693.67 T
+(the) 490.35 693.67 T
+(ar) 510.71 693.67 T
+(gu-) 521.34 693.67 T
+(ment list, just as the cloud and microph) 72 676.67 T
+(ysical information is, rather than being) 292.04 676.67 T
+(accessed from within radiation_dri) 72 659.67 T
+(v) 266.45 659.67 T
+(er_mod, as in pre) 273.24 659.67 T
+(vious v) 370.09 659.67 T
+(ersions of this code.) 410.72 659.67 T
+(         A signi\336cant dif) 72 625.67 T
+(ference between radiation ph) 194.15 625.67 T
+(ysics and the other ph) 356.19 625.67 T
+(ysics) 478.21 625.67 T
+(parameterizations) 72 608.67 T
+(in) 174.86 608.67 T
+(the) 189.09 608.67 T
+(model) 209.54 608.67 T
+(is) 247.87 608.67 T
+(that) 260.55 608.67 T
+(the) 284.89 608.67 T
+(radiation) 305.33 608.67 T
+(calculation) 358.44 608.67 T
+(is) 423.21 608.67 T
+(typically) 435.88 608.67 T
+(not) 488.22 608.67 T
+(done) 509.45 608.67 T
+(on) 72 591.67 T
+(e) 89.21 591.67 T
+(v) 95.07 591.67 T
+(ery) 101.86 591.67 T
+(ph) 122.94 591.67 T
+(ysics) 136.88 591.67 T
+(timestep) 168.08 591.67 T
+(due) 218.73 591.67 T
+(to) 242.15 591.67 T
+(its) 256.25 591.67 T
+(computational) 272.69 591.67 T
+(cost.) 356 591.67 T
+(Instead,) 385.26 591.67 T
+(the) 432.4 591.67 T
+(needed) 452.71 591.67 T
+(outputs) 495.56 591.67 T
+(from the radiation package \050heating rates, \337ux) 72 574.67 T
+(es, solar zenith angle\051 are stored as) 330.34 574.67 T
+(module) 72 557.67 T
+(v) 117.34 557.67 T
+(ariables) 123.99 557.67 T
+(on) 170.86 557.67 T
+(calculation) 188.2 557.67 T
+(steps) 252.96 557.67 T
+(and) 284.3 557.67 T
+(then) 307.85 557.67 T
+(these) 335.3 557.67 T
+(stored) 367.4 557.67 T
+(v) 404.95 557.67 T
+(alues) 411.6 557.67 T
+(are) 443.71 557.67 T
+(accessed) 464.14 557.67 T
+(and) 516.45 557.67 T
+(used on non-calculation steps.  Thus it is not necessary to obtain the input \336elds to) 72 540.67 T
+(radiation_dri) 72 523.67 T
+(v) 143.97 523.67 T
+(er_mod on non-calculation steps. As a consequence code is included) 150.76 523.67 T
+(in) 72 506.67 T
+(ph) 86.04 506.67 T
+(ysics_dri) 99.97 506.67 T
+(v) 150.18 506.67 T
+(er_mod) 156.97 506.67 T
+(to) 202.89 506.67 T
+(determine) 216.93 506.67 T
+(whether) 276.07 506.67 T
+(radiation) 324.32 506.67 T
+(is) 377.24 506.67 T
+(to) 389.73 506.67 T
+(be) 403.77 506.67 T
+(calculated) 420.14 506.67 T
+(on) 480.05 506.67 T
+(the) 497.2 506.67 T
+(cur-) 517.46 506.67 T
+(rent step, and then, if it is, whether the v) 72 489.67 T
+(arious optional inputs to radiation_dri) 297.18 489.67 T
+(v) 508.38 489.67 T
+(er) 515.17 489.67 T
+(must) 72 472.67 T
+(be) 102.63 472.67 T
+(supplied) 119.24 472.67 T
+(\050) 170.08 472.67 T
+(dependent) 178.14 472.67 T
+(on) 239.08 472.67 T
+(the) 256.48 472.67 T
+(radiation) 276.98 472.67 T
+(scheme) 330.15 472.67 T
+(and) 375.53 472.67 T
+(the) 399.15 472.67 T
+(namelist) 419.65 472.67 T
+(options) 470.49 472.67 T
+(acti-) 515.12 472.67 T
+(v) 72 455.67 T
+(ated\051.) 78.65 455.67 T
+(Thus) 113 455.67 T
+(ph) 143.88 455.67 T
+(ysics_dri) 157.8 455.67 T
+(v) 208.01 455.67 T
+(er_mod) 214.8 455.67 T
+(calls) 260.44 455.67 T
+(se) 288.97 455.67 T
+(v) 300.28 455.67 T
+(eral) 307.07 455.67 T
+(interf) 330.93 455.67 T
+(aces) 361.11 455.67 T
+(in) 388.07 455.67 T
+(radiation_dri) 401.83 455.67 T
+(v) 473.81 455.67 T
+(er_mod) 480.6 455.67 T
+(to) 526.24 455.67 T
+(prepare for the call to subroutine radiation_dri) 72 438.67 T
+(v) 330.59 438.67 T
+(er which controls the radiation cal-) 337.38 438.67 T
+(culation:) 72 421.67 T
+(                    de\336ne_rad_times : This routine determines if radiation is to be calcu-) 72 387.67 T
+(lated on the current timestep. If it is, it de\336nes the calendar / clock time to use in) 72 370.67 T
+(that calculation, and also returns v) 72 353.67 T
+(ariables indicating whether cloud, aerosol, radia-) 263.73 353.67 T
+(ti) 72 336.67 T
+(v) 79.43 336.67 T
+(e) 86.22 336.67 T
+(g) 95.83 336.67 T
+(as,) 102.76 336.67 T
+(and) 121.3 336.67 T
+(/) 144.9 336.67 T
+(or) 152.18 336.67 T
+(atmospheric) 170.62 336.67 T
+(input) 242.43 336.67 T
+(v) 274.6 336.67 T
+(ariables) 281.25 336.67 T
+(to) 328.18 336.67 T
+(radiation_dri) 342.46 336.67 T
+(v) 414.43 336.67 T
+(er) 421.22 336.67 T
+(are) 435.48 336.67 T
+(needed) 455.96 336.67 T
+(on) 499 336.67 T
+(this) 516.38 336.67 T
+(step.) 72 319.67 T
+(                    de\336ne_surf) 72 285.67 T
+(ace : This routine de\336nes a surf) 204.85 285.67 T
+(ace_type deri) 380.45 285.67 T
+(v) 455.12 285.67 T
+(ed-type v) 461.91 285.67 T
+(ari-) 514.05 285.67 T
+(able containing the surf) 72 268.67 T
+(ace \336elds needed for the radiation calculation.) 203.67 268.67 T
+(de\336ne_atmos_input_\336elds:) 136.01 234.67 T
+(if) 290.89 234.67 T
+(atmospheric) 302.65 234.67 T
+(input) 374.28 234.67 T
+(v) 406.26 234.67 T
+(ariables) 412.91 234.67 T
+(are) 459.65 234.67 T
+(needed) 479.95 234.67 T
+(on) 522.8 234.67 T
+(this step, this routine will de\336ne them as components of an atmos_input_type) 72 217.67 T
+(deri) 72 200.67 T
+(v) 93.42 200.67 T
+(ed- type v) 100.21 200.67 T
+(ariable and return that v) 155.85 200.67 T
+(ariable to ph) 289.24 200.67 T
+(ysics_dri) 359.15 200.67 T
+(v) 409.36 200.67 T
+(er_mod.) 416.15 200.67 T
+(         In addition, if aerosol data is needed on this step a call to aerosol_mod is) 72 166.67 T
+(made to obtain an aerosol_type v) 72 149.67 T
+(ariable which contains that information. If cloud) 257.12 149.67 T
+(and microph) 72 132.67 T
+(ysics information is no) 142.31 132.67 T
+(w needed, a call to cloud_spec_mod results in) 269.9 132.67 T
+(the return of a cld_speci\336cation_type v) 72 115.67 T
+(ariable containing cloud location, type and) 290.55 115.67 T
+(amount information and three microph) 72 98.67 T
+(ysics_type v) 288.9 98.67 T
+(ariables containing information) 358.16 98.67 T
+(on size and concentrations of condensate in an) 72 81.67 T
+(y lar) 331.9 81.67 T
+(ge-scale, mesoscale and cell-) 356.91 81.67 T
+FMENDPAGE
+%%EndPage: "3" 3
+%%Page: "4" 4
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(scale clouds present. Finally) 72 710.67 T
+(, if radiati) 229.74 710.67 T
+(v) 284.21 710.67 T
+(e g) 291 710.67 T
+(as data is needed, a call to) 307.65 710.67 T
+(radiati) 72 693.67 T
+(v) 107.42 693.67 T
+(e_g) 114.21 693.67 T
+(ases_mod results in the return of a radiati) 134.36 693.67 T
+(v) 365.36 693.67 T
+(e_g) 372.15 693.67 T
+(ases_type v) 392.29 693.67 T
+(ariable con-) 456.87 693.67 T
+(taining the rele) 72 676.67 T
+(v) 155.64 676.67 T
+(ant radiati) 162.29 676.67 T
+(v) 218.31 676.67 T
+(ely-acti) 225.1 676.67 T
+(v) 266.74 676.67 T
+(e g) 273.53 676.67 T
+(as data.) 290.18 676.67 T
+(        After these routines ha) 72 642.67 T
+(v) 226.85 642.67 T
+(e been called \050only when necessary\051, a call is made to) 233.64 642.67 T
+(subroutine radiation_dri) 72 625.67 T
+(v) 206.58 625.67 T
+(er) 213.37 625.67 T
+(. This routine will either control the calculation of ne) 223.48 625.67 T
+(w) 519.43 625.67 T
+(radiati) 72 608.67 T
+(v) 107.42 608.67 T
+(e) 114.21 608.67 T
+(outputs) 123.79 608.67 T
+(if) 168.39 608.67 T
+(this) 180.31 608.67 T
+(is) 203.9 608.67 T
+(a) 216.61 608.67 T
+(calculation) 226.19 608.67 T
+(step,) 290.99 608.67 T
+(or) 320.41 608.67 T
+(return) 335.44 608.67 T
+(the) 372.23 608.67 T
+(v) 392.71 608.67 T
+(alues) 399.36 608.67 T
+(stored) 431.49 608.67 T
+(on) 469.08 608.67 T
+(the) 486.44 608.67 T
+(pre) 506.92 608.67 T
+(vi-) 524.45 608.67 T
+(ous) 72 591.67 T
+(radiation) 94.71 591.67 T
+(calculation) 147.74 591.67 T
+(step.) 212.43 591.67 T
+(These) 241.74 591.67 T
+(output) 278.43 591.67 T
+(\336elds) 317.48 591.67 T
+(are) 351.08 591.67 T
+(returned) 371.43 591.67 T
+(in) 421.34 591.67 T
+(a) 435.49 591.67 T
+(rad_output_type) 444.97 591.67 T
+(v) 72 574.67 T
+(ariable and those v) 78.65 574.67 T
+(ariables needed outside of ph) 183.66 574.67 T
+(ysics_dri) 346.89 574.67 T
+(v) 397.09 574.67 T
+(er_mod are stored into) 403.88 574.67 T
+(the appropriate ar) 72 557.67 T
+(guments to be passed out, while an) 170.49 557.67 T
+(y outputs needed by other) 365.87 557.67 T
+(ph) 72 540.67 T
+(ysics) 85.93 540.67 T
+(modules) 117.29 540.67 T
+(accessed) 168.09 540.67 T
+(from) 220.42 540.67 T
+(ph) 251 540.67 T
+(ysics_dri) 264.93 540.67 T
+(v) 315.13 540.67 T
+(er_mod) 321.92 540.67 T
+(are) 368.05 540.67 T
+(stored) 388.5 540.67 T
+(as) 426.07 540.67 T
+(module) 441.09 540.67 T
+(v) 486.45 540.67 T
+(ariables) 493.1 540.67 T
+(in ph) 72 523.67 T
+(ysics_dri) 100.32 523.67 T
+(v) 150.53 523.67 T
+(er_mod.) 157.32 523.67 T
+(       In the model initialization phase,  ph) 72 489.67 T
+(ysics_dri) 301.36 489.67 T
+(v) 351.57 489.67 T
+(er_init initializes the modules) 358.36 489.67 T
+(that) 72 472.67 T
+(are) 96.13 472.67 T
+(accessed) 116.36 472.67 T
+(to) 168.46 472.67 T
+(obtain) 182.48 472.67 T
+(the) 220.61 472.67 T
+(input) 240.85 472.67 T
+(data) 272.77 472.67 T
+(for) 299.22 472.67 T
+(the) 318.68 472.67 T
+(radiation) 338.92 472.67 T
+(calculation) 391.82 472.67 T
+(\050aerosol_mod,) 456.38 472.67 T
+(radiati) 72 455.67 T
+(v) 107.42 455.67 T
+(e_g) 114.21 455.67 T
+(ases_mod,) 134.36 455.67 T
+(cloud_spec_mod\051) 196.21 455.67 T
+(and) 298.89 455.67 T
+(radiation_dri) 322.25 455.67 T
+(v) 394.22 455.67 T
+(er_init.) 401.01 455.67 T
+(At) 444.21 455.67 T
+(the) 461.35 455.67 T
+(end) 481.59 455.67 T
+(of) 504.95 455.67 T
+(the) 519.75 455.67 T
+(model) 72 438.67 T
+(run,) 110.32 438.67 T
+(ph) 135.79 438.67 T
+(ysics_dri) 149.72 438.67 T
+(v) 199.93 438.67 T
+(er_end) 206.71 438.67 T
+(calls) 248.12 438.67 T
+(the) 277.1 438.67 T
+(destructor) 297.52 438.67 T
+(routines) 356.82 438.67 T
+(for) 405.25 438.67 T
+(these) 424.89 438.67 T
+(same) 456.97 438.67 T
+(modules.) 489.05 438.67 T
+(B. Deri) 72 404.67 T
+(v) 112.87 404.67 T
+(ed-type v) 119.66 404.67 T
+(ariables) 171.79 404.67 T
+(       The deri) 72 370.67 T
+(v) 143.19 370.67 T
+(ed-type v) 149.98 370.67 T
+(ariables used in ph) 202.12 370.67 T
+(ysics_dri) 306.64 370.67 T
+(v) 356.84 370.67 T
+(er_mod to pass ar) 363.63 370.67 T
+(guments to) 462.53 370.67 T
+(and from radiation_dri) 72 353.67 T
+(v) 198.41 353.67 T
+(er_mod and the modules accessed to supply input \336elds to) 205.2 353.67 T
+(radiation_dri) 72 336.67 T
+(v) 143.97 336.67 T
+(er are de\336ned in atmos_param/sea_esf_rad/rad_utilities.f90. Their) 150.76 336.67 T
+(current components are described here; it is intended that an) 72 319.67 T
+(y additional v) 408.88 319.67 T
+(ariables) 485.53 319.67 T
+(which may in the future be needed as either input to or output from the radiation) 72 302.67 T
+(package) 72 285.67 T
+(because) 121.2 285.67 T
+(of) 168.84 285.67 T
+(e) 183.84 285.67 T
+(xpanded) 189.85 285.67 T
+(capabilities) 240.62 285.67 T
+(or) 307.72 285.67 T
+(changes) 322.72 285.67 T
+(in) 371.15 285.67 T
+(either) 385.37 285.67 T
+(the) 420.59 285.67 T
+(radiation) 441.03 285.67 T
+(parame-) 494.14 285.67 T
+(terization or in other ph) 72 268.67 T
+(ysics parameterizations, w) 204.13 268.67 T
+(ould be added to the appropriate) 352.13 268.67 T
+(deri) 72 251.67 T
+(v) 93.42 251.67 T
+(ed type, and passed in and out in that manner) 100.21 251.67 T
+(. Note that not all components of) 352.18 251.67 T
+(a deri) 72 234.67 T
+(v) 103.14 234.67 T
+(ed-type v) 109.93 234.67 T
+(ariable will be de\336ned for a gi) 162.06 234.67 T
+(v) 330.45 234.67 T
+(en model implementation; some) 337.24 234.67 T
+(v) 72 217.67 T
+(ariables will only be de\336ned when certain options are selected.) 78.65 217.67 T
+(1.) 94.28 183.67 T
+(The) 107.96 183.67 T
+(aerosol_type) 132.91 183.67 T
+(v) 207.64 183.67 T
+(ariable) 214.29 183.67 T
+(is) 255.57 183.67 T
+(designed) 268.09 183.67 T
+(to) 321.04 183.67 T
+(contain) 335.11 183.67 T
+(the) 379.51 183.67 T
+(information) 399.8 183.67 T
+(that) 469.09 183.67 T
+(the) 493.28 183.67 T
+(radi-) 513.57 183.67 T
+(ation package needs to kno) 72 166.67 T
+(w about the aerosols that are af) 223.28 166.67 T
+(fecting the radiati) 397.11 166.67 T
+(v) 495.51 166.67 T
+(e) 502.3 166.67 T
+(\337ux) 72 149.67 T
+(es and heating rates. Currently this is the aerosol amount in [ kg/m**2 ],  the) 93.57 149.67 T
+(aerosol) 72 132.67 T
+(names) 115.5 132.67 T
+(\050used) 154.34 132.67 T
+(for) 187.73 132.67 T
+(diagnostic) 207.13 132.67 T
+(purposes\051,) 267.75 132.67 T
+(and) 328.75 132.67 T
+(an) 352.04 132.67 T
+(array) 368.32 132.67 T
+(indicating) 400.14 132.67 T
+(which) 459.21 132.67 T
+(aerosol) 496.5 132.67 T
+(species are members of an) 72 115.67 T
+(y aerosol f) 219.52 115.67 T
+(amilies which may ha) 278.47 115.67 T
+(v) 400.68 115.67 T
+(e optionally been) 407.47 115.67 T
+(de\336ned for diagnostic purposes.) 72 98.67 T
+FMENDPAGE
+%%EndPage: "4" 4
+%%Page: "5" 5
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(          aerosol\050i,j,k,n\051               : aerosol concentration at each model grid point) 72 710.67 T
+(                                                 for each  of the n acti) 72 693.67 T
+(v) 362.11 693.67 T
+(ated aerosols [ kg/m**2 ]) 368.76 693.67 T
+(          aerosol_names\050n\051          : name associated with each acti) 72 676.67 T
+(v) 421.19 676.67 T
+(ated aerosol) 427.84 676.67 T
+(          f) 72 659.67 T
+(amily_members\050n, nf) 111.52 659.67 T
+(amily\051 :    .true. when aerosol species n is included) 231.92 659.67 T
+(                                                            in  aerosol f) 72 642.67 T
+(amily nf) 348.35 642.67 T
+(amily) 395.26 642.67 T
+( type aerosol_type) 72 608.67 T
+(     real, dimension\050:,:,:,:\051,        pointer :: aerosol=>NULL\050\051) 72 591.67 T
+(     character\050len=64\051, dimension\050:\051, pointer :: aerosol_names=>NULL\050\051) 72 574.67 T
+(     logical, dimension\050:,:\051, pointer :: f) 72 557.67 T
+(amily_members => NULL\050\051) 279.52 557.67 T
+( end type aerosol_type) 72 540.67 T
+(2.) 95.94 472.67 T
+(The) 113.28 472.67 T
+(atmos_input_type) 138.47 472.67 T
+(v) 242.23 472.67 T
+(ariable) 248.88 472.67 T
+(contains) 290.39 472.67 T
+(basic) 340.47 472.67 T
+(atmospheric) 372.66 472.67 T
+(state) 444.51 472.67 T
+(\336elds) 473.59 472.67 T
+(\050pres-) 507.35 472.67 T
+(sure,) 72 455.67 T
+(temperature,) 102.26 455.67 T
+(w) 176.05 455.67 T
+(ater) 186.02 455.67 T
+(v) 210.44 455.67 T
+(apor) 217.09 455.67 T
+(mixing) 245.4 455.67 T
+(ratio,) 288.51 455.67 T
+(relati) 321.1 455.67 T
+(v) 349.52 455.67 T
+(e) 356.31 455.67 T
+(humidity\051) 365.96 455.67 T
+(and) 424.62 455.67 T
+(the) 448.27 455.67 T
+(v) 468.81 455.67 T
+(ertical) 475.6 455.67 T
+(grid) 514.01 455.67 T
+(\050separation) 72 438.67 T
+(deltaz) 137.48 438.67 T
+(and) 174.2 438.67 T
+(heights) 197.7 438.67 T
+(of) 241.42 438.67 T
+(full) 256.37 438.67 T
+(le) 279.09 438.67 T
+(v) 288.85 438.67 T
+(els) 295.64 438.67 T
+(zfull\051) 314.48 438.67 T
+(in) 348.08 438.67 T
+(the) 362.26 438.67 T
+(form) 382.65 438.67 T
+(and) 413.14 438.67 T
+(with) 436.64 438.67 T
+(the) 464.82 438.67 T
+(units) 485.21 438.67 T
+(that) 515.72 438.67 T
+(the radiation package desires, and will contain additional v) 72 421.67 T
+(ariables when the radia-) 400.99 421.67 T
+(tion code is run within the radiati) 72 404.67 T
+(v) 257.53 404.67 T
+(e feedback program.) 264.32 404.67 T
+(    !         psfc          surf) 72 387.67 T
+(ace pressure) 202.12 387.67 T
+(    !                       [ \050kg /\050 m s^2\051 ]) 72 370.67 T
+(    !         tsfc          surf) 72 353.67 T
+(ace temperature) 199.01 353.67 T
+(    !                       [ de) 72 336.67 T
+(g K ]) 192.33 336.67 T
+(    !         temp          temperature at model le) 72 319.67 T
+(v) 317.39 319.67 T
+(els \0501:nle) 324.18 319.67 T
+(v\051, surf) 375.55 319.67 T
+(ace) 415.84 319.67 T
+(    !                       temperature is stored at v) 72 302.67 T
+(alue nle) 312.34 302.67 T
+(v+1; if eta) 355.92 302.67 T
+(    !                       coordinates, surf) 72 285.67 T
+(ace v) 264.33 285.67 T
+(alue stored in belo) 293.13 285.67 T
+(w) 395.82 285.67 T
+(    !                       ground points) 72 268.67 T
+(    !                       [ de) 72 251.67 T
+(g K ]) 192.33 251.67 T
+(    !         press         pressure at model le) 72 234.67 T
+(v) 294.45 234.67 T
+(els \0501:nle) 301.24 234.67 T
+(v\051, surf) 352.6 234.67 T
+(ace) 392.89 234.67 T
+(    !                       pressure is stored at inde) 72 217.67 T
+(x v) 309.37 217.67 T
+(alue nle) 326.52 217.67 T
+(v+1) 370.1 217.67 T
+(    !                       [ \050kg /\050 m s^2\051 ]) 72 200.67 T
+(    !         phalf         pressure at model half-le) 72 183.67 T
+(v) 320.88 183.67 T
+(els) 327.67 183.67 T
+(    !                       [ \050kg /\050m s^2\051 ]) 72 166.67 T
+(    !         rh2o          mixing ratio of w) 72 149.67 T
+(ater v) 280.29 149.67 T
+(apor at model full le) 311.43 149.67 T
+(v) 424.62 149.67 T
+(el        s) 431.41 149.67 T
+(    !                       [ non-dimensional ]) 72 132.67 T
+(    !         deltaz        model v) 72 115.67 T
+(ertical grid separation) 228.88 115.67 T
+(    !                       [meters]) 72 98.67 T
+(    !         p\337ux         a) 72 81.67 T
+(v) 188.38 81.67 T
+(erage of pressure at adjacent model le) 195.17 81.67 T
+(v) 406.31 81.67 T
+(els) 413.1 81.67 T
+FMENDPAGE
+%%EndPage: "5" 5
+%%Page: "6" 6
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(    !                       [ \050kg /\050 m s^2\051 ]) 72 710.67 T
+(    !         t\337ux         a) 72 693.67 T
+(v) 185.27 693.67 T
+(erage of temperature at adjacent model le) 192.06 693.67 T
+(v) 423.41 693.67 T
+(els) 430.2 693.67 T
+(    !                       [ de) 72 676.67 T
+(g K ]) 192.33 676.67 T
+(    !         rel_hum       relati) 72 659.67 T
+(v) 221.74 659.67 T
+(e humidity) 228.53 659.67 T
+(    !                       [ dimensionless ]) 72 642.67 T
+(    !         zfull     height of model full le) 72 625.67 T
+(v) 290.19 625.67 T
+(els abo) 296.98 625.67 T
+(v) 336.04 625.67 T
+(e sea le) 342.83 625.67 T
+(v) 383.68 625.67 T
+(el) 390.47 625.67 T
+(    !                       [ meters ]) 72 608.67 T
+(    !         cloudtemp     temperature to be seen by clouds \050used in) 72 591.67 T
+(    !                       sa_gcm feedback studies\051) 72 574.67 T
+(    !                       [ de) 72 557.67 T
+(grees K ]) 192.33 557.67 T
+(    !         cloudv) 72 540.67 T
+(apor    w) 159.92 540.67 T
+(ater v) 208.77 540.67 T
+(apor to be seen by clouds \050used in) 239.9 540.67 T
+(    !                       sa_gcm feedback studies\051) 72 523.67 T
+(    !                       [ nondimensional ]) 72 506.67 T
+(    !         clouddeltaz   deltaz to be used in de\336ning cloud paths \050used) 72 489.67 T
+(    !                       in sa_gcm feedback studies\051) 72 472.67 T
+(    !                       [ meters ]) 72 455.67 T
+(    !         aerosoltemp   temperature to be seen by aerosols \050used in) 72 438.67 T
+(    !                       sa_gcm feedback studies\051) 72 421.67 T
+(    !                       [ de) 72 404.67 T
+(grees K ]) 192.33 404.67 T
+(    !         aerosolv) 72 387.67 T
+(apor  w) 169.24 387.67 T
+(ater v) 211.09 387.67 T
+(apor to be seen by aerosols \050used in) 242.23 387.67 T
+(    !                       sa_gcm feedback studies\051) 72 370.67 T
+(    !                       [ nondimensional ]) 72 353.67 T
+(    !         aerosolpress  pressure \336eld to be seen by aerosols \050used in) 72 336.67 T
+(    !                       sa_gcm feedback studies\051) 72 319.67 T
+(    !                       [ P) 72 302.67 T
+(a ]) 186.9 302.67 T
+(    !         aerosolrelhum relati) 72 285.67 T
+(v) 234.18 285.67 T
+(e humidity seen by aerosol package,) 240.97 285.67 T
+(    !                       used in sa_gcm feedback studies) 72 268.67 T
+(    !                       [ dimensionless ]) 72 251.67 T
+( type atmos_input_type) 72 200.67 T
+(       real, dimension\050:,:,:\051, pointer :: press=>NULL\050\051,   &) 72 183.67 T
+(                                           temp=>NULL\050\051, &) 72 166.67 T
+(                                              rh2o=>NULL\050\051,  &) 72 149.67 T
+(                                             p\337ux=>NULL\050\051, &) 72 132.67 T
+(                                             phalf=>NULL\050\051, &) 72 115.67 T
+(                                             zfull=>NULL\050\051, &) 72 98.67 T
+(                                             t\337ux=>NULL\050\051,  &) 72 81.67 T
+FMENDPAGE
+%%EndPage: "6" 6
+%%Page: "7" 7
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(                                            deltaz=>NULL\050\051,  &) 72 710.67 T
+(                                            phalf=>NULL\050\051,   &) 72 693.67 T
+(                                             rel_hum=>NULL\050\051, &) 72 676.67 T
+(                                            cloudtemp=>NULL\050\051,   &) 72 659.67 T
+(                                            clouddeltaz=>NULL\050\051, &) 72 642.67 T
+(                                              cloudv) 72 625.67 T
+(apor=>NULL\050\051, &) 270.76 625.67 T
+(                                             aerosoltemp=>NULL\050\051, &) 72 608.67 T
+(                                             aerosolv) 72 591.67 T
+(apor=>NULL\050\051, &) 276.58 591.67 T
+(                                             aerosolpress=>NULL\050\051, &) 72 574.67 T
+(                                             aerosolrelhum=>NULL\050\051) 72 557.67 T
+(    real, dimension\050:,:\051,   pointer :: tsfc=>NULL\050\051,   &) 72 540.67 T
+(                                              psfc=>NULL\050\051) 72 523.67 T
+(end type atmos_input_type) 72 506.67 T
+(3.    The cld_speci\336cation_type v) 72 472.67 T
+(ariable contains v) 257.91 472.67 T
+(ariables that are used by v) 356.31 472.67 T
+(arious) 501.76 472.67 T
+(cloud schemes a) 72 455.67 T
+(v) 163.48 455.67 T
+(ailable in FMS to specify the distrib) 170.13 455.67 T
+(ution, type and co) 371.29 455.67 T
+(v) 471.41 455.67 T
+(erage of) 478.2 455.67 T
+(clouds that the radiation package is to see. NO) 72 438.67 T
+(T ALL OF THESE V) 331.56 438.67 T
+(ARIABLES) 450.99 438.67 T
+(WILL BE DEFINED FOR ALL CLOUD P) 72 421.67 T
+(ARAMETERIZA) 314.91 421.67 T
+(TIONS AND ALL) 413.68 421.67 T
+(N) 72 404.67 T
+(AMELIST OPTIONS.) 81.62 404.67 T
+(    !            %cmxol) 72 370.67 T
+(w         amount of maximally o) 179.18 370.67 T
+(v) 351.64 370.67 T
+(erlapped longw) 358.43 370.67 T
+(a) 444.99 370.67 T
+(v) 450.92 370.67 T
+(e) 457.71 370.67 T
+(    !                            clouds [ dimensionless ]) 72 353.67 T
+(    !            %crndl) 72 336.67 T
+(w         amount of randomly o) 172.95 336.67 T
+(v) 339.18 336.67 T
+(erlapped longw) 345.97 336.67 T
+(a) 432.53 336.67 T
+(v) 438.46 336.67 T
+(e) 445.25 336.67 T
+(    !                            clouds [ dimensionless ]) 72 319.67 T
+(    !            %nmxol) 72 302.67 T
+(w         number of maximally o) 179.97 302.67 T
+(v) 353.19 302.67 T
+(erlapped longw) 359.98 302.67 T
+(a) 446.54 302.67 T
+(v) 452.48 302.67 T
+(e) 459.27 302.67 T
+(    !                            clouds in each grid column.) 72 285.67 T
+(    !            %nrndl) 72 268.67 T
+(w         number of maximally o) 173.74 268.67 T
+(v) 346.96 268.67 T
+(erlapped longw) 353.75 268.67 T
+(a) 440.31 268.67 T
+(v) 446.25 268.67 T
+(e) 453.04 268.67 T
+(    !                            clouds in each grid column.) 72 251.67 T
+(    !            %camtsw         shortw) 72 234.67 T
+(a) 256.56 234.67 T
+(v) 262.5 234.67 T
+(e cloud amount. the sum of the max        -) 269.29 234.67 T
+(    !                            imally o) 72 217.67 T
+(v) 234.74 217.67 T
+(erlapped and randomly o) 241.53 217.67 T
+(v) 380.9 217.67 T
+(erlapped) 387.69 217.67 T
+(    !                            longw) 72 200.67 T
+(a) 223.52 200.67 T
+(v) 229.46 200.67 T
+(e cloud amounts. [ dimensionless ]) 236.25 200.67 T
+(    !            %ncldsw         number of shortw) 72 183.67 T
+(a) 314.89 183.67 T
+(v) 320.82 183.67 T
+(e clouds in each grid) 327.61 183.67 T
+(    !                            column.) 72 166.67 T
+(    !            %hi_cloud       logical mask for high clouds) 72 149.67 T
+(    !            %mid_cloud      logical mask for middle clouds) 72 132.67 T
+(    !            %lo) 72 115.67 T
+(w_cloud      logical mask for lo) 154.87 115.67 T
+(w clouds) 329.11 115.67 T
+(    !            %ice_cloud      logical mask for ice clouds) 72 98.67 T
+(    !            %iwp            ice w) 72 81.67 T
+(ater path  [ kg / m**2 ]) 237.12 81.67 T
+FMENDPAGE
+%%EndPage: "7" 7
+%%Page: "8" 8
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(    !            %l) 72 710.67 T
+(wp            liquid w) 148.08 710.67 T
+(ater path [ kg / m**2 ]) 253.33 710.67 T
+(    !            %ref) 72 693.67 T
+(f_liq       ef) 159.51 693.67 T
+(fecti) 220.99 693.67 T
+(v) 245.52 693.67 T
+(e cloud drop radius  used with) 252.31 693.67 T
+(    !                            b) 72 676.67 T
+(ulk cloud ph) 195.38 676.67 T
+(ysics scheme [ microns ]) 265.31 676.67 T
+(    !            %ref) 72 659.67 T
+(f_ice       ef) 159.51 659.67 T
+(fecti) 222.53 659.67 T
+(v) 247.06 659.67 T
+(e ice crystal radius used with) 253.85 659.67 T
+(    !                            b) 72 642.67 T
+(ulk cloud ph) 195.38 642.67 T
+(ysics scheme [ microns ]) 265.31 642.67 T
+(    !            %ref) 72 625.67 T
+(f_liq_micro ef) 159.51 625.67 T
+(fecti) 239.65 625.67 T
+(v) 264.18 625.67 T
+(e cloud drop radius used with) 270.97 625.67 T
+(    !                            microph) 72 608.67 T
+(ysically based scheme [ microns ]) 235.25 608.67 T
+(    !            %ref) 72 591.67 T
+(f_ice_micro ef) 159.51 591.67 T
+(fecti) 241.19 591.67 T
+(v) 265.72 591.67 T
+(e ice crystal radius used with) 272.51 591.67 T
+(    !                            microph) 72 574.67 T
+(ysically based scheme [ microns ]) 235.25 574.67 T
+(    !            %tau            e) 72 557.67 T
+(xtinction optical path  [ dimensionless ]) 209.44 557.67 T
+(    !            %liq_frac       fraction of cloud in a box which is liquid) 72 540.67 T
+(    !                            [ dimensionless ]) 72 523.67 T
+(    !            %cld_thickness  number of model layers contained in cloud) 72 506.67 T
+(    !            %cloud_w) 72 489.67 T
+(ater    liquid cloud content [ kg liq / kg air ]) 192.4 489.67 T
+(    !            %cloud_ice      ice cloud content [ kg ice / kg air ]) 72 472.67 T
+(    !            %cloud_area     saturated v) 72 455.67 T
+(olume fraction [ dimensionless  ]) 284 455.67 T
+(type cld_speci\336cation_type) 72 370.67 T
+(        real, dimension\050:,:,:,:\051,  pointer :: tau=>NULL\050\051) 72 353.67 T
+(        real, dimension\050:,:,:\051,    pointer :: l) 72 336.67 T
+(wp=>NULL\050\051,   &) 290.02 336.67 T
+(                                              iwp=>NULL\050\051,  &) 72 319.67 T
+(                                              ref) 72 302.67 T
+(f_liq=>NULL\050\051,   &) 248.19 302.67 T
+(                                              ref) 72 285.67 T
+(f_ice=>NULL\050\051, &) 248.19 285.67 T
+(                                              liq_frac=>NULL\050\051, &) 72 268.67 T
+(                                              cloud_w) 72 251.67 T
+(ater=>NULL\050\051, &) 281.08 251.67 T
+(                                              cloud_ice=>NULL\050\051,  &) 72 234.67 T
+(                                              cloud_area=>NULL\050\051, &) 72 217.67 T
+(                                              ref) 72 200.67 T
+(f_liq_micro=>NULL\050\051,   &) 248.19 200.67 T
+(                                              ref) 72 183.67 T
+(f_ice_micro=>NULL\050\051,&) 248.19 183.67 T
+(                                              camtsw=>NULL\050\051,   &) 72 166.67 T
+(                                              cmxol) 72 149.67 T
+(w=>NULL\050\051,  &) 267.86 149.67 T
+(                                              crndl) 72 132.67 T
+(w=>NULL\050\051) 261.63 132.67 T
+(        inte) 72 115.67 T
+(ger) 120.79 115.67 T
+(, dimension\050:,:,:\051, pointer :: cld_thickness=>NULL\050\051) 138.11 115.67 T
+(        inte) 72 98.67 T
+(ger) 120.79 98.67 T
+(, dimension\050:,:\051,   pointer :: ncldsw=>NULL\050\051,   &) 138.11 98.67 T
+(                                              nmxol) 72 81.67 T
+(w=>NULL\050\051,&) 268.64 81.67 T
+FMENDPAGE
+%%EndPage: "8" 8
+%%Page: "9" 9
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(                                              nrndl) 72 710.67 T
+(w=>NULL\050\051) 262.41 710.67 T
+(        logical, dimension\050:,:,:\051, pointer :: hi_cloud=>NULL\050\051,   &) 72 693.67 T
+(                                              mid_cloud=>NULL\050\051,  &) 72 676.67 T
+(                                              lo) 72 659.67 T
+(w_cloud=>NULL\050\051,   &) 243.54 659.67 T
+(4.) 72 608.67 T
+(The) 91.47 608.67 T
+(microph) 116.24 608.67 T
+(ysics_type) 162.83 608.67 T
+(v) 224.93 608.67 T
+(ariables) 231.58 608.67 T
+(will) 278.11 608.67 T
+(contain) 302.89 608.67 T
+(the) 347.09 608.67 T
+(concentrations) 367.19 608.67 T
+(and) 451.83 608.67 T
+(sizes) 475.04 608.67 T
+(of) 505.25 608.67 T
+(the) 519.9 608.67 T
+(v) 72 591.67 T
+(arious condensate types at each model grid point. There is a separate) 78.65 591.67 T
+(microph) 72 574.67 T
+(ysics_type v) 118.59 574.67 T
+(ariable for the lar) 187.85 574.67 T
+(ge-scale clouds and for the mesoscale and) 284.39 574.67 T
+(cell-scale clouds of the donner_deep parameterization, since the microph) 72 557.67 T
+(ysical) 480.55 557.67 T
+(properties) 72 540.67 T
+(of) 131.26 540.67 T
+(these) 146.19 540.67 T
+(three) 178.23 540.67 T
+(cloud) 209.48 540.67 T
+(types) 243.86 540.67 T
+(are) 276.68 540.67 T
+(treated) 297.05 540.67 T
+(dif) 338.41 540.67 T
+(ferently) 353.61 540.67 T
+(.) 396.24 540.67 T
+(Also) 403.02 540.67 T
+(included) 432.73 540.67 T
+(are) 484.22 540.67 T
+(equi) 504.58 540.67 T
+(v-) 528.34 540.67 T
+(alent arrays for the stochastic cloud option, which ha) 72 523.67 T
+(v) 367.61 523.67 T
+(e a 4th dimension of cloud) 374.4 523.67 T
+(pro\336le number) 72 506.67 T
+(.) 154.05 506.67 T
+(    !            %conc_ice   ice particle concentration [ g / m**3 ]) 72 472.67 T
+(    !            %conc_drop  cloud droplet concentration [ g / m**3 ]) 72 455.67 T
+(    !            %conc_rain  rain drop concentration [ g / m**3 ]) 72 438.67 T
+(    !            %conc_sno) 72 421.67 T
+(w  sno) 196.85 421.67 T
+(w concentration [ g / m**3 ]) 233.06 421.67 T
+(    !            %size_ice   ef) 72 404.67 T
+(fecti) 210.45 404.67 T
+(v) 234.97 404.67 T
+(e ice crystal diameter [ microns ]) 241.76 404.67 T
+(    !            %size_drop  ef) 72 387.67 T
+(fecti) 216.28 387.67 T
+(v) 240.81 387.67 T
+(e cloud drop diameter [ microns ]) 247.6 387.67 T
+(    !            %size_rain  ef) 72 370.67 T
+(fecti) 212.39 370.67 T
+(v) 236.92 370.67 T
+(e rain drop diameter [ microns ]) 243.71 370.67 T
+(    !            %size_sno) 72 353.67 T
+(w  ef) 192.19 353.67 T
+(fecti) 219.83 353.67 T
+(v) 244.35 353.67 T
+(e sno) 251.14 353.67 T
+(w \337ak) 279.96 353.67 T
+(e diameter [ microns ]) 314.42 353.67 T
+(    !            %cldamt     total cloud fraction \050crystal + droplet\051) 72 336.67 T
+(    !                        [ dimensionless ]) 72 319.67 T
+(    !            %stoch_conc_ice   ice particle concentration for each stochastic cloud) 72 302.67 T
+(                                             pro\336le[ g / m**3 ]) 72 285.67 T
+(    !            %stoch_conc_drop  cloud droplet concentration for each stochastic) 72 268.67 T
+(                                               cloud pro\336le[ g / m**3 ]) 72 251.67 T
+(    !            %stoch_size_ice   ef) 72 234.67 T
+(fecti) 247 234.67 T
+(v) 271.53 234.67 T
+(e ice crystal diameter for each stochastic cloud) 278.32 234.67 T
+(                                           pro\336le [ microns ]) 72 217.67 T
+(    !            %stoch_size_drop  ef) 72 200.67 T
+(fecti) 252.84 200.67 T
+(v) 277.37 200.67 T
+(e cloud drop diameter for each stochastic) 284.16 200.67 T
+(                                             cloud pro\336le  [ microns ]) 72 183.67 T
+(    !            %stoch_cldamt     total cloud fraction \050crystal + droplet\051 for each) 72 166.67 T
+(                                             stochastic cloud pro\336le   [ dimensionless ]) 72 149.67 T
+FMENDPAGE
+%%EndPage: "9" 9
+%%Page: "10" 10
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+( type microph) 72 710.67 T
+(ysics_type) 149.7 710.67 T
+(        real, dimension\050:,:,:\051, pointer :: conc_ice=>NULL\050\051,   &) 72 693.67 T
+(                                          conc_drop=>NULL\050\051,      &) 72 676.67 T
+(                                           size_ice=>NULL\050\051,   &) 72 659.67 T
+(                                           size_drop=>NULL\050\051,     &) 72 642.67 T
+(                                           size_sno) 72 625.67 T
+(w=>NULL\050\051,   &) 270.37 625.67 T
+(                                           conc_sno) 72 608.67 T
+(w=>NULL\050\051,     &) 275.03 608.67 T
+(                                           size_rain=>NULL\050\051,     &) 72 591.67 T
+(                                           conc_rain=>NULL\050\051,   &) 72 574.67 T
+(                                           cldamt=>NULL\050\051) 72 557.67 T
+(        real, dimension\050:,:,:,:\051, pointer :: stoch_conc_ice=>NULL\050\051,   &) 72 540.67 T
+(                                          stoch_conc_drop=>NULL\050\051,      &) 72 523.67 T
+(                                          stoch_size_ice=>NULL\050\051,   &) 72 506.67 T
+(                                          stoch_size_drop=>NULL\050\051,     &) 72 489.67 T
+(                                          stoch_cldamt=>NULL\050\051) 72 472.67 T
+( end type microph) 72 438.67 T
+(ysics_type) 173.42 438.67 T
+(5.   The rad_output_type v) 72 387.67 T
+(ariable contains those v) 220.19 387.67 T
+(ariables which must be e) 351.65 387.67 T
+(xported) 489.86 387.67 T
+(from radiation_dri) 72 370.67 T
+(v) 174.69 370.67 T
+(er_mod to ph) 181.48 370.67 T
+(ysics_dri) 256.07 370.67 T
+(v) 306.28 370.67 T
+(er_mod, where the) 313.07 370.67 T
+(y will be made a) 417.44 370.67 T
+(v) 509.7 370.67 T
+(ail-) 516.35 370.67 T
+(able to other modules and component models of the FMS.) 72 353.67 T
+(      tdt_rad                total radiati) 72 302.67 T
+(v) 252.47 302.67 T
+(e heating rate [ de) 259.26 302.67 T
+(g K / sec ]) 359.35 302.67 T
+(      tdt_rad_clr          clear sk) 72 285.67 T
+(y tdt_rad) 232.37 285.67 T
+(      tdtsw                   shortw) 72 268.67 T
+(a) 227.81 268.67 T
+(v) 233.74 268.67 T
+(e heating rate [ de) 240.53 268.67 T
+(g K / sec ]) 340.62 268.67 T
+(      tdtsw_clr             clear sk) 72 251.67 T
+(y tdtsw) 233.55 251.67 T
+(      tdtl) 72 234.67 T
+(w                   longw) 111.54 234.67 T
+(a) 223 234.67 T
+(v) 228.94 234.67 T
+(e heating rate [ de) 235.73 234.67 T
+(g K / sec ]) 335.82 234.67 T
+(      \337ux_sw_surf        net \050do) 72 217.67 T
+(wn - up\051 sw surf) 233.03 217.67 T
+(ace \337ux [ W / m**2 ]) 324.64 217.67 T
+(      \337ux_sw_surf_dir  net direct \050do) 72 200.67 T
+(wn - up\051 sw surf) 269.96 200.67 T
+(ace \337ux [ W / m**2 ]) 361.58 200.67 T
+(      \337ux_sw_surf_dif  net dif) 72 183.67 T
+(fuse \050do) 231.47 183.67 T
+(wn - up\051 sw surf) 276.61 183.67 T
+(ace \337ux [ W / m**2 ]) 368.23 183.67 T
+(      \337ux_sw_do) 72 166.67 T
+(wn_vis_dir  do) 157.99 166.67 T
+(wnw) 241.64 166.67 T
+(ard direct sw visible surf) 268.71 166.67 T
+(ace \337ux [ W / m**2 ]) 406.99 166.67 T
+(      \337ux_sw_do) 72 149.67 T
+(wn_vis_dif  do) 157.99 149.67 T
+(wnw) 241.64 149.67 T
+(ard dif) 268.71 149.67 T
+(fuse sw visible surf) 305.3 149.67 T
+(ace \337ux [ W / m**2 ]) 413.64 149.67 T
+(      \337ux_sw_do) 72 132.67 T
+(wn_total_dir  do) 157.99 132.67 T
+(wnw) 250.19 132.67 T
+(ard direct sw total surf) 277.27 132.67 T
+(ace \337ux [ W / m**2 ]) 403.1 132.67 T
+(      \337ux_sw_do) 72 115.67 T
+(wn_total_dif  do) 157.99 115.67 T
+(wnw) 250.19 115.67 T
+(ard dif) 277.27 115.67 T
+(fuse sw total surf) 313.85 115.67 T
+(ace \337ux [ W / m**2 ]) 409.75 115.67 T
+(      \337ux_sw_vis        net \050do) 72 98.67 T
+(wn - up\051 sw visible surf) 227.6 98.67 T
+(ace \337ux [ W / m**2 ]) 360.05 98.67 T
+(      \337ux_sw_vis_dir  net direct \050do) 72 81.67 T
+(wn - up\051 sw visible surf) 264.53 81.67 T
+(ace \337ux [ W / m**2 ]) 396.98 81.67 T
+FMENDPAGE
+%%EndPage: "10" 10
+%%Page: "11" 11
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(      \337ux_sw_vis_dif  net dif) 72 710.67 T
+(fuse \050do) 226.04 710.67 T
+(wn - up\051 sw visible surf) 271.18 710.67 T
+(ace \337ux [ W / m**2 ]) 403.63 710.67 T
+(      \337ux_l) 72 693.67 T
+(w_surf        do) 125.54 693.67 T
+(wnw) 206.06 693.67 T
+(ard l) 233.14 693.67 T
+(w surf) 258.27 693.67 T
+(ace \337ux [ W / m**2 ]) 293.51 693.67 T
+(      coszen_angle       cosine of the zenith angle to be used to calculate ocean) 72 676.67 T
+(                                 albedo to be used on ne) 72 659.67 T
+(xt radiation timestep [ dimensionless ]) 319.1 659.67 T
+(type rad_output_type) 72 608.67 T
+(          real, dimension\050:,:,:\051, pointer :: tdt_rad=>NULL\050\051,  &) 72 591.67 T
+(                                             tdt_rad_clr=>NULL\050\051, &) 72 574.67 T
+(                                             tdtsw=>NULL\050\051,   &) 72 557.67 T
+(                                             tdtsw_clr=>NULL\050\051,  &) 72 540.67 T
+(                                             tdtl) 72 523.67 T
+(w=>NULL\050\051) 248.04 523.67 T
+(          real, dimension\050:,:\051,   pointer :: \337ux_sw_surf=>NULL\050\051, &) 72 506.67 T
+(                                             \337ux_sw_surf_dir=>NULL\050\051, &) 72 489.67 T
+(                                             \337ux_sw_surf_dif=> NULL\050\051, &) 72 472.67 T
+(                                             \337ux_sw_do) 72 455.67 T
+(wn_vis_dir=>NULL\050\051, &) 294.49 455.67 T
+(                                             \337ux_sw_do) 72 438.67 T
+(wn_vis_dif=>NULL\050\051, &) 294.49 438.67 T
+(                                             \337ux_sw_do) 72 421.67 T
+(wn_total_dir=>NULL\050\051, &) 294.49 421.67 T
+(                                             \337ux_sw_do) 72 404.67 T
+(wn_total_dif=>NUll\050\051, &) 294.49 404.67 T
+(                                             \337ux_sw_vis=>NULL\050\051, &) 72 387.67 T
+(                                             \337ux_sw_vis_dir=>NULL\050\051, &) 72 370.67 T
+(                                             \337ux_sw_vis_dif=>NULL\050\051, &) 72 353.67 T
+(                                             \337ux_l) 72 336.67 T
+(w_surf=>NULL\050\051, &) 262.04 336.67 T
+(                                             coszen_angle=>NULL\050\051) 72 319.67 T
+(end type rad_output_type) 72 302.67 T
+(6.  The radiati) 72 251.67 T
+(v) 150.19 251.67 T
+(e_g) 156.98 251.67 T
+(ases_type v) 177.13 251.67 T
+(ariable contains the mixing ratios of the radiati) 241.71 251.67 T
+(v) 503.05 251.67 T
+(ely-) 509.84 251.67 T
+(acti) 72 234.67 T
+(v) 91.87 234.67 T
+(e g) 98.66 234.67 T
+(ases along with logical v) 115.3 234.67 T
+(ariables indicating whether the g) 253.38 234.67 T
+(as concentrations) 436.06 234.67 T
+(should) 72 217.67 T
+(v) 112.57 217.67 T
+(ary) 119.22 217.67 T
+(in) 140.33 217.67 T
+(time) 154.45 217.67 T
+(during) 182.57 217.67 T
+(the) 222.35 217.67 T
+(model) 242.69 217.67 T
+(run.) 280.92 217.67 T
+(F) 306.32 217.67 T
+(or) 313.89 217.67 T
+(these) 328.78 217.67 T
+(v) 360.78 217.67 T
+(ariables) 367.43 217.67 T
+(xxx) 414.2 217.67 T
+(is) 438.43 217.67 T
+(either) 451 217.67 T
+(co2,) 486.11 217.67 T
+(ch4,) 513.05 217.67 T
+(n2o, f11, f12, f113 or f22.) 72 200.67 T
+(              qo3                          :   ozone mass mixing ratio) 72 166.67 T
+(              rrvxxx                     :   mixing ratio of g) 72 149.67 T
+(as xxx) 340.65 149.67 T
+(              rxxxair                    :   mass mixing ratio of g) 72 132.67 T
+(as xxx) 371.75 132.67 T
+(              time_v) 72 115.67 T
+(arying_xxx    :   is the amount of g) 159.54 115.67 T
+(as xxx to v) 352.74 115.67 T
+(ary in time ?) 413.45 115.67 T
+FMENDPAGE
+%%EndPage: "11" 11
+%%Page: "12" 12
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+( F) 72 710.67 T
+(or the follo) 83.07 710.67 T
+(wing v) 144.94 710.67 T
+(ariables, xxx = co2, ch4 and n2o.) 183.09 710.67 T
+(              xxx_for_last_tf_calc:   g) 72 676.67 T
+(as mixing ratio used the last time transmission) 258.19 676.67 T
+(                                                functions were calculated) 72 659.67 T
+(              xxx_for_ne) 72 642.67 T
+(xt_tf_calc:  g) 185.33 642.67 T
+(as mixing ratio to be used the ne) 259.14 642.67 T
+(xt time) 440.52 642.67 T
+(                                                 transmission functions are calculated) 72 625.67 T
+(              xxx_tf_of) 72 608.67 T
+(fset:  time for which g) 175.87 608.67 T
+(as v) 299.84 608.67 T
+(alue used for tf calculation is to apply) 321.65 608.67 T
+(                                     relati) 72 591.67 T
+(v) 229.92 591.67 T
+(e to the time when the tfs are calculated) 236.71 591.67 T
+(              Xxx_time:  time_type indicating time elapsed since time v) 72 574.67 T
+(ariation of g) 448.08 574.67 T
+(as) 516.44 574.67 T
+(                                xxx be) 72 557.67 T
+(g) 221.51 557.67 T
+(an) 228.44 557.67 T
+(type radiati) 72 506.67 T
+(v) 135.03 506.67 T
+(e_g) 141.82 506.67 T
+(ases_type) 161.96 506.67 T
+(         real, dimension\050:,:,:\051, pointer :: qo3=>NULL\050\051) 72 489.67 T
+(          real                            :: rrvch4, rrvn2o, rrvco2,    &) 72 472.67 T
+(                                             rrvf11, rrvf12, rrvf113,  &) 72 455.67 T
+(                                             rrvf22, rf11air) 72 438.67 T
+(, rf12air) 309.02 438.67 T
+(,  &) 353.55 438.67 T
+(                                             rf113air) 72 421.67 T
+(, rf22air) 274.03 421.67 T
+(          logical                         :: time_v) 72 404.67 T
+(arying_co2,  &) 282.43 404.67 T
+(                                             time_v) 72 387.67 T
+(arying_f11, &) 268.04 387.67 T
+(                                             time_v) 72 370.67 T
+(arying_f12,  &) 268.04 370.67 T
+(                                             time_v) 72 353.67 T
+(arying_f113, &) 268.04 353.67 T
+(                                             time_v) 72 336.67 T
+(arying_f22,  &) 268.04 336.67 T
+(                                             time_v) 72 319.67 T
+(arying_ch4, &) 268.04 319.67 T
+(                                             time_v) 72 302.67 T
+(arying_n2o,  &) 268.04 302.67 T
+(                                             co2_for_last_tf_calc,  &) 72 285.67 T
+(                                             co2_tf_of) 72 268.67 T
+(fset, &) 283.58 268.67 T
+(                                             co2_for_ne) 72 251.67 T
+(xt_tf_calc, &) 293.05 251.67 T
+(                                             ch4_for_last_tf_calc,  &) 72 234.67 T
+(                                             ch4_tf_of) 72 217.67 T
+(fset, &) 283.58 217.67 T
+(                                             ch4_for_ne) 72 200.67 T
+(xt_tf_calc, &) 293.05 200.67 T
+(                                             n2o_for_last_tf_calc,  &) 72 183.67 T
+(                                             n2o_tf_of) 72 166.67 T
+(fset, &) 284.37 166.67 T
+(                                             n2o_for_ne) 72 149.67 T
+(xt_tf_calc) 293.83 149.67 T
+(       type\050time_type\051           :: Co2_time, Ch4_time, N2o_time) 72 132.67 T
+( end type radiati) 72 115.67 T
+(v) 162.24 115.67 T
+(e_g) 169.03 115.67 T
+(ases_type) 189.18 115.67 T
+FMENDPAGE
+%%EndPage: "12" 12
+%%Page: "13" 13
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(7.    The surf) 72 710.67 T
+(ace_type v) 143.4 710.67 T
+(ariable contains surf) 203.31 710.67 T
+(ace input \336elds needed by the radiation) 316.69 710.67 T
+(package. Currently these include the surf) 72 693.67 T
+(ace albedoes pro) 301.25 693.67 T
+(vided by the land model) 394.34 693.67 T
+(\050with) 72 676.67 T
+(LM3) 104.96 676.67 T
+(4) 136.36 676.67 T
+(separate) 146.76 676.67 T
+(albedoes) 196.03 676.67 T
+(will) 248.42 676.67 T
+(be) 273.6 676.67 T
+(pro) 290.22 676.67 T
+(vided\051,) 308.67 676.67 T
+(and) 351.35 676.67 T
+(the) 374.96 676.67 T
+(land) 395.48 676.67 T
+(fraction) 422.99 676.67 T
+(of) 469.93 676.67 T
+(each) 484.99 676.67 T
+(grid) 514.04 676.67 T
+(box.) 72 659.67 T
+(    !         asfc          surf) 72 625.67 T
+(ace albedo) 201.33 625.67 T
+(    !                       [ non-dimensional ]) 72 608.67 T
+(    !         asfc_vis_dir   surf) 72 591.67 T
+(ace albedo for direct, visible spectral bands) 222.72 591.67 T
+(    !                       [ non-dimensional ]) 72 574.67 T
+(    !         asfc_nir_dir   surf) 72 557.67 T
+(ace albedo for direct, near infrared spectral bands) 221.94 557.67 T
+(    !                       [ non-dimensional ]) 72 540.67 T
+(    !         asfc_vis_dif    surf) 72 523.67 T
+(ace albedo for dif) 226.22 523.67 T
+(fuse, visible spectral bands) 324.22 523.67 T
+(    !                       [ non-dimensional ]) 72 506.67 T
+(    !         asfc_nir_dif  surf) 72 489.67 T
+(ace albedo for dif) 218.44 489.67 T
+(fuse, near infrared spectral bands) 316.44 489.67 T
+(    !                       [ non-dimensional ]) 72 472.67 T
+(    !         land          fraction of grid box co) 72 455.67 T
+(v) 307.03 455.67 T
+(ered by land) 313.82 455.67 T
+(    !                       [ non-dimensional ]) 72 438.67 T
+(type surf) 72 387.67 T
+(ace_type) 121.24 387.67 T
+(        real, dimension\050:,:\051,   pointer ::  asfc=>NULL\050\051,  &) 72 370.67 T
+(                                             asfc_vis_dir=>NULL\050\051, &) 72 353.67 T
+(                                             asfc_nir_dir=>NULL\050\051, &) 72 336.67 T
+(                                             asfc_vis_dif=>NULL\050\051, &) 72 319.67 T
+(                                             asfc_nir_dif=>NULL\050\051, &) 72 302.67 T
+(                                             land=>NULL\050\051) 72 285.67 T
+(end type surf) 72 268.67 T
+(ace_type) 144.95 268.67 T
+FMENDPAGE
+%%EndPage: "13" 13
+%%Trailer
+FMENDDOCUMENT
+%%BoundingBox: 0 0 612 792
+%%PageOrder: Ascend
+%%Pages: 13
+%%DocumentFonts: Times-Bold
+%%+ Times-Roman
+%%DocumentNeedsFonts: Times-Bold
+%%+ Times-Roman
+%%DocumentSuppliedFonts:
+%%EOF

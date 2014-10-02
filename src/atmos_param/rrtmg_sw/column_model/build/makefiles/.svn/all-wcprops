@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/aer/!svn/ver/23308/project/RD/RRTMG_SW/trunk/build/makefiles
+END
+make_rrtmg_sw_linux_pgi
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/aer/!svn/ver/23308/project/RD/RRTMG_SW/trunk/build/makefiles/make_rrtmg_sw_linux_pgi
+END
+make_rrtmg_sw_OS_X_ibm_xl
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/aer/!svn/ver/23308/project/RD/RRTMG_SW/trunk/build/makefiles/make_rrtmg_sw_OS_X_ibm_xl
+END
+make_rrtmg_sw_sgi
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/aer/!svn/ver/23308/project/RD/RRTMG_SW/trunk/build/makefiles/make_rrtmg_sw_sgi
+END
+make_rrtmg_sw_aix_xlf90
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/aer/!svn/ver/23308/project/RD/RRTMG_SW/trunk/build/makefiles/make_rrtmg_sw_aix_xlf90
+END
+make_rrtmg_sw_sun
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/aer/!svn/ver/23308/project/RD/RRTMG_SW/trunk/build/makefiles/make_rrtmg_sw_sun
+END
+make_rrtmg_sw_OS_X_g95
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/aer/!svn/ver/23308/project/RD/RRTMG_SW/trunk/build/makefiles/make_rrtmg_sw_OS_X_g95
+END

@@ -1,0 +1,745 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module strat_cloud_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module strat_cloud_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Stephen.Klein@noaa.gov">   Stephen Klein </a>
+<br>
+<b>Reviewers:&nbsp;</b>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/strat_cloud">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Code to compute time tendencies of stratiform clouds and diagnoses
+   rain and snow flux with prognostic scheme.
+   <br>
+<br> 
+</p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   The prognostic scheme returns the time tendencies of liquid,
+   ice, and saturated volume fraction that are suspended in 
+   stratiform clouds.  The scheme diagnoses the fluxes of rain
+   and snow in saturated and unsaturated areas.
+   <br>
+<br>
+   The prognostic cloud scheme is responsible for determing
+   cloud volume fractions, condensed water tendencies, and
+   the stratiform precipitation rate.  It includes processes
+   for evaporation, condensation, deposition, and sublimation
+   of cloud water, conversion of cloud water to precipitation,
+   evaporation of falling precipitation, the bergeron-findeisan 
+   process, freezing of cloud liquid, accretion of cloud water 
+   by precipitation, and melting of falling precipitation.
+   <br>
+<br>
+   This scheme is based on the experience the author had 
+   at the ECMWF in 1997. The saturated volume fraction formalism 
+   and type of solution follow directly from the scheme of Tiedtke
+   (1993): Monthly Weather Review, Volume 121, pages 3040-3061.
+   The form of most of the microphysics follows Rotstayn , 1997:
+   Quart. J. Roy. Met. Soc. vol 123, pages 1227-1282. The partial
+   precipitation area formulism follows Jakob and Klein, 2000:
+   Quart. J. Roy. Met. Soc. vol 126, pages 2525-2544. 
+   <br>
+<br> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre> sat_vapor_pres_mod<br>            fms_mod<br>         fms_io_mod<br>      constants_mod<br>      cloud_rad_mod<br>   diag_manager_mod<br>   time_manager_mod<br>            edt_mod<br>cloud_generator_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#strat_cloud_init">strat_cloud_init</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#diag_field_init">diag_field_init</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#strat_driv">strat_driv</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#strat_cloud_end">strat_cloud_end</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#strat_cloud_sum">strat_cloud_sum</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#strat_cloud_avg">strat_cloud_avg</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#do_strat_cloud">do_strat_cloud</a>:</dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="strat_cloud_init"></a>
+<h4>strat_cloud_init</h4>
+<pre>
+<b>call strat_cloud_init </b>(axes,Time,idim,jdim,kdim)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Initializes strat_cloud.  Reads namelist, calls cloud_rad_init,
+   reads restart (if present), initializes netcdf output. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   Axes integer vector used for netcdf initialization. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   Time type variable used for netcdf. <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>idim&nbsp;&nbsp;&nbsp;</tt></td><td>   Size of first array (usually longitude) dimension. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>jdim&nbsp;&nbsp;&nbsp;</tt></td><td>   Size of second array (usually latitude) dimension. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kdim&nbsp;&nbsp;&nbsp;</tt></td><td>   Size of vertical array (usually height) dimension. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="diag_field_init"></a>
+<h4>diag_field_init</h4>
+<pre>
+<b>call diag_field_init </b>(axes,Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Initializes netcdf diagnostics. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   Integer array containing axes integers. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   Time <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="strat_driv"></a>
+<h4>strat_driv</h4>
+<pre>
+<b>call strat_driv </b>(Time,is,ie,js,je,dtcloud,pfull,phalf,radturbten2, T,qv,ql,qi,qa,omega,Mc,diff_t,LAND, ST,SQ,SL,SI,SA,surfrain, surfsnow,qrat,ahuco,MASK)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   Time <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   Indice of starting point in the longitude direction of the slab being passed to strat_driv <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   Indice of ending point in the longitude direction of the slab being passed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   Indice of starting point in the latitude direction of the slab being passed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   Indice of ending point in the latitude direction of the slab being passed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dtcloud&nbsp;&nbsp;&nbsp;</tt></td><td>   Physics time step (sec) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pfull&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure on model full levels (Pa) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure on model half levels (Pa) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>radturbten2&nbsp;&nbsp;&nbsp;</tt></td><td>   Sum of the tendencies of temperature from turbulence and radiation schemes (K/s) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>T&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperature (K) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qv&nbsp;&nbsp;&nbsp;</tt></td><td>   Water vapor specific humidity (kg vapor/kg air) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ql&nbsp;&nbsp;&nbsp;</tt></td><td>   Grid-box mean liquid water specific humidity (kg liquid/kg air) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qi&nbsp;&nbsp;&nbsp;</tt></td><td>   Grid-box mean ice water specific humidity (kg ice/kg air) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qa&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud fraction (3d array and a prognostic variable) (fraction) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>omega&nbsp;&nbsp;&nbsp;</tt></td><td>   Vertical pressure velocity (Pa/sec) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Mc&nbsp;&nbsp;&nbsp;</tt></td><td>   Cumulus mass flux (defined positive as upward) (kg air/m2/sec) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>diff_t&nbsp;&nbsp;&nbsp;</tt></td><td>   Vertical diffusion coefficient for temperature and tracer from vertical diffusion scheme (m2/sec) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>LAND&nbsp;&nbsp;&nbsp;</tt></td><td>   Fraction of surface that contains land (fraction) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qrat&nbsp;&nbsp;&nbsp;</tt></td><td>   Ratio of large-scale specific humidity to specific humidity in 
+   environment outside convective system (from donner_deep) 
+   <br>
+<br>
+   Will be equal to 1 for all normal AM2 operations (i.e. donner_deep is not activated)              
+   <br>
+<br>
+   Note that index 1 is nearest ground
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ahuco&nbsp;&nbsp;&nbsp;</tt></td><td>   The fraction of the grid box containing either cumulus cells or the mesoscale circulation (from donner_deep).
+   <br>
+<br>
+   Will be equal to 0 for all normal AM2 operations (i.e. donner_deep is not activated)              
+   <br>
+<br>
+   Note that index 1 is nearest ground
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>MASK&nbsp;&nbsp;&nbsp;</tt></td><td>   Optional input real array indicating the point is above the surface
+   if equal to 1.0 and indicating the point is below the surface if 
+   equal to 0.
+   <br>
+<br>
+   Used only in eta vertical coordinate model. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ST&nbsp;&nbsp;&nbsp;</tt></td><td>   Change in temperature due to strat_driv (K) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>SQ&nbsp;&nbsp;&nbsp;</tt></td><td>   Change in water vapor due to strat_driv (kg vapor/kg air) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>SL&nbsp;&nbsp;&nbsp;</tt></td><td>   Change in cloud liquid due to strat_driv (kg liquid/kg air) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>SI&nbsp;&nbsp;&nbsp;</tt></td><td>   Change in cloud ice due to strat_driv (kg ice/kg air) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>SA&nbsp;&nbsp;&nbsp;</tt></td><td>   Change in cloud fraction due to strat_driv (fraction) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>surfrain&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface rain fall over time step dtcloud (kg liquid/m2) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>surfsnow&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface snow fall over time step dtcloud (kg ice/m2) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="strat_cloud_end"></a>
+<h4>strat_cloud_end</h4>
+<pre>
+<b>call strat_cloud_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This writes out a restart (if needed). </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="strat_cloud_sum"></a>
+<h4>strat_cloud_sum</h4>
+<pre>
+<b>call strat_cloud_sum </b>(is, js, ql, qi, cf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This increments cloud variables for passing to radiation.
+   It is expected that this will become obsolete soon. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting integer for longitude window. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting integer for latitude window. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ql&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud liquid water specific humidity (kg/kg) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qi&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud ice water specific humidity (kg/kg) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cf&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud fraction (fraction, 0-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="strat_cloud_avg"></a>
+<h4>strat_cloud_avg</h4>
+<pre>
+<b>call strat_cloud_avg </b>(is, js, ql, qi, cf, ierr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Averaging routine for cloud variables to be passed to radiation.
+   Expected to be removed shortly. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting integer for longitude window. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting integer for latitude window. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ql&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud liquid water specific humidity (kg/kg) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qi&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud ice water specific humidity (kg/kg) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cf&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud fraction (0-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ierr&nbsp;&nbsp;&nbsp;</tt></td><td>   Error integer. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="do_strat_cloud"></a>
+<h4>do_strat_cloud</h4>
+<pre>result = <b>do_strat_cloud</b> ( ) result (answer)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Logical function to indicate whether or not strat_cloud is running. </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<hr>
+<h4>NAMELIST</h4>
+<div>
+<b>&amp;strat_cloud_nml</b>
+<br>
+<br>
+<div>
+<dl>
+<dt>
+<tt>do_netcdf_restart</tt>
+</dt>
+<dl>   netcdf/native restart format <br>
+<span class="type">[logical, dimension, units: fraction, default: ]</span>
+</dl>
+<dt>
+<tt>U00</tt>
+</dt>
+<dl>   Threshold relative humidity for cloud formation by large-scale condensation. (default = 0.80) <br>
+<span class="type">[real, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>u00_profile</tt>
+</dt>
+<dl>   Should low-level u00 ECMWF profile be applied? (default = .false.) <br>
+<span class="type">[logical, dimension, units: microns, default: ]</span>
+</dl>
+<dt>
+<tt>rthresh</tt>
+</dt>
+<dl>   Liquid cloud drop radius threshold for autoconversion. (default = 10.) <br>
+<span class="type">[real, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>N_land</tt>
+</dt>
+<dl>   Fixed number of cloud drops per unit volume in liquid clouds on land. ( default = 250.E+06) <br>
+<span class="type">[real, dimension, units: 1/(m*m*m), default: ]</span>
+</dl>
+<dt>
+<tt>N_ocean</tt>
+</dt>
+<dl>   Fixed number of cloud drops per unit volume in liquid clouds over ocean. ( default = 100.E+06) <br>
+<span class="type">[real, dimension, units: 1/(m*m*m), default: ]</span>
+</dl>
+<dt>
+<tt>U_evap</tt>
+</dt>
+<dl>   Critical relative humidity above which rain does not evaporate. (default = 1.0) <br>
+<span class="type">[real, dimension, units: fraction, default: ]</span>
+</dl>
+<dt>
+<tt>eros_scale</tt>
+</dt>
+<dl>   Normal erosion rate constant cloud destruction (default = 1.E-06) <br>
+<span class="type">[real, dimension, units: 1/sec, default: ]</span>
+</dl>
+<dt>
+<tt>eros_choice</tt>
+</dt>
+<dl>   Should enhanced erosion in turbulent conditions be done? (default = .false.) <br>
+<span class="type">[real, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>eros_scale_c</tt>
+</dt>
+<dl>   Erosion rate constant for convective conditions. (default = 8.E-05) <br>
+<span class="type">[real, dimension, units: 1/sec, default: ]</span>
+</dl>
+<dt>
+<tt>eros_scale_t</tt>
+</dt>
+<dl>   Erosion rate constant for cloud destruction for turbulent conditions. (default = 5.E-05) <br>
+<span class="type">[real, dimension, units: 1/sec, default: ]</span>
+</dl>
+<dt>
+<tt>mc_thresh</tt>
+</dt>
+<dl>   Convective mass-flux threshold for enhanced erosion to turn on. (default = 0.001) <br>
+<span class="type">[real, dimension, units: kg/m2/sec, default: ]</span>
+</dl>
+<dt>
+<tt>diff_thresh</tt>
+</dt>
+<dl>   Diffusion coefficient threshold for enhanced erosion to turn on. (default = 1.0) <br>
+<span class="type">[real, dimension, units: m2/s, default: ]</span>
+</dl>
+<dt>
+<tt>super_choice</tt>
+</dt>
+<dl>   Should should excess vapor in supersaturated conditions be put into cloud water (true) or precipitation fluxes (false)? (default = .false.) <br>
+<span class="type">[logical, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>tracer_advec</tt>
+</dt>
+<dl>   Are cloud liquid,ice and fraction advected by the grid resolved motion? (default = .false.) <br>
+<span class="type">[logical, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>qmin</tt>
+</dt>
+<dl>   Minimum permissible value of cloud liquid, cloud ice, saturated volume fraction, or rain and snow areas.
+   NOTE: qmin should be chosen such that the range of {qmin, max(qa,ql,qi)} is resolved by the precision of the numbers used. (default = 1.E-10) <br>
+<span class="type">[real, dimension, units: kg condensate/kg air, default: ]</span>
+</dl>
+<dt>
+<tt>Dmin</tt>
+</dt>
+<dl>   Minimum permissible dissipation in analytic integration of qa, ql, qi equations. This constant only affects the method by which the prognostic equations are integrated.
+   NOTE: Dmin will be MACHINE DEPENDENT and occur when
+   a. 1. -exp(-Dmin) = 0. instead of Dmin in the limit of very small Dmin
+   AND
+   b. 1. - exp(-D) &lt; D for all D &gt; Dmin
+   (default = 1.E-08) <br>
+<span class="type">[real, dimension, units: Dimensionless, default: ]</span>
+</dl>
+<dt>
+<tt>num_strat_pts</tt>
+</dt>
+<dl>   Number of grid points where instantaneous output will be saved to file strat.data
+   num_strat_pts &lt;= max_strat_pts
+   (default = 0) <br>
+<span class="type">[integer, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>strat_pts</tt>
+</dt>
+<dl>   num_strat_pts" pairs of grid indices, e.g., the global indices for i,j. (default = 0) <br>
+<span class="type">[integer, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>efact</tt>
+</dt>
+<dl>   (default = 0.0) <br>
+<span class="type">[real, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>do_old_snowmelt</tt>
+</dt>
+<dl>   Should the old version of snow melting, which has a bug,be run? (default = .false.) <br>
+<span class="type">[logical, dimension, units: , default: ]</span>
+</dl>
+</dl>
+</div>
+</div>
+<br>
+<!-- END NAMELIST -->
+<a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>
+<dl>
+<dt>strat_cloud.res</dt>
+<dd>   native format of the restart file </dd>
+<dt>strat_cloud.res.nc</dt>
+<dd>   netcdf format of the restart file </dd>
+</dl>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<a name="REFERENCES"></a>
+<hr>
+<h4>REFERENCES</h4>
+<!-- BEGIN REFERENCES -->
+<div>
+<ol>
+<li>   The saturation volume fraction formalism comes from:
+   <br>
+<br>
+   Tiedtke, M., 1993: Representation of clouds in large-scale models. Mon. Wea. Rev., 121, 3040-3061.
+   <br>
+<br> 
+</li>
+<li>   The form of most of the microphysics follows:
+   <br>
+<br>
+   Rotstayn, L., 1997: A physically based scheme for the treatment of stratiform clouds and precipitation in large-scale models. I: Description and evaluation of microphysical processes. Quart. J. Roy. Met. Soc. 123, 1227-1282. </li>
+</ol>
+</div>
+<br>
+<!-- END REFERENCES -->
+<a name="COMPILER SPECIFICS"></a>
+<hr>
+<h4>COMPILER SPECIFICS</h4>
+<!-- BEGIN COMPILER SPECIFICS -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END COMPILER SPECIFICS -->
+<a name="PRECOMPILER OPTIONS"></a>
+<hr>
+<h4>PRECOMPILER OPTIONS</h4>
+<!-- BEGIN PRECOMPILER OPTIONS -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PRECOMPILER OPTIONS -->
+<a name="LOADER OPTIONS"></a>
+<hr>
+<h4>LOADER OPTIONS</h4>
+<!-- BEGIN LOADER -->
+<div>
+<p> 
+</p>
+<pre>        
+</pre>
+</div>
+<!-- END LOADER OPTIONS -->
+<a name="TEST PROGRAM"></a>
+<hr>
+<h4>TEST PROGRAM</h4>
+<!-- BEGIN TEST PROGRAM -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END TEST PROGRAM -->
+<a name="KNOWN BUGS"></a>
+<hr>
+<h4>KNOWN BUGS</h4>
+<!-- BEGIN KNOWN BUGS -->
+<div>
+<p> 
+</p>
+</div>
+<br>
+<!-- END KNOWN BUGS -->
+<a name="NOTES"></a>
+<hr>
+<h4>NOTES</h4>
+<!-- BEGIN NOTES -->
+<div>   1. qmin should be chosen such that the range of {qmin, max(qa,ql,qi)} is resolved by the precision of the numbers used. (default = 1.E-10) <br>
+<br>   2. Dmin will be MACHINE DEPENDENT and occur when <br>
+<br>   a. 1. -exp(-Dmin) = 0. instead of Dmin in the limit of very small Dmin <br>
+<br>   b. 1. - exp(-D) &lt; D for all D &gt; Dmin </div>
+<br>
+<!-- END NOTES -->
+<a name="FUTURE PLANS"></a>
+<hr>
+<h4>FUTURE PLANS</h4>
+<!-- BEGIN FUTURE PLANS -->
+<div>
+<p> 
+</p>
+</div>
+<br>
+<!-- END FUTURE PLANS -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

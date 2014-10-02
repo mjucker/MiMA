@@ -1,0 +1,1170 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module sealw99_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module sealw99_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   This code provides the core functionality of FMS longwave
+   radiation. It is based on exchange method with prescribed
+   coefficients embedded in the code. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>            fms_mod<br>   time_manager_mod<br>      constants_mod<br>  rad_utilities_mod<br>longwave_params_mod<br>longwave_clouds_mod<br>longwave_fluxes_mod<br>longwave_tables_mod<br>   optical_path_mod<br>         gas_tf_mod<br> lw_gases_stdtf_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#sealw99_init">sealw99_init</a>:</dt>
+<dd>   Subroutine to initialize longwave radiation </dd>
+<dt>
+<a href="#sealw99">sealw99</a>:</dt>
+<dd>   Subroutine to calculate longwave radiation flux and heating rate. </dd>
+<dt>
+<a href="#sealw99_end">sealw99_end</a>:</dt>
+<dd>   sealw99_end is the destructor for sealw99_mod. </dd>
+<dt>
+<a href="#check_tf_interval">check_tf_interval</a>:</dt>
+<dd>   check_tf_interval verifies that requested tf calculation intervals
+   are compatible with radiation time step </dd>
+<dt>
+<a href="#obtain_gas_tfs">obtain_gas_tfs</a>:</dt>
+<dd>   obtain_gas_tfs obtains the transmission functions for the requested
+   gas </dd>
+<dt>
+<a href="#sealw99_alloc">sealw99_alloc</a>:</dt>
+<dd>   Subroutine to allocate variables needed for longwave diagnostics </dd>
+<dt>
+<a href="#cool_to_space_approx">cool_to_space_approx</a>:</dt>
+<dd>   Subroutine the calculate the cool to space approximation longwave
+   radiation. </dd>
+<dt>
+<a href="#cool_space_exact">cool_space_exact</a>:</dt>
+<dd>   cool_to_space calculates the cool-to-space cooling rate for 
+   a band n. </dd>
+<dt>
+<a href="#e1e290">e1e290</a>:</dt>
+<dd>   Subroutine to compute thermal exchange terms and emissivities used
+   to obtain the cool-to-space heating rates for all pressure layers. </dd>
+<dt>
+<a href="#e290">e290</a>:</dt>
+<dd>   e290 computes the exchange terms in the flux equation for longwave
+   radiation for all terms except the exchange with the top of the
+   atmosphere. </dd>
+<dt>
+<a href="#esfc">esfc</a>:</dt>
+<dd>   Subroutine to compute thermal layer emissivity using pre computed
+   look up tables </dd>
+<dt>
+<a href="#enear">enear</a>:</dt>
+<dd>   Subroutine to compute thermal layer emissivity using pre computed
+   look up tables </dd>
+<dt>
+<a href="#co2_source_calc">co2_source_calc</a>:</dt>
+<dd>   Subroutine to calculate CO2 source function </dd>
+<dt>
+<a href="#nlte">nlte</a>:</dt>
+<dd>   nlte is the present formulation of an nlte calculation of the 
+   source function in the 15 um region (two bands). </dd>
+<dt>
+<a href="#co2curt">co2curt</a>:</dt>
+<dd>   co2curt computes Curtis matrix elements derived from co2
+   transmission functions. </dd>
+<dt>
+<a href="#co2_time_vary">co2_time_vary</a>:</dt>
+<dd>   Calculate CO2 absorption coefficient based on its volume
+   mixing ratio using precomputed lbl tables </dd>
+<dt>
+<a href="#ch4_time_vary">ch4_time_vary</a>:</dt>
+<dd>   Calculate CH4 and N2O absorption coefficients from their
+   mixing ratios using precomputed lbl tables </dd>
+<dt>
+<a href="#n2o_time_vary">n2o_time_vary</a>:</dt>
+<dd>   Calculate CH4 and N2O absorption coefficients from their
+   mixing ratios using precomputed lbl tables </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="sealw99_init"></a>
+<h4>sealw99_init</h4>
+<pre>
+<b>call sealw99_init </b>(latb, lonb, pref, Lw_tables)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine initializes longwave radiation. It includes the
+   prescribed gas band coefficients, initializes gas optical depth, 
+   longwave tables, and allocate cloud related variables in the
+   longwave spectrum. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model latitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model longitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   array containing two reference pressure profiles [pascals] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_tables&nbsp;&nbsp;&nbsp;</tt></td><td>   lw_tables_type variable containing various longwave
+   table specifiers needed by radiation_diag_mod. <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_table_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="sealw99"></a>
+<h4>sealw99</h4>
+<pre>
+<b>call sealw99 </b>(is, ie, js, je, Atmos_input, Rad_gases, &amp; Aerosol, Aerosol_props, Cldrad_props, Cld_spec, &amp; Lw_output, Lw_diagnostics)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calculates longwave radiation flux and heating rate
+   based on the simplified exchange method. It also provides diagnostics
+   for the longwave radiation and cloud. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain i indice of data in the physics_window being
+   integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   ending subdomain i indice of data in the physics_window being
+   integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain j indice of data in the physics_window being
+   integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   ending subdomain j indice of data in the physics_window being
+   integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmos_input_type variable containing the atmospheric
+   input fields needed by the radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   radiative_gases_type variable containing the radi-
+   ative gas input fields needed by the radiation 
+   package <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol climatological input data to longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cldrad_properties_type variable containing the 
+   cloud radiative property input fields needed by the 
+   radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud specification type contains cloud microphysical, geometrical,
+   and distribution properties in a model column. <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_TYPE]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Aerosol_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol radiative properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   lw_output_type variable containing longwave 
+   radiation output data <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_output_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   lw_diagnostics_type variable containing diagnostic
+   longwave output used by the radiation diagnostics
+   module <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="sealw99_end"></a>
+<h4>sealw99_end</h4>
+<pre>
+<b>call sealw99_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   sealw99_end is the destructor for sealw99_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="check_tf_interval"></a>
+<h4>check_tf_interval</h4>
+<pre>
+<b>call check_tf_interval </b>(gas, gas_tf_calc_intrvl, &amp; calc_gas_tfs_on_first_step, &amp; use_current_gas_for_tf) call sealw99_alloc (ix, jx, kx, Lw_diagnostics)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   check_tf_interval verifies the following relationships:
+   1) that the tf calculation interval is no smaller than the
+   radiation time step;
+   2) that the tf calculation interval is an integral multiple of
+   the radiation time step;
+   3) that the specification for calculating tfs on the first step
+   of the job is done properly. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas&nbsp;&nbsp;&nbsp;</tt></td><td>   name associated with the gas </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_tf_calc_intrvl&nbsp;&nbsp;&nbsp;</tt></td><td>   time interval between recalculating transmission fumctions [ hours ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>calc_gas_tfs_on_first_step&nbsp;&nbsp;&nbsp;</tt></td><td>   flag indicating if tfs are to be calculated only on first step 
+   of job </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>use_current_gas_for_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   flag indicating if gas mixing ratio at current time is to be used
+   for calculation of gas tfs </td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_gas_tfs"></a>
+<h4>obtain_gas_tfs</h4>
+<pre>
+<b>call obtain_gas_tfs </b>(gas, Rad_time, Gas_time, gas_tf_calc_intrvl,&amp; gas_tf_offset, calc_gas_tfs_on_first_step, &amp; gas_for_next_tf_calc, gas_for_last_tf_calc, &amp; do_gas_tf_calc, do_gas_tf_calc_init)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_gas_tfs performs the following functions:
+   a) if time variation of the gas has begun at the current time:
+   1) defines how long the gas has been varying and whether
+   the tfs are due to be recalculated at the current time;
+   2) if the tfs are not to be always recalculated on the first
+   step:
+   a) if this is a recalculation step;
+   1) call the routine to calculate the tfs for the input 
+   gas;
+   2) redefine the value of the gas mixing ratio used fro the
+   last tf calculation to be the one just used;
+   3) set the flag indicating the need to initially calculate
+   the tfs to .false.
+   b) if this is not a recalculation step:
+   1) if this is the initial step, call the routine to calc-
+   ulate the tfs for the input gas;
+   2) set the flag indicating the need to initially calculate
+   the tfs to .false.
+   3) if the tfs are to be always calculated on the first step:
+   a) call the routine to calculate the tfs for the input gas;
+   b) redefine the value of the gas mixing ratio used from the
+   last tf calculation to be the one just used;
+   c) set the flag indicating the need to initially calculate
+   the tfs to .false.
+   b) if time variation of the gas has not begun at the current time:
+   1) if this is the initial call of the job, call the routine
+   to calculate the tfs for the input gas;
+   2) set a flag to indicate that the initial call has been made. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas&nbsp;&nbsp;&nbsp;</tt></td><td>   name associated with the gas </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_time&nbsp;&nbsp;&nbsp;</tt></td><td>   current model time [ time_type ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_time&nbsp;&nbsp;&nbsp;</tt></td><td>   time since time variation of gas began [ time_type ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_tf_calc_intrvl&nbsp;&nbsp;&nbsp;</tt></td><td>   time interval between recalculating transmission fumctions [ hours ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_tf_offset&nbsp;&nbsp;&nbsp;</tt></td><td>   time difference between current time and the time for which the 
+   tfs are calculated </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>calc_gas_tfs_on_first_step&nbsp;&nbsp;&nbsp;</tt></td><td>   flag indicating if tfs are to be calculated only on first step 
+   of job </td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_for_next_tf_calc&nbsp;&nbsp;&nbsp;</tt></td><td>   value of gas mixing ratio to be used when tfs are next calculated
+   [ no. / no. ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_for_last_tf_calc&nbsp;&nbsp;&nbsp;</tt></td><td>   value of gas mixing ratio to be used when tfs were last calculated
+   [ no. / no. ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_gas_tf_calc&nbsp;&nbsp;&nbsp;</tt></td><td>   if true, calculate gas tfs when alarm again goes off </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_gas_tf_calc_init&nbsp;&nbsp;&nbsp;</tt></td><td>   this variable is true initially to force calculation of the tfs on 
+   the first call of the job; it is then set to false </td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="sealw99_alloc"></a>
+<h4>sealw99_alloc</h4>
+<pre>
+<b>call sealw99_alloc </b>(ix, jx, kx, Lw_diagnostics)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   Dimension 1 length of radiation arrays to be allocated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>jx&nbsp;&nbsp;&nbsp;</tt></td><td>   Dimension 2 length of radiation arrays to be allocated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kx&nbsp;&nbsp;&nbsp;</tt></td><td>   Dimension 3 length of radiation arrays to be allocated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   lw_diagnostics_type variable containing longwave 
+   radiation output data <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_output_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cool_to_space_approx"></a>
+<h4>cool_to_space_approx</h4>
+<pre>
+<b>call cool_to_space_approx </b>( pflux_in, source, &amp; trans, cld_trans, cld_ind, &amp; Lw_diagnostics, &amp; trans2 )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pflux_in&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure values at flux levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>source&nbsp;&nbsp;&nbsp;</tt></td><td>   band integrated longwave source function of each model layer <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans&nbsp;&nbsp;&nbsp;</tt></td><td>   clear sky longwave transmission <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_trans&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud transmission <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_ind&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud type index <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans2&nbsp;&nbsp;&nbsp;</tt></td><td>   optional input alternative transmission profile <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   longwave diagnostics output <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_dignostics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cool_space_exact"></a>
+<h4>cool_space_exact</h4>
+<pre>
+<b>call cool_space_exact </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldtf&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud transmission function between levels k level KS. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input to the cool to space approximation method <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>sorc&nbsp;&nbsp;&nbsp;</tt></td><td>   band-integrated Planck function, for each combined
+   band in the 160-1200 cm-1 region. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>to3cnt&nbsp;&nbsp;&nbsp;</tt></td><td>   transmission functions between levels k and
+   level KS for the 990-1070 cm-1 range. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth of atmospheric layers and clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   Longwave diagnostics <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cts_sum&nbsp;&nbsp;&nbsp;</tt></td><td>   Cool to space heating rates <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cts_sumcf&nbsp;&nbsp;&nbsp;</tt></td><td>   Cool to space heating rates due to cloud forcing <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gxctscf&nbsp;&nbsp;&nbsp;</tt></td><td>   gxcts is the "exact" surface flux accumulated over
+   the frequency bands in the 160-1200 cm-1 range. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="e1e290"></a>
+<h4>e1e290</h4>
+<pre>
+<b>call e1e290 </b>(Atmos_input, e1ctw1, e1ctw2, &amp; trans_band1, trans_band2, Optical, tch4n2oe, &amp; t4, Lw_diagnostics, cldtf, cld_indx, flx1e1cf, &amp; tcfc8)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   E1e290 computes two different quantities.
+   <br>
+<br>
+   1) emissivities used to compute the exchange terms for flux at the
+   top of the atmosphere (level KS). (the top layer, isothermal by
+   assumption, does not contribute to photon exchanges with other
+   layers). these terms are obtained using precomputed e2 functions
+   (see ref. (2)).
+   <br>
+<br>
+   2) emissivities used to obtain the cool-to-space heating rates
+   for all pressure layers. these are obtained using precomputed
+   e1 functions (see ref. (2)).
+   <br>
+<br>
+   the frequency ranges for the e2 calculations are 0-560 and 1200-
+   2200 cm-1. the CTS calculations also require calculations in the
+   160-560 cm-1 range. (see refs. (1) and (2)).
+   ifdef ch4n2o
+   <br>
+<br>
+   if ch4 and n2o are included, the frequency range for emissivities
+   is 1400-2200 cm-1, with separate emissivity quantities for the
+   1200-1400 cm-1 range.
+   endif ch4n2o
+   <br>
+<br>
+   the reason for combining these calculations is that both use
+   the same scaled h2o amount (avephi) as input, thus reducing
+   some calculation time for obtaining index quantities.
+   <br>
+<br>
+   references:
+   <br>
+<br>
+   (1) schwarzkopf, m. d., and s. b. fels, "the simplified
+   exchange method revisited: an accurate, rapid method for
+   computation of infrared cooling rates and fluxes," journal
+   of geophysical research, 96 (1981), 9075-9096.
+   <br>
+<br>
+   (2) fels, s. b., and m. d. schwarzkopf, "the simplified exchange
+   approximation: a new method for radiative transfer
+   calculations," journal atmospheric science, 32 (1975),
+   1475-1488.
+   <br>
+<br>
+   author: m. d. schwarzkopf
+   <br>
+<br>
+   revised: 1/1/93
+   <br>
+<br>
+   certified:  radiation version 1.0 </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data to the thermal exchange method <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tch4n2oe&nbsp;&nbsp;&nbsp;</tt></td><td>   CH4 and N2O transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>t4&nbsp;&nbsp;&nbsp;</tt></td><td>   source function of the top most layer <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   longwave diagnostics variable <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_indx&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud type index <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   thermal layer optical path <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tcfc8&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC transmission function (chloroflurocarbons) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>e1ctw1&nbsp;&nbsp;&nbsp;</tt></td><td>   Cool to space thermal exchange terms in 0-560 band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>e1ctw2&nbsp;&nbsp;&nbsp;</tt></td><td>   Cool to space thermal exchange terms in 1200-2200  band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans_band1&nbsp;&nbsp;&nbsp;</tt></td><td>   transmission functions in band 1 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans_band2&nbsp;&nbsp;&nbsp;</tt></td><td>   transmission function in band 2 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>flx1e1cf&nbsp;&nbsp;&nbsp;</tt></td><td>   TOA flux due to cloud forcing <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="e290"></a>
+<h4>e290</h4>
+<pre>
+<b>call e290 </b>(Atmos_input, k, trans_band2, trans_band1, Optical, tch4n2oe, &amp; tcfc8)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   e290 computes the exchange terms in the flux equation for longwave
+   radiation for all terms except the exchange with the top of the
+   atmosphere.  the method is a table lookup on a pre-computed e2
+   function (defined in reference (2)).  calculation are done in the
+   frequency range: 0-560, 1200-2200 cm-1 for q(approximate).
+   motivation for these calculations is in references (1) and (2).
+   <br>
+<br>
+   references:
+   <br>
+<br>
+   (1) schwarzkopf, m. d., and s. b. fels, "the simplified
+   exchange method revisited: an accurate, rapid method for
+   computation of infrared cooling rates and fluxes," journal
+   of geophysical research, 96 (1981), 9075-9096.
+   <br>
+<br>
+   (2) fels, s. b., and m. d. schwarzkopf, "the simplified exchange
+   approximation: a new method for radiative transfer
+   calculations," journal atmospheric science, 32 (1975),
+   1475-1488. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting vertical level k to compute exchange terms <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tch4n2oe&nbsp;&nbsp;&nbsp;</tt></td><td>   CH4 and N2O transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>trans_band2&nbsp;&nbsp;&nbsp;</tt></td><td>   Transmission funciton in band 1200-2200 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans_band&nbsp;&nbsp;&nbsp;</tt></td><td>   Transmission function in band 0-560 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth of the thermal layers <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tcfc8&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="esfc"></a>
+<h4>esfc</h4>
+<pre>
+<b>call esfc </b>(Atmos_input, emspec, Optical, &amp; emspecf, tch4n2oe, tcfc8 )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data such as temperature and flux level temp <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tch4n2oe&nbsp;&nbsp;&nbsp;</tt></td><td>   CH4 and N2O transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth of thermal layers <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tcfc8&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>emspec&nbsp;&nbsp;&nbsp;</tt></td><td>   Emissivity of thermal layers <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>emspecf&nbsp;&nbsp;&nbsp;</tt></td><td>   Emissivity of thermal layers including effects of minor gas species <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="enear"></a>
+<h4>enear</h4>
+<pre>
+<b>call enear </b>(Atmos_input, emisdg, Optical, &amp; emisdgf, tch4n2oe, tcfc8 )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data such as temperature and flux level temp <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tch4n2oe&nbsp;&nbsp;&nbsp;</tt></td><td>   CH4 and N2O transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth of thermal layers <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tcfc8&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>emisdg&nbsp;&nbsp;&nbsp;</tt></td><td>   Emissivity of thermal layers <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>emisdgf&nbsp;&nbsp;&nbsp;</tt></td><td>   Emissivity of thermal layers including effects of minor gas species <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="co2_source_calc"></a>
+<h4>co2_source_calc</h4>
+<pre>
+<b>call co2_source_calc </b>(Atmos_input, Rad_gases, sorc, Gas_tf, &amp; source_band, dsrcdp_band)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   Radiative gases properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>sorc&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 source function results <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>source_band&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 source function bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dsrcdp_band&nbsp;&nbsp;&nbsp;</tt></td><td>   Difference of source function between nearby thermal layers <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="nlte"></a>
+<h4>nlte</h4>
+<pre>
+<b>call nlte </b>(pflux, press, rrvco2, sorc, Gas_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   nlte is the present formulation of an nlte calculation of the 
+   source function in the 15 um region (two bands).
+   <br>
+<br>
+   the essential theory is:
+   <br>
+<br>
+   phi = C*j
+   j = b + E*phi
+   <br>
+<br>
+   where
+   C = Curtis matrix
+   E = NLTE contribution (diagonal matrix)
+   phi = heating rate vector
+   b = LTE source function vector
+   j = NLTE source function vector
+   <br>
+<br>
+   j = b (by assumption) for pressure layers &gt; ixnltr
+   j = b (by assumption) for pressure layers &gt; ixprnlte
+   E is obtained using a formulation devised by Fels (denoted
+   Ri in his notes). </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pflux&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure values at flux levels. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>press&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure cordinates <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rrvco2&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 volumn mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>sorc&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 source function to be calculated <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="co2curt"></a>
+<h4>co2curt</h4>
+<pre>
+<b>call co2curt </b>(pflux, cmtrx, Gas_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pflux&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure values at flux levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   gas transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cmtrx&nbsp;&nbsp;&nbsp;</tt></td><td>   Curtis matrix elements <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="co2_time_vary"></a>
+<h4>co2_time_vary</h4>
+<pre>
+<b>call co2_time_vary </b>( rrvco2 )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Calculate CO2 absorption coefficient based on its volume
+   mixing ratio using precomputed lbl tables </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>rrvco2&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="ch4_time_vary"></a>
+<h4>ch4_time_vary</h4>
+<pre>
+<b>call ch4_time_vary </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Calculate CH4 and N2O absorption coefficients from their
+   mixing ratios using precomputed lbl tables </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>rrvch4&nbsp;&nbsp;&nbsp;</tt></td><td>   ch4 volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rrvn2o&nbsp;&nbsp;&nbsp;</tt></td><td>   n2o volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="n2o_time_vary"></a>
+<h4>n2o_time_vary</h4>
+<pre>
+<b>call n2o_time_vary </b>(rrvch4, rrvn2o)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Calculate CH4 and N2O absorption coefficients from their
+   mixing ratios using precomputed lbl tables </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>rrvch4&nbsp;&nbsp;&nbsp;</tt></td><td>   ch4 volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rrvn2o&nbsp;&nbsp;&nbsp;</tt></td><td>   n2o volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

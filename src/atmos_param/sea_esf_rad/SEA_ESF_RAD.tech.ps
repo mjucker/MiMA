@@ -1,0 +1,6897 @@
+%!PS-Adobe-3.0
+%%BoundingBox: (atend)
+%%Pages: (atend)
+%%PageOrder: (atend)
+%%DocumentFonts: (atend)
+%%DocumentNeedsFonts: (atend)
+%%DocumentSuppliedFonts: (atend)
+%%Creator: Frame 5.5
+%%DocumentData: Clean7Bit
+%%EndComments
+%%BeginProlog
+%
+% Frame ps_prolog 5.5, for use with Adobe Unix Frame 5.5 products
+%
+% This ps_prolog file is Copyright (c) 1986-1996 Adobe Systems, Incoporated.
+% All rights reserved.  This ps_prolog file may be freely copied and 
+% distributed in conjunction with documents created using FrameMaker, 
+% FrameMaker+SGML, FrameReader, and FrameViewer as long as this 
+% copyright notice is preserved.
+/FMDocSave save def
+%
+% FrameMaker users specify the proper paper size for each print job in the
+% "Print" dialog's "Printer Paper Size" "Width" and "Height~ fields.  If the
+% printer that the PS file is sent to does not support the requested paper
+% size, or if there is no paper tray of the proper size currently installed, 
+% then the job will not be printed.  The following flag, if set to true, will
+% cause the job to print on the default paper in such cases.
+/FMAllowPaperSizeMismatch            false def
+%
+% Frame products normally print colors as their true color on a color printer
+% or as shades of gray, based on luminance, on a black-and white printer. The
+% following flag, if set to true, forces all non-white colors to print as pure
+% black. This has no effect on bitmap images.
+/FMPrintAllColorsAsBlack             false def
+%
+% Frame products can either set their own line screens or use a printer's 
+% default settings. Three flags below control this separately for no 
+% separations, spot separations and process separations. If a flag
+% is true, then the default printer settings will not be changed. If it is
+% false, Frame products will use their own settings from a table based on
+% the printer's resolution.
+/FMUseDefaultNoSeparationScreen      true  def
+/FMUseDefaultSpotSeparationScreen    true  def
+/FMUseDefaultProcessSeparationScreen false def
+%
+% For any given PostScript printer resolution, Frame products have two sets of 
+% screen angles and frequencies for printing process separations, which are 
+% recomended by Adobe. The following variable chooses the higher frequencies
+% when set to true or the lower frequencies when set to false. This is only
+% effective if the appropriate FMUseDefault...SeparationScreen flag is false.
+/FMUseHighFrequencyScreens true def
+%
+% The following is a set of predefined optimal frequencies and angles for various
+% common dpi settings. This is taken from "Advances in Color Separation Using
+% PostScript Software Technology," from Adobe Systems (3/13/89 P.N. LPS 0043)
+% and corrolated with information which is in various PPD (4.0) files.
+%
+% The "dpiranges" figure is the minimum dots per inch device resolution which
+% can support this setting. The "low" and "high" values are controlled by the
+% setting of the FMUseHighFrequencyScreens flag above. The "TDot" flags control
+% the use of the "Yellow Triple Dot" feature whereby the frequency id divided by
+% three, but the dot function is "trippled" giving a block of 3x3 dots per cell.
+%
+% PatFreq is a compromise pattern frequency for ps Level 2 printers which is close
+% to the ideal WYSIWYG pattern frequency of 9 repetitions/inch but does not beat
+% (too badly) against the screen frequencies of any separations for that DPI.
+/dpiranges   [  2540    2400    1693     1270    1200     635      600      0      ] def
+/CMLowFreqs  [ 100.402  94.8683 89.2289 100.402  94.8683  66.9349  63.2456 47.4342 ] def
+/YLowFreqs   [  95.25   90.0    84.65    95.25   90.0     70.5556  66.6667 50.0    ] def
+/KLowFreqs   [  89.8026 84.8528 79.8088  89.8026 84.8528  74.8355  70.7107 53.033  ] def
+/CLowAngles  [  71.5651 71.5651 71.5651 71.5651  71.5651  71.5651  71.5651 71.5651 ] def
+/MLowAngles  [  18.4349 18.4349 18.4349 18.4349  18.4349  18.4349  18.4349 18.4349 ] def
+/YLowTDot    [  true    true    false    true    true     false    false   false   ] def
+/CMHighFreqs [ 133.87  126.491 133.843  108.503 102.523  100.402   94.8683 63.2456 ] def
+/YHighFreqs  [ 127.0   120.0   126.975  115.455 109.091   95.25    90.0    60.0    ] def
+/KHighFreqs  [ 119.737 113.137 119.713  128.289 121.218   89.8026  84.8528 63.6395 ] def
+/CHighAngles [  71.5651 71.5651 71.5651  70.0169 70.0169  71.5651  71.5651 71.5651 ] def
+/MHighAngles [  18.4349 18.4349 18.4349  19.9831 19.9831  18.4349  18.4349 18.4349 ] def
+/YHighTDot   [  false   false   true     false   false    true     true    false   ] def
+/PatFreq     [	10.5833 10.0     9.4055  10.5833 10.0	  10.5833  10.0	   9.375   ] def
+%
+% PostScript Level 2 printers contain an "Accurate Screens" feature which can
+% improve process separation rendering at the expense of compute time. This 
+% flag is ignored by PostScript Level 1 printers.
+/FMUseAcccurateScreens true def
+%
+% The following PostScript procedure defines the spot function that Frame
+% products will use for process separations. You may un-comment-out one of
+% the alternative functions below, or use your own.
+%
+% Dot function
+/FMSpotFunction {abs exch abs 2 copy add 1 gt 
+		{1 sub dup mul exch 1 sub dup mul add 1 sub }
+		{dup mul exch dup mul add 1 exch sub }ifelse } def
+%
+% Line function
+% /FMSpotFunction { pop } def
+%
+% Elipse function
+% /FMSpotFunction { dup 5 mul 8 div mul exch dup mul exch add 
+%		sqrt 1 exch sub } def
+%
+%
+/FMversion (5.5) def 
+/fMLevel1 /languagelevel where {pop languagelevel} {1} ifelse 2 lt def
+/FMPColor
+	fMLevel1 {
+		false
+		/colorimage where {pop pop true} if
+	} {
+		true
+	} ifelse
+def
+/FrameDict 400 dict def 
+systemdict /errordict known not {/errordict 10 dict def
+		errordict /rangecheck {stop} put} if
+% The readline in PS 23.0 doesn't recognize cr's as nl's on AppleTalk
+FrameDict /tmprangecheck errordict /rangecheck get put 
+errordict /rangecheck {FrameDict /bug true put} put 
+FrameDict /bug false put 
+mark 
+% Some PS machines read past the CR, so keep the following 3 lines together!
+currentfile 5 string readline
+00
+0000000000
+cleartomark 
+errordict /rangecheck FrameDict /tmprangecheck get put 
+FrameDict /bug get { 
+	/readline {
+		/gstring exch def
+		/gfile exch def
+		/gindex 0 def
+		{
+			gfile read pop 
+			dup 10 eq {exit} if 
+			dup 13 eq {exit} if 
+			gstring exch gindex exch put 
+			/gindex gindex 1 add def 
+		} loop
+		pop 
+		gstring 0 gindex getinterval true 
+		} bind def
+	} if
+/FMshowpage /showpage load def
+/FMquit /quit load def
+/FMFAILURE { 
+	2 copy exch = = flush 
+	FMshowpage 
+	/Helvetica findfont 12 scalefont setfont
+	72 200 moveto show
+	72 220 moveto show
+	FMshowpage 
+	FMquit 
+	} def 
+/FMVERSION {
+	FMversion ne {
+		(Adobe Frame product version does not match ps_prolog!  Check installation;)
+		(also check ~/fminit and ./fminit for old versions) FMFAILURE
+		} if
+	} def 
+/fmConcatProcs
+	{
+	/proc2 exch cvlit def/proc1 exch cvlit def/newproc proc1 length proc2 length add array def
+	newproc 0 proc1 putinterval newproc proc1 length proc2 putinterval newproc cvx
+}def
+FrameDict begin [
+	/ALDsave
+	/FMdicttop
+	/FMoptop
+	/FMpointsize
+	/FMsetsize
+	/FMsaveobject
+	/b
+	/bitmapsave
+	/blut
+	/bpside
+	/bs
+	/bstring
+	/bwidth
+	/c
+	/cf
+	/cs
+	/cynu
+	/depth
+	/edown
+	/fh
+	/fillvals
+	/fw
+	/fx
+	/fy
+	/g
+	/gfile
+	/gindex
+	/grnt
+	/gryt
+	/gstring
+	/height
+	/hh
+	/i
+	/im
+	/indx
+	/is
+	/k
+	/kk
+	/landscape
+	/lb
+	/len
+	/llx
+	/lly
+	/m
+	/magu
+	/manualfeed
+	/n
+	/offbits
+	/onbits
+	/organgle
+	/orgbangle
+	/orgbfreq
+	/orgbproc
+	/orgbxfer
+	/orgfreq
+	/orggangle
+	/orggfreq
+	/orggproc
+	/orggxfer
+	/orghalftone
+	/orgmatrix
+	/orgproc
+	/orgrangle
+	/orgrfreq
+	/orgrproc
+	/orgrxfer
+	/orgxfer
+	/pagesave
+	/paperheight
+	/papersizedict
+	/paperwidth
+	/pos
+	/pwid
+	/r
+	/rad
+	/redt
+	/sl
+	/str
+	/tran
+	/u
+	/urx
+	/ury
+	/val
+	/width
+	/width
+	/ws
+	/ww
+	/x
+	/x1
+	/x2
+	/xindex
+	/xpoint
+	/xscale
+	/xx
+	/y
+	/y1
+	/y2
+	/yelu
+	/yindex
+	/ypoint
+	/yscale
+	/yy
+	/tintGray
+] { 0 def } forall
+/FmBD {bind def} bind def
+systemdict /pdfmark known systemdict /currentdistillerparams known and {
+	/fMAcrobat true def
+	
+	/FmPD /pdfmark load def
+	
+	
+	/FmPT /show load def
+	
+	
+	currentdistillerparams /CoreDistVersion get 2000 ge {
+	
+		
+		/FmPD2 /pdfmark load def
+		
+		
+		
+		
+		
+%     
+% Procedure /FmPA defines named destinations. 
+% In order to accommodate all possible scenarios, FrameMaker defines named destinations
+% for each paragraph, which allows links to arbitrary points in already generated
+% PDF documents. This feature may cause larger PDF files to be created. 
+% The fmCG flag tells Distiller whether to create named destinations for each 
+% paragraph. This prolog defines two versions of this flag. One of these versions must be
+% commented out, and the other must be uncommented.
+%     
+% The following fmCG flag will cause Distiller to create a named destination for
+% each paragraph. 
+%     
+/fmCG { false } FmBD
+%     
+% The following fmCG flag will cause Distiller to create a named destination only
+% for each paragraph known to be a destination. If you do not want Distiller to create
+% named destinations for each paragraph (thus creating smaller sized PDF documents), 
+% uncomment the following statement and comment out the previous statement. 
+% CAUTION: By making the following statement active, you may lose some links in the
+%          resulting PDF documents.
+%     
+%%/fmCG { dup 127 string cvs 0 get (G) 0 get eq } FmBD 
+% 
+	  /FmND
+	  { mark exch /Dest exch 5 3 roll /View [ /XYZ 5 -2 roll FmDC null ] /DEST FmPD 
+	  }FmBD
+	  /FmPA 
+	  { fmCG
+	    { pop pop pop }
+	    { FmND } ifelse
+	  } FmBD
+	} {
+		
+		/FmPD2 /cleartomark load def
+		/FmPA {pop pop pop}FmBD
+		/FmND {pop pop pop}FmBD
+	} ifelse
+} {
+	
+	/fMAcrobat false def
+	/FmPD /cleartomark load def
+	/FmPD2 /cleartomark load def
+	/FmPT /pop load def
+	/FmPA {pop pop pop}FmBD
+	/FmND {pop pop pop}FmBD
+} ifelse
+/FmDC {
+	transform fMDefaultMatrix defaultmatrix itransform cvi exch cvi exch
+}FmBD
+/FmBx {
+	dup 3 index lt {3 1 roll exch} if 
+	1 index 4 index lt {4 -1 roll 3 1 roll exch 4 1 roll} if
+}FmBD
+/FMnone 0 def
+/FMcyan 1 def
+/FMmagenta 2 def
+/FMyellow 3 def
+/FMblack 4 def
+/FMcustom 5 def
+/fMNegative false def 
+/FrameSepIs FMnone def 
+/FrameSepBlack 0 def
+/FrameSepYellow 0 def
+/FrameSepMagenta 0 def
+/FrameSepCyan 0 def
+/FrameSepRed 1 def
+/FrameSepGreen 1 def
+/FrameSepBlue 1 def
+/FrameCurGray 1 def
+/FrameCurPat null def
+/FrameCurColors [ 0 0 0 1 0 0 0 1] def 
+/FrameColorEpsilon .001 def	
+/eqepsilon {		
+	sub dup 0 lt {neg} if
+	FrameColorEpsilon le
+} bind def
+/FrameCmpColorsCMYK { 
+	2 copy 0 get exch 0 get eqepsilon {
+		2 copy 1 get exch 1 get eqepsilon {
+			2 copy 2 get exch 2 get eqepsilon {
+				3 get exch 3 get eqepsilon
+			} {pop pop false} ifelse
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/FrameCmpColorsRGB { 
+	2 copy 4 get exch 0 get eqepsilon {
+		2 copy 5 get exch 1 get eqepsilon {
+			6 get exch 2 get eqepsilon
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/RGBtoCMYK { 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	3 copy 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	dup dup dup 
+	6 1 roll 
+	4 1 roll 
+	7 1 roll 
+	sub 
+	6 1 roll 
+	sub 
+	5 1 roll 
+	sub 
+	4 1 roll 
+} bind def
+/CMYKtoRGB { 
+	dup dup 4 -1 roll add 						  
+	5 1 roll 3 -1 roll add 						  
+	4 1 roll add 								  
+	1 exch sub dup 0 lt {pop 0} if 3 1 roll 	  
+	1 exch sub dup 0 lt {pop 0} if exch 	      
+	1 exch sub dup 0 lt {pop 0} if exch	  		  
+} bind def
+/FrameSepInit {
+	1.0 RealSetgray
+} bind def
+/FrameSetSepColor { 
+	/FrameSepBlue exch def
+	/FrameSepGreen exch def
+	/FrameSepRed exch def
+	/FrameSepBlack exch def
+	/FrameSepYellow exch def
+	/FrameSepMagenta exch def
+	/FrameSepCyan exch def
+	/FrameSepIs FMcustom def
+	setCurrentScreen	
+} bind def
+/FrameSetCyan {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 1.0 def
+	/FrameSepIs FMcyan def
+	setCurrentScreen	
+} bind def
+ 
+/FrameSetMagenta {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 1.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMmagenta def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetYellow {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 1.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMyellow def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetBlack {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 1.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMblack def
+	setCurrentScreen
+} bind def
+ 
+/FrameNoSep { 
+	/FrameSepIs FMnone def
+	setCurrentScreen
+} bind def
+/FrameSetSepColors { 
+	FrameDict begin
+	[ exch 1 add 1 roll ]
+	/FrameSepColors  
+	exch def end
+	} bind def
+/FrameColorInSepListCMYK { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsCMYK 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/FrameColorInSepListRGB { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsRGB 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/RealSetgray /setgray load def
+/RealSetrgbcolor /setrgbcolor load def
+/RealSethsbcolor /sethsbcolor load def
+end 
+/setgray { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+		{ RealSetgray } 
+		{ 
+		FrameSepIs FMblack eq 
+			{ RealSetgray } 
+			{ FrameSepIs FMcustom eq 
+			  FrameSepRed 0 eq and
+			  FrameSepGreen 0 eq and
+			  FrameSepBlue 0 eq and {
+			  	RealSetgray
+			  } {
+				1 RealSetgray pop 
+			  } ifelse
+			} ifelse
+		} ifelse
+	end
+} bind def
+/setrgbcolor { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+	{  RealSetrgbcolor }
+	{
+		3 copy [ 4 1 roll ] 
+		FrameColorInSepListRGB
+		{
+				FrameSepBlue eq exch 
+			 	FrameSepGreen eq and exch 
+			 	FrameSepRed eq and
+			 	{ 0 } { 1 } ifelse
+		}
+		{
+			FMPColor {
+				RealSetrgbcolor
+				currentcmykcolor
+			} {
+				RGBtoCMYK
+			} ifelse
+			FrameSepIs FMblack eq
+			{1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		RealSetgray
+	} 
+	ifelse
+	end
+} bind def
+/sethsbcolor {
+	FrameDict begin
+	FrameSepIs FMnone eq 
+	{ RealSethsbcolor } 
+	{
+		RealSethsbcolor 
+		currentrgbcolor  
+		setrgbcolor 
+	} 
+	ifelse
+	end
+} bind def
+FrameDict begin
+/setcmykcolor where {
+	pop /RealSetcmykcolor /setcmykcolor load def
+} {
+	/RealSetcmykcolor {
+		4 1 roll
+		3 { 3 index add 0 max 1 min 1 exch sub 3 1 roll} repeat 
+		RealSetrgbcolor pop
+	} bind def
+} ifelse
+userdict /setcmykcolor { 
+		FrameDict begin
+		FrameSepIs FMnone eq
+		{ RealSetcmykcolor } 
+		{
+			4 copy [ 5 1 roll ]
+			FrameColorInSepListCMYK
+			{
+				FrameSepBlack eq exch 
+				FrameSepYellow eq and exch 
+				FrameSepMagenta eq and exch 
+				FrameSepCyan eq and 
+				{ 0 } { 1 } ifelse
+			}
+			{
+				FrameSepIs FMblack eq
+				{1.0 exch sub 4 1 roll pop pop pop} {
+				FrameSepIs FMyellow eq
+				{pop 1.0 exch sub 3 1 roll pop pop} {
+				FrameSepIs FMmagenta eq
+				{pop pop 1.0 exch sub exch pop } {
+				FrameSepIs FMcyan eq
+				{pop pop pop 1.0 exch sub } 
+				{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+			} ifelse
+			RealSetgray
+		}
+		ifelse
+		end
+	} bind put
+fMLevel1 { 
+	
+	
+	
+	/patScreenDict 7 dict dup begin
+		<0f1e3c78f0e1c387> [ 45  { pop } {exch pop} 		.5   2 sqrt] FmBD
+		<0f87c3e1f0783c1e> [ 135 { pop } {exch pop}			.5   2 sqrt] FmBD
+		<cccccccccccccccc> [ 0   { pop } dup				.5   2	   ] FmBD
+		<ffff0000ffff0000> [ 90  { pop } dup				.5   2	   ] FmBD
+		<8142241818244281> [ 45  { 2 copy lt {exch} if pop}	dup .75  2 sqrt] FmBD
+		<03060c183060c081> [ 45  { pop } {exch pop}			.875 2 sqrt] FmBD
+		<8040201008040201> [ 135 { pop } {exch pop}			.875 2 sqrt] FmBD
+	end def
+} { 
+	
+	/patProcDict 5 dict dup begin
+		<0f1e3c78f0e1c387> { 3 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<0f87c3e1f0783c1e> { 3 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+		<8142241818244281> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke
+											-1 -1 moveto 9 9 lineto stroke } bind def
+		<03060c183060c081> { 1 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<8040201008040201> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+	end def
+	/patDict 15 dict dup begin
+		/PatternType 1 def		
+		/PaintType 2 def		
+		/TilingType 3 def		
+		/BBox [ 0 0 8 8 ] def 	
+		/XStep 8 def			
+		/YStep 8 def			
+		/PaintProc {
+			begin
+			patProcDict bstring known {
+				patProcDict bstring get exec
+			} {
+				8 8 true [1 0 0 -1 0 8] bstring imagemask
+			} ifelse
+			end
+		} bind def
+	end def
+} ifelse
+/tintCMYK {
+	1 tintGray sub FrameCurColors 0 4 getinterval aload pop 	
+	4 index mul 5 1 roll										
+	3 index mul 5 1 roll										
+	2 index mul 5 1 roll										
+	mul 4 1 roll												
+}bind def
+/tintRGB {
+	1 tintGray sub FrameCurColors 4 3 getinterval aload pop 	
+	1 exch sub 3 index mul 1 exch sub 4 1 roll					
+	1 exch sub 2 index mul 1 exch sub 4 1 roll					
+	1 exch sub mul 1 exch sub 3 1 roll							
+}bind def
+/combineColor {
+	/tintGray 1 1 FrameCurGray sub FrameCurColors 7 get mul sub def
+    FrameSepIs FMnone eq
+	{
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceCMYK]] setcolorspace
+			tintCMYK FrameCurPat setcolor
+		} {
+			FrameCurColors 3 get 1.0 ge {
+				tintGray RealSetgray
+			} {
+				fMAcrobat not FMPColor graymode and and {
+					tintCMYK
+					RealSetcmykcolor
+				} {
+					tintRGB
+					RealSetrgbcolor
+				} ifelse
+			} ifelse
+		} ifelse
+	} { 
+		FrameCurColors 0 4 getinterval aload
+		FrameColorInSepListCMYK {
+			FrameSepBlack eq exch 
+			FrameSepYellow eq and exch 
+			FrameSepMagenta eq and exch 
+			FrameSepCyan eq and
+			FrameSepIs FMcustom eq and
+			{ tintGray } { 1 } ifelse
+		} {
+			FrameSepIs FMblack eq
+			{tintGray 1.0 exch sub mul 1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop tintGray 1.0 exch sub mul 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop tintGray 1.0 exch sub mul 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop tintGray 1.0 exch sub mul 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceGray]] setcolorspace
+			FrameCurPat setcolor
+		} { 
+			graymode not fMLevel1 and {
+				
+				dup 1 lt {pop FrameCurGray} if
+			} if
+			RealSetgray
+		} ifelse
+	} ifelse
+} bind def
+/savematrix {
+	orgmatrix currentmatrix pop
+	} bind def
+/restorematrix {
+	orgmatrix setmatrix
+	} bind def
+/fMDefaultMatrix matrix def
+/fMatrix2 matrix def
+/dpi    72 0 fMDefaultMatrix defaultmatrix dtransform
+    dup mul exch   dup mul add   sqrt def
+	
+/freq dpi dup 72 div round dup 0 eq {pop 1} if 8 mul div def
+/sangle 1 0 fMDefaultMatrix defaultmatrix dtransform exch atan def
+	sangle fMatrix2 rotate 
+	fMDefaultMatrix defaultmatrix fMatrix2 concatmatrix 
+	dup 0 get /sflipx exch def
+	    3 get /sflipy exch def
+/screenIndex {
+	0 1 dpiranges length 1 sub { dup dpiranges exch get 1 sub dpi le {exit} {pop} ifelse } for
+} bind def
+/getCyanScreen {
+	FMUseHighFrequencyScreens { CHighAngles CMHighFreqs} {CLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getMagentaScreen {
+	FMUseHighFrequencyScreens { MHighAngles CMHighFreqs } {MLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getYellowScreen {
+	FMUseHighFrequencyScreens { YHighTDot YHighFreqs} { YLowTDot YLowFreqs } ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get { 3 div
+			{2 { 1 add 2 div 3 mul dup floor sub 2 mul 1 sub exch} repeat
+			FMSpotFunction } } {/FMSpotFunction load } ifelse
+			0.0 exch
+} bind def
+/getBlackScreen  {
+	FMUseHighFrequencyScreens { KHighFreqs } { KLowFreqs } ifelse
+		screenIndex get 45.0 /FMSpotFunction load 
+} bind def
+/getSpotScreen {
+	getBlackScreen
+} bind def
+/getCompositeScreen {
+	getBlackScreen
+} bind def
+/FMSetScreen 
+	fMLevel1 { /setscreen load 
+	}{ {
+		8 dict begin
+		/HalftoneType 1 def
+		/SpotFunction exch def
+		/Angle exch def
+		/Frequency exch def
+		/AccurateScreens FMUseAcccurateScreens def
+		currentdict end sethalftone
+	} bind } ifelse
+def
+/setDefaultScreen {
+	fMLevel1 {
+		FMPColor {
+			orgrxfer cvx orggxfer cvx orgbxfer cvx orgxfer cvx setcolortransfer
+		}
+		{
+			orgxfer cvx settransfer
+		} ifelse
+		orgfreq organgle orgproc cvx setscreen
+	} {
+		orghalftone sethalftone
+	}ifelse
+} bind def
+/setCurrentScreen {
+	FrameSepIs FMnone eq {
+		FMUseDefaultNoSeparationScreen {
+			setDefaultScreen
+		} {
+			getCompositeScreen FMSetScreen
+		} ifelse
+	} {
+		FrameSepIs FMcustom eq {
+			FMUseDefaultSpotSeparationScreen {
+				setDefaultScreen
+			} {
+				getSpotScreen FMSetScreen
+			} ifelse
+		} {
+			FMUseDefaultProcessSeparationScreen {
+				setDefaultScreen
+			} {
+				FrameSepIs FMcyan eq {
+					getCyanScreen FMSetScreen
+				} {
+					FrameSepIs FMmagenta eq {
+						getMagentaScreen FMSetScreen
+					} {
+						FrameSepIs FMyellow eq {
+							getYellowScreen FMSetScreen
+						} {
+							getBlackScreen FMSetScreen
+						} ifelse
+					} ifelse
+				} ifelse
+			} ifelse
+		} ifelse
+	} ifelse 
+} bind def
+end
+	
+/FMDOCUMENT { 
+	array /FMfonts exch def 
+	dup 1 gt {/#copies exch def} {pop} ifelse
+	FrameDict begin
+	0 ne /manualfeed exch def
+	/paperheight exch def
+	/paperwidth exch def
+	0 ne /fMNegative exch def 
+	0 ne /edown exch def 
+	/yscale exch def
+	/xscale exch def
+	fMLevel1 {
+		manualfeed {setmanualfeed} if
+		/FMdicttop countdictstack 1 add def 
+		/FMoptop count def 
+		setpapername 
+		manualfeed {true} {papersize} ifelse 
+		{manualpapersize} {false} ifelse 
+		{desperatepapersize} {false} ifelse 
+		{papersizefailure} if
+		count -1 FMoptop {pop pop} for
+		countdictstack -1 FMdicttop {pop end} for 
+		}
+		{2 dict
+		 dup /PageSize [paperwidth paperheight] put
+		 manualfeed {dup /ManualFeed manualfeed put} if
+		 {setpagedevice} stopped {papersizefailure} if
+		}
+	ifelse 
+	
+	fMLevel1 not {
+		/orghalftone currenthalftone def
+	}if 
+	
+	FMPColor {
+		currentcolorscreen
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+			cvlit /orgbproc exch def
+				  /orgbangle exch def 
+				  /orgbfreq exch def
+			cvlit /orggproc exch def
+				  /orggangle exch def 
+				  /orggfreq exch def
+			cvlit /orgrproc exch def
+				  /orgrangle exch def 
+				  /orgrfreq exch def
+			currentcolortransfer 
+			fMNegative {
+				1 1 4 { 
+					pop { 1 exch sub } fmConcatProcs 4 1 roll
+				} for
+				4 copy
+				setcolortransfer
+			} if
+			cvlit /orgxfer exch def
+			cvlit /orgbxfer exch def
+			cvlit /orggxfer exch def
+			cvlit /orgrxfer exch def
+	} {
+		currentscreen 
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+				  
+		currenttransfer 
+		fMNegative {
+			{ 1 exch sub } fmConcatProcs
+			dup settransfer
+		} if 
+		cvlit /orgxfer exch def
+	} ifelse
+	end 
+} def 
+/FMENDDOCUMENT {
+	FMDocSave restore	
+} def
+/FMBEGINPAGE { 
+	FrameDict begin 
+	/pagesave save def
+	3.86 setmiterlimit
+	0 0 moveto paperwidth 0 lineto paperwidth paperheight lineto 
+	0 paperheight lineto 0 0 lineto 1 setgray fill
+	/landscape exch 0 ne def
+	landscape { 
+		90 rotate 0 exch dup /pwid exch def neg translate pop 
+	}{
+		pop /pwid exch def
+	} ifelse
+	edown { [-1 0 0 1 pwid 0] concat } if
+	xscale yscale scale
+	/orgmatrix matrix def
+	gsave 
+} def 
+/FMENDPAGE {
+	grestore 
+	pagesave restore
+	end 
+	showpage
+	} def 
+/FMFONTDEFINE { 
+	FrameDict begin
+	findfont 
+	ReEncode 
+	1 index exch 
+	definefont 
+	FMfonts 3 1 roll 
+	put
+	end 
+	} def 
+/FMFILLS {
+	FrameDict begin dup
+	array /fillvals exch def
+	dict /patCache exch def
+	end 
+	} def 
+/FMFILL {
+	FrameDict begin
+	 fillvals 3 1 roll put
+	end 
+	} def 
+/FMNORMALIZEGRAPHICS { 
+	newpath
+	1 setlinewidth
+	0 setlinecap
+	0 0 0 sethsbcolor
+	0 setgray 
+	} bind def
+/FMBEGINEPSF { 
+	end 
+	/FMEPSF save def 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	[/fy /fx /fh /fw /ury /urx /lly /llx] {exch def} forall 
+	fx fw 2 div add fy fh 2 div add  translate
+	rotate
+	fw 2 div neg fh 2 div neg translate
+	fw urx llx sub div fh ury lly sub div scale 
+	llx neg lly neg translate 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count def 
+	} bind def
+/FMENDEPSF {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMEPSF restore
+	FrameDict begin 
+	} bind def
+FrameDict begin 
+/setmanualfeed {
+%%BeginFeature: *ManualFeed True
+	 statusdict /manualfeed true put
+%%EndFeature
+	} bind def
+/max {2 copy lt {exch} if pop} bind def
+/min {2 copy gt {exch} if pop} bind def
+/inch {72 mul} def
+/pagedimen { 
+	paperheight sub abs 16 lt exch 
+	paperwidth sub abs 16 lt and
+	{/papername exch def} {pop} ifelse
+	} bind def
+/setpapername { 
+	/papersizedict 14 dict def 
+	papersizedict begin
+	/papername /unknown def 
+		/Letter 8.5 inch 11.0 inch pagedimen
+		/LetterSmall 7.68 inch 10.16 inch pagedimen
+		/Tabloid 11.0 inch 17.0 inch pagedimen
+		/Ledger 17.0 inch 11.0 inch pagedimen
+		/Legal 8.5 inch 14.0 inch pagedimen
+		/Statement 5.5 inch 8.5 inch pagedimen
+		/Executive 7.5 inch 10.0 inch pagedimen
+		/A3 11.69 inch 16.5 inch pagedimen
+		/A4 8.26 inch 11.69 inch pagedimen
+		/A4Small 7.47 inch 10.85 inch pagedimen
+		/B4 10.125 inch 14.33 inch pagedimen
+		/B5 7.16 inch 10.125 inch pagedimen
+	end
+	} bind def
+/papersize {
+	papersizedict begin
+		/Letter {lettertray letter} def
+		/LetterSmall {lettertray lettersmall} def
+		/Tabloid {11x17tray 11x17} def
+		/Ledger {ledgertray ledger} def
+		/Legal {legaltray legal} def
+		/Statement {statementtray statement} def
+		/Executive {executivetray executive} def
+		/A3 {a3tray a3} def
+		/A4 {a4tray a4} def
+		/A4Small {a4tray a4small} def
+		/B4 {b4tray b4} def
+		/B5 {b5tray b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	statusdict begin stopped end 
+	} bind def
+/manualpapersize {
+	papersizedict begin
+		/Letter {letter} def
+		/LetterSmall {lettersmall} def
+		/Tabloid {11x17} def
+		/Ledger {ledger} def
+		/Legal {legal} def
+		/Statement {statement} def
+		/Executive {executive} def
+		/A3 {a3} def
+		/A4 {a4} def
+		/A4Small {a4small} def
+		/B4 {b4} def
+		/B5 {b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	stopped 
+	} bind def
+/desperatepapersize {
+	
+	mark
+	statusdict begin 
+		/setpageparams where {
+			pop
+			paperwidth paperheight 0 1 
+			{setpageparams} stopped 
+		} { 
+			true 
+		} ifelse
+		
+		{
+			
+			/setpagedevice where {
+				pop 
+				1 dict dup begin
+					/PageSize [ paperwidth paperheight ] def
+				end 
+				{setpagedevice} stopped
+			} {
+				true	
+			} ifelse
+		} {
+			false		
+		} ifelse 
+	end
+	{cleartomark true}{cleartomark false}ifelse
+} bind def
+/papersizefailure {
+	FMAllowPaperSizeMismatch not
+		{
+(The requested paper size is not available in any currently-installed tray)
+(Edit the PS file to "FMAllowPaperSizeMismatch true" to use default tray)
+		 FMFAILURE } if
+	} def
+/DiacriticEncoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl
+/numbersign /dollar /percent /ampersand /quotesingle /parenleft
+/parenright /asterisk /plus /comma /hyphen /period /slash /zero /one
+/two /three /four /five /six /seven /eight /nine /colon /semicolon
+/less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K
+/L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash
+/bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h
+/i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar
+/braceright /asciitilde /.notdef /Adieresis /Aring /Ccedilla /Eacute
+/Ntilde /Odieresis /Udieresis /aacute /agrave /acircumflex /adieresis
+/atilde /aring /ccedilla /eacute /egrave /ecircumflex /edieresis
+/iacute /igrave /icircumflex /idieresis /ntilde /oacute /ograve
+/ocircumflex /odieresis /otilde /uacute /ugrave /ucircumflex
+/udieresis /dagger /.notdef /cent /sterling /section /bullet
+/paragraph /germandbls /registered /copyright /trademark /acute
+/dieresis /.notdef /AE /Oslash /.notdef /.notdef /.notdef /.notdef
+/yen /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/ordfeminine /ordmasculine /.notdef /ae /oslash /questiondown
+/exclamdown /logicalnot /.notdef /florin /.notdef /.notdef
+/guillemotleft /guillemotright /ellipsis /.notdef /Agrave /Atilde
+/Otilde /OE /oe /endash /emdash /quotedblleft /quotedblright
+/quoteleft /quoteright /.notdef /.notdef /ydieresis /Ydieresis
+/fraction /currency /guilsinglleft /guilsinglright /fi /fl /daggerdbl
+/periodcentered /quotesinglbase /quotedblbase /perthousand
+/Acircumflex /Ecircumflex /Aacute /Edieresis /Egrave /Iacute
+/Icircumflex /Idieresis /Igrave /Oacute /Ocircumflex /.notdef /Ograve
+/Uacute /Ucircumflex /Ugrave /dotlessi /circumflex /tilde /macron
+/breve /dotaccent /ring /cedilla /hungarumlaut /ogonek /caron
+] def
+/ReEncode { 
+	dup 
+	length 
+	dict begin 
+	{
+	1 index /FID ne 
+		{def} 
+		{pop pop} ifelse 
+	} forall 
+	0 eq {/Encoding DiacriticEncoding def} if 
+	currentdict 
+	end 
+	} bind def
+FMPColor 
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPCOLOR} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPCOLORc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUECOLOR } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUECOLORc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYK } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKc } def
+	}
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPGRAY} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPGRAYc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUEGRAY } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUEGRAYc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYKGRAY } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKGRAYc } def
+	}
+ifelse
+/K { 
+	FMPrintAllColorsAsBlack {
+		8 1 roll
+		dup 1 eq 2 index 1 eq and 3 index 1 eq and not
+			{7 {pop} repeat 0 0 0 1 0 0 0} if
+		8 -1 roll
+	} if 
+	FrameCurColors astore 
+	pop combineColor
+} bind def
+/graymode true def
+fMLevel1 {
+	/fmGetFlip {
+		fMatrix2 exch get mul 0 lt { -1 } { 1 } ifelse
+	} FmBD
+} if
+/setPatternMode {
+	fMLevel1 {
+		2 index patScreenDict exch known {
+			pop pop
+			patScreenDict exch get aload pop 
+			freq 								
+			mul									
+			5 2 roll							
+			fMatrix2 currentmatrix 1 get 0 ne {
+				3 -1 roll 90 add 3 1 roll 		
+				sflipx 1 fmGetFlip sflipy 2 fmGetFlip neg mul
+			} {  								
+				sflipx 0 fmGetFlip sflipy 3 fmGetFlip mul 
+			} ifelse
+			0 lt {exch pop} {pop} ifelse 		
+			fMNegative { 
+				{neg} fmConcatProcs 			
+			} if
+			bind
+			
+			
+			
+			systemdict /setscreen get exec		
+			/FrameCurGray exch def
+		} {
+			/bwidth  exch def
+			/bpside  exch def
+			/bstring exch def
+			/onbits 0 def  /offbits 0 def
+			freq sangle landscape {90 add} if 
+				{/ypoint exch def
+				 /xpoint exch def
+				 /xindex xpoint 1 add 2 div bpside mul cvi def
+				 /yindex ypoint 1 add 2 div bpside mul cvi def
+				 bstring yindex bwidth mul xindex 8 idiv add get
+				 1 7 xindex 8 mod sub bitshift and 0 ne fMNegative {not} if
+				 {/onbits  onbits  1 add def 1}
+				 {/offbits offbits 1 add def 0}
+				 ifelse
+				}
+				setscreen
+			offbits offbits onbits add dup 0 ne {div} {pop pop .5} ifelse fMNegative {1.0 exch sub} if
+			/FrameCurGray exch def
+		} ifelse
+	} { 
+		pop pop
+		dup patCache exch known {
+			patCache exch get
+		} { 
+			dup
+			patDict /bstring 3 -1 roll put
+			patDict 
+			9 PatFreq screenIndex get div dup matrix scale
+			makepattern
+			dup 
+			patCache 4 -1 roll 3 -1 roll put
+		} ifelse
+		/FrameCurGray 0 def
+		/FrameCurPat exch def
+	} ifelse
+	/graymode false def
+	combineColor
+} bind def
+/setGrayScaleMode {
+	graymode not {
+		/graymode true def
+		fMLevel1 {
+			setCurrentScreen
+		} if
+	} if
+	/FrameCurGray exch def
+	combineColor
+} bind def
+/normalize {
+	transform round exch round exch itransform
+	} bind def
+/dnormalize {
+	dtransform round exch round exch idtransform
+	} bind def
+/lnormalize { 
+	0 dtransform exch cvi 2 idiv 2 mul 1 add exch idtransform pop
+	} bind def
+/H { 
+	lnormalize setlinewidth
+	} bind def
+/Z {
+	setlinecap
+	} bind def
+	
+/PFill {
+	graymode fMLevel1 or not {
+		gsave 1 setgray eofill grestore
+	} if
+} bind def
+/PStroke {
+	graymode fMLevel1 or not {
+		gsave 1 setgray stroke grestore
+	} if
+	stroke
+} bind def
+/X { 
+	fillvals exch get
+	dup type /stringtype eq
+	{8 1 setPatternMode} 
+	{setGrayScaleMode}
+	ifelse
+	} bind def
+/V { 
+	PFill gsave eofill grestore
+	} bind def
+/Vclip {
+	clip
+	} bind def
+/Vstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/N { 
+	PStroke
+	} bind def
+/Nclip {
+	strokepath clip newpath
+	} bind def
+/Nstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/M {newpath moveto} bind def
+/E {lineto} bind def
+/D {curveto} bind def
+/O {closepath} bind def
+/L { 
+ 	/n exch def
+	newpath
+	normalize
+	moveto 
+	2 1 n {pop normalize lineto} for
+	} bind def
+/Y { 
+	L 
+	closepath
+	} bind def
+/R { 
+	/y2 exch def
+	/x2 exch def
+	/y1 exch def
+	/x1 exch def
+	x1 y1
+	x2 y1
+	x2 y2
+	x1 y2
+	4 Y 
+	} bind def
+/rarc 
+	{rad 
+	 arcto
+	} bind def
+/RR { 
+	/rad exch def
+	normalize
+	/y2 exch def
+	/x2 exch def
+	normalize
+	/y1 exch def
+	/x1 exch def
+	mark
+	newpath
+	{
+	x1 y1 rad add moveto
+	x1 y2 x2 y2 rarc
+	x2 y2 x2 y1 rarc
+	x2 y1 x1 y1 rarc
+	x1 y1 x1 y2 rarc
+	closepath
+	} stopped {x1 y1 x2 y2 R} if 
+	cleartomark
+	} bind def
+/RRR { 
+	/rad exch def
+	normalize /y4 exch def /x4 exch def
+	normalize /y3 exch def /x3 exch def
+	normalize /y2 exch def /x2 exch def
+	normalize /y1 exch def /x1 exch def
+	newpath
+	normalize moveto 
+	mark
+	{
+	x2 y2 x3 y3 rarc
+	x3 y3 x4 y4 rarc
+	x4 y4 x1 y1 rarc
+	x1 y1 x2 y2 rarc
+	closepath
+	} stopped
+	 {x1 y1 x2 y2 x3 y3 x4 y4 newpath moveto lineto lineto lineto closepath} if
+	cleartomark
+	} bind def
+/C { 
+	grestore
+	gsave
+	R 
+	clip
+	setCurrentScreen
+} bind def
+/CP { 
+	grestore
+	gsave
+	Y 
+	clip
+	setCurrentScreen
+} bind def
+/F { 
+	FMfonts exch get
+	[FMsetsize 0 0 FMpointsize 0 0] makefont
+	setfont
+	} bind def
+/Q { 
+	/FMpointsize exch def
+	/FMsetsize FMpointsize def
+	F 
+	} bind def
+/QQ { 
+	/FMsetsize exch def
+	/FMpointsize exch def
+	F 
+	} bind def
+/T { 
+	moveto show
+	} bind def
+/RF { 
+	rotate
+	0 ne {-1 1 scale} if
+	} bind def
+/TF { 
+	gsave
+	moveto 
+	RF
+	show
+	grestore
+	} bind def
+/P { 
+	moveto
+	0 32 3 2 roll widthshow
+	} bind def
+/PF { 
+	gsave
+	moveto 
+	RF
+	0 32 3 2 roll widthshow
+	grestore
+	} bind def
+/S { 
+	moveto
+	0 exch ashow
+	} bind def
+/SF { 
+	gsave
+	moveto
+	RF
+	0 exch ashow
+	grestore
+	} bind def
+/B { 
+	moveto
+	0 32 4 2 roll 0 exch awidthshow
+	} bind def
+/BF { 
+	gsave
+	moveto
+	RF
+	0 32 4 2 roll 0 exch awidthshow
+	grestore
+	} bind def
+/G { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	PFill fill
+	grestore
+	} bind def
+/Gstrk {
+	savematrix
+    newpath
+    2 index 2 div add exch 3 index 2 div sub exch 
+    normalize 2 index 2 div sub exch 3 index 2 div add exch 
+    translate
+    scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+    } bind def
+/Gclip { 
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	clip newpath
+	restorematrix
+	} bind def
+/GG { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	rotate 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath
+	PFill
+	fill
+	grestore
+	} bind def
+/GGclip { 
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	clip newpath
+	restorematrix
+	} bind def
+/GGstrk { 
+	savematrix
+    newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath 
+	restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/A { 
+	gsave
+	savematrix
+	newpath
+	2 index 2 div add exch 3 index 2 div sub exch 
+	normalize 2 index 2 div sub exch 3 index 2 div add exch 
+	translate 
+	scale 
+	2 copy 0.0 0.0 1.0 5 3 roll arc 
+	round cvi 360 mod exch round cvi 360 mod eq {closepath} if 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/Aclip {
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	strokepath clip newpath
+	restorematrix
+} bind def
+/Astrk {
+	Gstrk
+} bind def
+/AA { 
+	gsave
+	savematrix
+	newpath
+	
+	3 index 2 div add exch 4 index 2 div sub exch 
+	
+	normalize 3 index 2 div sub exch 4 index 2 div add exch
+	translate 
+	rotate 
+	scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/AAclip {
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	strokepath clip newpath
+	restorematrix
+} bind def
+/AAstrk {
+	GGstrk
+} bind def
+/BEGINPRINTCODE { 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count 7 sub def 
+	/FMsaveobject save def
+	userdict begin 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	3 index neg 3 index neg translate
+	} bind def
+/ENDPRINTCODE {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMsaveobject restore 
+	} bind def
+/gn { 
+	0 
+	{	46 mul 
+		cf read pop 
+		32 sub 
+		dup 46 lt {exit} if 
+		46 sub add 
+		} loop
+	add 
+	} bind def
+/cfs { 
+	/str sl string def 
+	0 1 sl 1 sub {str exch val put} for 
+	str def 
+	} bind def
+/ic [ 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0
+	{0 hx} {1 hx} {2 hx} {3 hx} {4 hx} {5 hx} {6 hx} {7 hx} {8 hx} {9 hx}
+	{10 hx} {11 hx} {12 hx} {13 hx} {14 hx} {15 hx} {16 hx} {17 hx} {18 hx}
+	{19 hx} {gn hx} {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}
+	{13} {14} {15} {16} {17} {18} {19} {gn} {0 wh} {1 wh} {2 wh} {3 wh}
+	{4 wh} {5 wh} {6 wh} {7 wh} {8 wh} {9 wh} {10 wh} {11 wh} {12 wh}
+	{13 wh} {14 wh} {gn wh} {0 bl} {1 bl} {2 bl} {3 bl} {4 bl} {5 bl} {6 bl}
+	{7 bl} {8 bl} {9 bl} {10 bl} {11 bl} {12 bl} {13 bl} {14 bl} {gn bl}
+	{0 fl} {1 fl} {2 fl} {3 fl} {4 fl} {5 fl} {6 fl} {7 fl} {8 fl} {9 fl}
+	{10 fl} {11 fl} {12 fl} {13 fl} {14 fl} {gn fl}
+	] def
+/ms { 
+	/sl exch def 
+	/val 255 def 
+	/ws cfs 
+	/im cfs 
+	/val 0 def 
+	/bs cfs 
+	/cs cfs 
+	} bind def
+400 ms 
+/ip { 
+	is 
+	0 
+	cf cs readline pop 
+	{	ic exch get exec 
+		add 
+		} forall 
+	pop 
+	
+	} bind def
+/rip { 
+	   
+	  
+	  bis ris copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  ris gis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  gis bis copy pop 
+	  dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/rip4 { 
+	   
+	  
+	  kis cis copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  cis mis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  mis yis copy pop 
+	  dup dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  yis kis copy pop 
+	  3 mul is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/wh { 
+	/len exch def 
+	/pos exch def 
+	ws 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/bl { 
+	/len exch def 
+	/pos exch def 
+	bs 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/s1 1 string def
+/fl { 
+	/len exch def 
+	/pos exch def 
+	/val cf s1 readhexstring pop 0 get def
+	pos 1 pos len add 1 sub {im exch val put} for
+	pos len 
+	} bind def
+/hx { 
+	3 copy getinterval 
+	cf exch readhexstring pop pop 
+	} bind def
+/wbytes { 
+      dup dup
+      8 gt { pop 8 idiv mul }
+      { 8 eq {pop} {1 eq {7 add 8 idiv} {3 add 4 idiv} ifelse} ifelse } ifelse
+	} bind def
+/BEGINBITMAPBWc { 
+	1 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAPGRAYc { 
+	8 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAP2BITc { 
+	2 {} COMMONBITMAPc
+	} bind def
+/COMMONBITMAPc { 
+		 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	cvtProc                
+	/is im 0 lb getinterval def 
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{ip} image 
+	bitmapsave restore 
+	grestore
+	} bind def
+/BEGINBITMAPBW { 
+	1 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAPGRAY { 
+	8 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAP2BIT { 
+	2 {} COMMONBITMAP
+	} bind def
+/COMMONBITMAP { 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def 
+	cvtProc              
+	/is width depth wbytes string def
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{cf is readhexstring pop} image
+	bitmapsave restore 
+	grestore
+	} bind def
+/ngrayt 256 array def
+/nredt 256 array def
+/nbluet 256 array def
+/ngreent 256 array def
+fMLevel1 {
+/colorsetup {
+	currentcolortransfer
+	/gryt exch def
+	/blut exch def
+	/grnt exch def
+	/redt exch def
+	0 1 255 {
+		/indx exch def
+		/cynu 1 red indx get 255 div sub def
+		/magu 1 green indx get 255 div sub def
+		/yelu 1 blue indx get 255 div sub def
+		/kk cynu magu min yelu min def
+		/u kk currentundercolorremoval exec def
+%		/u 0 def
+		nredt indx 1 0 cynu u sub max sub redt exec put
+		ngreent indx 1 0 magu u sub max sub grnt exec put
+		nbluet indx 1 0 yelu u sub max sub blut exec put
+		ngrayt indx 1 kk currentblackgeneration exec sub gryt exec put
+	} for
+	{255 mul cvi nredt exch get}
+	{255 mul cvi ngreent exch get}
+	{255 mul cvi nbluet exch get}
+	{255 mul cvi ngrayt exch get}
+	setcolortransfer
+	{pop 0} setundercolorremoval
+	{} setblackgeneration
+	} bind def
+}
+{
+/colorSetup2 {
+	[ /Indexed /DeviceRGB 255 
+		{dup red exch get 255 div 
+		 exch dup green exch get 255 div 
+		 exch blue exch get 255 div}
+	] setcolorspace
+} bind def
+} ifelse
+/fakecolorsetup {
+	/tran 256 string def
+	0 1 255 {/indx exch def 
+		tran indx
+		red indx get 77 mul
+		green indx get 151 mul
+		blue indx get 28 mul
+		add add 256 idiv put} for
+	currenttransfer
+	{255 mul cvi tran exch get 255.0 div}
+	exch fmConcatProcs settransfer
+} bind def
+/BITMAPCOLOR { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def
+	fMLevel1 {	
+		colorsetup
+		/is width depth wbytes string def
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{cf is readhexstring pop} {is} {is} true 3 colorimage 
+	} {
+		colorSetup2
+		/is width depth wbytes string def
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {cf is readhexstring pop} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCOLORc { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	fMLevel1 {	
+		colorsetup
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{ip} {is} {is} true 3 colorimage
+	} {
+		colorSetup2
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {ip} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLORc { 
+	/depth 24 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip pop ris} {gis} {bis} true 3 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCMYKc { 
+	/depth 32 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip4 pop cis} {mis} {yis} {kis} true 4 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLOR { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf gis readhexstring pop } 
+        { cf bis readhexstring pop } 
+        true 3 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYK { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /mis width string def
+        /yis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf mis readhexstring pop } 
+        { cf yis readhexstring pop } 
+        { cf kis readhexstring pop } 
+        true 4 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPTRUEGRAYc { 
+	/depth 24 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop ris gis bis width gray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAYc { 
+	/depth 32 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop cis mis yis kis width cgray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/cgray { 
+        /ww exch def
+        /k exch def
+        /y exch def
+        /m exch def
+        /c exch def
+        0 1 ww 1 sub { /i exch def c i get m i get y i get k i get CMYKtoRGB
+				.144 mul 3 1 roll .587 mul 3 1 roll .299 mul add add
+				c i 3 -1 roll floor cvi put } for
+        c
+ 		} bind def
+/gray { 
+        /ww exch def
+        /b exch def
+        /g exch def
+        /r exch def
+        0 1 ww 1 sub { /i exch def r i get .299 mul g i get .587 mul
+			b i get .114 mul add add r i 3 -1 roll floor cvi put } for
+        r
+        } bind def
+/BITMAPTRUEGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf gis readhexstring pop 
+          cf bis readhexstring pop width gray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /yis width string def
+        /mis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf mis readhexstring pop 
+          cf yis readhexstring pop 
+          cf kis readhexstring pop width cgray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPGRAY { 
+	8 {fakecolorsetup} COMMONBITMAP
+	} bind def
+/BITMAPGRAYc { 
+	8 {fakecolorsetup} COMMONBITMAPc
+	} bind def
+/ENDBITMAP {
+	} bind def
+end 
+	/ALDmatrix matrix def ALDmatrix currentmatrix pop
+/StartALD {
+	/ALDsave save def
+	 savematrix
+	 ALDmatrix setmatrix
+	} bind def
+/InALD {
+	 restorematrix
+	} bind def
+/DoneALD {
+	 ALDsave restore
+	} bind def
+/I { setdash } bind def
+/J { [] 0 setdash } bind def
+%%EndProlog
+%%BeginSetup
+(5.5) FMVERSION
+1 1 0 0 612 792 0 1 6 FMDOCUMENT
+%%IncludeFont: Times-Bold
+0 0 /Times-Bold FMFONTDEFINE
+%%IncludeFont: Times-Roman
+1 0 /Times-Roman FMFONTDEFINE
+32 FMFILLS
+0 0 FMFILL
+1 0.1 FMFILL
+2 0.3 FMFILL
+3 0.5 FMFILL
+4 0.7 FMFILL
+5 0.9 FMFILL
+6 0.97 FMFILL
+7 1 FMFILL
+8 <0f1e3c78f0e1c387> FMFILL
+9 <0f87c3e1f0783c1e> FMFILL
+10 <cccccccccccccccc> FMFILL
+11 <ffff0000ffff0000> FMFILL
+12 <8142241818244281> FMFILL
+13 <03060c183060c081> FMFILL
+14 <8040201008040201> FMFILL
+16 1 FMFILL
+17 0.9 FMFILL
+18 0.7 FMFILL
+19 0.5 FMFILL
+20 0.3 FMFILL
+21 0.1 FMFILL
+22 0.03 FMFILL
+23 0 FMFILL
+24 <f0e1c3870f1e3c78> FMFILL
+25 <f0783c1e0f87c3e1> FMFILL
+26 <3333333333333333> FMFILL
+27 <0000ffff0000ffff> FMFILL
+28 <7ebddbe7e7dbbd7e> FMFILL
+29 <fcf9f3e7cf9f3f7e> FMFILL
+30 <7fbfdfeff7fbfdfe> FMFILL
+%%EndSetup
+%%Page: "1" 1
+%%BeginPaperSize: Letter
+%%EndPaperSize
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+[
+/Creator (FrameMaker 5.5.6.)
+/Title (SEA_ESF_RAD_doc)
+/CreationDate (D:20000602054802)
+/ModDate (D:20050318060214)
+/DOCINFO FmPD2
+FrameNoSep
+0 0 0 1 0 0 0 1 K
+J
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+0 18 Q
+0 X
+(The SEA-ESF Radiation Code  -- Lima r) 127.41 666 T
+(elease) 439.61 666 T
+1 F
+(Richard Hemler) 250.51 600 T
+(March 18, 2005) 248.76 578 T
+1 14 Q
+(This document contains information about the sea-esf radiation code as imple-) 99 490 T
+(mented) 72 470.67 T
+(in) 116.39 470.67 T
+(the) 130.46 470.67 T
+(Lima) 150.75 470.67 T
+(release) 183.48 470.67 T
+(of) 225.53 470.67 T
+(the) 240.37 470.67 T
+(FMS.) 260.65 470.67 T
+(It) 298.52 470.67 T
+(is) 310.26 470.67 T
+(intended) 322.77 470.67 T
+(to) 374.17 470.67 T
+(pro) 388.24 470.67 T
+(vide) 406.69 470.67 T
+(an) 433.98 470.67 T
+(o) 450.37 470.67 T
+(v) 457.16 470.67 T
+(ervie) 463.95 470.67 T
+(w) 491.59 470.67 T
+(of) 504.87 470.67 T
+(the) 519.71 470.67 T
+(radiation code or) 72 452.67 T
+(g) 166.61 452.67 T
+(anization, rather than to address an) 173.54 452.67 T
+(y science issues.  Documenta-) 368.51 452.67 T
+(tion for each of the component modules is included in the .f90 \336le containing that) 72 434.67 T
+(module which  may be used to generate a .html \336le containing speci\336c information) 72 416.67 T
+(related) 72 398.67 T
+(to) 113.37 398.67 T
+(that) 127.54 398.67 T
+(module.) 151.81 398.67 T
+(As) 200.59 398.67 T
+(is) 219.41 398.67 T
+(al) 232.03 398.67 T
+(w) 241.99 398.67 T
+(ays) 251.96 398.67 T
+(the) 273.9 398.67 T
+(case,) 294.28 398.67 T
+(it) 325.15 398.67 T
+(is) 336.21 398.67 T
+(intended) 348.82 398.67 T
+(that) 400.31 398.67 T
+(additional) 424.59 398.67 T
+(enhanced) 483.86 398.67 T
+(documentation for the indi) 72 380.67 T
+(vidual modules and for the package as a whole will be) 220.58 380.67 T
+(released at a later date.) 72 362.67 T
+(      The follo) 72 327.67 T
+(wing sections are contained in this document:) 144.37 327.67 T
+(            A.   An o) 72 310.67 T
+(v) 165.51 310.67 T
+(ervie) 172.3 310.67 T
+(w of the features of the sea l) 199.93 310.67 T
+(w code and the esf sw code.) 358.02 310.67 T
+(            B.    A summary of the major changes made since the Jakarta release.) 72 293.67 T
+(            C.    The or) 72 276.67 T
+(g) 177.52 276.67 T
+(anizational structure of the sea-esf radiation code.) 184.45 276.67 T
+(            D.    Chart indicating the relationship between the modules acti) 72 259.67 T
+(v) 467.5 259.67 T
+(e in AM2.) 474.29 259.67 T
+(            E.    Summary of namelist v) 72 242.67 T
+(ariables and acceptable v) 270.76 242.67 T
+(alues for them.) 410.74 242.67 T
+0 F
+(A.   Character of the sea lw radiation code and the esf sw radiation code) 75.5 208.67 T
+1 F
+(              Among the features and capabilities within the sea-esf radiation code are :) 72 174.67 T
+(            1.  ESF Shortw) 72 157.67 T
+(a) 199.43 157.67 T
+(v) 205.36 157.67 T
+(e code) 212.15 157.67 T
+(                a.\051  The e) 72 140.67 T
+(xponential-sum-\336t sw code uses either 25 bands and 72) 180.65 140.67 T
+(                       frequenc) 72 123.67 T
+(y points \050high resolution\051 or 18 bands and 38 frequenc) 201.26 123.67 T
+(y) 505.51 123.67 T
+(points) 154.04 106.67 T
+(\050lo) 191.55 106.67 T
+(w) 206.76 106.67 T
+(resolution,) 220.15 106.67 T
+(def) 282.93 106.67 T
+(ault) 300.67 106.67 T
+(for) 324.95 106.67 T
+(the) 344.55 106.67 T
+(AM2) 364.94 106.67 T
+(model\051) 397.78 106.67 T
+(to) 440.72 106.67 T
+(de\336ne) 454.89 106.67 T
+(the) 492.39 106.67 T
+(solar) 512.78 106.67 T
+(                       spectrum, allo) 72 89.67 T
+(wing the proper interaction of v) 231.47 89.67 T
+(arious atmospheric) 408.81 89.67 T
+FMENDPAGE
+%%EndPage: "1" 1
+%%Page: "2" 2
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(                       components with the spectrum. The scheme optionally  includes  the) 72 710.67 T
+(                       ef) 72 693.67 T
+(fects of aerosols  on the solar heating rates and \337ux) 163.03 693.67 T
+(es.) 449.76 693.67 T
+(                b) 72 676.67 T
+(.\051  Cloud radiati) 134.44 676.67 T
+(v) 222.75 676.67 T
+(e properties are de\336ned based on cloud micro-) 229.54 676.67 T
+(                      ph) 72 659.67 T
+(ysical properties.) 162.93 659.67 T
+(             2.  SEA Longw) 72 625.67 T
+(a) 204.47 625.67 T
+(v) 210.4 625.67 T
+(e code) 217.19 625.67 T
+(                  a.\051   The ability to include the ef) 72 608.67 T
+(fects of the follo) 314.68 608.67 T
+(wing radiati) 406.47 608.67 T
+(v) 473.39 608.67 T
+(ely-acti) 480.18 608.67 T
+(v) 521.82 608.67 T
+(e) 528.61 608.67 T
+(                         g) 72 591.67 T
+(ases on the L) 166.43 591.67 T
+(W \337ux) 238.88 591.67 T
+(es and heating rates is present, in addition to) 277.17 591.67 T
+(                         CO2, H2O and O3 : CH4, N2O, and 4 CFCs : f11, f12, f22, and) 72 574.67 T
+(                         f113.) 72 557.67 T
+(b) 135.79 540.67 T
+(.\051) 142.24 540.67 T
+(The) 160.47 540.67 T
+(ef) 185.6 540.67 T
+(fects) 196.12 540.67 T
+(of) 225.91 540.67 T
+(w) 240.93 540.67 T
+(ater) 250.9 540.67 T
+(v) 275.25 540.67 T
+(apor) 281.9 540.67 T
+(continuum) 310.13 540.67 T
+(absorption) 373.38 540.67 T
+(may) 435.85 540.67 T
+(be) 463.31 540.67 T
+(calculated) 483.24 540.67 T
+(                         using either the CKD 2.1 or CKD 2.4 v) 72 523.67 T
+(ersions  of the AFGL) 379.38 523.67 T
+(                         continuum absorption algorithm or the Roberts continuum.) 72 506.67 T
+(                 c.\051    A 16 l) 72 489.67 T
+(w band structure is used .) 194.74 489.67 T
+(                 d.\051    Aerosol ef) 72 472.67 T
+(fects on the L) 219.01 472.67 T
+(W \337ux) 294.57 472.67 T
+(es and heating rates are  included.) 332.86 472.67 T
+(                 e.\051    Cloud radiati) 72 455.67 T
+(v) 233.03 455.67 T
+(e properties are de\336ned based on cloud micro-) 239.82 455.67 T
+(                          ph) 72 438.67 T
+(ysical properties.) 176.93 438.67 T
+(                  f.\051    Longw) 72 421.67 T
+(a) 201.35 421.67 T
+(v) 207.28 421.67 T
+(e transmission functions for the well-mix) 214.07 421.67 T
+(ed greenhouse) 444.46 421.67 T
+(                         g) 72 404.67 T
+(ases \050CO2, CH4, N2O\051 at model species amount, temperatures) 166.43 404.67 T
+(                         and pressures are computed \050online\051  from transmission functions) 72 387.67 T
+(                         for these g) 72 370.67 T
+(ases at standard species amounts, temperatures and) 218.52 370.67 T
+(                         at 496 standard pressure le) 72 353.67 T
+(v) 308.45 353.67 T
+(els.) 315.24 353.67 T
+(              3. Standalone dri) 72 319.67 T
+(v) 215.92 319.67 T
+(er -  There is a standalone dri) 222.71 319.67 T
+(v) 386.03 319.67 T
+(er a) 392.82 319.67 T
+(v) 413.14 319.67 T
+(ailable to run the) 419.79 319.67 T
+(radiation) 136.42 302.67 T
+(code) 189.41 302.67 T
+(in) 219.07 302.67 T
+(either) 233.18 302.67 T
+(of) 268.28 302.67 T
+(three) 283.16 302.67 T
+(modes) 314.37 302.67 T
+(:) 354.14 302.67 T
+(in) 361.26 302.67 T
+(a) 375.37 302.67 T
+(program) 384.8 302.67 T
+(designed) 435.46 302.67 T
+(to) 488.45 302.67 T
+(assess) 502.56 302.67 T
+(                  radiati) 72 285.67 T
+(v) 170.42 285.67 T
+(e feedbacks using GCM-generated input,  in a standalone) 177.21 285.67 T
+(                  column mode used to assess  v) 72 268.67 T
+(arious  aspects of the parameterization) 306.53 268.67 T
+(                  and assist in its further de) 72 251.67 T
+(v) 278.14 251.67 T
+(elopment, or using GCM-generated input to) 284.93 251.67 T
+(                  calculate instantaneous radiati) 72 234.67 T
+(v) 303.39 234.67 T
+(e forcings.) 310.18 234.67 T
+0 F
+(B.    Summary of changes between Khartoum and Lima) 72 200.67 T
+1 F
+(       The follo) 72 166.67 T
+(wing ne) 147.87 166.67 T
+(w capabilities were added to the khartoum code v) 192.23 166.67 T
+(ersion:) 469.63 166.67 T
+(          1.  The follo) 72 132.67 T
+(wing ne) 175.87 132.67 T
+(w features are no) 220.23 132.67 T
+(w a) 315.89 132.67 T
+(v) 335.44 132.67 T
+(ailable when running the radiation) 342.09 132.67 T
+(               code  in standalone mode:) 72 115.67 T
+(               a\051  the ability to process input \336elds from a foreign v) 72 98.67 T
+(ertical grid;) 419.42 98.67 T
+(               b\051  the ability to use ph) 72 81.67 T
+(ysics windo) 253.54 81.67 T
+(ws;) 319.69 81.67 T
+FMENDPAGE
+%%EndPage: "2" 2
+%%Page: "3" 3
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(               c\051  the increased use of speci\336ed netcdf attrib) 72 710.67 T
+(utes in reading input \336les;) 377.7 710.67 T
+(               d\051  ability to process separate input \336les for atmospheric and cloud input) 72 693.67 T
+(                    \336elds, which may contain dif) 72 676.67 T
+(ferent numbers of data columns and/or) 304.58 676.67 T
+(                    time slices;) 72 659.67 T
+(               e\051  ability to transpose time dimension to the y dimension to allo) 72 642.67 T
+(w) 485.04 642.67 T
+(                    domain decomposition and parallel e) 72 625.67 T
+(x) 348.65 625.67 T
+(ecution when time marching is) 355.44 625.67 T
+(                    not present;) 72 608.67 T
+(               f\051  pro) 72 591.67 T
+(vides ability to run the \336x) 159.28 591.67 T
+(ed-dynamical-heating application with) 303.35 591.67 T
+(                    the standalone code;) 72 574.67 T
+(               g\051  adds tw) 72 557.67 T
+(o ne) 186.18 557.67 T
+(w input_data_sources \050single_column and monthly_ts\051 to) 209.55 557.67 T
+(                    allo) 72 540.67 T
+(w additional applications;) 162.65 540.67 T
+(               h\051  restructures the v) 72 523.67 T
+(ertical grid speci\336cation of the input data set to) 239.37 523.67 T
+(                    pro) 72 506.67 T
+(vide additional generality) 160.45 506.67 T
+(.) 302.64 506.67 T
+(        2.  The ability to specify via nml or input \336le time-and space-in) 72 472.67 T
+(v) 454.47 472.67 T
+(ariant) 461.12 472.67 T
+(             astronomical parameters \050zenith angle, fracday) 72 455.67 T
+(, earth-sun distance\051 is) 379.01 455.67 T
+(             added.) 72 438.67 T
+(        3.  The ability to specify ozone and aerosol pro\336les to be the same in all) 72 421.67 T
+(             columns by e) 72 404.67 T
+(xtracting a nml-speci\336ed column from the respecti) 191.95 404.67 T
+(v) 474.67 404.67 T
+(e) 481.46 404.67 T
+(             climatology \336les, or by reading an input \336le \050nati) 72 387.67 T
+(v) 392.08 387.67 T
+(e or netcdf\051 has been) 398.87 387.67 T
+(             added.) 72 370.67 T
+(        4.  The ability to output direct and dif) 72 353.67 T
+(fuse do) 310.03 353.67 T
+(wnw) 350.5 353.67 T
+(ard clearsk) 377.58 353.67 T
+(y sw sfc \337ux) 438.39 353.67 T
+(             diagnostics has been added.) 72 336.67 T
+(        5.  The treatment of ch4 and n2o has been completely separated. Pre) 72 319.67 T
+(vious) 482.23 319.67 T
+(             code v) 72 302.67 T
+(ersions used a compound control v) 154.22 302.67 T
+(ariable do_ch4_n2o, which is) 348.68 302.67 T
+(             no) 72 285.67 T
+(w replaced by tw) 131.15 285.67 T
+(o v) 227.04 285.67 T
+(ariables do_ch4 and do_n2o. This pro) 244.19 285.67 T
+(vides a\051) 455.5 285.67 T
+(             independent treatment of these tw) 72 268.67 T
+(o g) 307.1 268.67 T
+(ases with respect to  their) 324.53 268.67 T
+(             presence or absence; b\051 the ability to specify either a single or multiple) 72 251.67 T
+(             l) 72 234.67 T
+(w bands in the 1200 - 1400 cm\050-1\051 re) 121.25 234.67 T
+(gion, independent of the presence) 329.45 234.67 T
+(             or absence of these tw) 72 217.67 T
+(o g) 241.76 217.67 T
+(ases; and c\051 the ability to use temperature) 259.19 217.67 T
+(             dependent h2o emission lines in the 1200 - 1400 band independent of the) 72 200.67 T
+(             presence or absence of these g) 72 183.67 T
+(ases.  V) 287.31 183.67 T
+(alues of ch4 and/or n2o mixing ratio) 329.68 183.67 T
+(             may no) 72 166.67 T
+(w be speci\336ed as 0.0 without causing code problems; thus the) 158.76 166.67 T
+(             option of specifying \324absent\325 for xxx_data_source has been eliminated.) 72 149.67 T
+(        6.  The ability to generate diagnostics for total column aerosol \050std +) 72 132.67 T
+(              v) 72 115.67 T
+(olcanic\051 e) 127.72 115.67 T
+(xtinction and absorption optical depths for nml-speci\336ed) 182.32 115.67 T
+(              aerosol f) 72 98.67 T
+(amilies in the visible and nir sw bands and in the 900-990 and) 169.45 98.67 T
+(              990-1070 l) 72 81.67 T
+(w bands has been added.) 181.91 81.67 T
+FMENDPAGE
+%%EndPage: "3" 3
+%%Page: "4" 4
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(       7.  A check w) 72 710.67 T
+(as added to pre) 173.72 710.67 T
+(v) 257.74 710.67 T
+(ent specifyingg diurnally v) 264.53 710.67 T
+(arying solar radiation) 414.66 710.67 T
+(           using an a) 72 693.67 T
+(v) 166.99 693.67 T
+(eraging period of e) 173.78 693.67 T
+(xactly one day) 279.7 693.67 T
+(. The a) 360.44 693.67 T
+(v) 398.65 693.67 T
+(eraging period must be) 405.44 693.67 T
+(           no greater than 12 hours; the special case of 1 day had slipped through the) 72 676.67 T
+(           logic pre) 72 659.67 T
+(viously) 159.53 659.67 T
+(.) 199.85 659.67 T
+(       8.  An) 72 642.67 T
+(y reference to ice particle radius is remo) 130.9 642.67 T
+(v) 355.78 642.67 T
+(ed. Size is speci\336ed in terms of) 362.57 642.67 T
+(            ef) 72 625.67 T
+(fecti) 124.53 625.67 T
+(v) 149.06 625.67 T
+(e size.) 155.85 625.67 T
+(       9.  The ability to specify a latitude and longitude to be used for the astronom-) 72 608.67 T
+(            ical calculations that does not v) 72 591.67 T
+(ary with grid point w) 289.8 591.67 T
+(as added. Thus the toa) 407.87 591.67 T
+(           solar input will be uniform for all grid columns.) 72 574.67 T
+(      10. The time-a) 72 557.67 T
+(v) 174.76 557.67 T
+(eraged surf) 181.55 557.67 T
+(ace albedo diagnostic is rede\336ned in terms of the) 243.99 557.67 T
+(            ratio of accumulated upw) 72 540.67 T
+(ard sw \337ux to accumulated do) 256.55 540.67 T
+(wnw) 424.56 540.67 T
+(ard sw \337ux.) 451.64 540.67 T
+(            The pre) 72 523.67 T
+(vious diagnostic w) 156.8 523.67 T
+(as \337a) 261.66 523.67 T
+(wed in that arbitrary v) 290.61 523.67 T
+(alues assigned during) 414.68 523.67 T
+(            periods of darkness were included in the time-a) 72 506.67 T
+(v) 379.27 506.67 T
+(eraged diagnostic, so that) 386.06 506.67 T
+(            truly meaningful v) 72 489.67 T
+(alues could only be obtained during post-processing.) 217.87 489.67 T
+(       11. The ability to run the radiation package without the ef) 72 472.67 T
+(fects of ozone and/or) 419.27 472.67 T
+(             w) 72 455.67 T
+(ater v) 127.47 455.67 T
+(apor has been added.) 158.6 455.67 T
+(12.) 95.57 438.67 T
+(Mods) 119.81 438.67 T
+(to) 155.07 438.67 T
+(interpolator_mod) 169.33 438.67 T
+(were) 269.91 438.67 T
+(made) 300.48 438.67 T
+(to) 334.17 438.67 T
+(eliminate) 348.43 438.67 T
+(the) 403.91 438.67 T
+(printout) 424.39 438.67 T
+(of) 472.09 438.67 T
+(e) 487.12 438.67 T
+(xcessi) 493.13 438.67 T
+(v) 526.99 438.67 T
+(e) 533.78 438.67 T
+(             NO) 72 421.67 T
+(TES and to allo) 137.16 421.67 T
+(w \336x) 224.31 421.67 T
+(ed-year data from the climatology \336les to be) 252.49 421.67 T
+(             used during standalone radiation jobs which are run for greater than one) 72 404.67 T
+(             year) 72 387.67 T
+(.) 140.82 387.67 T
+0 F
+(C.   Or) 72 336.67 T
+(ganization of the radiation package) 113.08 336.67 T
+(       0. Radiation package utility modules) 72 302.67 T
+1 F
+(        Three modules are contained within the radiation package to contain general) 72 268.67 T
+(information that is accessed by man) 72 251.67 T
+(y of the modules. These are:) 272.82 251.67 T
+(              atmos_param/sea_esf_rad/rad_utilities.f90    - Rad_utilities_mod contains) 72 217.67 T
+(the v) 72 200.67 T
+(arious deri) 99.26 200.67 T
+(v) 158.39 200.67 T
+(ed-type v) 165.18 200.67 T
+(ariables used within the radiation package to communi-) 217.32 200.67 T
+(cate betwen modules. It also contains basic information and routines to perform) 72 183.67 T
+(basic functions, such as table access and band-a) 72 166.67 T
+(v) 339.2 166.67 T
+(eraging.) 345.99 166.67 T
+(                atmos_param/sea_esf_rad/esfsw_parameters.f90  :) 72 149.67 T
+(Esfsw_parameters_mod contains the parameter settings for the esf99 sw package.) 72 132.67 T
+(                atmos_param/sea-esf_rad/longw) 72 115.67 T
+(a) 309.82 115.67 T
+(v) 315.75 115.67 T
+(e_params/f90 :) 322.54 115.67 T
+(Longw) 72 98.67 T
+(a) 111.52 98.67 T
+(v) 117.46 98.67 T
+(e_params_mod contains parameters used in the sea99 l) 124.25 98.67 T
+(w package.) 431.66 98.67 T
+FMENDPAGE
+%%EndPage: "4" 4
+%%Page: "5" 5
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+0 14 Q
+0 X
+(       1. Le) 72 693.67 T
+(v) 125.84 693.67 T
+(el 1 modules \050accessed by ph) 132.7 693.67 T
+(ysics_dri) 302.44 693.67 T
+(v) 355.19 693.67 T
+(er_mod\051) 362.05 693.67 T
+1 F
+(        The radiation code is connected to the outside through ph) 72 659.67 T
+(ysics_dri) 421.5 659.67 T
+(v) 471.7 659.67 T
+(er_mod) 478.49 659.67 T
+(\050when run in GCM mode\051, or to a dri) 72 642.67 T
+(v) 279.68 642.67 T
+(er program when run in standalone mode.) 286.47 642.67 T
+(As) 72 625.67 T
+(described) 90.89 625.67 T
+(in) 147.88 625.67 T
+(atmos_param/ph) 162.11 625.67 T
+(ysics_dri) 255.36 625.67 T
+(v) 305.57 625.67 T
+(er/Radiation_o) 312.36 625.67 T
+(v) 395.36 625.67 T
+(ervie) 402.15 625.67 T
+(w) 429.79 625.67 T
+(.ps,) 438.99 625.67 T
+(inputs) 461.77 625.67 T
+(to) 499.34 625.67 T
+(radi-) 513.57 625.67 T
+(ation) 72 608.67 T
+(are) 103.29 608.67 T
+(required) 123.67 608.67 T
+(to) 173.6 608.67 T
+(come) 187.78 608.67 T
+(in) 221.39 608.67 T
+(through) 235.56 608.67 T
+(the) 282.4 608.67 T
+(ar) 302.8 608.67 T
+(gument) 313.42 608.67 T
+(list.) 358.71 608.67 T
+(As) 382.61 608.67 T
+(a) 401.45 608.67 T
+(consequence,) 410.96 608.67 T
+(modules) 489.27 608.67 T
+(ha) 72 591.67 T
+(v) 84.94 591.67 T
+(e been pro) 91.73 591.67 T
+(vided to be accessed by ph) 149.83 591.67 T
+(ysics_dri) 299.44 591.67 T
+(v) 349.65 591.67 T
+(er \050or the standalone main pro-) 356.44 591.67 T
+(gram\051 to obtain these inputs, in anticipation of the day when aerosols and radiati) 72 574.67 T
+(v) 521.15 574.67 T
+(e) 527.94 574.67 T
+(g) 72 557.67 T
+(ases may become prognostic, just as clouds optionally may be currently) 78.93 557.67 T
+(. These) 479.69 557.67 T
+(modules are:) 72 540.67 T
+(        to obtain the radiati) 72 506.67 T
+(v) 208.92 506.67 T
+(e g) 215.71 506.67 T
+(as \336elds:) 232.36 506.67 T
+(                   atmos_param/sea_esf_rad/radiati) 72 489.67 T
+(v) 323.22 489.67 T
+(e_g) 330.01 489.67 T
+(ases.f90) 350.15 489.67 T
+(        to obtain the cloud and microph) 72 472.67 T
+(ysics \336elds:) 278.42 472.67 T
+(                   atmos_param/sea_esf_rad/cloud_spec.f90) 72 455.67 T
+(        to obtain the aerosol \336elds:) 72 438.67 T
+(                   atmos_param/sea_esf_rad/aerosol.F90) 72 421.67 T
+(Ph) 72 387.67 T
+(ysics_dri) 86.71 387.67 T
+(v) 136.92 387.67 T
+(er_mod accesses these modules in addition to radiation_dri) 143.71 387.67 T
+(v) 474.26 387.67 T
+(er_mod.) 481.05 387.67 T
+0 F
+(2. Le) 86 336.67 T
+(v) 115.34 336.67 T
+(el 2 modules \050accessed by Le) 122.2 336.67 T
+(v) 291.93 336.67 T
+(el 1 modules\051) 298.79 336.67 T
+1 F
+(       a\051 Radiati) 72 302.67 T
+(v) 150.97 302.67 T
+(e_g) 157.76 302.67 T
+(ases_mod accesses the follo) 177.91 302.67 T
+(wing module:) 334.25 302.67 T
+(           to obtain ozone data :) 72 268.67 T
+(                      atmos_param/sea_esf_rad/ozone.f90) 72 251.67 T
+(       The remaining radiati) 72 234.67 T
+(v) 217.46 234.67 T
+(e g) 224.25 234.67 T
+(ases are treated within radiati) 240.9 234.67 T
+(v) 404.61 234.67 T
+(e_g) 411.4 234.67 T
+(ases_mod since) 431.55 234.67 T
+(the) 72 217.67 T
+(y are currently assumed spatially uniform. If their speci\336cation / treatment) 88.9 217.67 T
+(becomes more complicated, separate modules will be created for them, as e) 72 200.67 T
+(xists) 494.41 200.67 T
+(curcurrently with ozone.) 72 183.67 T
+(b\051) 94.01 149.67 T
+(Cloud_spec_mod) 108.82 149.67 T
+(accesses) 209.96 149.67 T
+(one) 260.52 149.67 T
+(of) 283.88 149.67 T
+(the) 298.69 149.67 T
+(follo) 318.94 149.67 T
+(wing) 345.04 149.67 T
+(wrapper) 376.18 149.67 T
+(mods,) 425.19 149.67 T
+(dependent) 462.17 149.67 T
+(on) 522.85 149.67 T
+(the cloud parameterization which has been acti) 72 132.67 T
+(v) 334.47 132.67 T
+(ated, in order to obtain the cloud) 341.12 132.67 T
+(speci\336cation information which will be passed on to radiation_dri) 72 115.67 T
+(v) 440.28 115.67 T
+(er_mod:) 447.07 115.67 T
+(         to access the strat_cloud module:) 72 81.67 T
+FMENDPAGE
+%%EndPage: "5" 5
+%%Page: "6" 6
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(                    atmos_param/sea_esf_rad/strat_clouds_W) 72 710.67 T
+(.f90) 377.89 710.67 T
+(          to access the Gordon diagnostic clouds module:) 72 693.67 T
+(                     atmos_param/sea_esf_rad/diag_clouds_W) 72 676.67 T
+(.f90) 381.39 676.67 T
+(          to access either a zonally-prescribed cloud module or the observ) 72 659.67 T
+(ed cloud) 466.42 659.67 T
+(          module:) 72 642.67 T
+(                      atmos_param/sea_esf_rad/speci\336ed_clouds_W) 72 625.67 T
+(.f90) 410.55 625.67 T
+(to) 104.04 608.67 T
+(access) 118.13 608.67 T
+(a) 157.09 608.67 T
+(cloud) 166.51 608.67 T
+(scheme) 200.82 608.67 T
+(diagnosing) 246.01 608.67 T
+(clouds) 310.66 608.67 T
+(based) 350.42 608.67 T
+(on) 385.5 608.67 T
+(model) 402.71 608.67 T
+(relati) 440.91 608.67 T
+(v) 469.33 608.67 T
+(e) 476.12 608.67 T
+(humidity:) 485.54 608.67 T
+(                      atmos_param/sea_esf_rad/rh_based_clouds.f90) 72 591.67 T
+(          to access the clouds produced by the donner_deep module:) 72 574.67 T
+(                      atmos_param/sea_esf_rad/donner_deep_clouds_W) 72 557.67 T
+(.f90) 433.09 557.67 T
+(          to access an alternati) 72 540.67 T
+(v) 222.89 540.67 T
+(e zonally prescribed cloud scheme:) 229.68 540.67 T
+(                       atmos_param/sea_esf_rad/mgrp_pscr_clds.f90) 72 523.67 T
+(          to access the module pro) 72 506.67 T
+(viding clouds for use with the standalone column) 245.21 506.67 T
+(          program:) 72 489.67 T
+(                      atmos_param/sea_esf_rad/standalone_clouds.f90) 72 472.67 T
+(          to access the module pro) 72 455.67 T
+(viding clouds for use with the ZET) 245.21 455.67 T
+(A) 439.89 455.67 T
+(C model:) 449.44 455.67 T
+(                      atmos_param/sea_esf_rad/zetac_clouds_W) 72 438.67 T
+(.f90) 389.53 438.67 T
+(c\051) 97.53 404.67 T
+(Aerosol_mod) 111.6 404.67 T
+(accesses) 191.01 404.67 T
+(no) 241.62 404.67 T
+(lo) 258.81 404.67 T
+(wer) 269.35 404.67 T
+(-le) 290.06 404.67 T
+(v) 304.48 404.67 T
+(el) 311.27 404.67 T
+(modules) 324.57 404.67 T
+(within) 375.21 404.67 T
+(the) 414.18 404.67 T
+(radiation) 434.48 404.67 T
+(package.) 487.44 404.67 T
+(It currently obtains aerosol  data by interpolation into a supplied aerosol climatol-) 72 387.67 T
+(ogy) 72 370.67 T
+(, using an interpolation module contained within the FMS atmos_shared direc-) 92.09 370.67 T
+(tory) 72 353.67 T
+(.) 93.64 353.67 T
+(d\051) 96.26 319.67 T
+(Radiation_dri) 111.39 319.67 T
+(v) 188.04 319.67 T
+(er_mod) 194.83 319.67 T
+(is) 241.07 319.67 T
+(called) 253.87 319.67 T
+(by) 290.77 319.67 T
+(ph) 308.24 319.67 T
+(ysics_dri) 322.17 319.67 T
+(v) 372.37 319.67 T
+(er_mod) 379.16 319.67 T
+(\050or) 425.4 319.67 T
+(standalone) 445.19 319.67 T
+(main) 508.53 319.67 T
+(program\051 and then accesses the follo) 72 302.67 T
+(wing modules:) 276.54 302.67 T
+(         to access the original fms radiation code \050le) 72 268.67 T
+(g) 347.07 268.67 T
+(ac) 354 268.67 T
+(y code\051:) 366.22 268.67 T
+(                   atmos_param/sea_esf_rad/original_fms_rad.f90) 72 251.67 T
+(         to access the sea_esf_rad radiation package:) 72 234.67 T
+(                    atmos_param/sea_esf_rad/sea_esf_rad.f90) 72 217.67 T
+(         to output radiation package diagnostics in a netcdf \336le:) 72 200.67 T
+(                    atmos_param/.sea_esf_rad/rad_output_\336le.f90) 72 183.67 T
+(         to obtain cloud radiati) 72 166.67 T
+(v) 226.42 166.67 T
+(e properties to be passed on to the longw) 233.21 166.67 T
+(a) 461.7 166.67 T
+(v) 467.64 166.67 T
+(e and) 474.43 166.67 T
+(         shortw) 72 149.67 T
+(a) 141.47 149.67 T
+(v) 147.4 149.67 T
+(e codes:) 154.19 149.67 T
+(                     atmos_param/sea_esf_rad/cloudrad_package.f90) 72 132.67 T
+(         to obtain aerosol radiati) 72 115.67 T
+(v) 235.74 115.67 T
+(e properties to be passed on to the longw) 242.53 115.67 T
+(a) 471.03 115.67 T
+(v) 476.96 115.67 T
+(e and) 483.75 115.67 T
+(         shortw) 72 98.67 T
+(a) 141.47 98.67 T
+(v) 147.4 98.67 T
+(e codes:) 154.19 98.67 T
+(                      atmos_param/sea_esf_rad/aerosolrad_package.f90) 72 81.67 T
+FMENDPAGE
+%%EndPage: "6" 6
+%%Page: "7" 7
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(            Radiation_dri) 72 693.67 T
+(v) 190.65 693.67 T
+(er_mod also uses tw) 197.44 693.67 T
+(o support modules not contained in the) 311.23 693.67 T
+(radiation package directory:) 72 676.67 T
+(           to obtain the astronomical parameters needed by the sw radiation package:) 72 659.67 T
+(                       atmos_param/astronomy/astronomy) 72 642.67 T
+(.f90) 353.02 642.67 T
+(           to process diagnostic global and/or hemispheric inte) 72 625.67 T
+(grals:) 401.92 625.67 T
+(                       atmos_param/diag_inte) 72 608.67 T
+(gral/diag_inte) 283.72 608.67 T
+(gral.f90) 361.28 608.67 T
+0 F
+(3. Le) 72 557.67 T
+(v) 101.34 557.67 T
+(el 3 modules \050accessed by Le) 108.2 557.67 T
+(v) 277.93 557.67 T
+(el 2 modules\051) 284.79 557.67 T
+1 F
+(      Ozone_mod does not access an) 72 523.67 T
+(y lo) 267.75 523.67 T
+(wer) 288.79 523.67 T
+(-le) 309.5 523.67 T
+(v) 323.92 523.67 T
+(el radiation routines.) 330.71 523.67 T
+(The) 92.11 489.67 T
+(v) 117.24 489.67 T
+(arious) 123.89 489.67 T
+(wrapper) 161.45 489.67 T
+(routines) 210.67 489.67 T
+(accessed) 259.13 489.67 T
+(by) 311.45 489.67 T
+(cloud_spec_mod) 328.81 489.67 T
+(will) 427.04 489.67 T
+(talk) 452.17 489.67 T
+(to) 476.52 489.67 T
+(the) 490.77 489.67 T
+(asso-) 511.23 489.67 T
+(ciated cloud parameterization modules, if the) 72 472.67 T
+(y e) 324.52 472.67 T
+(xist, in order to obtain the cloud) 341.02 472.67 T
+(data) 72 455.67 T
+(which) 98.27 455.67 T
+(will) 135.44 455.67 T
+(ultimately) 160.18 455.67 T
+(be) 219.91 455.67 T
+(passed) 236.07 455.67 T
+(to) 276.35 455.67 T
+(the) 290.19 455.67 T
+(radiation) 310.25 455.67 T
+(package.) 362.97 455.67 T
+(\050The) 415.29 455.67 T
+(simpler) 444.67 455.67 T
+(schemes) 489.62 455.67 T
+(may not ha) 72 438.67 T
+(v) 133.94 438.67 T
+(e a speci\336c parameterization module\051. There is not a lo) 140.73 438.67 T
+(wer le) 448.31 438.67 T
+(v) 482.55 438.67 T
+(el set of) 489.34 438.67 T
+(sea_esf_rad modules which are accessed.) 72 421.67 T
+(      Sea_esf_rad_mod accesses the follo) 72 387.67 T
+(wing modules:) 294.43 387.67 T
+(          to obtain longw) 72 353.67 T
+(a) 194.75 353.67 T
+(v) 200.69 353.67 T
+(e heating rates and \337ux) 207.48 353.67 T
+(es:) 337.13 353.67 T
+(                       atmos_param/sea_esf_rad/longw) 72 336.67 T
+(a) 336.66 336.67 T
+(v) 342.59 336.67 T
+(e_dri) 349.38 336.67 T
+(v) 377.8 336.67 T
+(er) 384.59 336.67 T
+(.f90) 394.7 336.67 T
+(          to obtain shortw) 72 302.67 T
+(a) 197.86 302.67 T
+(v) 203.8 302.67 T
+(e heating rates and \337ux) 210.59 302.67 T
+(es:) 340.24 302.67 T
+(                       atmos_param/sea_esf_rad/shortw) 72 285.67 T
+(a) 339.76 285.67 T
+(v) 345.7 285.67 T
+(e_dri) 352.49 285.67 T
+(v) 380.91 285.67 T
+(er) 387.7 285.67 T
+(.f90) 397.81 285.67 T
+(          to obtain radiation column diagnostics :) 72 251.67 T
+(                        atmos_param/sea_esf_rad/radiation_diag.f90) 72 234.67 T
+(      Rad_output_\336le_mod does not access an) 72 200.67 T
+(y lo) 321.44 200.67 T
+(wer) 342.48 200.67 T
+(-le) 363.19 200.67 T
+(v) 377.61 200.67 T
+(el radiation modules.) 384.4 200.67 T
+(       Cloudrad_package_mod accesses the follo) 72 149.67 T
+(wing modules:) 334.49 149.67 T
+(           to obtain microph) 72 132.67 T
+(ysically-based cloud radiati) 209.98 132.67 T
+(v) 363.61 132.67 T
+(e properties, when needed:) 370.4 132.67 T
+(                         atmos_param/sea_esf_rad/microph) 72 115.67 T
+(ys_rad.f90) 355.39 115.67 T
+(           to obtain b) 72 81.67 T
+(ulk-ph) 170.11 81.67 T
+(ysics based cloud radiati) 206.6 81.67 T
+(v) 343.5 81.67 T
+(e properties, when needed:) 350.29 81.67 T
+FMENDPAGE
+%%EndPage: "7" 7
+%%Page: "8" 8
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(                         atmos_param/sea_esf_rad/b) 72 710.67 T
+(ulkph) 315.52 710.67 T
+(ys_rad.f90) 347.34 710.67 T
+(           to produce netcdf diagnostics related to the clouds and cloud radiati) 72 676.67 T
+(v) 488.86 676.67 T
+(e) 495.65 676.67 T
+(           properties seen by the radiation package:) 72 659.67 T
+(                         atmos_param/sea_esf_rad/cloudrad_diagnostics.f90) 72 642.67 T
+(      Aerosolrad_package_mod does not access lo) 72 608.67 T
+(wer) 343.81 608.67 T
+(-le) 364.52 608.67 T
+(v) 378.94 608.67 T
+(el radiation routines.) 385.73 608.67 T
+0 F
+(4. Le) 72 574.67 T
+(v) 101.34 574.67 T
+(el 4 modules \050accessed by Le) 108.2 574.67 T
+(v) 277.93 574.67 T
+(el 3 modules\051) 284.79 574.67 T
+1 F
+(        Longw) 72 540.67 T
+(a) 139.52 540.67 T
+(v) 145.46 540.67 T
+(e_dri) 152.25 540.67 T
+(v) 180.67 540.67 T
+(er_mod accesses the internal dri) 187.46 540.67 T
+(v) 366.73 540.67 T
+(er for the longw) 373.52 540.67 T
+(a) 463.19 540.67 T
+(v) 469.12 540.67 T
+(e radiation) 475.91 540.67 T
+(parameterizations a) 72 523.67 T
+(v) 180.96 523.67 T
+(ailable in the sea-esf radiation package. Currently only one) 187.61 523.67 T
+(package is a) 72 506.67 T
+(v) 140.14 506.67 T
+(ailable, seal) 146.79 506.67 T
+(w99.  It is accessed at) 212.74 506.67 T
+(                          atmos_param/sea_esf_rad/seal) 72 489.67 T
+(w99.f90) 333.93 489.67 T
+(        Shortw) 72 455.67 T
+(a) 140.31 455.67 T
+(v) 146.24 455.67 T
+(e_dri) 153.03 455.67 T
+(v) 181.45 455.67 T
+(er_mod accesses the a) 188.24 455.67 T
+(v) 311.97 455.67 T
+(ailable shortw) 318.62 455.67 T
+(a) 397.42 455.67 T
+(v) 403.35 455.67 T
+(e parameterizations;) 410.14 455.67 T
+(              to access the Lacis-Hansen shortw) 72 438.67 T
+(a) 313.7 438.67 T
+(v) 319.63 438.67 T
+(e parameterization:) 326.42 438.67 T
+(                           atmos_param/sea_esf_rad/lhsw_dri) 72 421.67 T
+(v) 364.45 421.67 T
+(er) 371.24 421.67 T
+(.f90) 381.34 421.67 T
+(              to access the esf99 shortw) 72 387.67 T
+(a) 267.05 387.67 T
+(v) 272.98 387.67 T
+(e parameterization:) 279.77 387.67 T
+(                            atmos_param/sea_esf_rad/esfsw99.f90) 72 370.67 T
+(        Radiation_diag_mod does not access an) 72 319.67 T
+(y lo) 323.76 319.67 T
+(wer) 344.8 319.67 T
+(-le) 365.51 319.67 T
+(v) 379.93 319.67 T
+(el modules.) 386.72 319.67 T
+(         Microph) 72 285.67 T
+(ys_rad_mod does not access an) 151.65 285.67 T
+(y lo) 327.18 285.67 T
+(wer) 348.22 285.67 T
+(-le) 368.93 285.67 T
+(v) 383.35 285.67 T
+(el modules.) 390.14 285.67 T
+(Bulkph) 106.96 251.67 T
+(ys_rad_mod) 148.12 251.67 T
+(accesses) 220.84 251.67 T
+(the) 271.75 251.67 T
+(cloud) 292.36 251.67 T
+(parameterization) 326.96 251.67 T
+(wrapper) 424.54 251.67 T
+(modules) 473.9 251.67 T
+(as) 524.84 251.67 T
+(described under Le) 72 234.67 T
+(v) 178.95 234.67 T
+(el 1 module cloud_spec_mod.) 185.74 234.67 T
+(          Cloudrad_diagnostics_mod accesses the radiati) 72 149.67 T
+(v) 371.45 149.67 T
+(e properties module associ-) 378.24 149.67 T
+(ated with the strat_cloud parameterization and a diagnostic module used to relate) 72 132.67 T
+(the model clouds to the ISCCP cloud types:) 72 115.67 T
+(                        atmos_param/sea_esf_rad/isccp_clouds.f90) 72 98.67 T
+FMENDPAGE
+%%EndPage: "8" 8
+%%Page: "9" 9
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+0 14 Q
+0 X
+(5. Le) 72 710.67 T
+(v) 101.34 710.67 T
+(el 5 modules \050accessed by Le) 108.2 710.67 T
+(v) 277.93 710.67 T
+(el 4 modules\051) 284.79 710.67 T
+1 F
+(Seal) 114 676.67 T
+(w99_mod is the internal dri) 137.97 676.67 T
+(v) 292.39 676.67 T
+(er for the sea99 l) 299.18 676.67 T
+(w radiation package. The) 393.12 676.67 T
+(component modules making up this package are:) 72 659.67 T
+(                    atmos_param/sea_esf_rad/longw) 72 642.67 T
+(a) 326.16 642.67 T
+(v) 332.09 642.67 T
+(e_clouds.f90) 338.88 642.67 T
+(                    atmos_param/sea_esf_rad/longw) 72 625.67 T
+(a) 326.16 625.67 T
+(v) 332.09 625.67 T
+(e_\337ux) 338.88 625.67 T
+(es.f90) 373.67 625.67 T
+(                    atmos_param/sea_esf_rad/longw) 72 608.67 T
+(a) 326.16 608.67 T
+(v) 332.09 608.67 T
+(e_tables.f90) 338.88 608.67 T
+(                    atmos_param/sea_esf_rad/optical_path.f90) 72 591.67 T
+(                    atmos_param/sea_esf_rad/g) 72 574.67 T
+(as_tf.f90) 298.23 574.67 T
+(                    atmos_param/sea_esf_rad/l) 72 557.67 T
+(w_g) 295.05 557.67 T
+(ases_stdtf.f90) 319.09 557.67 T
+(Esfsw99_mod) 112.22 523.67 T
+(is) 195.68 523.67 T
+(the) 208.37 523.67 T
+(internal) 228.83 523.67 T
+(dri) 274.95 523.67 T
+(v) 290.15 523.67 T
+(er) 296.95 523.67 T
+(for) 311.17 523.67 T
+(the) 330.85 523.67 T
+(esf99) 351.31 523.67 T
+(sw) 384.99 523.67 T
+(package.) 403.89 523.67 T
+(It) 459.96 523.67 T
+(has) 471.86 523.67 T
+(no) 493.88 523.67 T
+(com-) 511.23 523.67 T
+(ponent modules.) 72 506.67 T
+(Lhsw_dri) 113.3 472.67 T
+(v) 166.62 472.67 T
+(er_mod) 173.4 472.67 T
+(is) 219.62 472.67 T
+(the) 232.4 472.67 T
+(internal) 252.95 472.67 T
+(dri) 299.16 472.67 T
+(v) 314.36 472.67 T
+(er) 321.15 472.67 T
+(for) 335.47 472.67 T
+(the) 355.24 472.67 T
+(Lacis-Hansen) 375.79 472.67 T
+(sw) 456.2 472.67 T
+(package.) 475.2 472.67 T
+(It) 528 472.67 T
+(has no component modules.) 72 455.67 T
+(             Isccp_clouds_mod uses no lo) 72 421.67 T
+(wer) 281.64 421.67 T
+(-le) 302.34 421.67 T
+(v) 316.76 421.67 T
+(el radiation package modules.) 323.55 421.67 T
+0 F
+(C.  AM2 module r) 72 387.67 T
+(elationship chart) 180.23 387.67 T
+1 F
+(          F) 72 353.67 T
+(ollo) 114.57 353.67 T
+(wing is a summary of the relationship between the radiation package) 136.01 353.67 T
+(modules for those modules acti) 72 336.67 T
+(v) 246.64 336.67 T
+(e in the AM2 GCM.) 253.43 336.67 T
+(ph) 72 302.67 T
+(ysics_dri) 85.93 302.67 T
+(v) 136.13 302.67 T
+(er -->  aerosol) 142.92 302.67 T
+(ph) 72 268.67 T
+(ysics_dri) 85.93 268.67 T
+(v) 136.13 268.67 T
+(er --> radiati) 142.92 268.67 T
+(v) 213.44 268.67 T
+(e_g) 220.23 268.67 T
+(ases --> ozone) 240.38 268.67 T
+(ph) 72 234.67 T
+(ysics_dri) 85.93 234.67 T
+(v) 136.13 234.67 T
+(er --> cloud_spec --> strat_clouds_W) 142.92 234.67 T
+(ph) 72 200.67 T
+(ysics_dri) 85.93 200.67 T
+(v) 136.13 200.67 T
+(er --> radiation_dri) 142.92 200.67 T
+(v) 250 200.67 T
+(er --> rad_output_\336le) 256.79 200.67 T
+(ph) 72 183.67 T
+(ysics_dri) 85.93 183.67 T
+(v) 136.13 183.67 T
+(er --> radiation_dri) 142.92 183.67 T
+(v) 250 183.67 T
+(er --> aerosolrad_package) 256.79 183.67 T
+(ph) 72 166.67 T
+(ysics_dri) 85.93 166.67 T
+(v) 136.13 166.67 T
+(er --> radiation_dri) 142.92 166.67 T
+(v) 250 166.67 T
+(er --> astronomy) 256.79 166.67 T
+(ph) 72 149.67 T
+(ysics_dri) 85.93 149.67 T
+(v) 136.13 149.67 T
+(er --> radiation_dri) 142.92 149.67 T
+(v) 250 149.67 T
+(er --> diag_inte) 256.79 149.67 T
+(gral) 343.78 149.67 T
+(ph) 72 115.67 T
+(ysics_dri) 85.93 115.67 T
+(v) 136.13 115.67 T
+(er --> radiation_dri) 142.92 115.67 T
+(v) 250 115.67 T
+(er --> cloudrad_package --> microph) 256.79 115.67 T
+(ys_rad) 464.55 115.67 T
+(ph) 72 98.67 T
+(ysics_dri) 85.93 98.67 T
+(v) 136.13 98.67 T
+(er --> radiation_dri) 142.92 98.67 T
+(v) 250 98.67 T
+(er --> cloudrad_package -->) 256.79 98.67 T
+(                                                            cloudrad_diagnostics   --> isccp_clouds) 72 81.67 T
+FMENDPAGE
+%%EndPage: "9" 9
+%%Page: "10" 10
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 14 Q
+0 X
+(ph) 72 693.67 T
+(ysics_dri) 85.93 693.67 T
+(v) 136.13 693.67 T
+(er --> radiation_dri) 142.92 693.67 T
+(v) 250 693.67 T
+(er --> sea_esf_rad -->) 256.79 693.67 T
+(                                                            longw) 72 676.67 T
+(a) 316.86 676.67 T
+(v) 322.8 676.67 T
+(e_dri) 329.59 676.67 T
+(v) 358.01 676.67 T
+(er) 364.8 676.67 T
+(--> seal) 375.39 676.67 T
+(w99 -->) 417.74 676.67 T
+(                                                            g) 72 659.67 T
+(as_tf, l) 288.93 659.67 T
+(w_g) 326.9 659.67 T
+(ases_stdtf, optical_path,) 350.94 659.67 T
+(                                                            longw) 72 642.67 T
+(a) 316.86 642.67 T
+(v) 322.8 642.67 T
+(e_clouds, longw) 329.59 642.67 T
+(a) 421.22 642.67 T
+(v) 427.15 642.67 T
+(e_\337ux) 433.94 642.67 T
+(es,) 468.73 642.67 T
+(                                                            longw) 72 625.67 T
+(a) 316.86 625.67 T
+(v) 322.8 625.67 T
+(e_tables) 329.59 625.67 T
+(ph) 72 608.67 T
+(ysics_dri) 85.93 608.67 T
+(v) 136.13 608.67 T
+(er --> radiation_dri) 142.92 608.67 T
+(v) 250 608.67 T
+(er --> sea_esf_rad -->) 256.79 608.67 T
+(                                                            shortw) 72 591.67 T
+(a) 319.97 591.67 T
+(v) 325.9 591.67 T
+(e_dri) 332.69 591.67 T
+(v) 361.11 591.67 T
+(er) 367.9 591.67 T
+(--> esfsw99) 378.5 591.67 T
+(ph) 72 574.67 T
+(ysics_dri) 85.93 574.67 T
+(v) 136.13 574.67 T
+(er --> radiation_dri) 142.92 574.67 T
+(v) 250 574.67 T
+(er --> sea_esf_rad -->) 256.79 574.67 T
+(                                                            radiation_diag) 72 557.67 T
+(        The rad_utilities, esfsw_parameters and longw) 72 523.67 T
+(a) 361.53 523.67 T
+(v) 367.47 523.67 T
+(e_params modules may be) 374.26 523.67 T
+(accessed by an) 72 506.67 T
+(y of the abo) 154.98 506.67 T
+(v) 221.25 506.67 T
+(e modules.) 228.04 506.67 T
+0 F
+(D) 79 455.67 T
+(.    Namelist v) 88.83 455.67 T
+(ariables within the sea_esf_rad modules) 169.57 455.67 T
+1 F
+(In) 116.26 421.67 T
+(the) 131.32 421.67 T
+(follo) 151.84 421.67 T
+(wing) 177.93 421.67 T
+(table,) 209.34 421.67 T
+(v) 243.46 421.67 T
+(ariables) 250.11 421.67 T
+(in) 297.05 421.67 T
+0 F
+(bold) 311.35 421.67 T
+(type) 341.21 421.67 T
+1 F
+(denoted) 370.28 421.67 T
+(with) 418.01 421.67 T
+(\050) 446.3 421.67 T
+0 F
+(**\051) 454.37 421.67 T
+1 F
+(require) 476.43 421.67 T
+(the) 519.49 421.67 T
+(user to replace the def) 72 404.67 T
+(ault v) 195.48 404.67 T
+(alue with a realistic one when running the model) 226.63 404.67 T
+0 F
+(r) 72 387.67 T
+(egardless of what execution options ar) 77.96 387.67 T
+(e chosen) 305.2 387.67 T
+1 F
+(.  Other v) 355.36 387.67 T
+(ariables e) 407.89 387.67 T
+(xist which) 460.93 387.67 T
+(must be set to realistic v) 72 370.67 T
+(alues when the rele) 207.37 370.67 T
+(v) 314.7 370.67 T
+(ant option is chosen; these are also in) 321.35 370.67 T
+0 F
+(bold type) 72 353.67 T
+1 F
+(,  b) 127.62 353.67 T
+(ut denoted by  \050*\051. The v) 144.84 353.67 T
+(alues of an) 283.3 353.67 T
+(y v) 343.74 353.67 T
+(ariable may be changed as the) 360.89 353.67 T
+(user wishes; it is intended that internal checks will pre) 72 336.67 T
+(v) 375.34 336.67 T
+(ent the use of inconsistent) 382.13 336.67 T
+(options.) 72 319.67 T
+0 12 Q
+(T) 158.28 261 T
+(able 1: Namelist v) 165.18 261 T
+(ariables used with the sea-esf radiation package) 256.72 261 T
+1 F
+(Module) 107.33 221 T
+(V) 204.68 221 T
+(ariable Name) 212.01 221 T
+(Description) 344 221 T
+(Def) 461.07 228 T
+(ault) 478.93 228 T
+(V) 465.34 214 T
+(alue) 472.67 214 T
+(Other) 537.34 235 T
+(Acceptable) 524.01 221 T
+(V) 535 207 T
+(alues) 542.34 207 T
+(aerosol) 78 183 T
+0 F
+(*data_names) 186 183 T
+1 F
+(names of acti) 307 183 T
+(v) 370.68 183 T
+(e aerosol) 376.5 183 T
+(species) 307 169 T
+(\324       \324) 449 183 T
+(names con-) 521 183 T
+(tained in) 521 169 T
+(aerosol) 521 155 T
+(input \336le) 521 141 T
+0 F
+(*\336lename) 186 119 T
+1 F
+(name of netcdf \336le con-) 307 119 T
+(taining aerosol data) 307 105 T
+(\324        \324) 449 119 T
+72 250.75 72 97.25 2 L
+V
+0.5 H
+0 Z
+N
+180 251.25 180 96.75 2 L
+V
+N
+301 251.25 301 96.75 2 L
+V
+N
+443 251.25 443 96.75 2 L
+V
+N
+515 251.25 515 96.75 2 L
+V
+N
+587 250.75 587 97.25 2 L
+V
+N
+71.75 251 587.25 251 2 L
+V
+N
+72.25 198.25 586.75 198.25 2 L
+V
+N
+72.25 195.75 586.75 195.75 2 L
+V
+N
+71.75 133 587.25 133 2 L
+V
+N
+71.75 97 587.25 97 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "10" 10
+%%Page: "11" 11
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(f) 186 634 T
+(amily_names) 189.88 634 T
+(names gi) 307 634 T
+(v) 349.7 634 T
+(en to aerosol) 355.52 634 T
+(f) 307 620 T
+(amilies) 310.88 620 T
+(\324       \324) 449 634 T
+(use_aerosol_time_seri) 186 598 T
+(es) 186 584 T
+(use a timeseries pro) 307 598 T
+(viding) 401.8 598 T
+(interannual aerosol v) 307 584 T
+(aria-) 407.34 584 T
+(tion ?) 307 570 T
+(.f) 449 598 T
+(alse.) 455.88 598 T
+(aerosol_dataset_entry) 186 548 T
+(time in aerosol timeseries) 307 548 T
+(that is mapped to model) 307 534 T
+(initial time) 307 520 T
+(1,1,1,1,1,1) 449 548 T
+(in_f) 186 498 T
+(amily[1,2,3,...9]) 205.21 498 T
+(aerosol) 307 498 T
+(species) 344.62 498 T
+(n) 382.24 498 T
+(is) 391.2 498 T
+(in) 402.17 498 T
+(f) 414.46 498 T
+(am-) 418.34 498 T
+(ily number [1,2,3, ....9] ?) 307 484 T
+(.f) 449 498 T
+(alse.) 455.88 498 T
+(aerosol_data_source) 186 462 T
+(source of aerosol data) 307 462 T
+(\325climatol-) 449 462 T
+(ogy\325) 449 448 T
+(\325calculate_c) 521 462 T
+(olumn\325,) 521 448 T
+(\324input\325,) 521 434 T
+(lonb_col) 186 398 T
+(longitudes de\336ning the) 307 398 T
+(re) 307 384 T
+(gion to use for column) 316.14 384 T
+( data calculation) 307 370 T
+(\050/-999, -) 449 398 T
+(999/\051) 449 384 T
+(latb_col) 186 348 T
+(latitudes de\336ning the) 307 348 T
+(re) 307 334 T
+(gion to use for column) 316.14 334 T
+( data calculation) 307 320 T
+(\050/-999, -) 449 348 T
+(999\051/) 449 334 T
+(time_col) 186 298 T
+(time to use for column) 307 298 T
+(data calculation) 307 284 T
+(\050/) 449 298 T
+(0,0,0,0,0,0/\051) 449 284 T
+(v) 186 262 T
+(olc_in_f) 191.76 262 T
+(am_col_opt_) 231.64 262 T
+(depth[1,2,3,...9]) 186 248 T
+(is) 307 262 T
+(the) 317.13 262 T
+(v) 333.91 262 T
+(olcanic) 339.67 262 T
+(contrib) 376.45 262 T
+(ution) 410.21 262 T
+(to column optical depth to) 307 248 T
+(be) 307 234 T
+(included) 321.29 234 T
+(for) 365.58 234 T
+(this) 382.53 234 T
+(f) 402.83 234 T
+(amily) 406.7 234 T
+(in) 307 220 T
+(the) 319.14 220 T
+(netcdf) 336.6 220 T
+(output) 369.39 220 T
+(\336elds) 402.87 220 T
+(?) 431.67 220 T
+(.f) 449 262 T
+(alse.) 455.88 262 T
+(aerosolrad_package) 78 198 T
+(do_l) 186 198 T
+(w) 207.22 198 T
+(aerosol) 215.76 198 T
+(aerosol ef) 307 198 T
+(fects included in) 353.68 198 T
+(l) 307 184 T
+(w radiation ?) 310.22 184 T
+(.f) 449 198 T
+(alse.) 455.88 198 T
+(do_sw) 186 162 T
+(aerosol) 217.21 162 T
+(aerosol ef) 307 162 T
+(fects included in) 353.68 162 T
+(sw radiation ?) 307 148 T
+(.f) 449 162 T
+(alse.) 455.88 162 T
+0 F
+(*aer) 186 126 T
+(osol_data_set) 208.44 126 T
+1 F
+(source of aerosol data) 307 126 T
+(\324    \324) 449 126 T
+(\324shettle-) 521 126 T
+(fenn\325, \324pre-) 521 112 T
+(dicted) 521 98 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 90.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 89.75 2 L
+V
+N
+301 702.25 301 89.75 2 L
+V
+N
+443 702.25 443 89.75 2 L
+V
+N
+515 702.25 515 89.75 2 L
+V
+N
+587 701.75 587 90.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 612 587.25 612 2 L
+V
+N
+71.75 562 587.25 562 2 L
+V
+N
+71.75 512 587.25 512 2 L
+V
+N
+71.75 476 587.25 476 2 L
+V
+N
+71.75 412 587.25 412 2 L
+V
+N
+71.75 362 587.25 362 2 L
+V
+N
+71.75 312 587.25 312 2 L
+V
+N
+71.75 276 587.25 276 2 L
+V
+N
+71.75 212 587.25 212 2 L
+V
+N
+71.75 176 587.25 176 2 L
+V
+N
+71.75 140 587.25 140 2 L
+V
+N
+71.75 90 587.25 90 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "11" 11
+%%Page: "12" 12
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+0 12 Q
+0 X
+(*aer) 186 634 T
+(osol_optical_na) 208.44 634 T
+(mes) 186 620 T
+1 F
+(names associated with) 307 634 T
+(acti) 307 620 T
+(v) 324.03 620 T
+(e) 329.85 620 T
+(aerosol) 338.01 620 T
+(optical) 375.51 620 T
+(prop-) 411.01 620 T
+(erty types) 307 606 T
+(\324      \324) 449 634 T
+(see module) 521 634 T
+(for) 521 620 T
+(a) 536.61 620 T
+(v) 541.69 620 T
+(ailable) 547.39 620 T
+(set, names) 521 606 T
+(contained) 521 592 T
+(in) 569.66 592 T
+(optical_\336len) 521 578 T
+(ame) 521 564 T
+0 F
+(*optical \336lename) 186 542 T
+1 F
+(name of \336le containing) 307 542 T
+(optical property types) 307 528 T
+(\324         \324) 449 542 T
+(using_v) 186 506 T
+(olcanic_l) 223.76 506 T
+(w_\336l) 267.64 506 T
+(es) 186 492 T
+(v) 307 506 T
+(olcanic aerosol optical) 312.76 506 T
+(properties are supplied  to) 307 492 T
+(the l) 307 478 T
+(w radiation code?) 327.88 478 T
+(.f) 449 506 T
+(alse.) 455.88 506 T
+(using_v) 186 456 T
+(olcanic_sw_\336l) 223.76 456 T
+(es) 186 442 T
+(v) 307 456 T
+(olcanic aerosol optical) 312.76 456 T
+(properties are supplied to) 307 442 T
+(the sw radiation code ?) 307 428 T
+(.f) 449 456 T
+(alse.) 455.88 456 T
+0 F
+(*[sw_ext, sw_ssa,) 186 406 T
+(sw_asy) 186 392 T
+(, lw_ext,) 221.34 392 T
+(lw_ssa,) 186 378 T
+(lw_asy]_\336lename) 186 364 T
+1 F
+(name of \336le in which the) 307 406 T
+(speci\336ed v) 307 392 T
+(olcanic aerosol) 358.42 392 T
+(optical) 307 378 T
+(properties) 342.47 378 T
+(are) 393.27 378 T
+(to) 410.72 378 T
+(be) 422.87 378 T
+(found) 307 364 T
+(\324  \324) 449 406 T
+0 F
+(*[sw_ext, sw_ssa,) 186 342 T
+(sw_asy) 186 328 T
+(, lw_ext,) 221.34 328 T
+(lw_ssa, lw_asy]_r) 186 314 T
+(oot) 275.11 314 T
+1 F
+(root v) 307 342 T
+(ariable name of the) 335.03 342 T
+(\336eld in each \336le) 307 328 T
+(\324   \324) 449 342 T
+0 F
+(v) 186 292 T
+(olcanic_dataset_ent) 191.88 292 T
+(ry) 186 278 T
+1 F
+(time in v) 307 292 T
+(olcanic data time) 349.43 292 T
+(series that is to be mapped) 307 278 T
+(to the model initial time) 307 264 T
+(1,1,1,0,0,0) 449 292 T
+0 F
+(inter) 186 242 T
+(polating_v) 210.54 242 T
+(olcan) 264.43 242 T
+(ic_data) 186 228 T
+1 F
+(v) 307 242 T
+(olcanic) 312.76 242 T
+(data) 350.4 242 T
+(is) 373.38 242 T
+(to) 384.37 242 T
+(be) 396.69 242 T
+(inter-) 411.01 242 T
+(polated \050rather than using) 307 228 T
+(the monthly v) 307 214 T
+(alues for the) 373.37 214 T
+(entire month and chang-) 307 200 T
+(ing as the month changes\051) 307 186 T
+(?) 307 172 T
+(.true.) 449 242 T
+(astronomy) 78 150 T
+(ecc) 186 150 T
+(orbital eccentricity) 307 150 T
+(0.01671) 449 150 T
+(obliq) 186 128 T
+(obliquity) 307 128 T
+(23.439) 449 128 T
+(per) 186 106 T
+(longitude of perihelion) 307 106 T
+(102.932) 449 106 T
+(period) 186 84 T
+(length of year) 307 84 T
+(0) 449 84 T
+(see module) 521 84 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 76.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 75.75 2 L
+V
+N
+301 702.25 301 75.75 2 L
+V
+N
+443 702.25 443 75.75 2 L
+V
+N
+515 702.25 515 75.75 2 L
+V
+N
+587 701.75 587 76.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 556 587.25 556 2 L
+V
+N
+71.75 520 587.25 520 2 L
+V
+N
+71.75 470 587.25 470 2 L
+V
+N
+71.75 420 587.25 420 2 L
+V
+N
+71.75 356 587.25 356 2 L
+V
+N
+71.75 306 587.25 306 2 L
+V
+N
+71.75 256 587.25 256 2 L
+V
+N
+71.75 164 587.25 164 2 L
+V
+N
+71.75 142 587.25 142 2 L
+V
+N
+71.75 120 587.25 120 2 L
+V
+N
+71.75 98 587.25 98 2 L
+V
+N
+71.75 76 587.25 76 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "12" 12
+%%Page: "13" 13
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(day_ae) 186 634 T
+(day of speci\336ed autumnal) 307 634 T
+(equinox) 307 620 T
+(23) 449 634 T
+(month_ae) 186 598 T
+(month of speci\336ed autum-) 307 598 T
+(nal equinox) 307 584 T
+(9) 449 598 T
+(year_ae) 186 562 T
+(year of speci\336ed autumnal) 307 562 T
+(equinox) 307 548 T
+(1998) 449 562 T
+(hour_ae) 186 526 T
+(hour of speci\336ed autum-) 307 526 T
+(nal equinox) 307 512 T
+(5) 449 526 T
+(minute_ae) 186 490 T
+(minute of speci\336ed autum-) 307 490 T
+(nal equinox) 307 476 T
+(37) 449 490 T
+(second_ae) 186 454 T
+(second of speci\336ed autum-) 307 454 T
+(nal equinox) 307 440 T
+(0) 449 454 T
+(num_angles) 186 418 T
+(number of interv) 307 418 T
+(als in yr) 387.35 418 T
+(used to calculate orbital) 307 404 T
+(positions) 307 390 T
+(3600) 449 418 T
+(b) 78 368 T
+(ulkph) 83.76 368 T
+(ys_rad) 111.04 368 T
+(dummy) 186 368 T
+(dummy v) 307 368 T
+(ariable) 352.37 368 T
+( 1) 449 368 T
+(cloudrad_diagnosti) 78 346 T
+(cs) 78 332 T
+(do_isccp) 186 346 T
+(the) 307 346 T
+(isccp) 324.6 346 T
+(simulator) 352.2 346 T
+(code) 400.47 346 T
+(is) 426.06 346 T
+(to be e) 307 332 T
+(x) 338.81 332 T
+(ecuted ?) 344.63 332 T
+(.f) 449 346 T
+(alse.) 455.88 346 T
+(isccp_actual_radprops) 186 310 T
+(use GCM pro) 307 310 T
+(vided radia-) 372.15 310 T
+(ti) 307 296 T
+(v) 313.37 296 T
+(e properties ?) 319.19 296 T
+(.true.) 449 310 T
+(isccp_scale_f) 186 274 T
+(actor) 250.52 274 T
+(accounts for the  plane-) 307 274 T
+(parallel) 307 260 T
+(homogenous) 344.99 260 T
+(cloud) 408.33 260 T
+(bias) 307 246 T
+(0.85) 449 274 T
+(cloudrad_package) 78 224 T
+0 F
+(**micr) 186 224 T
+(oph) 221.77 224 T
+(ys_f) 240.94 224 T
+(orm) 261.3 224 T
+1 F
+(type of microph) 307 224 T
+(ysics to) 383.6 224 T
+(use when de\336ning cloud) 307 210 T
+(radiati) 307 196 T
+(v) 337.36 196 T
+(e properties) 343.18 196 T
+(\324                 \324) 449 224 T
+(\324none\325,) 521 224 T
+(\324pre-) 521 210 T
+(scribed\325,) 521 196 T
+(\324predicted\325) 521 182 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 174.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 173.75 2 L
+V
+N
+301 702.25 301 173.75 2 L
+V
+N
+443 702.25 443 173.75 2 L
+V
+N
+515 702.25 515 173.75 2 L
+V
+N
+587 701.75 587 174.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 612 587.25 612 2 L
+V
+N
+71.75 576 587.25 576 2 L
+V
+N
+71.75 540 587.25 540 2 L
+V
+N
+71.75 504 587.25 504 2 L
+V
+N
+71.75 468 587.25 468 2 L
+V
+N
+71.75 432 587.25 432 2 L
+V
+N
+71.75 382 587.25 382 2 L
+V
+N
+71.75 360 587.25 360 2 L
+V
+N
+71.75 324 587.25 324 2 L
+V
+N
+71.75 288 587.25 288 2 L
+V
+N
+71.75 238 587.25 238 2 L
+V
+N
+71.75 174 587.25 174 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "13" 13
+%%Page: "14" 14
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(cloud_spec) 78 634 T
+0 F
+(**cloud_type_f) 186 634 T
+(orm) 263.7 634 T
+1 F
+(cloud parameterization) 307 634 T
+(name) 307 620 T
+(\324         \324) 449 634 T
+(\324strat\325, \324rh\325,) 521 634 T
+(\324deep\325,) 521 620 T
+(\324strat-) 521 606 T
+(deep\325,) 521 592 T
+(\325zonal) 549.81 592 T
+(\325, \324obs\325,) 521 578 T
+(\324pre-) 521 564 T
+(scribed\325,) 521 550 T
+(\324diag\325,) 521 536 T
+(\324none\325,) 521 522 T
+(\324speci\336ed\325,) 521 508 T
+(\324not_sea_es) 521 494 T
+(f) 521 480 T
+(\325) 525.66 480 T
+(wtr_cld_ref) 186 458 T
+(f) 241.68 458 T
+(cloud drop ef) 307 458 T
+(fecti) 370.68 458 T
+(v) 391.71 458 T
+(e radius) 397.53 458 T
+(10 microns) 449 458 T
+(ice_cld_ref) 186 436 T
+(f) 239.68 436 T
+(ice cloud particle ef) 307 436 T
+(fecti) 401.67 436 T
+(v) 422.69 436 T
+(e) 428.51 436 T
+(size) 307 422 T
+(50 microns) 449 436 T
+(rain_ref) 186 400 T
+(f) 223.68 400 T
+(rain drop ef) 307 400 T
+(fecti) 362.68 400 T
+(v) 383.7 400 T
+(e radius) 389.52 400 T
+(250 microns) 449 400 T
+(o) 186 378 T
+(v) 191.82 378 T
+(erlap_type) 197.64 378 T
+(cloud o) 307 378 T
+(v) 342.48 378 T
+(erlap assumption) 348.3 378 T
+(\324random\325) 449 378 T
+(\324max-ran-) 521 378 T
+(dom\325) 521 364 T
+(doing_data_o) 186 342 T
+(v) 251.15 342 T
+(erride) 256.97 342 T
+(is the cloud input data to) 307 342 T
+(the) 307 328 T
+(radiation) 324.2 328 T
+(package) 369.4 328 T
+(to) 411.26 328 T
+(be) 423.13 328 T
+(replaced by that obtained) 307 314 T
+(from another \336le ?) 307 300 T
+(.f) 449 342 T
+(alse.) 455.88 342 T
+(diag_clouds_W) 78 278 T
+(num_slingo_bands) 186 278 T
+(number of w) 307 278 T
+(a) 368.2 278 T
+(v) 373.29 278 T
+(elength) 379.11 278 T
+(bands used in the slingo) 307 264 T
+(parameterization) 307 250 T
+(4) 449 278 T
+(taucrit) 186 228 T
+(critical optical depth at) 307 228 T
+(which) 307 214 T
+(solar) 338.67 214 T
+(beam) 364.34 214 T
+(becomes) 392.67 214 T
+(dif) 307 200 T
+(fuse) 320.03 200 T
+(1.0) 449 228 T
+(diag_inte) 78 178 T
+(gral) 122.48 178 T
+(\336le_name) 186 178 T
+(name of \336le to which inte-) 307 178 T
+(grals are written) 307 164 T
+(\324    \324) 449 178 T
+0 F
+(**output_inter) 186 142 T
+(v) 262.55 142 T
+(al) 268.43 142 T
+1 F
+(interv) 307 142 T
+(al at which to output) 334.7 142 T
+(inte) 307 128 T
+(grals) 324.82 128 T
+(-1) 449 142 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 120.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 119.75 2 L
+V
+N
+301 702.25 301 119.75 2 L
+V
+N
+443 702.25 443 119.75 2 L
+V
+N
+515 702.25 515 119.75 2 L
+V
+N
+587 701.75 587 120.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 472 587.25 472 2 L
+V
+N
+71.75 450 587.25 450 2 L
+V
+N
+71.75 414 587.25 414 2 L
+V
+N
+71.75 392 587.25 392 2 L
+V
+N
+71.75 356 587.25 356 2 L
+V
+N
+71.75 292 587.25 292 2 L
+V
+N
+71.75 242 587.25 242 2 L
+V
+N
+71.75 192 587.25 192 2 L
+V
+N
+71.75 156 587.25 156 2 L
+V
+N
+71.75 120 587.25 120 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "14" 14
+%%Page: "15" 15
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(time_units) 186 634 T
+(units of output_interv) 307 634 T
+(al) 410.7 634 T
+(\324hours\325) 449 634 T
+(\324days\325, \324sec-) 521 634 T
+(onds\325, \324min-) 521 620 T
+(utes\325) 521 606 T
+(print_header) 186 584 T
+(print a header for the inte-) 307 584 T
+(grals \336le ?) 307 570 T
+(.true.) 449 584 T
+(\336elds_per_print_line) 186 548 T
+(number) 307 548 T
+(of) 346 548 T
+(\336elds) 358.33 548 T
+(per) 386.67 548 T
+(line) 404.33 548 T
+(of) 424.67 548 T
+(output) 307 534 T
+(4) 449 548 T
+(donner_deep_cloud) 78 512 T
+(s_W) 78 498 T
+(using_dge_swe) 186 512 T
+(use Fu\0501998\051 scheme for) 307 512 T
+(ice sw optical depth ?) 307 498 T
+(.true.) 449 512 T
+(using_dge_l) 186 476 T
+(w) 244.55 476 T
+(use Fu\0501998\051 scheme for) 307 476 T
+(ice l) 307 462 T
+(w optical depth ?) 327.21 462 T
+(.true.) 449 476 T
+(esfsw_dri) 78 440 T
+(v) 124.36 440 T
+(er) 130.18 440 T
+(do_rayleigh_all_band) 186 440 T
+(s) 186 426 T
+(rayleigh scattering is) 307 440 T
+(applied to all sw bands ?) 307 426 T
+(.true.) 449 440 T
+(do_ica_calcs) 186 404 T
+(compute independent col-) 307 404 T
+(umn v) 307 390 T
+(alues for sw \337ux) 337.04 390 T
+(es) 416.51 390 T
+(\050stochastic cloud option\051) 307 376 T
+(.f) 449 404 T
+(alse.) 455.88 404 T
+(do_herzber) 186 354 T
+(g) 239.76 354 T
+(add the herzber) 307 354 T
+(g sw ef) 380.75 354 T
+(fect) 415.11 354 T
+(?) 307 340 T
+(.f) 449 354 T
+(alse.) 455.88 354 T
+(do_quench) 186 318 T
+(add the sw quenching f) 307 318 T
+(ac-) 418.19 318 T
+(tor ?) 307 304 T
+(.f) 449 318 T
+(alse.) 455.88 318 T
+(esfsw_parameters) 78 282 T
+0 F
+(**sw_r) 186 282 T
+(esolution) 222.44 282 T
+1 F
+(will allo) 307 282 T
+(w ability to use) 346.37 282 T
+(either high or lo) 307 268 T
+(w resolu-) 383.69 268 T
+(tion spectral parameteriza-) 307 254 T
+(tion) 307 240 T
+(\324          \324) 449 282 T
+(\324high\325,) 521 282 T
+(\324lo) 521 268 T
+(w\325) 534.03 268 T
+0 F
+(**sw_diff_str) 186 218 T
+(eams) 255.11 218 T
+1 F
+(number of streams of dif-) 307 218 T
+(fuse radiation) 307 204 T
+(0) 449 218 T
+(select) 521 218 T
+(either) 551 218 T
+(1 or 4) 521 204 T
+(g) 78 182 T
+(as_tf) 83.94 182 T
+(interp_form) 186 182 T
+(the form of table interpola-) 307 182 T
+(tion to be used when cal-) 307 168 T
+(culating the transmission) 307 154 T
+(functions) 307 140 T
+(\324log\324) 449 182 T
+(\324linear\325) 521 182 T
+(do_calcstdch4tfs) 186 118 T
+(calculate the ch4 tfs) 307 118 T
+(.true.) 449 118 T
+(do_writestdch4tfs) 186 96 T
+(write) 307 96 T
+(the) 334.41 96 T
+(ch4) 351.83 96 T
+(tfs) 371.91 96 T
+(to) 386.66 96 T
+(a) 398.74 96 T
+(\336le) 406.83 96 T
+(to) 424.91 96 T
+(sa) 307 82 T
+(v) 316.76 82 T
+(e) 322.58 82 T
+(.f) 449 96 T
+(alse.) 455.88 96 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 74.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 73.75 2 L
+V
+N
+301 702.25 301 73.75 2 L
+V
+N
+443 702.25 443 73.75 2 L
+V
+N
+515 702.25 515 73.75 2 L
+V
+N
+587 701.75 587 74.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 598 587.25 598 2 L
+V
+N
+71.75 562 587.25 562 2 L
+V
+N
+71.75 526 587.25 526 2 L
+V
+N
+71.75 490 587.25 490 2 L
+V
+N
+71.75 454 587.25 454 2 L
+V
+N
+71.75 418 587.25 418 2 L
+V
+N
+71.75 368 587.25 368 2 L
+V
+N
+71.75 332 587.25 332 2 L
+V
+N
+71.75 296 587.25 296 2 L
+V
+N
+71.75 232 587.25 232 2 L
+V
+N
+71.75 196 587.25 196 2 L
+V
+N
+71.75 132 587.25 132 2 L
+V
+N
+71.75 110 587.25 110 2 L
+V
+N
+71.75 74 587.25 74 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "15" 15
+%%Page: "16" 16
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(do_readstdch4tfs) 186 634 T
+(read the ch4 tfs  from a \336le) 307 634 T
+(.f) 449 634 T
+(alse.) 455.88 634 T
+(do _calcstdn2otfs) 186 612 T
+(calculate the n2o tfs) 307 612 T
+(.true.) 449 612 T
+(do_writestdn2otfs) 186 590 T
+(write the n2o tfs to a \336le) 307 590 T
+(.f) 449 590 T
+(alse.) 455.88 590 T
+(do_readstdn2otfs) 186 568 T
+(read the n2o tfs from a \336le) 307 568 T
+(.f) 449 568 T
+(alse.) 455.88 568 T
+(do_calcstdco2tfs) 186 546 T
+(calculate the co2 tfs) 307 546 T
+(.true.) 449 546 T
+(do_writestdco2tfs) 186 524 T
+(write the co2 tfs to a \336le) 307 524 T
+(.f) 449 524 T
+(alse.) 455.88 524 T
+(do_readstdco2tfs) 186 502 T
+(read the tfs from a \336le) 307 502 T
+(.f) 449 502 T
+(alse.) 455.88 502 T
+(isccp_clouds) 78 480 T
+(ncol) 186 480 T
+(number) 307 480 T
+(of) 345.93 480 T
+(columns) 358.19 480 T
+(used) 401.13 480 T
+(in) 425.39 480 T
+(ISCCP) 307 466 T
+(50) 449 480 T
+(top_height) 186 444 T
+(ho) 307 444 T
+(w to handle cloud top) 318.7 444 T
+(height in isccp analysis) 307 430 T
+(1) 449 444 T
+(2, 3 -- see) 521 444 T
+(module for) 521 430 T
+(e) 521 416 T
+(xplanation) 526.15 416 T
+(isccp_taumin) 186 394 T
+(minimum optical depth) 307 394 T
+(seen by ISCCP) 307 380 T
+(0.3) 449 394 T
+(emsfcl) 186 358 T
+(w) 217.87 358 T
+(assumed constant fraction) 307 358 T
+(of surf) 307 344 T
+(ace l) 338.54 344 T
+(w emissi) 360.74 344 T
+(vity) 402.77 344 T
+(0.94) 449 358 T
+(do_sunlit_only) 186 322 T
+(diagnostics done during) 307 322 T
+(sunlit hours only ?) 307 308 T
+(.f) 449 322 T
+(alse.) 455.88 322 T
+(o) 186 286 T
+(v) 191.82 286 T
+(erlap) 197.64 286 T
+(o) 307 286 T
+(v) 312.82 286 T
+(erlap) 318.64 286 T
+(assumption) 344.72 286 T
+(used) 401.48 286 T
+(in) 425.57 286 T
+(isccp_cloud module) 307 272 T
+(2 \050random) 449 286 T
+(o) 449 272 T
+(v) 454.82 272 T
+(erlap\051) 460.64 272 T
+(1 = maxi-) 521 286 T
+(mum, 3=) 521 272 T
+(maximum-) 521 258 T
+(random) 521 244 T
+(minColsInhomo) 186 222 T
+(minimum number of) 307 222 T
+(cloudy) 307 208 T
+(subcolumns) 341.67 208 T
+(needed) 401.01 208 T
+(to do inhomogeneous cal-) 307 194 T
+(culation) 307 180 T
+(3) 449 222 T
+(lhsw_dri) 78 158 T
+(v) 119.7 158 T
+(er) 125.52 158 T
+(dummy) 186 158 T
+(dummy v) 307 158 T
+(ariable) 352.37 158 T
+(0.0) 449 158 T
+(nbands_to_use) 186 136 T
+(number of sw bands) 307 136 T
+(9) 449 136 T
+(12) 521 136 T
+(calculate_o2_absorpti) 186 114 T
+(on) 186 100 T
+(O2 absorption ef) 307 114 T
+(fects) 387.35 114 T
+(should be included ?) 307 100 T
+(.f) 449 114 T
+(alse.) 455.88 114 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 92.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 91.75 2 L
+V
+N
+301 702.25 301 91.75 2 L
+V
+N
+443 702.25 443 91.75 2 L
+V
+N
+515 702.25 515 91.75 2 L
+V
+N
+587 701.75 587 92.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 626 587.25 626 2 L
+V
+N
+71.75 604 587.25 604 2 L
+V
+N
+71.75 582 587.25 582 2 L
+V
+N
+71.75 560 587.25 560 2 L
+V
+N
+71.75 538 587.25 538 2 L
+V
+N
+71.75 516 587.25 516 2 L
+V
+N
+71.75 494 587.25 494 2 L
+V
+N
+71.75 458 587.25 458 2 L
+V
+N
+71.75 408 587.25 408 2 L
+V
+N
+71.75 372 587.25 372 2 L
+V
+N
+71.75 336 587.25 336 2 L
+V
+N
+71.75 300 587.25 300 2 L
+V
+N
+71.75 236 587.25 236 2 L
+V
+N
+71.75 172 587.25 172 2 L
+V
+N
+71.75 150 587.25 150 2 L
+V
+N
+71.75 128 587.25 128 2 L
+V
+N
+71.75 92 587.25 92 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "16" 16
+%%Page: "17" 17
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(longw) 78 634 T
+(a) 107.88 634 T
+(v) 112.97 634 T
+(e_clouds) 118.79 634 T
+(dummy) 186 634 T
+(dummy v) 307 634 T
+(ariable) 352.37 634 T
+(.f) 449 634 T
+(alse.) 455.88 634 T
+(longw) 78 612 T
+(a) 107.88 612 T
+(v) 112.97 612 T
+(e_dri) 118.79 612 T
+(v) 143.15 612 T
+(er) 148.97 612 T
+(l) 186 612 T
+(wform) 189.22 612 T
+(character) 307 612 T
+(string) 353.87 612 T
+(describing) 384.11 612 T
+(l) 307 598 T
+(w parameterization being) 310.22 598 T
+(used) 307 584 T
+(\324seal) 449 612 T
+(w99\325) 471.54 612 T
+(longw) 78 562 T
+(a) 107.88 562 T
+(v) 112.97 562 T
+(e_\337ux) 118.79 562 T
+(es) 148.61 562 T
+(dummy) 186 562 T
+(dummy v) 307 562 T
+(ariable) 352.37 562 T
+(1.0) 449 562 T
+(longw) 78 540 T
+(a) 107.88 540 T
+(v) 112.97 540 T
+(e_params) 118.79 540 T
+(dummy) 186 540 T
+(dummy v) 307 540 T
+(ariable) 352.37 540 T
+(\324              \324) 449 540 T
+(longw) 78 518 T
+(a) 107.88 518 T
+(v) 112.97 518 T
+(e_tables) 118.79 518 T
+(dummy) 186 518 T
+(dummy v) 307 518 T
+(ariable) 352.37 518 T
+(1.0) 449 518 T
+(l) 78 496 T
+(w_g) 81.22 496 T
+(ases_stdtf) 101.82 496 T
+(do_coeintdiag) 186 496 T
+(include diagnostic print-) 307 496 T
+(out of some coef) 307 482 T
+(\336cients ?) 387.02 482 T
+(.f) 449 496 T
+(alse.) 455.88 496 T
+(nstdco2lvls) 186 460 T
+(number) 307 460 T
+(of) 345.95 460 T
+(le) 358.24 460 T
+(v) 366.61 460 T
+(els) 372.43 460 T
+(contained) 388.05 460 T
+(in  the tab) 307 446 T
+(ulated lbl tfs) 354.42 446 T
+(496) 449 460 T
+(pre) 521 460 T
+(viously) 536.02 460 T
+(w) 521 446 T
+(as 109.) 529.54 446 T
+(mgrp_prscr_clds) 78 424 T
+(dummy) 186 424 T
+(dummy v) 307 424 T
+(ariable) 352.37 424 T
+(0) 449 424 T
+(microph) 78 402 T
+(ys_cloud) 117.94 402 T
+(diam_liq) 186 402 T
+(diameter of liquid droplets) 307 402 T
+(33.2) 449 402 T
+(microns) 449 388 T
+(microph) 78 366 T
+(ys_rad) 117.94 366 T
+0 F
+(*lwem_f) 186 366 T
+(orm) 229.02 366 T
+1 F
+(l) 307 366 T
+(w emissi) 310.22 366 T
+(vity parameter-) 352.25 366 T
+(ization type) 307 352 T
+(\324   \324) 449 366 T
+(\324fuliou\325,) 521 366 T
+(\324ebertcurry\325) 521 352 T
+(optical_path) 78 330 T
+(dummy) 186 330 T
+(dummy v) 307 330 T
+(ariable) 352.37 330 T
+(0.0) 449 330 T
+(original_fms_rad) 78 308 T
+(lat_diag) 186 308 T
+(latitude for diagnostics) 307 308 T
+(column \050de) 307 294 T
+(grees\051) 361.14 294 T
+(-1000.) 449 308 T
+(-90. -> 90.) 521 308 T
+(long_diag) 186 272 T
+(longitude for diagnostics) 307 272 T
+(column \050de) 307 258 T
+(grees\051) 361.14 258 T
+(-1000.) 449 272 T
+(0. -> 360.) 521 272 T
+(solar_constant) 186 236 T
+(solar constant \050W/m**2\051) 307 236 T
+(1365.) 449 236 T
+(co2std) 186 214 T
+(co2 mixing ratio) 307 214 T
+(330.) 449 214 T
+(300.) 521 214 T
+(ratio) 186 192 T
+(f) 307 192 T
+(actor to multiply co2std) 310.88 192 T
+(by to get co2 v) 307 178 T
+(alue being) 378.03 178 T
+(used) 307 164 T
+(1.0) 449 192 T
+(0.5 - 4.0) 521 192 T
+(ozone) 78 142 T
+(basic_ozone_type) 186 142 T
+(label for ozone type) 307 142 T
+(\324clim_zonal) 449 142 T
+(\325) 449 128 T
+(\324time_v) 521 142 T
+(aryi) 558.03 142 T
+(ng\325,) 521 128 T
+(\324\336x) 521 114 T
+(ed_year\325) 537.49 114 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 106.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 105.75 2 L
+V
+N
+301 702.25 301 105.75 2 L
+V
+N
+443 702.25 443 105.75 2 L
+V
+N
+515 702.25 515 105.75 2 L
+V
+N
+587 701.75 587 106.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 626 587.25 626 2 L
+V
+N
+71.75 576 587.25 576 2 L
+V
+N
+71.75 554 587.25 554 2 L
+V
+N
+71.75 532 587.25 532 2 L
+V
+N
+71.75 510 587.25 510 2 L
+V
+N
+71.75 474 587.25 474 2 L
+V
+N
+71.75 438 587.25 438 2 L
+V
+N
+71.75 416 587.25 416 2 L
+V
+N
+71.75 380 587.25 380 2 L
+V
+N
+71.75 344 587.25 344 2 L
+V
+N
+71.75 322 587.25 322 2 L
+V
+N
+71.75 286 587.25 286 2 L
+V
+N
+71.75 250 587.25 250 2 L
+V
+N
+71.75 228 587.25 228 2 L
+V
+N
+71.75 206 587.25 206 2 L
+V
+N
+71.75 156 587.25 156 2 L
+V
+N
+71.75 106 587.25 106 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "17" 17
+%%Page: "18" 18
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(ozone_data_source) 186 634 T
+(source for ozone data) 307 634 T
+(\325fortuin_k) 449 634 T
+(el) 497.54 634 T
+(der\325) 449 620 T
+(\324input\325,) 521 634 T
+(\324gfdl_zonal) 521 620 T
+(_ozone\325,) 521 606 T
+(mozart_moz) 521 592 T
+(top_fk,) 521 578 T
+(mozart_trop) 521 564 T
+(_fk,calculat) 521 550 T
+(e_column) 521 536 T
+(clim_base_year) 186 514 T
+(year with which the ozone) 307 514 T
+(data set is associated) 307 500 T
+(\3241990\325) 449 514 T
+(\3241979\325,) 521 514 T
+(\3241997\325,) 521 500 T
+( \3241850\325,) 521 486 T
+(1860\325) 521 472 T
+(trans_data_type) 186 450 T
+(time_interpolation) 307 450 T
+(method) 398.33 450 T
+(to use) 307 436 T
+(\324linear\325) 449 450 T
+(gfdl_zonal_ozone_typ) 186 414 T
+(e) 186 400 T
+(time \337a) 307 414 T
+(v) 343.1 414 T
+(or of ozone data) 348.86 414 T
+(set to be used) 307 400 T
+(\324seasonally-) 449 414 T
+(v) 449 400 T
+(arying\325) 454.7 400 T
+(\324winter\325,) 521 414 T
+(\324spring\325,) 521 400 T
+(\324summer\325,) 521 386 T
+(\324autumn\325,) 521 372 T
+(\324annual_me) 521 358 T
+(an\325) 521 344 T
+(do_mcm_o3_clim) 186 322 T
+(treat ozone as in manabe) 307 322 T
+(climate model ?) 307 308 T
+(.f) 449 322 T
+(alse.) 455.88 322 T
+(\336lename) 186 286 T
+(name of \336le containing) 307 286 T
+(ozone data) 307 272 T
+(\324o3.trend.nc) 449 286 T
+(\325) 449 272 T
+(data_name) 186 250 T
+(name of v) 307 250 T
+(ariable in \336le to) 354.69 250 T
+(be accessed) 307 236 T
+(\324ozone_199) 449 250 T
+(0\325) 449 236 T
+(ozone_dataset_entry) 186 214 T
+(time in ozone timeseries) 307 214 T
+(which is mapped to model) 307 200 T
+(initial time) 307 186 T
+(1,1,1,0,0,0) 449 214 T
+(lonb_col) 186 164 T
+(longitudes de\336ning the) 307 164 T
+(re) 307 150 T
+(gion to use for column) 316.14 150 T
+(data calculation) 307 136 T
+(\050/-999., -) 449 164 T
+(999./\051) 449 150 T
+(latb_col) 186 114 T
+(latitudes de\336ning the) 307 114 T
+(re) 307 100 T
+(gion to use for column) 316.14 100 T
+(data calculation) 307 86 T
+(\050/-999., -) 449 114 T
+(999./\051) 449 100 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 78.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 77.75 2 L
+V
+N
+301 702.25 301 77.75 2 L
+V
+N
+443 702.25 443 77.75 2 L
+V
+N
+515 702.25 515 77.75 2 L
+V
+N
+587 701.75 587 78.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 528 587.25 528 2 L
+V
+N
+71.75 464 587.25 464 2 L
+V
+N
+71.75 428 587.25 428 2 L
+V
+N
+71.75 336 587.25 336 2 L
+V
+N
+71.75 300 587.25 300 2 L
+V
+N
+71.75 264 587.25 264 2 L
+V
+N
+71.75 228 587.25 228 2 L
+V
+N
+71.75 178 587.25 178 2 L
+V
+N
+71.75 128 587.25 128 2 L
+V
+N
+71.75 78 587.25 78 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "18" 18
+%%Page: "19" 19
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(time_col) 186 634 T
+(time to use for column cal-) 307 634 T
+(culation) 307 620 T
+(\050/) 449 634 T
+(0,0,0,0,0,0/\051) 449 620 T
+(rad_output_\336le) 78 598 T
+(write_data_\336le) 186 598 T
+(radiation) 307 598 T
+(output) 352.06 598 T
+(data) 385.13 598 T
+(\336le) 407.53 598 T
+(to) 425.26 598 T
+(be written ?) 307 584 T
+(.f) 449 598 T
+(alse.) 455.88 598 T
+(rad_utilities) 78 562 T
+(dummy) 186 562 T
+(0) 449 562 T
+(radiation_diag) 78 540 T
+0 F
+(*iradprt_gl) 186 540 T
+1 F
+(global) 307 540 T
+(i) 339.45 540 T
+(indices) 345.23 540 T
+(of) 381.67 540 T
+(points) 394.11 540 T
+(at) 425.89 540 T
+(which radiation diagnos-) 307 526 T
+(tics are to be generated) 307 512 T
+(0) 449 540 T
+0 F
+(*jradprt_gl) 186 490 T
+1 F
+(global) 307 490 T
+(j) 339.45 490 T
+(indices) 345.23 490 T
+(of) 381.67 490 T
+(points) 394.11 490 T
+(at) 425.89 490 T
+(which radiation diagnos-) 307 476 T
+(tics are to be generated) 307 462 T
+(0) 449 490 T
+(num_pts_ij) 186 440 T
+(number) 307 440 T
+(of) 346.5 440 T
+(points) 359.33 440 T
+(speci\336ed) 391.5 440 T
+(by global indices at which) 307 426 T
+(to generate radiation diag-) 307 412 T
+(nostics) 307 398 T
+(0) 449 440 T
+(num_pts_latlon) 186 376 T
+(number) 307 376 T
+(of) 346.5 376 T
+(points) 359.33 376 T
+(speci\336ed) 391.5 376 T
+(by lat-lon at which to gen-) 307 362 T
+(erate radiation diagnostics) 307 348 T
+(0) 449 376 T
+0 F
+(*latradprt) 186 326 T
+1 F
+(latitudes) 307 326 T
+(of) 350.07 326 T
+(points) 362.47 326 T
+(at) 394.21 326 T
+(which) 405.27 326 T
+(diagnostics are desired) 307 312 T
+(999.) 449 326 T
+(*) 186 290 T
+0 F
+(lonradprt) 192 290 T
+1 F
+(longitudes of points at) 307 290 T
+(which diagnostics are) 307 276 T
+(desired) 307 262 T
+(999.) 449 290 T
+(radiation_dri) 78 240 T
+(v) 139.69 240 T
+(er) 145.51 240 T
+0 F
+(**rad_time_step) 186 240 T
+1 F
+(radiation time step in sec-) 307 240 T
+(onds) 307 226 T
+(0) 449 240 T
+(do_clear_sk) 186 204 T
+(y_pass) 243.8 204 T
+(are clear) 307 204 T
+(-sk) 347.73 204 T
+(y radiation) 362.21 204 T
+(diagnostics to be calcu-) 307 190 T
+(lated?) 307 176 T
+(.f) 449 204 T
+(alse.) 455.88 204 T
+0 F
+(**zenith_spec) 186 154 T
+1 F
+(string de\336ning ho) 307 154 T
+(w zenith) 391.37 154 T
+(angle is computed) 307 140 T
+(\324   \324) 449 154 T
+(\324daily_mean) 521 154 T
+(\325,) 521 140 T
+(\324annual_me) 521 126 T
+(an\325, \324diur-) 521 112 T
+(nally-v) 521 98 T
+(ary-) 554.7 98 T
+(ing\325) 521 84 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 76.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 75.75 2 L
+V
+N
+301 702.25 301 75.75 2 L
+V
+N
+443 702.25 443 75.75 2 L
+V
+N
+515 702.25 515 75.75 2 L
+V
+N
+587 701.75 587 76.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 612 587.25 612 2 L
+V
+N
+71.75 576 587.25 576 2 L
+V
+N
+71.75 554 587.25 554 2 L
+V
+N
+71.75 504 587.25 504 2 L
+V
+N
+71.75 454 587.25 454 2 L
+V
+N
+71.75 390 587.25 390 2 L
+V
+N
+71.75 340 587.25 340 2 L
+V
+N
+71.75 304 587.25 304 2 L
+V
+N
+71.75 254 587.25 254 2 L
+V
+N
+71.75 218 587.25 218 2 L
+V
+N
+71.75 168 587.25 168 2 L
+V
+N
+71.75 76 587.25 76 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "19" 19
+%%Page: "20" 20
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(rad_package) 186 634 T
+(string de\336ning radiation) 307 634 T
+(package being used) 307 620 T
+(\324sea_esf) 449 634 T
+(\325) 488.97 634 T
+(\324original_f) 521 634 T
+(ms\325) 521 620 T
+(calc_hemi_inte) 186 598 T
+(grals) 259.14 598 T
+(are hemispheric inte) 307 598 T
+(grals) 404.13 598 T
+(desired ?) 307 584 T
+(.f) 449 598 T
+(alse.) 455.88 598 T
+(do_netcdf_restart) 186 562 T
+(netcdf vs. nati) 307 562 T
+(v) 374.36 562 T
+(e restart) 380.18 562 T
+(.true.) 449 562 T
+(all_step_diagnostics) 186 540 T
+(are l) 307 540 T
+(w and sw radiati) 327.87 540 T
+(v) 406.55 540 T
+(e) 412.37 540 T
+(bdy \337ux) 307 526 T
+(es and atmo-) 346.49 526 T
+(spheric heatingrates to be) 307 512 T
+(output on ph) 307 498 T
+(ysics steps ?) 367.61 498 T
+(.f) 449 540 T
+(alse.) 455.88 540 T
+(renormalize_sw_\337ux) 186 476 T
+(e) 287.14 476 T
+(s) 186 462 T
+(should sw \337ux) 307 476 T
+(es be renor-) 376.83 476 T
+(malized on each step to) 307 462 T
+(account for earth-sun) 307 448 T
+(mo) 307 434 T
+(v) 322.16 434 T
+(ement between radia-) 327.98 434 T
+(tion steps ?) 307 420 T
+(.f) 449 476 T
+(alse.) 455.88 476 T
+(rad_date) 186 398 T
+(use the input \336elds at this) 307 398 T
+(time) 307 384 T
+(rather) 330.61 384 T
+(than) 360.87 384 T
+(the) 383.8 384 T
+(current) 400.74 384 T
+(model) 307 370 T
+(time) 339.4 370 T
+(to) 363.14 370 T
+(calculate) 374.88 370 T
+(the) 419.93 370 T
+(radiati) 307 356 T
+(v) 337.36 356 T
+(e forcings) 343.18 356 T
+(\0500,0,0,0,0,0\051) 449 398 T
+(all_le) 186 334 T
+(v) 212.36 334 T
+(el_radiation) 218.18 334 T
+(radiation is to be calcu-) 307 334 T
+(lated at all model le) 307 320 T
+(v) 401.36 320 T
+(els ?) 407.18 320 T
+(.true.) 449 334 T
+0 F
+(*topmost_radiation_) 186 298 T
+(le) 186 284 T
+(v) 194.48 284 T
+(el) 200.36 284 T
+1 F
+(highest model le) 307 298 T
+(v) 386.03 298 T
+(el at) 391.85 298 T
+(which radiation is calcu-) 307 284 T
+(lated; only needed when) 307 270 T
+(all_le) 307 256 T
+(v) 333.36 256 T
+(el_radiation is) 339.18 256 T
+(.f) 307 242 T
+(alse.) 313.88 242 T
+(-99) 449 298 T
+(drop_upper_le) 186 220 T
+(v) 255.68 220 T
+(els) 261.5 220 T
+(if all_le) 307 220 T
+(v) 343.7 220 T
+(el_radiation is) 349.52 220 T
+(.f) 307 206 T
+(alse. and) 313.88 206 T
+(drop_upper_le) 307 192 T
+(v) 376.68 192 T
+(els) 382.5 192 T
+(is) 397.67 192 T
+(.true.,) 407.51 192 T
+(radiation will only be cal-) 307 178 T
+(culated from) 307 164 T
+(topmost_radiation_le) 307 150 T
+(v) 408.7 150 T
+(el) 414.52 150 T
+(to) 425.42 150 T
+(the surf) 307 136 T
+(ace) 343.2 136 T
+(.f) 449 220 T
+(alse.) 455.88 220 T
+(all_column_radiation) 186 114 T
+(radiation is to be calcu-) 307 114 T
+(lated) 307 100 T
+(in) 333.26 100 T
+(all) 345.53 100 T
+(model) 360.46 100 T
+(columns) 393.4 100 T
+(?) 307 86 T
+(.true.) 449 114 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 78.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 77.75 2 L
+V
+N
+301 702.25 301 77.75 2 L
+V
+N
+443 702.25 443 77.75 2 L
+V
+N
+515 702.25 515 77.75 2 L
+V
+N
+587 701.75 587 78.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 612 587.25 612 2 L
+V
+N
+71.75 576 587.25 576 2 L
+V
+N
+71.75 554 587.25 554 2 L
+V
+N
+71.75 490 587.25 490 2 L
+V
+N
+71.75 412 587.25 412 2 L
+V
+N
+71.75 348 587.25 348 2 L
+V
+N
+71.75 312 587.25 312 2 L
+V
+N
+71.75 234 587.25 234 2 L
+V
+N
+71.75 128 587.25 128 2 L
+V
+N
+71.75 78 587.25 78 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "20" 20
+%%Page: "21" 21
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(rsd) 186 634 T
+(call) 307 634 T
+(radiation) 326.6 634 T
+(for) 371.54 634 T
+(same) 387.8 634 T
+(date) 414.73 634 T
+(\050yr) 307 620 T
+(,day\051, b) 320.51 620 T
+(ut repeatedly) 356.6 620 T
+(run through the diurnal) 307 606 T
+(c) 307 592 T
+(ycle) 312.15 592 T
+(.f) 449 634 T
+(alse.) 455.88 634 T
+(use_mixing_ratio) 186 570 T
+(assume q is mixing ratio) 307 570 T
+(rather than speci\336c humid-) 307 556 T
+(ity on input ?) 307 542 T
+(.f) 449 570 T
+(alse.) 455.88 570 T
+(solar_constant) 186 520 T
+(annual mean solar \337ux toa) 307 520 T
+(1365.0) 449 520 T
+(trop_ht_at_poles) 186 498 T
+(height of tropopause at) 307 498 T
+(poles \050when linear_tropo) 307 484 T
+(is .true.\051) 307 470 T
+(300 hP) 449 498 T
+(a) 482.49 498 T
+(trop_ht_at_eq) 186 448 T
+(height of tropopause at) 307 448 T
+(equator \050when) 307 434 T
+(linear_tropo is .true.\051) 307 420 T
+(100 hP) 449 448 T
+(a) 482.49 448 T
+(trop_ht_constant) 186 398 T
+(heigt of tropopause when) 307 398 T
+(constant_tropo is .true.) 307 384 T
+(200 hP) 449 398 T
+(a) 482.49 398 T
+(constant_tropo) 186 362 T
+(diagnostics calculated) 307 362 T
+(assuming height of tropo-) 307 348 T
+(pause is constant ?) 307 334 T
+(.true.) 449 362 T
+(linear_tropo) 186 312 T
+(diagnostics calculated) 307 312 T
+(assuming ht of tropopause) 307 298 T
+(v) 307 284 T
+(aries linearly from equa-) 312.7 284 T
+(tor to pole ?) 307 270 T
+(.true.) 449 312 T
+(thermo_trop) 186 248 T
+(diagnostics calculated) 307 248 T
+(assuming ht of tropopause) 307 234 T
+(is determined thermody-) 307 220 T
+(namically ?) 307 206 T
+(.f) 449 248 T
+(alse.) 455.88 248 T
+(time_v) 186 184 T
+(arying_solar_c) 219.04 184 T
+(onstant) 186 170 T
+(solar input at toa v) 307 184 T
+(aries) 396.03 184 T
+(with time ?) 307 170 T
+(.f) 449 184 T
+(alse.) 455.88 184 T
+(solar_dataset_entry) 186 148 T
+(time in solar timeseries) 307 148 T
+(which is mapped to model) 307 134 T
+(initial time) 307 120 T
+(1,1,1,0,0,0) 449 148 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 112.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 111.75 2 L
+V
+N
+301 702.25 301 111.75 2 L
+V
+N
+443 702.25 443 111.75 2 L
+V
+N
+515 702.25 515 111.75 2 L
+V
+N
+587 701.75 587 112.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 584 587.25 584 2 L
+V
+N
+71.75 534 587.25 534 2 L
+V
+N
+71.75 512 587.25 512 2 L
+V
+N
+71.75 462 587.25 462 2 L
+V
+N
+71.75 412 587.25 412 2 L
+V
+N
+71.75 376 587.25 376 2 L
+V
+N
+71.75 326 587.25 326 2 L
+V
+N
+71.75 262 587.25 262 2 L
+V
+N
+71.75 198 587.25 198 2 L
+V
+N
+71.75 162 587.25 162 2 L
+V
+N
+71.75 112 587.25 112 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "21" 21
+%%Page: "22" 22
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(doing_data_o) 186 634 T
+(v) 251.15 634 T
+(erride) 256.97 634 T
+(input \336elds to the radia-) 307 634 T
+(tionpackage are being) 307 620 T
+(o) 307 606 T
+(v) 312.82 606 T
+(erriden using) 318.64 606 T
+(data_o) 307 592 T
+(v) 338.81 592 T
+(erride_mod ?) 344.63 592 T
+(.f) 449 634 T
+(alse.) 455.88 634 T
+(o) 186 570 T
+(v) 191.82 570 T
+(erriding_temps) 197.64 570 T
+(temperature and ts \336elds) 307 570 T
+(areo) 307 556 T
+(v) 327.47 556 T
+(erriden ?) 333.29 556 T
+(.f) 449 570 T
+(alse.) 455.88 570 T
+(o) 186 534 T
+(v) 191.82 534 T
+(erriding_sphum) 197.64 534 T
+(speci\336c humidity \336eld is) 307 534 T
+(o) 307 520 T
+(v) 312.82 520 T
+(erriden ?) 318.64 520 T
+(.f) 449 534 T
+(alse.) 455.88 534 T
+(o) 186 498 T
+(v) 191.82 498 T
+(erriding_albedo) 197.64 498 T
+(surf) 307 498 T
+(ace albedo \336eld is) 325.54 498 T
+(o) 307 484 T
+(v) 312.82 484 T
+(erriden ?) 318.64 484 T
+(.f) 449 498 T
+(alse.) 455.88 498 T
+(o) 186 462 T
+(v) 191.82 462 T
+(erriding_aerosol) 197.64 462 T
+(aerosol) 307 462 T
+(\336elds) 343.92 462 T
+(are) 372.19 462 T
+(o) 389.11 462 T
+(v) 394.93 462 T
+(erriden) 400.75 462 T
+(?) 307 448 T
+(.f) 449 462 T
+(alse.) 455.88 462 T
+(al) 186 426 T
+(w) 194.54 426 T
+(ays_calculate) 203.09 426 T
+(radiation calculation is) 307 426 T
+(done on e) 307 412 T
+(v) 353.36 412 T
+(ery call to) 359.18 412 T
+(radiation_dri) 307 398 T
+(v) 368.69 398 T
+(er ?) 374.51 398 T
+(.f) 449 426 T
+(alse.) 455.88 426 T
+(do_h2o) 186 376 T
+(h2o radiati) 307 376 T
+(v) 358.36 376 T
+(e ef) 364.18 376 T
+(fects aren-) 381.53 376 T
+(cluded in the radiationcal-) 307 362 T
+(culation ?) 307 348 T
+(.true.) 449 376 T
+(do_o3) 186 326 T
+(o3 radiati) 307 326 T
+(v) 352.36 326 T
+(e ef) 358.18 326 T
+(fects arein-) 375.53 326 T
+(cluded in the radiationcal-) 307 312 T
+(culation ?) 307 298 T
+(.true.) 449 326 T
+(use_uniform_solar_in) 186 276 T
+(put) 186 262 T
+(!) 309.95 276 T
+(the) 319.85 276 T
+(\050lat,lon\051) 337.46 276 T
+(v) 378.74 276 T
+(alues) 384.44 276 T
+(used) 412.05 276 T
+(to calculate zenith angle) 307 262 T
+(are) 307 248 T
+(uniform) 324.19 248 T
+(across) 365.4 248 T
+(the) 397.92 248 T
+(grid) 415.13 248 T
+(?) 307 234 T
+(.f) 449 276 T
+(alse.) 455.88 276 T
+(lat_for_solar_input) 186 212 T
+(latitude to be used when) 307 212 T
+(uniform solar input is acti-) 307 198 T
+(v) 307 184 T
+(ated [ de) 312.7 184 T
+(grees ]) 353.84 184 T
+(100.) 449 212 T
+(lon_for_solar_input) 186 162 T
+(longitude to be used when) 307 162 T
+(uni-orm solar input is acti-) 307 148 T
+(v) 307 134 T
+(ated [ de) 312.7 134 T
+(grees ]) 353.84 134 T
+(500.) 449 162 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 126.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 125.75 2 L
+V
+N
+301 702.25 301 125.75 2 L
+V
+N
+443 702.25 443 125.75 2 L
+V
+N
+515 702.25 515 125.75 2 L
+V
+N
+587 701.75 587 126.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 584 587.25 584 2 L
+V
+N
+71.75 548 587.25 548 2 L
+V
+N
+71.75 512 587.25 512 2 L
+V
+N
+71.75 476 587.25 476 2 L
+V
+N
+71.75 440 587.25 440 2 L
+V
+N
+71.75 390 587.25 390 2 L
+V
+N
+71.75 340 587.25 340 2 L
+V
+N
+71.75 290 587.25 290 2 L
+V
+N
+71.75 226 587.25 226 2 L
+V
+N
+71.75 176 587.25 176 2 L
+V
+N
+71.75 126 587.25 126 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "22" 22
+%%Page: "23" 23
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(radiati) 78 634 T
+(v) 108.36 634 T
+(e_g) 114.18 634 T
+(ases) 131.45 634 T
+0 F
+(**ch4_data_sour) 186 634 T
+(ce) 273.12 634 T
+1 F
+(source of ch4 data to be) 307 634 T
+(used) 307 620 T
+(\324    \324) 449 634 T
+(\324restart\325,) 521 634 T
+(\324icrccm\325,) 521 620 T
+(\324ipcc_92\325,) 521 606 T
+(\324ipcc_98\325,) 521 592 T
+(\324ipcc_80\325,) 521 578 T
+(\324input\325,) 521 564 T
+(\325pre-) 521 550 T
+(scribed\325,) 521 536 T
+(\324predicted\325,) 521 522 T
+(\324namelist\325,) 521 508 T
+0 F
+(**n2o_data_sour) 186 486 T
+(ce) 273.79 486 T
+1 F
+(source of n2o data to be) 307 486 T
+(used) 307 472 T
+(\324    \324) 449 486 T
+(\324restart\325,) 521 486 T
+(\324icrccm\325,) 521 472 T
+(\324ipcc_92\325,) 521 458 T
+(\324ipcc_98\325,) 521 444 T
+(\324ipcc_80\325,) 521 430 T
+(\324input\325,) 521 416 T
+(\325pre-) 555.82 416 T
+(scribed\325,) 521 402 T
+(\324predicted\325,) 521 388 T
+(\324namelist\325) 521 374 T
+0 F
+(**f11_data_sour) 186 352 T
+(ce) 271.12 352 T
+1 F
+(source of f11 data to be) 307 352 T
+(used) 307 338 T
+(\324    \324) 449 352 T
+(\324restart\325,) 521 352 T
+(\324icrccm\325,) 521 338 T
+(\324ipcc_92\325,) 521 324 T
+(\324ipcc_98\325,) 521 310 T
+(\324ipcc_80\325,) 521 296 T
+(\324input\325,) 521 282 T
+(\325pre-) 555.82 282 T
+(scribed\325,) 521 268 T
+(\324predicted\325,) 521 254 T
+(\324namelist\325) 521 240 T
+0 F
+(**f12_data_sour) 186 218 T
+(ce) 271.12 218 T
+1 F
+(source of f12 data to be) 307 218 T
+(used) 307 204 T
+(\324           \324) 449 218 T
+(\324restart\325,) 521 218 T
+(\324icrccm\325,) 521 204 T
+(\324ipcc_92\325,) 521 190 T
+(\324ipcc_98\325,) 521 176 T
+(\324ipcc_80\325,) 521 162 T
+(\324input\325,) 521 148 T
+(\325pre-) 555.82 148 T
+(scribed\325,) 521 134 T
+(\324predicted\325,) 521 120 T
+(\324namelist\325) 521 106 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 98.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 97.75 2 L
+V
+N
+301 702.25 301 97.75 2 L
+V
+N
+443 702.25 443 97.75 2 L
+V
+N
+515 702.25 515 97.75 2 L
+V
+N
+587 701.75 587 98.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 500 587.25 500 2 L
+V
+N
+71.75 366 587.25 366 2 L
+V
+N
+71.75 232 587.25 232 2 L
+V
+N
+71.75 98 587.25 98 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "23" 23
+%%Page: "24" 24
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+0 12 Q
+0 X
+(**f113_data_sour) 186 634 T
+(ce) 277.12 634 T
+1 F
+(source of f113 data to be) 307 634 T
+(used) 307 620 T
+(\324           \324) 449 634 T
+(\324restart\325,) 521 634 T
+(\324icrccm\325,) 521 620 T
+(\324ipcc_92\325,) 521 606 T
+(\324ipcc_98\325,) 521 592 T
+(\324ipcc_80\325,) 521 578 T
+(\324input\325,) 521 564 T
+(\325pre-) 555.82 564 T
+(scribed\325,) 521 550 T
+(\324predicted\325,) 521 536 T
+(\324namelist\325) 521 522 T
+0 F
+(**f22_data_sour) 186 500 T
+(ce) 271.12 500 T
+1 F
+(source of f22 data to be) 307 500 T
+(used) 307 486 T
+(\324           \324) 449 500 T
+(\324restart\325,) 521 500 T
+(\324icrccm\325,) 521 486 T
+(\324ipcc_92\325,) 521 472 T
+(\324ipcc_98\325,) 521 458 T
+(\324ipcc_80\325,) 521 444 T
+(\324input\325,) 521 430 T
+(\325pre-) 555.82 430 T
+(scribed\325,) 521 416 T
+(\324predicted\325,) 521 402 T
+(\324namelist\325) 521 388 T
+0 F
+(**co2_data_sour) 186 352 T
+(ce) 272.45 352 T
+1 F
+(source of co2 data to be) 307 352 T
+(used) 307 338 T
+(\324           \324) 449 352 T
+(\324restart\325,) 521 352 T
+(\324icrccm\325,) 521 338 T
+(\324ipcc_92\325,) 521 324 T
+(\324ipcc_98\325,) 521 310 T
+(\324ipcc_80\325,) 521 296 T
+(\324input\325,) 521 282 T
+(\325pre-) 555.82 282 T
+(scribed\325,) 521 268 T
+(\324predicted\325,) 521 254 T
+(\324namelist\325,) 521 240 T
+( \324330ppm\325,) 521 226 T
+(\324660ppm\325) 521 212 T
+(time_v) 186 190 T
+(arying_xxx) 219.04 190 T
+(g) 307 190 T
+(as xxx v) 312.94 190 T
+(aries with time ?) 352.64 190 T
+(.f) 449 190 T
+(alse.) 455.88 190 T
+(xxx_dataset_entry) 186 168 T
+(time in xxx  data set corre-) 307 168 T
+(sponding to modelinitial) 307 154 T
+(time  \050yr) 307 140 T
+(, mo, dy) 347.85 140 T
+(, hr) 386.4 140 T
+(, mn,) 401.92 140 T
+(sc\051) 307 126 T
+(\050/ 1, 1, 1, 0,) 449 168 T
+(0, 0 /\051) 449 154 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 118.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 117.75 2 L
+V
+N
+301 702.25 301 117.75 2 L
+V
+N
+443 702.25 443 117.75 2 L
+V
+N
+515 702.25 515 117.75 2 L
+V
+N
+587 701.75 587 118.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 514 587.25 514 2 L
+V
+N
+71.75 366 587.25 366 2 L
+V
+N
+71.75 204 587.25 204 2 L
+V
+N
+71.75 182 587.25 182 2 L
+V
+N
+71.75 118 587.25 118 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "24" 24
+%%Page: "25" 25
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(xxx_base_v) 186 634 T
+(alue) 243.02 634 T
+(base) 307 634 T
+(v) 330.6 634 T
+(alue) 336.3 634 T
+(to) 358.57 634 T
+(be) 370.18 634 T
+(used) 383.79 634 T
+(along) 408.06 634 T
+(with xxx-base_time and) 307 620 T
+(xxx_change_rate to deter-) 307 606 T
+(mine g) 307 592 T
+(as concentration at) 339.94 592 T
+(a gi) 307 578 T
+(v) 324.36 578 T
+(en time \050when) 330.18 578 T
+(xxx_speci\336cation_type is) 307 564 T
+(\324base_and_trend\325\051) 307 550 T
+(0.0) 449 634 T
+(xxx_base_time) 186 528 T
+(base) 307 528 T
+(v) 330.6 528 T
+(alue) 336.3 528 T
+(to) 358.57 528 T
+(be) 370.18 528 T
+(used) 383.79 528 T
+(along) 408.06 528 T
+(with xxx-base_v) 307 514 T
+(alue and) 386.36 514 T
+(xxx_change_rate to deter-) 307 500 T
+(mine g) 307 486 T
+(as concentration at) 339.94 486 T
+(a gi) 307 472 T
+(v) 324.36 472 T
+(en time \050when) 330.18 472 T
+(xxx_speci\336cation_type is) 307 458 T
+(\324base_and_trend\325\051) 307 444 T
+(0,0,0,0,0,0) 449 528 T
+(xxx_change_rate) 186 422 T
+(base) 307 422 T
+(v) 330.6 422 T
+(alue) 336.3 422 T
+(to) 358.57 422 T
+(be) 370.18 422 T
+(used) 383.79 422 T
+(along) 408.06 422 T
+(with xxx-base_time and) 307 408 T
+(xxx_base_v) 307 394 T
+(alue to deter-) 364.02 394 T
+(mine g) 307 380 T
+(as concentration at) 339.94 380 T
+(a gi) 307 366 T
+(v) 324.36 366 T
+(en time \050when) 330.18 366 T
+(xxx_speci\336cation_type is) 307 352 T
+(\324base_and_trend\325\051) 307 338 T
+(0.0) 449 422 T
+(xxx_\337oor) 186 316 T
+(lo) 307 316 T
+(west) 316.04 316 T
+(acceptable) 340.19 316 T
+(v) 392.99 316 T
+(alue) 398.69 316 T
+(for) 420.85 316 T
+(g) 307 302 T
+(as xxx v) 312.94 302 T
+(ol mixing ratio) 352.7 302 T
+(0.0) 449 316 T
+(xxx_ceiling) 186 280 T
+(highest acceptable v) 307 280 T
+(alue) 404.01 280 T
+(for g) 307 266 T
+(as xxx v) 329.93 266 T
+(ol mixing) 369.69 266 T
+(ratio) 307 252 T
+(1.0E6) 449 280 T
+(xxx_speci\336cation_typ) 186 230 T
+(e) 186 216 T
+(indicator as to form of) 307 230 T
+(time v) 307 216 T
+(ariation of g) 337.04 216 T
+(as xxx) 395.63 216 T
+(\050needed when g) 307 202 T
+(as is time-) 382.91 202 T
+(v) 307 188 T
+(arying\051) 312.7 188 T
+(\324  \324) 449 230 T
+(\324time_series) 521 230 T
+(\325,) 521 216 T
+(\324base_and_t) 521 202 T
+(rend\325) 521 188 T
+(xxx_v) 186 166 T
+(ariation_type) 215.7 166 T
+(form of time v) 307 166 T
+(ariation of) 376.36 166 T
+(g) 307 152 T
+(as xxx \050needed when g) 312.94 152 T
+(as) 422.85 152 T
+(is time-v) 307 138 T
+(arying\051) 349.04 138 T
+(\324    \324) 449 166 T
+(\324linear\325,) 521 166 T
+(\324log) 521 152 T
+(arith-) 540.27 152 T
+(mic\325) 521 138 T
+(v) 186 116 T
+(erbose) 191.82 116 T
+(control o) 307 116 T
+(v) 349.82 116 T
+(er printed output) 355.64 116 T
+(0 \050least\051) 449 116 T
+(0 - 5) 521 116 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 108.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 107.75 2 L
+V
+N
+301 702.25 301 107.75 2 L
+V
+N
+443 702.25 443 107.75 2 L
+V
+N
+515 702.25 515 107.75 2 L
+V
+N
+587 701.75 587 108.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 542 587.25 542 2 L
+V
+N
+71.75 436 587.25 436 2 L
+V
+N
+71.75 330 587.25 330 2 L
+V
+N
+71.75 294 587.25 294 2 L
+V
+N
+71.75 244 587.25 244 2 L
+V
+N
+71.75 180 587.25 180 2 L
+V
+N
+71.75 130 587.25 130 2 L
+V
+N
+71.75 108 587.25 108 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "25" 25
+%%Page: "26" 26
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(g) 186 634 T
+(as_printout_freq) 191.94 634 T
+(frequenc) 307 634 T
+(y at which g) 348.8 634 T
+(as) 407.73 634 T
+(mixing) 307 620 T
+(ratios) 343.94 620 T
+(are) 373.54 620 T
+(output) 391.12 620 T
+(to) 424.73 620 T
+(stdout \050hours\051) 307 606 T
+(32 days) 449 634 T
+(rh_based_clouds) 78 584 T
+(cirrus_cld_prop_form) 186 584 T
+(the \324blackness\325 of cirrus) 307 584 T
+(clouds) 307 570 T
+(\324full\325) 449 584 T
+(\324part\325) 521 584 T
+(\324) 521 570 T
+(sea_esf_rad) 78 548 T
+(dummy) 186 548 T
+(dummy v) 307 548 T
+(ariable) 352.37 548 T
+(.f) 449 548 T
+(alse.) 455.88 548 T
+(seal) 78 526 T
+(w99) 96.54 526 T
+(do_nlte) 186 526 T
+(is a re) 307 526 T
+(gion of non-local) 335.48 526 T
+(thermodynamic equilib-) 307 512 T
+(rium included in the) 307 498 T
+(model ?) 307 484 T
+(.f) 449 526 T
+(alse.) 455.88 526 T
+(do_thick) 186 462 T
+(an optional parameteriza-) 307 462 T
+(tion of the longw) 307 448 T
+(a) 389.21 448 T
+(v) 394.3 448 T
+(e \337ux) 400.12 448 T
+(in thick clouds is used ?) 307 434 T
+(.f) 449 462 T
+(alse.) 455.88 462 T
+(do_l) 186 412 T
+(wcldemiss) 207.22 412 T
+(a) 307 412 T
+(cloud) 315.31 412 T
+(emissi) 344.96 412 T
+(vity) 375.34 412 T
+(that) 396.99 412 T
+(v) 417.98 412 T
+(ar-) 423.68 412 T
+(ies with frequenc) 307 398 T
+(y band is) 389.46 398 T
+(used) 307 384 T
+(in) 331.82 384 T
+(the) 343.99 384 T
+(l) 361.48 384 T
+(w) 364.7 384 T
+(calculation) 376.19 384 T
+(?) 431.67 384 T
+(.f) 449 412 T
+(alse.) 455.88 412 T
+(do_ch4lbltmpint) 186 362 T
+(  de) 307 362 T
+(v) 324.03 362 T
+(elopment option) 329.85 362 T
+(.f) 449 362 T
+(alse.) 455.88 362 T
+(do_n2olbltmpint) 186 340 T
+(de) 307 340 T
+(v) 318.03 340 T
+(elopment option) 323.85 340 T
+(.f) 449 340 T
+(alse.) 455.88 340 T
+0 F
+(**continuum_f) 186 318 T
+(orm) 263.04 318 T
+1 F
+(continuum speci\336cation) 307 318 T
+(\324   \324) 449 318 T
+(\324ckd2.1\325,) 521 318 T
+(\324ckd2.4\325,) 521 304 T
+(mt_ckd1.0\325,) 521 290 T
+(\324rsb\325, \324none\325) 521 276 T
+0 F
+(**linecatalog_f) 186 254 T
+(orm) 263.03 254 T
+1 F
+(line catalog speci\336cation) 307 254 T
+(\324    \324) 449 254 T
+(\324hitran_199) 521 254 T
+(2\325,) 521 240 T
+(\324hitran_200) 521 226 T
+(0\325) 521 212 T
+(v) 186 190 T
+(erbose) 191.82 190 T
+(control o) 307 190 T
+(v) 349.82 190 T
+(er printed output) 355.64 190 T
+(0 \050least\051) 449 190 T
+(0 - 5) 521 190 T
+(calc_xxx_tfs_month;l) 186 168 T
+(y) 186 154 T
+(calculate the tfs for g) 307 168 T
+(as) 408.24 168 T
+(xxx once a month ?) 307 154 T
+(.f) 449 168 T
+(alse.) 455.88 168 T
+(calc_xxx_tfs_on_\336rst) 186 132 T
+(_step) 186 118 T
+(calculate) 307 132 T
+(tfs) 352.22 132 T
+(for) 366.79 132 T
+(g) 383.35 132 T
+(as) 389.29 132 T
+(xxx) 401.86 132 T
+(on) 422.43 132 T
+(the \336rst step of job ?) 307 118 T
+(.true.) 449 132 T
+(use_current_xxx_for_) 186 96 T
+(tf) 186 82 T
+(use g) 307 96 T
+(as v) 331.94 96 T
+(alue at current) 350.63 96 T
+(time when calculating tfs ?) 307 82 T
+(.f) 449 96 T
+(alse.) 455.88 96 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 74.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 73.75 2 L
+V
+N
+301 702.25 301 73.75 2 L
+V
+N
+443 702.25 443 73.75 2 L
+V
+N
+515 702.25 515 73.75 2 L
+V
+N
+587 701.75 587 74.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 598 587.25 598 2 L
+V
+N
+71.75 562 587.25 562 2 L
+V
+N
+71.75 540 587.25 540 2 L
+V
+N
+71.75 476 587.25 476 2 L
+V
+N
+71.75 426 587.25 426 2 L
+V
+N
+71.75 376 587.25 376 2 L
+V
+N
+71.75 354 587.25 354 2 L
+V
+N
+71.75 332 587.25 332 2 L
+V
+N
+71.75 268 587.25 268 2 L
+V
+N
+71.75 204 587.25 204 2 L
+V
+N
+71.75 182 587.25 182 2 L
+V
+N
+71.75 146 587.25 146 2 L
+V
+N
+71.75 110 587.25 110 2 L
+V
+N
+71.75 74 587.25 74 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "26" 26
+%%Page: "27" 27
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+1 12 Q
+0 X
+(xxx_tf_time_displace) 186 634 T
+(ment) 186 620 T
+(time displacement of g) 307 634 T
+(as) 416.6 634 T
+(v) 307 620 T
+(alue to be used in tf cal-) 312.7 620 T
+(culation) 307 606 T
+(0.0) 449 634 T
+(xxx_tf_calc_intrvl) 186 584 T
+(interv) 307 584 T
+(al between calculat-) 334.7 584 T
+(ing g) 307 570 T
+(as tfs [ hours ]) 331.28 570 T
+(1.0E6) 449 584 T
+(shortw) 78 548 T
+(a) 110.54 548 T
+(v) 115.63 548 T
+(e_dri) 121.45 548 T
+(v) 145.81 548 T
+(er) 151.63 548 T
+0 F
+(**swf) 186 548 T
+(orm) 215.03 548 T
+1 F
+(shortw) 307 548 T
+(a) 339.54 548 T
+(v) 344.63 548 T
+(e parameteriza-) 350.45 548 T
+(tion to be used) 307 534 T
+(\324     \325) 449 548 T
+(\324lhsw\325,) 521 548 T
+(\324esfsw99\325) 521 534 T
+(do_cmip_diagnostics) 186 512 T
+(e) 307 512 T
+(x) 312.15 512 T
+(ecute code needed to) 317.97 512 T
+(obtain cmip aerosol diag-) 307 498 T
+(nostics ?) 307 484 T
+(.f) 449 512 T
+(alse.) 455.88 512 T
+(calculate_v) 186 462 T
+(olcanic_sw) 240.41 462 T
+(_heating) 186 448 T
+(mak) 307 462 T
+(e an e) 327.54 462 T
+(xtra call to) 355.35 462 T
+(esfsw_dri) 307 448 T
+(v) 353.36 448 T
+(er so that v) 359.18 448 T
+(olca-) 411.93 448 T
+(nic sw heating may be) 307 434 T
+(diagnosed ?) 307 420 T
+(.f) 449 462 T
+(alse.) 455.88 462 T
+(speci\336ed_clouds_) 78 398 T
+(W) 78 384 T
+(dummy) 186 398 T
+(dummy v) 307 398 T
+(ariable) 352.37 398 T
+(0) 449 398 T
+(standalone_clouds) 78 362 T
+0 F
+(*cldht_type_f) 186 362 T
+(orm) 255.7 362 T
+1 F
+(formulation used to de\336ne) 307 362 T
+(the  boundaries between) 307 348 T
+(lo) 307 334 T
+(w) 316.04 334 T
+(, middle and high) 323.92 334 T
+(clouds) 307 320 T
+(\324     \324) 449 362 T
+(\32460\325, \32493\325,) 521 362 T
+(\324sk) 521 348 T
+(yhi\325) 535.48 348 T
+0 F
+(*cloud_data_f) 186 298 T
+(orm) 258.37 298 T
+1 F
+(source of cloud data iloca-) 307 298 T
+(tion and amount, either an) 307 284 T
+(input \336le or as speci\336ed in) 307 270 T
+(code) 307 256 T
+(\324   \324) 449 298 T
+(\324input\325,) 521 298 T
+(\324speci\336ed\325) 521 284 T
+0 F
+(*cloud_data_points) 186 234 T
+1 F
+(number) 307 234 T
+(of) 346.2 234 T
+(columns) 358.73 234 T
+(of) 401.94 234 T
+(data) 414.47 234 T
+(being supplied to standal-) 307 220 T
+(one code) 307 206 T
+(0) 449 234 T
+(must be >=) 521 234 T
+(1 to run) 521 220 T
+0 F
+(*cloud_o) 186 184 T
+(v) 231.89 184 T
+(erlap_f) 237.77 184 T
+(or) 274.13 184 T
+(m) 186 170 T
+1 F
+(are we using random o) 307 184 T
+(v) 416.13 184 T
+(er-) 421.95 184 T
+(lap assumption or maxi-) 307 170 T
+(mum-random o) 307 156 T
+(v) 381.15 156 T
+(erlap) 386.97 156 T
+(assumption ?) 307 142 T
+(\324   \324) 449 184 T
+(\324random\325,) 521 184 T
+(\324max_rando) 521 170 T
+(m\325) 521 156 T
+0 F
+(*lhsw_cld_pr) 186 120 T
+(op_f) 254.46 120 T
+(or) 276.83 120 T
+(m) 186 106 T
+1 F
+(de\336ne cvisrf, cirrf and) 307 120 T
+(cirab from input \336le or as) 307 106 T
+(speci\336ed within code) 307 92 T
+(\324   \324) 449 120 T
+(\324input\325,) 521 120 T
+(\324speci\336ed\325) 521 106 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 84.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 83.75 2 L
+V
+N
+301 702.25 301 83.75 2 L
+V
+N
+443 702.25 443 83.75 2 L
+V
+N
+515 702.25 515 83.75 2 L
+V
+N
+587 701.75 587 84.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 598 587.25 598 2 L
+V
+N
+71.75 562 587.25 562 2 L
+V
+N
+71.75 526 587.25 526 2 L
+V
+N
+71.75 476 587.25 476 2 L
+V
+N
+71.75 412 587.25 412 2 L
+V
+N
+71.75 376 587.25 376 2 L
+V
+N
+71.75 312 587.25 312 2 L
+V
+N
+71.75 248 587.25 248 2 L
+V
+N
+71.75 198 587.25 198 2 L
+V
+N
+71.75 134 587.25 134 2 L
+V
+N
+71.75 84 587.25 84 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "27" 27
+%%Page: "28" 28
+612 792 0 FMBEGINPAGE
+0 FrameSetSepColors
+FrameNoSep
+-45 -45 657 837 C
+0 0 0 1 0 0 0 1 K
+0 12 Q
+0 X
+(*lw_cld_pr) 186 634 T
+(op_f) 243.12 634 T
+(orm) 265.49 634 T
+1 F
+(de\336ne l) 307 634 T
+(w emissi) 342.54 634 T
+(vity from) 384.58 634 T
+(either) 307 620 T
+(input) 337.13 620 T
+(\336le) 364.6 620 T
+(or) 382.74 620 T
+(as) 395.54 620 T
+(speci-) 408.34 620 T
+(\336ed in code) 307 606 T
+(\324   \324) 449 634 T
+(\324input\325,) 521 634 T
+(\324speci\336ed\325) 521 620 T
+(strat_clouds_W) 78 584 T
+(do_stochastic_clouds) 186 584 T
+(acti) 307 584 T
+(v) 324.03 584 T
+(ate the stochastic) 329.73 584 T
+(clouds module ?) 307 570 T
+(.f) 449 584 T
+(alse.) 455.88 584 T
+(zetac_clouds_W) 78 548 T
+(dummy) 186 548 T
+(dummy v) 307 548 T
+(ariable) 352.37 548 T
+(0) 449 548 T
+0 F
+(T) 158.28 712 T
+(able 1: Namelist v) 165.18 712 T
+(ariables used with the sea-esf radiation package) 256.72 712 T
+1 F
+(Module) 107.33 672 T
+(V) 204.68 672 T
+(ariable Name) 212.01 672 T
+(Description) 344 672 T
+(Def) 461.07 679 T
+(ault) 478.93 679 T
+(V) 465.34 665 T
+(alue) 472.67 665 T
+(Other) 537.34 686 T
+(Acceptable) 524.01 672 T
+(V) 535 658 T
+(alues) 542.34 658 T
+72 701.75 72 540.25 2 L
+V
+0.5 H
+0 Z
+N
+180 702.25 180 539.75 2 L
+V
+N
+301 702.25 301 539.75 2 L
+V
+N
+443 702.25 443 539.75 2 L
+V
+N
+515 702.25 515 539.75 2 L
+V
+N
+587 701.75 587 540.25 2 L
+V
+N
+71.75 702 587.25 702 2 L
+V
+N
+72.25 649.25 586.75 649.25 2 L
+V
+N
+72.25 646.75 586.75 646.75 2 L
+V
+N
+71.75 598 587.25 598 2 L
+V
+N
+71.75 562 587.25 562 2 L
+V
+N
+71.75 540 587.25 540 2 L
+V
+N
+FMENDPAGE
+%%EndPage: "28" 28
+%%Trailer
+FMENDDOCUMENT
+%%BoundingBox: 0 0 612 792
+%%PageOrder: Ascend
+%%Pages: 28
+%%DocumentFonts: Times-Bold
+%%+ Times-Roman
+%%DocumentNeedsFonts: Times-Bold
+%%+ Times-Roman
+%%DocumentSuppliedFonts:
+%%EOF

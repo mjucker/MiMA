@@ -1,0 +1,424 @@
+<HTML>
+<TITLE>module vert_diff_driver_mod</TITLE>
+<BODY BGCOLOR="#AABBCC" TEXT="#332211" >
+
+<DIV ALIGN="CENTER"> <FONT SIZE=1>
+<A HREF="#INTERFACE">PUBLIC INTERFACE</A> / 
+<A HREF="#ROUTINES">ROUTINES</A> / 
+<A HREF="#NAMELIST">NAMELIST</A> / 
+<A HREF="#DIAGNOSTICS">DIAGNOSTICS</A> / 
+<A HREF="#CHANGES">CHANGES</A> / 
+<A HREF="#ERRORS">ERRORS</A> / 
+<A HREF="#REFERENCES">REFERENCES</A> / 
+<A HREF="#NOTES">NOTES</A> 
+</FONT>
+<BR><BR></DIV><HR>
+
+
+<H2>Module vert_diff_driver_mod</H2>
+<A NAME="HEADER">
+<PRE>
+     <B>Contact:</B>   Bruce Wyman or Isaac Held
+     <B>Reviewers:</B>
+
+     <B><A HREF=".doc.log#vert_diff_driver.f90">Tags/Status</A></B>
+</PRE>
+</A><!-- END HEADER -->
+<!--------------------------------------------------------------------->
+<A NAME="OVERVIEW">
+<HR>
+<H4>OVERVIEW</H4>
+<!-- BEGIN OVERVIEW -->
+<PRE>
+
+     Controls vertical diffusion and the output of related diagnostic
+     fields for the GCM.
+
+</PRE>
+</A><!-- END OVERVIEW -->
+<!--------------------------------------------------------------------->
+<A NAME="DESCRIPTION">
+<!-- BEGIN DESCRIPTION -->
+<PRE>
+     This version of vert_diff_driver_mod has been designed around the
+     implicit version diffusion scheme of the GCM. It requires calling
+     two routines to fully compute the vertical diffusion tendencies for
+     the current time step. These two routines correspond to the down and
+     up sweeps of the standard tridiagonal solver.  The down routine
+     fully updates the tendencies for the momentum components and tracers,
+     and performs the down sweep of the tridiagional elimination for
+     heat and moisture.  The up routine finishes computing the vertical
+     diffusion tendencies for heat and moisture.
+
+</PRE>
+</A><!-- END DESCRIPTION -->
+<!--------------------------------------------------------------------->
+<A NAME="MODULES_USED">
+<HR>
+<H4>OTHER MODULES USED</H4>
+<!-- BEGIN MODULES_USED -->
+<PRE>
+
+    tq_vert_diff_mod
+    uv_vert_diff_mod
+    tr_vert_diff_mod
+     strat_cloud_mod
+    physics_diag_mod
+             fms_mod
+       constants_mod
+
+</PRE>
+</A><!-- END MODULES_USED -->
+<!--------------------------------------------------------------------->
+<A NAME="INTERFACE">
+<HR>
+<H4>PUBLIC INTERFACE</H4>
+<!-- BEGIN INTERFACE -->
+<PRE>
+
+use vert_diff_driver_mod [, only: vert_diff_driver_init,
+                                  vert_diff_driver_down,
+                                  vert_diff_driver_up  ]
+
+vert_diff_driver_init: Initialization routine for module that must be
+                       called once before calling vert_diff_down or
+                       vert_diff_up.
+
+vert_diff_driver_down: Updates the tendencies of the momentum components and
+                       tracers for vertical diffusion. The downward sweep
+                       of the standard tridiagonal elimination is performed
+                       for heat and moisture.
+
+vert_diff_driver_up:   Updates the tendencies of heat and moisture for
+                       vertical diffusion by completing the upward sweep
+                       of the standard tridiagonal elimination.
+
+Notes:
+
+   Users may provide an optional namelist input called <b>&vert_diff_driver_nml</b>
+   in file <b>input.nml</b>.
+
+</PRE>
+</A><!-- END INTERFACE -->
+<!--------------------------------------------------------------------->
+<A NAME="ROUTINES">
+<HR>
+<H4>PUBLIC ROUTINES</H4>
+<!-- BEGIN ROUTINES -->
+<PRE>
+
+<b>call vert_diff_driver_init</b> ( Surf_diff, idim, jdim, kdim, axes, Time )
+
+input
+
+   idim   number of longitude grid boxes for a global field
+           [integer]
+
+   jdim   number of latitude grid boxes for a global field
+           [integer]
+
+   kdim   number of vertical levels  [integer]
+
+   axes   axes id numbers (used for diagnostic output)
+          [integer, dimension(4)]
+
+   Time   Initial model time [type(time_type)]
+
+output
+
+   Surf_diff Coefficients of the matrices of implicit vertical diffusion
+             of heat and moisture.  [type(surf_diff_type)]
+
+notes
+
+   A 3-dimensional global field would have dimension(idim,jdim,kdim).
+
+--------------------------------------------------------------------
+
+<b>call vert_diff_driver_down</b> ( is, js, Time, delt, p_half, p_full,
+                             z_full, diff_mom, diff_heat,   
+                             u, v, t, q, trs,  
+                             dtau_du, dtau_dv, tau_x, tau_y,
+                             dt_u, dt_v, dt_t, dt_q, dt_trs, 
+                             Surf_diff, mask, kbot )
+
+input
+
+   is, js     The starting horizonal indices of the rectangular sub-window
+              being processed by this call to vert_diff_down. The ending
+              indices are determined by the size of the array arguments.
+                [integer]
+
+    Time      Current model time
+                [type(time_type)]
+
+   delt       time step in seconds  [real]
+
+   p_half     Pressure at half model levels in pascals.
+                [real, dimension(:,:,nlev+1)]
+
+   p_full     Pressure at full model levels in pascals.
+                [real, dimension(:,:,nlev)]
+
+   z_full     Height at full levels in meters.
+                [real, dimension(:,:,nlev)]
+
+   diff_mom   diffusion coefficients for momentum at half model levels
+              (excluding the surface) in m/sec2
+                [real, dimension(:,:,nlev)]
+
+   diff_heat  diffusion coefficients for heat, moisture, and tracers
+              at half model levels in m/sec2
+                [real, dimension(:,:,nlev)]
+
+   u          zonal wind
+                [real, dimension(:,:,nlev)]
+
+   v          meridional wind
+                [real, dimension(:,:,nlev)]
+
+   t          temperature
+                [real, dimension(:,:,nlev)]
+
+   q          specific humidity
+                [real, dimension(:,:,nlev)]
+
+   trs        arbitrary number of tracers at full levels
+                [real, dimension(:,:,nlev,:)]
+
+   dtau_du    derivative of wind stress w.r.t. zonal wind speed
+              at the lowest model level   [real, dimension(:,:)]
+
+   dtau_dv    derivative of wind stress w.r.t. meridional wind speed
+              at the lowest model level   [real, dimension(:,:)]
+
+input/output
+
+   tau_x      zonal wind stress in pascals
+                [real, dimension(:,:)]
+
+   tau_y      meridional wind stress in pascals
+                [real, dimension(:,:)]
+
+   dt_u, dt_v  tendencies for zonal and meridional momentum components at 
+               full levels in m/s2    [real, dimension(:,:,nlev)]
+
+   dt_t, dt_q  tendencies for temperature (deg k/s) and specific humidity
+               (kg/kg/s) at full levels, note that these tendencies have not
+               been fully updated for the vertical diffusion contribution,
+               that will be done in vert_diff_up
+                 [real, dimension(:,:,nlev)]
+
+   dt_trs      tendencies for arbitrary number of tracers at full levels
+                 [real, dimension(:,:,nlev,:)]
+
+output
+
+   Surf_diff Coefficients of the matrices of implicit vertical diffusion
+             of heat and moisture.  [type(surf_diff_type)]
+
+input (optional for the step-mountain/eta coordinate)
+
+   mask    underground mask (0.=below ground, 1.=above ground)
+                [real, dimension(:,:,nlev)]
+
+   kbot    the lowest model level above ground
+                [integer, dimension(:,:)]
+
+Notes
+
+   The tendencies for momentum (dt_u, dt_v) and tracers (dt_trs) are
+   updated for the full vertical diffusion tendency.
+
+   The tendencies for temperature (dt_t) and specific humidity (dt_q)
+   have only been modified for the downward sweep of the tridiagonal
+   elimination solver. These tendencies will be fully updated after
+   the call to routine vert_diff_up.
+
+--------------------------------------------------------------------
+
+<b>call vert_diff_driver_up</b> ( is, js, Time, delt, p_half, Surf_diff, 
+                                  dt_t, dt_q,  mask, kbot )
+
+input
+
+   is, js    The starting horizonal indices of the rectangular sub-window
+             being processed by this call to vert_diff_up. The ending
+             indices are determined by the size of the array arguments.
+                [integer]
+
+   Time      Current model time.
+                [type(time_type)]
+
+   delt      time step in seconds  [real]
+
+   p_half    The pressure at half model levels in pascals.
+                [real, dimension(:,:,nlev+1)]
+
+   Surf_diff Coefficients of the matrices of implicit vertical diffusion
+             of heat and moisture.  [type(surf_diff_type)]
+
+input/output
+
+   dt_t, dt_q  Tendencies for temperature (deg k/s) and specific humidity
+               (kg/kg/s) at full levels   [real, dimension(:,:,nlev)]
+
+input (optional for the step-mountain/eta coordinate)
+
+   mask    underground mask (0.=below ground, 1.=above ground)
+             [real, dimension(:,:,nlev)]
+
+   kbot    the lowest model level above ground
+             [integer, dimension(:,:)]
+
+----------------------------------------------------------------------
+<b>call vert_diff_driver_end</b>
+
+</PRE>
+</A><!-- END ROUTINES -->
+<!--------------------------------------------------------------------->
+<A NAME="NAMELIST">
+<HR>
+<H4>NAMELIST</H4>
+<!-- BEGIN NAMELIST -->
+<PRE>
+
+<b>vert_diff_driver_nml</b>
+
+    do_conserve_energy
+           logical, default = .false.
+           if true, kinetic energy that is lost due to vertical diffusion
+           is returned as heat in the temperature tendency so as to 
+           conserve energy
+
+    do_mcm_no_neg_q
+           logical, default = .false.
+           When .true., specific humidities less than zero are
+           set to zero for the vertical diffusion calculation.
+           Intended to be set to .true. for the Manabe Climate Model.
+
+    use_virtual_temp_vert_diff
+           logical, default = .true.
+           When .false., virtual temperature is not used
+           for the vertical diffusion calculation.
+           Intended to be set to .false. for the Manabe Climate Model.
+           
+
+    do_mcm_plev
+           logical, default = .false.
+           Intended to be set to .true. for the Manabe Climate Model.
+
+    do_mcm_vert_diff_tq
+           logical, default = .false.
+           Intended to be set to .true. for the Manabe Climate Model.
+
+</PRE>
+</A><!-- END NAMELIST -->
+<!--------------------------------------------------------------------->
+<A NAME="DIAGNOSTICS">
+<HR>
+<H4>DIAGNOSTIC FIELDS</H4>
+<PRE>
+Diagnostic fields may be output to a netcdf file by specifying the
+module name <b>vert_diff</b> and the desired field names (given below)
+in file <b>diag_table</b>. See the documentation for diag_manager.
+</PRE>
+<!-- BEGIN DIAGNOSTICS -->
+<PRE>
+
+Diagnostic fields for module name: <b>vert_diff</b>
+
+   field name     field description
+   ----------     -----------------
+
+   tdt_vdif        Temperature tendency from vert diff (deg_K/s)
+   qdt_vdif        Spec humidity tendency from vert diff (kg/kg/s)
+   udt_vdif        Zonal wind tendency from vert diff (m/s2)
+   vdt_vdif        Meridional wind tendency from vert diff (m/s2)
+   sens_vdif       Integrated heat flux from vert diff (W/m2)
+   evap_vdif       Integrated moisture flux from vert diff (kg/m2/s)
+   tdt_diss_vdif   Dissipative heating from vert_diff (deg_K/s)
+   diss_heat_vdif  Integrated dissipative heating from vert diff (W/m2)
+
+</PRE>
+</A><!-- END DIAGNOSTICS -->
+<!--------------------------------------------------------------------->
+<A NAME="CHANGES">
+<HR>
+<H4>CHANGE HISTORY</H4>
+<!-- BEGIN CHANGES -->
+<PRE>
+<B><A HREF=".doc.log#vert_diff_driver.f90">Revision history</A></B>
+
+</PRE>
+</A><!-- END CHANGES -->
+<!--------------------------------------------------------------------->
+<A NAME="ERRORS">
+<HR>
+<H4>ERROR MESSAGES</H4>
+<!-- BEGIN ERRORS -->
+<PRE>
+
+<b>Fatal Errors in vert_diff_driver_mod</b>
+
+    <b>vert_diff_driver_init must be called first</b>
+        The initialization for this module must be called before
+        calling routine vert_diff_driver_down.
+
+    <b>Number of tracers .lt. number of tracer tendencies</b>
+        The number of tracers passed as arguments to vert_diff_driver_down
+        is less than the number of tracers tendencies.
+	The 4'th dimension of the arrays for tracers and
+	tracer tendencies determines the number of tracers.
+
+</PRE>
+</A><!-- END ERRORS -->
+<!--------------------------------------------------------------------->
+<A NAME="REFERENCES">
+<HR>
+<H4>REFERENCES</H4>
+<!-- BEGIN REFERENCES -->
+<PRE>
+
+     None.
+
+</PRE>
+</A><!-- END REFERENCES -->
+<!--------------------------------------------------------------------->
+<A NAME="BUGS">
+<HR>
+<H4>KNOWN BUGS</H4>
+<!-- BEGIN BUGS -->
+<PRE>
+
+     There are no known bugs.
+
+</PRE>
+</A><!-- END BUGS -->
+<!--------------------------------------------------------------------->
+<A NAME="NOTES">
+<HR>
+<H4>NOTES</H4>
+<!-- BEGIN NOTES -->
+<PRE>
+
+     None.
+
+</PRE>
+</A><!-- END NOTES -->
+<!--------------------------------------------------------------------->
+<A NAME="PLANS">
+<HR>
+<H4>FUTURE PLANS</H4>
+<!-- BEGIN PLANS -->
+<PRE>
+
+     Incorporation of new tracer manager.
+
+</PRE>
+</A><!-- END PLANS -->
+<!--------------------------------------------------------------------->
+
+<HR>
+</BODY>
+</HTML>

@@ -1,0 +1,257 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module aerosol_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module aerosol_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Stuart.Freidenreich@noaa.gov">   smf </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Code to initialize/allocate aerosol climatology </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This code initializes prescribed aerosol climatology from input file,
+   allocates necessary memory space and interpolate the aerosol climatology
+   to the model specification. Afterwards the memory space is deallocated,
+   the aerosol climatology information is freed. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre> time_manager_mod<br> diag_manager_mod<br>          fms_mod<br> interpolator_mod<br>       mpp_io_mod<br>    constants_mod<br>rad_utilities_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#aerosol_init">aerosol_init</a>:</dt>
+<dd>   Subroutine to initialize/interpolate prescribed aerosol climatology </dd>
+<dt>
+<a href="#aerosol_driver">aerosol_driver</a>:</dt>
+<dd>   Interpolate aerosol verical profile based on prescribed aerosol
+   climatology input and model set up. </dd>
+<dt>
+<a href="#aerosol_end">aerosol_end</a>:</dt>
+<dd>   aerosol_end is the destructor for aerosol_mod. </dd>
+<dt>
+<a href="#aerosol_dealloc">aerosol_dealloc</a>:</dt>
+<dd>   aerosol_dealloc deallocates the array components of an 
+   aersol_type derived type variable. </dd>
+<dt>
+<a href="#obtain_input_file_data">obtain_input_file_data</a>:</dt>
+<dd>   obtain_input_file_data reads an input file containing a single
+   column aerosol profile. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="aerosol_init"></a>
+<h4>aerosol_init</h4>
+<pre>
+<b>call aerosol_init </b>(lonb, latb, aerosol_names)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to initialize/interpolate prescribed aerosol climatology </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   Array of model longitudes on cell boundaries in [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   Array of model latitudes on cell boundaries in [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>aerosol_names&nbsp;&nbsp;&nbsp;</tt></td><td>   names of the activated aerosol species <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="aerosol_driver"></a>
+<h4>aerosol_driver</h4>
+<pre>
+<b>call aerosol_driver </b>(is, js, model_time, p_half, Aerosol)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd></dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>model_time&nbsp;&nbsp;&nbsp;</tt></td><td>   The internal model simulation time, i.e. Jan. 1 1982 <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_half&nbsp;&nbsp;&nbsp;</tt></td><td>   The array of model layer pressure values <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   The longitude index of model physics window domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   The latitude index of model physics window domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol climatology input <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="aerosol_end"></a>
+<h4>aerosol_end</h4>
+<pre>
+<b>call aerosol_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   aerosol_end is the destructor for aerosol_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="aerosol_dealloc"></a>
+<h4>aerosol_dealloc</h4>
+<pre>
+<b>call aerosol_dealloc </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   aerosol_dealloc deallocates the array components of an 
+   aersol_type derived type variable. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_input_file_data"></a>
+<h4>obtain_input_file_data</h4>
+<pre>
+<b>call obtain_input_file_data </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_input_file_data reads an input file containing a single
+   column aerosol profile. </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

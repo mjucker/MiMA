@@ -1,0 +1,373 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module lhsw_driver_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module lhsw_driver_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:fei.liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:"> </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   lacis-hansen shortwave parameterization
+   <br>
+<br> 
+</p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>rad_utilities_mod<br>    constants_mod<br>          fms_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#lhsw_driver_init">lhsw_driver_init</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#lhsw_driver_end">lhsw_driver_end</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#swrad">swrad</a>:</dt>
+<dd>   Swrad solves for shortwave radiation.
+   <br>
+<br>
+   references:
+   <br>
+<br>
+   (1)  lacis, a. a. and j. e. hansen, "a parameterization for the
+   absorption of solar radiation in the earth's atmosphere,"
+   journal of the atmospheric sciences, 31 (1974), 118-133.
+   <br>
+<br>
+   author: m. d. schwarzkopf
+   <br>
+<br>
+   revised: 1/1/93
+   <br>
+<br>
+   certified:  radiation version 1.0
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#convert_to_cloud_space">convert_to_cloud_space</a>:</dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="lhsw_driver_init"></a>
+<h4>lhsw_driver_init</h4>
+<pre>
+<b>call lhsw_driver_init </b>( pref )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="lhsw_driver_end"></a>
+<h4>lhsw_driver_end</h4>
+<pre>
+<b>call lhsw_driver_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="swrad"></a>
+<h4>swrad</h4>
+<pre>
+<b>call swrad </b>( is, ie, js, je, &amp; Astro, with_clouds, Atmos_input, &amp; Surface, &amp; Rad_gases, &amp; Cldrad_props, Cld_spec, Sw_output, Cldspace_rad, gwt)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt> is&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Astro&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[astronomy_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>with_clouds&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surface&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[surface_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gwt&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Sw_output&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[sw_output_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldspace_rad&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_space_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="convert_to_cloud_space"></a>
+<h4>convert_to_cloud_space</h4>
+<pre>
+<b>call convert_to_cloud_space </b>(is, ie, js, je, Cldrad_props, &amp; Cld_spec, &amp; cirabswkc, cirrfswkc, &amp; cvisrfswkc, ktopswkc, kbtmswkc, &amp; camtswkc, Cldspace_rad)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cldspace_rad&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_space_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cirabswkc&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cirrfswkc&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cvisrfswkc&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ktopswkc&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbtmswkc&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>camtswkc&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module cloudrad_package_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module cloudrad_package_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Module that supplies cloud radiative properties </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>                 fms_mod<br>        time_manager_mod<br>       rad_utilities_mod<br>    esfsw_parameters_mod<br>cloudrad_diagnostics_mod<br>        bulkphys_rad_mod<br>       microphys_rad_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#cloudrad_package_init">cloudrad_package_init</a>:</dt>
+<dd>   Contructor of cloudrad_package module </dd>
+<dt>
+<a href="#cloud_radiative_properties">cloud_radiative_properties</a>:</dt>
+<dd>   Subroutine to calculate cloud radiative properties
+   appropriate for the radiation options that are active. </dd>
+<dt>
+<a href="#cldrad_properties_dealloc">cldrad_properties_dealloc</a>:</dt>
+<dd>   Subroutine to deallocate the array elements of the
+   cldrad_properties_type variable that is input. </dd>
+<dt>
+<a href="#cloudrad_package_end">cloudrad_package_end</a>:</dt>
+<dd>   Destructor of the cloudrad_package module </dd>
+<dt>
+<a href="#initialize_cldrad_props">initialize_cldrad_props</a>:</dt>
+<dd>   initialize_cldrad_props allocates and initializes those fields
+   which define the cloud radiative properties needed by the
+   radiation package. </dd>
+<dt>
+<a href="#combine_cloud_properties">combine_cloud_properties</a>:</dt>
+<dd>   combine_cloud_properties produces cloud-radiative properties fields
+   for the total-cloud field in each grid box. </dd>
+<dt>
+<a href="#cloudrad_package_dealloc">cloudrad_package_dealloc</a>:</dt>
+<dd>   Subroutine to deallocate the space cloud radiative properties use
+   in the model </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="cloudrad_package_init"></a>
+<h4>cloudrad_package_init</h4>
+<pre>
+<b>call cloudrad_package_init </b>( pref, lonb, latb, axes, Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Contructor of cloudrad_package module </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   reference pressure levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   the longitude array of the model grid point <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   the latitude array of the model grid point <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time [ time_type(days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_radiative_properties"></a>
+<h4>cloud_radiative_properties</h4>
+<pre>
+<b>call cloud_radiative_properties </b>(is, ie, js, je, Time_next, &amp; Astro, Atmos_input, Cld_spec, &amp; Lsc_microphys, Meso_microphys, &amp; Cell_microphys, Cldrad_props, &amp; kbot, mask)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to calculate cloud radiative properties
+   appropriate for the radiation options that are active. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,ie,js,je&nbsp;&nbsp;&nbsp;</tt></td><td>   starting/ending subdomain i,j indices of data in
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time_next&nbsp;&nbsp;&nbsp;</tt></td><td>   time on next timestep, used as stamp for 
+   diagnostic output [ time_type (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Astro&nbsp;&nbsp;&nbsp;</tt></td><td>   astronomical properties needed by radiation
+   package <br>&nbsp;&nbsp;&nbsp;<span class="type">[astronomy_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmospheric input fields on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   index of lowest model level above ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   mask to remove points below ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties on model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cldrad_properties_dealloc"></a>
+<h4>cldrad_properties_dealloc</h4>
+<pre>
+<b>call cldrad_properties_dealloc </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to deallocate the array elements of the
+   cldrad_properties_type variable that is input. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cldrad_properties_type variable containing cloud 
+   radiative properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloudrad_package_end"></a>
+<h4>cloudrad_package_end</h4>
+<pre>
+<b>call cloudrad_package_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Destructor of the cloudrad_package module </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="initialize_cldrad_props"></a>
+<h4>initialize_cldrad_props</h4>
+<pre>
+<b>call initialize_cldrad_props </b>(ix, jx, kx, Lscrad_props, &amp; Mesorad_props, Cellrad_props, &amp; Cldrad_props )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   initialize_cldrad_props allocates and initializes those fields
+   which define the cloud radiative properties needed by the
+   radiation package. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ix, jx, kx&nbsp;&nbsp;&nbsp;</tt></td><td>   ix             size of i dimension of physics window
+   jx             size of j dimension of physics window
+   kx             size of k dimension of physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lscrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Mesorad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the meso-scale
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cellrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties on model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="combine_cloud_properties"></a>
+<h4>combine_cloud_properties</h4>
+<pre>
+<b>call combine_cloud_properties </b>(deltaz, &amp; Lsc_microphys, Meso_microphys, &amp; Cell_microphys, Lscrad_props, &amp; Mesorad_props, Cellrad_props, &amp; Cldrad_props)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   combine_cloud_properties produces cloud-radiative properties fields
+   for the total-cloud field in each grid box, using as input the 
+   properties and characteristics of the various cloud types that may 
+   be present (large-scale, mesoscale and cell-scale). </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ix, jx, kx&nbsp;&nbsp;&nbsp;</tt></td><td>   ix             size of i dimension of physics window
+   jx             size of j dimension of physics window
+   kx             size of k dimension of physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for  convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lscrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Mesorad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the meso-scale
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cellrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties on model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloudrad_package_dealloc"></a>
+<h4>cloudrad_package_dealloc</h4>
+<pre>
+<b>call cloudrad_package_dealloc </b>(Lscrad_props, Mesorad_props, Cldrad_props)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to deallocate the space cloud radiative properties use
+   in the model </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lscrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Mesorad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the meso-scale
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cldrad_prperties_type variable containing the cloud radiative
+   property output fields needed by the radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_prperties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

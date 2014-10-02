@@ -1,0 +1,914 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module optical_path_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module optical_path_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Module that set up optical depth calculaiton </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   radiative fluxes </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>            fms_mod<br>      constants_mod<br>  rad_utilities_mod<br>longwave_params_mod<br> lw_gases_stdtf_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#optical_path_init">optical_path_init</a>:</dt>
+<dd>   Subroutine to initialize optical depth calculation and read
+   optical path namelist from input file. </dd>
+<dt>
+<a href="#optical_path_setup">optical_path_setup</a>:</dt>
+<dd>   Subroutine to prepare optical path calculation, such as memory
+   allocation. </dd>
+<dt>
+<a href="#optical_trans_funct_from_KS">optical_trans_funct_from_KS</a>:</dt>
+<dd>   Subroutine to compute transmission function from level KS to another
+   level </dd>
+<dt>
+<a href="#optical_trans_funct_k_down">optical_trans_funct_k_down</a>:</dt>
+<dd>   Subroutine to compute transmission function downward from level k </dd>
+<dt>
+<a href="#optical_trans_funct_KE">optical_trans_funct_KE</a>:</dt>
+<dd>   Subroutine to compute transmission function from level KE </dd>
+<dt>
+<a href="#optical_trans_funct_diag">optical_trans_funct_diag</a>:</dt>
+<dd>   Subroutine to compute diagnostic transmission function </dd>
+<dt>
+<a href="#get_totch2o">get_totch2o</a>:</dt>
+<dd>   Subroutine to compute self broadened temperature dependent
+   water vapor continuum </dd>
+<dt>
+<a href="#get_totch2obd">get_totch2obd</a>:</dt>
+<dd>   Subroutine to compute self broadened temperature dependent
+   water vapor continuum </dd>
+<dt>
+<a href="#get_totvo2">get_totvo2</a>:</dt>
+<dd>   Subroutine to compute continuum coefficients in band n </dd>
+<dt>
+<a href="#optical_dealloc">optical_dealloc</a>:</dt>
+<dd>   Subroutine to deallocate the array components of the 
+   optical_path_type input variable. </dd>
+<dt>
+<a href="#optical_path_end">optical_path_end</a>:</dt>
+<dd>   optical_path_end is the destructor for optical_path_mod. </dd>
+<dt>
+<a href="#optical_ckd_init">optical_ckd_init</a>:</dt>
+<dd>   Subroutine to initialize water vapor self and foreign broadened
+   continuum coefficients. </dd>
+<dt>
+<a href="#optical_path_ckd">optical_path_ckd</a>:</dt>
+<dd>   Subroutine to compute water vapor self and foreign broadened 
+   continuum optical paths </dd>
+<dt>
+<a href="#optical_o3">optical_o3</a>:</dt>
+<dd>   Subroutine to compute optical paths for o3. </dd>
+<dt>
+<a href="#optical_rbts">optical_rbts</a>:</dt>
+<dd>   Subroutine to compute optical paths for h2o rbts continuum </dd>
+<dt>
+<a href="#optical_h2o">optical_h2o</a>:</dt>
+<dd>   Subroutine to compute water vapor optical paths </dd>
+<dt>
+<a href="#cfc_optical_depth">cfc_optical_depth</a>:</dt>
+<dd>   Subroutine to compute CFC optical depths </dd>
+<dt>
+<a href="#optical_depth_aerosol">optical_depth_aerosol</a>:</dt>
+<dd>   Subroutine to compute aerosol optical depths </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="optical_path_init"></a>
+<h4>optical_path_init</h4>
+<pre>
+<b>call optical_path_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to initialize optical depth calculation and read
+   optical path namelist from input file. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_path_setup"></a>
+<h4>optical_path_setup</h4>
+<pre>
+<b>call optical_path_setup </b>(is, ie, js, je, Atmos_input, &amp; Rad_gases, Aerosol, Aerosol_props, Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to prepare optical path calculation, such as memory
+   allocation. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is, ie, js, je&nbsp;&nbsp;&nbsp;</tt></td><td>   Latitude and longitude bound of model physics window. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   Radiative gases input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol radiative properties input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Aerosol_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol radiative properties output (extinction coefficient,
+   single scattering albedo and asymmetry parameter in different
+   bands) <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   optical path output <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_trans_funct_from_KS"></a>
+<h4>optical_trans_funct_from_KS</h4>
+<pre>
+<b>call optical_trans_funct_from_KS </b>(Gas_tf, to3cnt, overod, Optical, &amp; cnttaub1, cnttaub2, cnttaub3)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute transmission function from level KS to another
+   level </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>to3cnt&nbsp;&nbsp;&nbsp;</tt></td><td>   Ozone continuum transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>overod&nbsp;&nbsp;&nbsp;</tt></td><td>   Transmission function due to h2o continuum and aerosol <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cnttaub1, cnttaub2, cnttaub3&nbsp;&nbsp;&nbsp;</tt></td><td>   Transmission functions of gas continuum <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_trans_funct_k_down"></a>
+<h4>optical_trans_funct_k_down</h4>
+<pre>
+<b>call optical_trans_funct_k_down </b>(Gas_tf, k, &amp; to3cnt, overod, Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute transmission function downward from level k </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>k&nbsp;&nbsp;&nbsp;</tt></td><td>   The data level from which downward transmission functions are computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>to3cnt&nbsp;&nbsp;&nbsp;</tt></td><td>   Ozone continuum transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>overod&nbsp;&nbsp;&nbsp;</tt></td><td>   Transmission function due to h2o continuum and aerosol <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_trans_funct_KE"></a>
+<h4>optical_trans_funct_KE</h4>
+<pre>
+<b>call optical_trans_funct_KE </b>(Gas_tf, to3cnt, Optical, overod)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute transmission function from level KE </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>to3cnt&nbsp;&nbsp;&nbsp;</tt></td><td>   Ozone continuum transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>overod&nbsp;&nbsp;&nbsp;</tt></td><td>   Transmission function due to h2o continuum and aerosol <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_trans_funct_diag"></a>
+<h4>optical_trans_funct_diag</h4>
+<pre>
+<b>call optical_trans_funct_diag </b>(Atmos_input, contdg, to3dg, &amp; Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute diagnostic transmission function </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>to3dg&nbsp;&nbsp;&nbsp;</tt></td><td>   Ozone continuum diagnostic transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>contdg&nbsp;&nbsp;&nbsp;</tt></td><td>   Diagnostic continuum transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_totch2o"></a>
+<h4>get_totch2o</h4>
+<pre>
+<b>call get_totch2o </b>(n, Optical, totch2o, dte1, ixoe1)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute self broadened temperature dependent
+   water vapor continuum </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>n&nbsp;&nbsp;&nbsp;</tt></td><td>   frequency band index <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dte1&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature step delta <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ixoe1&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature index array <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth output <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>totch2o&nbsp;&nbsp;&nbsp;</tt></td><td>   self broadened and temperature dependent continuum <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_totch2obd"></a>
+<h4>get_totch2obd</h4>
+<pre>
+<b>call get_totch2obd </b>(n, Optical, totch2obd)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute self broadened temperature dependent
+   water vapor continuum </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>n&nbsp;&nbsp;&nbsp;</tt></td><td>   frequency band index <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth output <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>totch2obd&nbsp;&nbsp;&nbsp;</tt></td><td>   self broadened and temperature dependent h2o continuum <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_totvo2"></a>
+<h4>get_totvo2</h4>
+<pre>
+<b>call get_totvo2 </b>(n, Optical, totvo2_out)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute continuum coefficients in band n </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>n&nbsp;&nbsp;&nbsp;</tt></td><td>   frequency band index <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth output <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>totvo2_out&nbsp;&nbsp;&nbsp;</tt></td><td>   Continuum coefficients in band n <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_dealloc"></a>
+<h4>optical_dealloc</h4>
+<pre>
+<b>call optical_dealloc </b>(Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine deallocates the array components of the 
+   optical_path_type input variable. Dependent on the namelist
+   options chosen, some of the arrays may or may nothave been
+   allocated. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Derived type variable containing information related to
+   the computation of optical depth associated with 
+   different atmospheric constituents. <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_path_end"></a>
+<h4>optical_path_end</h4>
+<pre>
+<b>call optical_path_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   optical_path_end is the destructor for optical_path_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_ckd_init"></a>
+<h4>optical_ckd_init</h4>
+<pre>
+<b>call optical_ckd_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Idckdh2o reads ckd2.1 self and foreign-broadened h2o continuum
+   coefficients, corrections, and coefficients for temperature
+   dependence of the self-continuum. these are tabulated at 10
+   cm-1 intervals from 0 to 20000 cm-1 </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_path_ckd"></a>
+<h4>optical_path_ckd</h4>
+<pre>
+<b>call optical_path_ckd </b>(atmden, press, temp, rh2o, Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute water vapor self and foreign broadened 
+   continuum optical paths over the frequency range specified by
+   ioffh2o and nptch2o using the ckd algorithm, modified for 
+   the gcm parameterization. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>atmden&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric density profile <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>press&nbsp;&nbsp;&nbsp;</tt></td><td>   The pressure coordinate array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>temp&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperature <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rh2o&nbsp;&nbsp;&nbsp;</tt></td><td>   mass mixing ratio of h2o at model data levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   water vapor continuum optical path otuput <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_o3"></a>
+<h4>optical_o3</h4>
+<pre>
+<b>call optical_o3 </b>(atmden, qo3, vv, Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute optical paths for o3. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>atmden&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric density profile <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qo3&nbsp;&nbsp;&nbsp;</tt></td><td>   mass mixing ratio of o3 at model data levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vv&nbsp;&nbsp;&nbsp;</tt></td><td>   Ozone volume mixing atio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   ozone optical path otuput <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_rbts"></a>
+<h4>optical_rbts</h4>
+<pre>
+<b>call optical_rbts </b>(temp, rh2o, Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute optical paths for h2o rbts continuum </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>temp&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature profile used in continuum calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rh2o&nbsp;&nbsp;&nbsp;</tt></td><td>   mass mixing ratio of h2o at model data levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   water vapor robert continuum optical path <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_h2o"></a>
+<h4>optical_h2o</h4>
+<pre>
+<b>call optical_h2o </b>(pflux, atmden, vv, press, temp, rh2o, tflux, &amp; Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute water vapor optical paths </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pflux&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at flux levels of model <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>atmden&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric density profile <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vv&nbsp;&nbsp;&nbsp;</tt></td><td>   volume mixing ratio of h2o at model data levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>press&nbsp;&nbsp;&nbsp;</tt></td><td>   The pressure coordinate array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>temp&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperature at data levels of model <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rh2o&nbsp;&nbsp;&nbsp;</tt></td><td>   mass mixing ratio of h2o at model data levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tflux&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperature at flux levels of model <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   water vapor optical path otuput <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cfc_optical_depth"></a>
+<h4>cfc_optical_depth</h4>
+<pre>
+<b>call cfc_optical_depth </b>(density, Rad_gases, Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute CFC optical depths. The code assumes
+   a constant mixing ratio throughout the atmosphere. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>density&nbsp;&nbsp;&nbsp;</tt></td><td>   density profile of CFC in the atmosphere <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   Radiative gases optical properties input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC Optical depth output <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="optical_depth_aerosol"></a>
+<h4>optical_depth_aerosol</h4>
+<pre>
+<b>call optical_depth_aerosol </b>(Atmos_input, n, Aerosol, &amp; Aerosol_props, Optical)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute aerosol optical depths. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data to model grid point for radiative 
+   properties calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>n&nbsp;&nbsp;&nbsp;</tt></td><td>   aerosol optical index <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol climatological input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Aerosol_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol radiative properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol Optical depth output <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

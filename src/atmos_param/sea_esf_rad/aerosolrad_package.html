@@ -1,0 +1,400 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module aerosolrad_package_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module aerosolrad_package_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:"> </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   aerosolrad_package_mod provides the radiative properties 
+   associated with the atmospheric aerosols. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>             fms_mod<br>          mpp_io_mod<br>    time_manager_mod<br>    diag_manager_mod<br>    interpolator_mod<br>   rad_utilities_mod<br>esfsw_parameters_mod<br> longwave_params_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#aerosolrad_package_init">aerosolrad_package_init</a>:</dt>
+<dd>   aerosolrad_package_init is the constructor for 
+   aerosolrad_package_mod. </dd>
+<dt>
+<a href="#aerosol_radiative_properties">aerosol_radiative_properties</a>:</dt>
+<dd>   aerosol_radiative_properties defines and returns the radiative
+   properties for each aerosol properties type and for each solar
+   parameterization band in the shortwave and for each aerosol 
+   emissivity band in the longwave. </dd>
+<dt>
+<a href="#aerosolrad_package_end">aerosolrad_package_end</a>:</dt>
+<dd>   aerosolrad_package_end is the destructor for 
+   aerosolrad_package_mod. </dd>
+<dt>
+<a href="#get_aerosol_optical_info">get_aerosol_optical_info</a>:</dt>
+<dd>   get_aerosol_optical_info accesses data stored by this module. </dd>
+<dt>
+<a href="#get_aerosol_optical_index">get_aerosol_optical_index</a>:</dt>
+<dd>   get_aerosol_optical_index returns the aerosol optical property
+   index for given aerosol number and relative humidity. </dd>
+<dt>
+<a href="#assign_aerosol_opt_props">assign_aerosol_opt_props</a>:</dt>
+<dd>   assign_aerosol_opt_props assigns an index for an available optical
+   properties type to each activated aerosol type. for sulfates, a 
+   flag is set, since the aerosol properties type is a function 
+   of model relative humidity, and will vary with time. </dd>
+<dt>
+<a href="#read_optical_input_file">read_optical_input_file</a>:</dt>
+<dd>   read_optical_input_file reads the optical properties input file
+   to obtain the specified aerosol radiative properties for each 
+   aerosol in each of the aerosol parameterization spectral bands. </dd>
+<dt>
+<a href="#sw_aerosol_interaction">sw_aerosol_interaction</a>:</dt>
+<dd>   sw_aerosol_interaction defines the weights and interval infor-
+   mation needed to map the aerosol radiative properties from the
+   aerosol parameterization bands to the solar parameterization
+   bands being used by the model. </dd>
+<dt>
+<a href="#lw_aerosol_interaction">lw_aerosol_interaction</a>:</dt>
+<dd>   lw_aerosol_interaction defines the weights and interval infor-
+   mation needed to map the aerosol radiative properties from the
+   aerosol parameterization bands to the aerosol emissivity bands
+   being used by the model. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="aerosolrad_package_init"></a>
+<h4>aerosolrad_package_init</h4>
+<pre>
+<b>call aerosolrad_package_init </b>(aerosol_names)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   aerosolrad_package_init is the constructor for 
+   aerosolrad_package_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>aerosol_names&nbsp;&nbsp;&nbsp;</tt></td><td>   names of the activated aerosol species <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="aerosol_radiative_properties"></a>
+<h4>aerosol_radiative_properties</h4>
+<pre>
+<b>call aerosol_radiative_properties </b>(is, ie, js, je, &amp; Aerosol, Aerosol_props_out)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   aerosol_radiative_properties defines and returns the radiative
+   properties for each aerosol properties type and for each solar
+   parameterization band in the shortwave and for each aerosol 
+   emissivity band in the longwave. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol climatology input <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>is, ie&nbsp;&nbsp;&nbsp;</tt></td><td>   The longitude index of model physics window domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js, je&nbsp;&nbsp;&nbsp;</tt></td><td>   The latitude index of model physics window domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Aerosol_props_out&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol radiative properties in radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="aerosolrad_package_end"></a>
+<h4>aerosolrad_package_end</h4>
+<pre>
+<b>call aerosolrad_package_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   aerosolrad_package_end is the destructor for 
+   aerosolrad_package_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_aerosol_optical_info"></a>
+<h4>get_aerosol_optical_info</h4>
+<pre>
+<b>call get_aerosol_optical_info </b>( num_categories, nwavenumbers, &amp; names, wavenumbers, &amp; aer_ext, aer_ss_alb, aer_asymm)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   get_aerosol_optical_info accesses data stored by this module. </dd>
+<br>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>num_categories&nbsp;&nbsp;&nbsp;</tt></td><td>   number of aerosol properties types <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nwavenumbers&nbsp;&nbsp;&nbsp;</tt></td><td>   number of wavenumber bands over which
+   aerosol properties are defined <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>names&nbsp;&nbsp;&nbsp;</tt></td><td>   names assigned to the optical properties types <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>wavenumbers&nbsp;&nbsp;&nbsp;</tt></td><td>   wavenumber limits for each of the bands for
+   which aerosol properties are defined <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>aer_ext, aer_ss_alb, aer_asymm&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol extinction coefficient, single scattering albedo, and
+   asymmetry parameter <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_aerosol_optical_index"></a>
+<h4>get_aerosol_optical_index</h4>
+<pre>index = <b>get_aerosol_optical_index</b> ( name, naerosol, rh )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   get_aerosol_optical_index returns the aerosol optical property
+   index for given aerosol number and relative humidity. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>name&nbsp;&nbsp;&nbsp;</tt></td><td>   aerosol species name for which the optical 
+   properties index is desired <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>naerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   aerosol index of the aerosol for whoch the 
+   optical properties index is desired <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rh&nbsp;&nbsp;&nbsp;</tt></td><td>   relative humidity <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="assign_aerosol_opt_props"></a>
+<h4>assign_aerosol_opt_props</h4>
+<pre>
+<b>call assign_aerosol_opt_props </b>(aerosol_names)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   assign_aerosol_opt_props assigns an index for an available optical
+   properties type to each activated aerosol type. for sulfates, a 
+   flag is set, since the aerosol properties type is a function 
+   of model relative humidity, and will vary with time. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>aerosol_names&nbsp;&nbsp;&nbsp;</tt></td><td>   names associated with each aerosol species <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="read_optical_input_file"></a>
+<h4>read_optical_input_file</h4>
+<pre>
+<b>call read_optical_input_file </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   read_optical_input_file reads the optical properties input file
+   to obtain the specified aerosol radiative properties for each 
+   aerosol in each of the aerosol parameterization spectral bands. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="sw_aerosol_interaction"></a>
+<h4>sw_aerosol_interaction</h4>
+<pre>
+<b>call sw_aerosol_interaction </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   sw_aerosol_interaction defines the weights and interval infor-
+   mation needed to map the aerosol radiative properties from the
+   aerosol parameterization bands to the solar parameterization
+   bands being used by the model. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="lw_aerosol_interaction"></a>
+<h4>lw_aerosol_interaction</h4>
+<pre>
+<b>call lw_aerosol_interaction </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   lw_aerosol_interaction defines the weights and interval infor-
+   mation needed to map the aerosol radiative properties from the
+   aerosol parameterization bands to the aerosol emissivity bands
+   being used by the model. </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

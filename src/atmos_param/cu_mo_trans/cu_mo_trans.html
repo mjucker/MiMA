@@ -1,0 +1,334 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module cu_mo_trans_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module cu_mo_trans_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Isaac.Held@noaa.gov">   Isaac Held </a>
+<br>
+<b>Reviewers:&nbsp;</b>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/cu_mo_trans">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   A simple module that computes a diffusivity proportional to the 
+   convective mass flux, for use with diffusive 
+   convective momentum transport closure </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   A diffusive approximation to convective momentum transport is crude but
+   has been found to be useful in improving the simulation of tropical
+   precipitation in some models.  The diffusivity computed here is
+   simply <pre> diffusivity = c*W*L 
+ W = M/rho  (m/sec) 
+ M = convective mass flux (kg/(m2 sec)) 
+ rho - density of air &lt;p&gt;
+ L = depth of convecting layer (m)
+ c = normalization constant = diff_norm/g 
+   (diff_norm is a namelist parameter;
+      the factor of g = acceleration of gravity here is an historical artifact) &lt;p&gt;
+ for further discussion see 
+     <a href="cu_mo_trans.pdf">cu_mo_trans.pdf</a>
+</pre> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>   constants_mod<br>         fms_mod<br>Diag_Manager_Mod<br>Time_Manager_Mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#cu_mo_trans_init">cu_mo_trans_init</a>:</dt>
+<dd>   initializes module </dd>
+<dt>
+<a href="#cu_mo_trans_end">cu_mo_trans_end</a>:</dt>
+<dd>   terminates module </dd>
+<dt>
+<a href="#cu_mo_trans">cu_mo_trans</a>:</dt>
+<dd>   returns a diffusivity proportional to the 
+   convective mass flux, for use with diffusive 
+   convective momentum transport closure </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="cu_mo_trans_init"></a>
+<h4>cu_mo_trans_init</h4>
+<pre>
+<b>call cu_mo_trans_init </b>( axes, Time )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Reads namelist and registers one diagnostic field
+   (diff_cmt:  the kinematic diffusion coefficient) </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt> axes&nbsp;&nbsp;&nbsp;</tt></td><td>   axes identifier needed by diag manager <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   time at initialization needed by diag manager <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cu_mo_trans_end"></a>
+<h4>cu_mo_trans_end</h4>
+<pre>
+<b>call cu_mo_trans_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This is the destructor for cu_mo_trans </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="cu_mo_trans"></a>
+<h4>cu_mo_trans</h4>
+<pre>
+<b>call cu_mo_trans </b>(is, js, Time, mass_flux, t, &amp; p_half, p_full, z_half, z_full, diff)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   A diffusive approximation to convective momentum transport is crude but
+   has been found to be useful in inproving the simulation of tropical
+   precipitation in some models.  The diffusivity computed here is
+   simply <pre> diffusivity = c*W*L
+ W = M/rho  (m/sec)
+ M = convective mass flux (kg/(m2 sec)) 
+ rho - density of air
+ L = depth of convecting layer (m)
+ c = normalization constant = diff_norm/g
+   (diff_norm is a namelist parameter;
+      the factor of g here is an historical artifact)
+ for further discussion see cu_mo_trans.ps</pre> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   horizontal domain on which computation to be performed is
+   (is:is+size(t,1)-1,ie+size(t,2)-1) in global coordinates
+   (used by diag_manager only) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time, used by diag_manager <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mass_flux&nbsp;&nbsp;&nbsp;</tt></td><td>   convective mass flux (Kg/(m**2 s)), dimension(:,:,:), 3rd dimension is
+   vertical level (top down) -- defined at interfaces, so that
+   size(mass_flux,3) = size(p_half,3); entire field processed;
+   all remaining fields are 3 dimensional;
+   size of first two dimensions must confrom for all variables <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>t&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature (K) at full levels, size(t,3) = size(p_full,3) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_half&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at interfaces (Pascals) 
+   size(p_half,3) = size(p_full,3) + 1 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_full&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at full levels (levels at which temperature is defined) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_half&nbsp;&nbsp;&nbsp;</tt></td><td>   height at half levels (meters); size(z_half,3) = size(p_half,3) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_full&nbsp;&nbsp;&nbsp;</tt></td><td>   height at full levels (meters); size(z_full,3) = size(p_full,3) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>diff&nbsp;&nbsp;&nbsp;</tt></td><td>   kinematic diffusivity (m*2/s); defined at half levels 
+   size(diff,3) = size(p_half,3) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<a name="REFERENCES"></a>
+<hr>
+<h4>REFERENCES</h4>
+<!-- BEGIN REFERENCES -->
+<div>
+        None.
+      </div>
+<br>
+<!-- END REFERENCES -->
+<a name="COMPILER SPECIFICS"></a>
+<hr>
+<h4>COMPILER SPECIFICS</h4>
+<!-- BEGIN COMPILER SPECIFICS -->
+<div>
+        None.
+      </div>
+<br>
+<!-- END COMPILER SPECIFICS -->
+<a name="PRECOMPILER OPTIONS"></a>
+<hr>
+<h4>PRECOMPILER OPTIONS</h4>
+<!-- BEGIN PRECOMPILER OPTIONS -->
+<div>
+        None.
+      </div>
+<br>
+<!-- END PRECOMPILER OPTIONS -->
+<a name="LOADER OPTIONS"></a>
+<hr>
+<h4>LOADER OPTIONS</h4>
+<!-- BEGIN LOADER -->
+<div>None.<br>
+<br>
+</div>
+<!-- END LOADER OPTIONS -->
+<a name="TEST PROGRAM"></a>
+<hr>
+<h4>TEST PROGRAM</h4>
+<!-- BEGIN TEST PROGRAM -->
+<div>None.<br>
+</div>
+<br>
+<!-- END TEST PROGRAM -->
+<a name="KNOWN BUGS"></a>
+<hr>
+<h4>KNOWN BUGS</h4>
+<!-- BEGIN KNOWN BUGS -->
+<div>
+        None.
+      </div>
+<br>
+<!-- END KNOWN BUGS -->
+<a name="NOTES"></a>
+<hr>
+<h4>NOTES</h4>
+<!-- BEGIN NOTES -->
+<div>None.<br>
+</div>
+<br>
+<!-- END NOTES -->
+<a name="FUTURE PLANS"></a>
+<hr>
+<h4>FUTURE PLANS</h4>
+<!-- BEGIN FUTURE PLANS -->
+<div>
+        None.
+      </div>
+<br>
+<!-- END FUTURE PLANS -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

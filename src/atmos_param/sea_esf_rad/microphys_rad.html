@@ -1,0 +1,1397 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module microphys_rad_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module microphys_rad_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Stuart.Freidenreich@noaa.gov">   smf </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Code to provide micro physics subroutines for radiation calculation </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>             fms_mod<br>       constants_mod<br>   rad_utilities_mod<br> longwave_params_mod<br>esfsw_parameters_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#microphys_rad_init">microphys_rad_init</a>:</dt>
+<dd>   The microphys_rad module constructor </dd>
+<dt>
+<a href="#microphys_sw_driver">microphys_sw_driver</a>:</dt>
+<dd>   Subroutine to deploy micro physics radiation calculation,
+   particularly for cloud parameterizations in the shortwave </dd>
+<dt>
+<a href="#microphys_lw_driver">microphys_lw_driver</a>:</dt>
+<dd>   Subroutine to deploy micro physics radiation calculation,
+   particularly for cloud parameterizations in the longwave </dd>
+<dt>
+<a href="#isccp_microphys_sw_driver">isccp_microphys_sw_driver</a>:</dt>
+<dd>   Subroutine to deploy micro physics radiation calculation,
+   particularly for cloud parameterizations in the shortwave </dd>
+<dt>
+<a href="#isccp_microphys_lw_driver">isccp_microphys_lw_driver</a>:</dt>
+<dd>   Subroutine to deploy micro physics radiation calculation,
+   particularly for cloud parameterizations in the longwave </dd>
+<dt>
+<a href="#lwemiss_calc">lwemiss_calc</a>:</dt>
+<dd>   Subroutine to compute infrared emissivity from the absorption
+   coefficient </dd>
+<dt>
+<a href="#comb_cldprops_calc">comb_cldprops_calc</a>:</dt>
+<dd>   Subroutine to define the total-cloud radiative
+   properties </dd>
+<dt>
+<a href="#microphys_rad_end">microphys_rad_end</a>:</dt>
+<dd>   microphys_rad_end is the destructor for microphys_rad_mod. </dd>
+<dt>
+<a href="#cloudpar">cloudpar</a>:</dt>
+<dd>   Subroutine to determine cloud single scattering parameters </dd>
+<dt>
+<a href="#slingo">slingo</a>:</dt>
+<dd>   Subroutine to determine single scattering parameters for clouds </dd>
+<dt>
+<a href="#savijarvi">savijarvi</a>:</dt>
+<dd>   Subroutine to define the single scattering parameters for rain drop </dd>
+<dt>
+<a href="#fu">fu</a>:</dt>
+<dd>   Subroutine to define the single scattering parameters for ice crystals </dd>
+<dt>
+<a href="#icesolar">icesolar</a>:</dt>
+<dd>   Subroutine to define the single scattering parameters for ice crystals </dd>
+<dt>
+<a href="#snowsw">snowsw</a>:</dt>
+<dd>   Subroutine to define the single scattering parameters for snow </dd>
+<dt>
+<a href="#cloud_lwpar">cloud_lwpar</a>:</dt>
+<dd>   Subroutine to determine cloud infrared emissivity </dd>
+<dt>
+<a href="#cloud_lwem_oneband">cloud_lwem_oneband</a>:</dt>
+<dd>   Subroutine to determine a single broadband cloud infrared emissivity </dd>
+<dt>
+<a href="#el">el</a>:</dt>
+<dd>   Subroutine to calculates total optical depth and scattering 
+   optical depth </dd>
+<dt>
+<a href="#el_dge">el_dge</a>:</dt>
+<dd>   Subroutine to calculate total optical depth and scattering optical
+   depth in infrared. </dd>
+<dt>
+<a href="#cliqlw">cliqlw</a>:</dt>
+<dd>   Subroutine to calculate longwave absorption optical depth for liquid </dd>
+<dt>
+<a href="#furainlw">furainlw</a>:</dt>
+<dd>   Subroutine to calculate total optical depth and scattering optical
+   depth in infrared for cloud rain water </dd>
+<dt>
+<a href="#fusnowlw">fusnowlw</a>:</dt>
+<dd>   Subroutine to calculate total optical depth and scattering optical
+   depth in infrared for cloud rain water </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="microphys_rad_init"></a>
+<h4>microphys_rad_init</h4>
+<pre>
+<b>call microphys_rad_init </b>(cldhm_abs_in, cldml_abs_in)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine initializes micro physics module data,
+   determines micro physics parameterization scheme based
+   on initialization input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldhm_abs_in&nbsp;&nbsp;&nbsp;</tt></td><td>   boundaries in sigma pressure level between high and middle
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldhm_abs_in]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldml_abs_in&nbsp;&nbsp;&nbsp;</tt></td><td>   boundaries in sigma pressure level between middle and low
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldml_abs_in]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="microphys_sw_driver"></a>
+<h4>microphys_sw_driver</h4>
+<pre>
+<b>call microphys_sw_driver </b>(is, ie, js, je, Cloud_microphysics, &amp; Cloud_rad_props, donner_flag )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine takes cloud micro physics parameters and
+   calculate broad band cloud radiation parameters. For example
+   the input parameters are cloud droplet concentration, size,
+   and composition; the output parameters are cloud extinction
+   coefficient, scattering coefficient, and assymmetry parameters. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of x dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   ending indice of x dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of y dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   ending indice of y dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cloud_microphysics&nbsp;&nbsp;&nbsp;</tt></td><td>   derived type variable containing cloud 
+   microphysical specification information <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>donner_flag&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: logical flag which if present indicates
+   that clouds from donner_deep_mod are being
+   processed, and that an ice parameterization
+   associated with that scheme (which differs
+   from that used by strat_cloud_mod) is to
+   be used. <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cloud_rad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   derived type variable containing the micro-
+   physically-based sw cloud radiative proper-
+   ties [ microrad_properties_type ]
+   the components defined in this routine:
+   %cldext   parameterization band values of 
+   the cloud extinction coefficient 
+   [ km**(-1) ]   
+   %cldsct   parameterization band values of 
+   the cloud scattering coefficient 
+   [ km**(-1) ] 
+   %cldasymm parameterization band values of 
+   the asymmetry factor 
+   [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="microphys_lw_driver"></a>
+<h4>microphys_lw_driver</h4>
+<pre>
+<b>call microphys_lw_driver </b>(is, ie, js, je, Cloud_microphysics, &amp; Cloud_rad_props, donner_flag )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine takes cloud micro physics parameters and
+   calculate broad band cloud radiation parameters. For example
+   the input parameters are cloud droplet concentration, size,
+   and composition; the output parameters are cloud extinction
+   coefficient, scattering coefficient, and assymmetry parameters. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of x dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   ending indice of x dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of y dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   ending indice of y dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cloud_microphysics&nbsp;&nbsp;&nbsp;</tt></td><td>   derived type variable containing cloud 
+   microphysical specification information <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>donner_flag&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: logical flag which if present indicates
+   that clouds from donner_deep_mod are being
+   processed, and that an ice parameterization
+   associated with that scheme (which differs
+   from that used by strat_cloud_mod) is to
+   be used. <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cloud_rad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   derived type variable containing the micro-
+   physically-based sw cloud radiative proper-
+   ties [ microrad_properties_type ]
+   the components defined in this routine:
+   %cldext   parameterization band values of 
+   the cloud extinction coefficient 
+   [ km**(-1) ]   
+   %cldsct   parameterization band values of 
+   the cloud scattering coefficient 
+   [ km**(-1) ] 
+   %cldasymm parameterization band values of 
+   the asymmetry factor 
+   [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_microphys_sw_driver"></a>
+<h4>isccp_microphys_sw_driver</h4>
+<pre>
+<b>call isccp_microphys_sw_driver </b>(is, js, iswband, Cloud_microphysics,cldext )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine takes cloud micro physics parameters and
+   calculate broad band cloud radiation parameters. For example
+   the input parameters are cloud droplet concentration, size,
+   and composition; the output parameters are cloud extinction
+   coefficient, scattering coefficient, and assymmetry parameters. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of x dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of y dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iswband&nbsp;&nbsp;&nbsp;</tt></td><td>   swband whose extinction we desire <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cloud_microphysics&nbsp;&nbsp;&nbsp;</tt></td><td>   derived type variable containing cloud 
+   microphysical specification information <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldext &nbsp;&nbsp;&nbsp;</tt></td><td>   derived type variable containing the micro-
+   physically-based sw cloud radiative proper-
+   ties [ microrad_properties_type ]
+   the components defined in this routine:
+   %cldext   parameterization band values of 
+   the cloud extinction coefficient 
+   [ km**(-1) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_microphys_lw_driver"></a>
+<h4>isccp_microphys_lw_driver</h4>
+<pre>
+<b>call isccp_microphys_lw_driver </b>(is, js, ilwband, &amp; Cloud_microphysics,abscoeff )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine takes cloud micro physics parameters and
+   calculate broad band cloud radiation parameters. For example
+   the input parameters are cloud droplet concentration, size,
+   and composition; the output parameters are cloud extinction
+   coefficient, scattering coefficient, and assymmetry parameters. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of x dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of y dimension in current physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ilwband&nbsp;&nbsp;&nbsp;</tt></td><td>   lwband whose absorption we desire <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cloud_microphysics&nbsp;&nbsp;&nbsp;</tt></td><td>   derived type variable containing cloud 
+   microphysical specification information <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>abscoeff&nbsp;&nbsp;&nbsp;</tt></td><td>   abscoeff absorption coefficient for 
+   clouds in each of the longwave frequency bands [ km**(-1) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="lwemiss_calc"></a>
+<h4>lwemiss_calc</h4>
+<pre>
+<b>call lwemiss_calc </b>( deltaz, abscoeff, cldemiss)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute infrared emissivity from the absorption
+   coefficient </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>deltaz&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure layer thickness <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>abscoeff&nbsp;&nbsp;&nbsp;</tt></td><td>   Absorption coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldemiss&nbsp;&nbsp;&nbsp;</tt></td><td>   Emissivity calculated from absorption coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="comb_cldprops_calc"></a>
+<h4>comb_cldprops_calc</h4>
+<pre>
+<b>call comb_cldprops_calc </b>( deltaz, &amp; cldext, cldsct, cldasymm, abscoeff, &amp; Lsc_microphys, Cell_microphys, &amp; Meso_microphys, Lscrad_props, &amp; Cellrad_props, Mesorad_props)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to define the total-cloud radiative
+   properties to be seen by the radiation package, obtained by the 
+   appropriate combination of the large-scale, mesoscale and 
+   cell-scale clouds present in a grid box. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for convective cell 
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lscrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cellrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Mesorad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the meso-scale 
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldext&nbsp;&nbsp;&nbsp;</tt></td><td>   parameterization band values of the cloud      
+   extinction coefficient [ km**(-1) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldsct&nbsp;&nbsp;&nbsp;</tt></td><td>   parameterization band values of the cloud      
+   scattering coefficient [ km**(-1) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymm&nbsp;&nbsp;&nbsp;</tt></td><td>   parameterization band values of the asymmetry  
+   factor [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>abscoeff&nbsp;&nbsp;&nbsp;</tt></td><td>   combined absorption coefficient for clouds in 
+   each of the longwave frequency bands [ km**(-1) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="microphys_rad_end"></a>
+<h4>microphys_rad_end</h4>
+<pre>
+<b>call microphys_rad_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   microphys_rad_end is the destructor for microphys_rad_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloudpar"></a>
+<h4>cloudpar</h4>
+<pre>
+<b>call cloudpar </b>( nonly, nbmax, nnn, &amp; size_drop, size_ice, size_rain, conc_drop, &amp; conc_ice, conc_rain, conc_snow, do_dge_sw, &amp; cldext, cldsct, cldasymm)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   determine the parameterization band values of the single scattering   
+   parameters (extinction coefficient, scattering coefficient and   
+   asymmetry factor) for clouds from the size and/or concentration of    
+   each constituent (cloud drops, rain drops, ice crystals and snow)     
+   present. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nonly&nbsp;&nbsp;&nbsp;</tt></td><td>   The single band for calculations.  Note that this is used
+   only in the case of a call from cloudrad_diagnostics to 
+   do isccp simulator work.  For all other calls, nonly should
+   be 0 and will have no effect on the calculations below <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nbmax&nbsp;&nbsp;&nbsp;</tt></td><td>   The number of individual bands to do calculations over. Note
+   that for normal GCM calls this will be 1.  For calls using
+   stochastic clouds with or without the isccp simulator this will
+   be equal to the number of shortwave bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nnn&nbsp;&nbsp;&nbsp;</tt></td><td>   This integer controls which cloud state to access for radiation
+   calculations.  For normal GCM applications this will be 1. For
+   Full Independent Column Approximation calculations with stochast-
+   ic clouds this will be the profile number being accessed. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   total cloud droplet concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   ice crystal concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_rain&nbsp;&nbsp;&nbsp;</tt></td><td>   rain droplet concetration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_snow&nbsp;&nbsp;&nbsp;</tt></td><td>   snow concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud droplet size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   ice crystal size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_rain&nbsp;&nbsp;&nbsp;</tt></td><td>   rain drop size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_dge_sw&nbsp;&nbsp;&nbsp;</tt></td><td>   use sw parameterizations using generalized effective 
+   size developed by Fu et al (1998) (if true). 
+   otherwise use parameterizations by Fu et al using 
+   effective size. <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldext&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the cloud      
+   extinction coefficient in kilometer**(-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldsct&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the cloud      
+   scattering coefficient in kilometer**(-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymm&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the asymmetry  
+   factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="slingo"></a>
+<h4>slingo</h4>
+<pre>
+<b>call slingo </b>&amp; (conc_drop , size_drop , &amp; cldextivlliq, cldssalbivlliq, cldasymmivlliq, &amp; starting_band, ending_band )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define the single scattering parameters for cloud drops using the     
+   Slingo parameterization for his spectral intervals.
+   slingo, a., a gcm parameterization of the shortwave properties of     
+   water clouds., j. atmos. sci.,46, 1419-1427, 1989. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   the cloud drop liquid water concentration in grams meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   the cloud drop effective diameter in microns <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>starting_band&nbsp;&nbsp;&nbsp;</tt></td><td> </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ending_band&nbsp;&nbsp;&nbsp;</tt></td><td> </td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextivlliq&nbsp;&nbsp;&nbsp;</tt></td><td>   The specified spectral values of the extinction      
+   coefficient in kilometer**(-1) for drops <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbivlliq&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-scattering albedo 
+   for drops <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmivlliq&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry factor for drops <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="savijarvi"></a>
+<h4>savijarvi</h4>
+<pre>
+<b>call savijarvi </b>&amp; (conc_rain , size_rain , &amp; cldextivlrain, cldssalbivlrain, cldasymmivlrain)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define the single scattering parameters for rain drops using the      
+   Savijarvi parameterization for his spectral intervals. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_rain&nbsp;&nbsp;&nbsp;</tt></td><td>   the rain drop water concentration in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_rain&nbsp;&nbsp;&nbsp;</tt></td><td>   the rain drop effective diameter in microns <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextivlrain&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction     
+   coefficient for rain in kilometers**(-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbivlrain&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-        
+   scattering albedo for rain <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmivlrain&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry      
+   factor for rain <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="fu"></a>
+<h4>fu</h4>
+<pre>
+<b>call fu </b>&amp; (conc_ice , size_ice , &amp; cldextivlice, cldssalbivlice, cldasymmivlice)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define the single scattering parameters for ice crystals using the    
+   Fu parameterization for his spectral intervals.
+   <br>
+<br>
+   references:                                                           
+   <br>
+<br>
+   fu, q., an accurate parameterization of the solar radiative           
+   properties of cirrus clouds for climate models., j. climate,     
+   9, 2058-2082, 1996.                                              
+   <br>
+<br>
+   notes: the ice crystal effective size (D^sub^ge in his paper) can     
+   only be 18.6 &lt;= D^sub^ge &lt;= 130.2 microns.                     
+   <br>
+<br>
+   the single scattering properties for wavenumbers &lt; 2000 cm-1   
+   are assigned the values in the first interval, since the       
+   formulation is not defined for those wavenumbers.              
+   <br>
+<br>
+   the extinction coefficient is converted to kilometer**(-1)     
+   the unit utilized by the shortwave routine Swresf.             
+   <br>
+<br>
+   a value of 1.0E-100 is added to the size so that no division   
+   by zero occurs when the size is zero, in defining the          
+   extinction coefficient. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice water concentation in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice crystal effective size in microns <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextivlice&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction      
+   coefficient for ice particles in kilometers**(-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbivlice&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-         
+   scattering albedo for ice particles <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmivlice&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry       
+   factor for ice particles <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="icesolar"></a>
+<h4>icesolar</h4>
+<pre>
+<b>call icesolar </b>&amp; (conc_ice , size_ice , &amp; cldextivlice, cldssalbivlice, cldasymmivlice)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define the single scattering parameters for ice crystals using the    
+   Fu parameterization for his spectral intervals.                       
+   <br>
+<br>
+   references:                                                           
+   <br>
+<br>
+   fu and Liou (1993, JAS) 
+   <br>
+<br>
+   notes: the ice crystal effective size (D^sub^e in paper) can          
+   only be 18.6 &lt;= D^sub^e &lt;= 130.2 microns.                     
+   <br>
+<br>
+   the single scattering properties for wavenumbers &lt; 2000 cm-1   
+   are assigned the values in the first interval, since the       
+   formulation is not defined for those wavenumbers.              
+   <br>
+<br>
+   the extinction coefficient is converted to kilometer**(-1)     
+   the unit utilized by the shortwave routine Swresf.             
+   <br>
+<br>
+   a value of 1.0E-100 is added to the size so that no division  
+   by zero occurs when the size is zero, in defining the          
+   extinction coefficient. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice water concentation in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice crystal effective size in microns                  
+   Corresponds to minimum dimension of hexagonal crystal. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextivlice&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction      
+   coefficient for ice particles in kilometers**(-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbivlice&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-         
+   scattering albedo for ice particles <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmivlice&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry       
+   factor for ice particles <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="snowsw"></a>
+<h4>snowsw</h4>
+<pre>
+<b>call snowsw </b>&amp; (conc_snow, &amp; cldextivlsnow, cldssalbivlsnow, cldasymmivlsnow)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define the single scattering parameters for snow using the Fu         
+   parameterization for his spectral intervals.
+   author: leo donner, gfdl, 11 Sept 98                                  
+   <br>
+<br>
+   references:                                                           
+   <br>
+<br>
+   fu, q., et al., (See notes from Kuo-Nan Liou, 1 Sept 98). (SNOW)      
+   <br>
+<br>
+   notes: the single scattering properties for wavenumbers &lt; 2500 cm-1   
+   are assigned the values in the first interval, since the       
+   formulation is not defined for those wavenumbers.              
+   <br>
+<br>
+   the extinction coefficient is in units of kilometer**(-1) </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_snow&nbsp;&nbsp;&nbsp;</tt></td><td>   the snow concentration in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextivlsnow&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction     
+   coefficient for snow in kilometers**(-1) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbivlsnow&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-        
+   scattering albedo for snow <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmivlsnow&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry      
+   factor for snow <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_lwpar"></a>
+<h4>cloud_lwpar</h4>
+<pre>subroutine <b>cloud_lwpar</b> (nonly, nbmax, nnn, &amp; size_drop, size_ice, size_rain, &amp; conc_drop, conc_ice, conc_rain, conc_snow, &amp; do_dge_lw, abscoeff)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   determine the infrared cloud emissivities for specified wavenumber    
+   bands from parameterizations for absorption coefficients due to       
+   cloud drops, cloud ice crystals, rain and snow. conceptually one      
+   could have separate concentrations and sizes for "thin" or randomly   
+   overlapped and for maximally overlapped clouds. for now, there is     
+   one concentration and size, therefore the two emissivities are set    
+   equal. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nonly&nbsp;&nbsp;&nbsp;</tt></td><td>   The single band for calculations.  Note that this is used
+   only in the case of a call from cloudrad_diagnostics to 
+   do isccp simulator work.  For all other calls, nonly should
+   be 0 and will have no effect on the calculations below <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nbmax&nbsp;&nbsp;&nbsp;</tt></td><td>   The number of individual bands to do calculations over. Note
+   that for normal GCM calls this will be 1.  For calls using
+   stochastic clouds with or without the isccp simulator this will
+   be equal to the number of longwave bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nnn&nbsp;&nbsp;&nbsp;</tt></td><td>   This integer controls which cloud state to access for radiation
+   calculations.  For normal GCM applications this will be 1. For
+   Full Independent Column Approximation calculations with stochast-
+   ic clouds this will be the profile number being accessed. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   total cloud droplet concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   ice cloud droplet concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_rain&nbsp;&nbsp;&nbsp;</tt></td><td>   rain droplet concetration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_snow&nbsp;&nbsp;&nbsp;</tt></td><td>   snow concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud droplet size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   ice droplet size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_rain&nbsp;&nbsp;&nbsp;</tt></td><td>   rain droplet size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_dge_lw&nbsp;&nbsp;&nbsp;</tt></td><td>   flag for using dge longwave parameterization <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>abscoeff&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud absorption coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_lwem_oneband"></a>
+<h4>cloud_lwem_oneband</h4>
+<pre>subroutine <b>cloud_lwem_oneband</b> &amp; (conc_drop, conc_ice, size_drop, size_ice, &amp; abscoeff)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   determine the infrared cloud emissivities for a single broadband
+   from parameterizations for absorption coefficients due to
+   cloud drops and cloud ice crystals. the parameterization comes from
+   from the 5-band formulation given by Ebert and Curry (1992,
+   J. Geophys. Res., vol. 97, pp. 3831-3836). S. Klein  derived the
+   coefficients for the 1-band version used here. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   total cloud droplet concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   ice cloud droplet concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud droplet size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   ice droplet size distribution <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>abscoeff&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud absorption coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="el"></a>
+<h4>el</h4>
+<pre>
+<b>call el </b>(conc_ice , size_ice , &amp; cldextbndicelw, cldssalbbndicelw, cldasymmbndicelw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calculates total optical depth and scattering 
+   optical depth
+   for infrared radiation using Fu and Liou (1993,
+   JAS). To be used for crystal effective sizes from 20 to 130 um.
+   limits changed to 18.6 to 130.2 um on 2 April 1999 to
+   match shortwave limits. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice crystal concentation in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice crystal effective size in microns <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextbndicelw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the extinction          
+   coefficient for ice particles in kilometers**(-1)
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbbndicelw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the single-           
+   scattering albedo for ice particles             
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmbndicelw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the asymmetry         
+   factor for ice particles                        
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="el_dge"></a>
+<h4>el_dge</h4>
+<pre>
+<b>call el_dge </b>( conc_ice , size_ice , &amp; cldextbndicelw, cldssalbbndicelw, cldasymmbndicelw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   calculates total optical depth and scattering optical depth
+   for infrared radiation using Fu et al (J. Clim., 11,2223 (1998)).
+   To be used for crystal generalized effective diameters from 
+   18.6 to 130.2 um to match shortwave limits. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice crystal concentation in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   the ice crystal effective size in microns <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextbndicelw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the extinction          
+   coefficient for ice particles in kilometers**(-1)
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbbndicelw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the single-           
+   scattering albedo for ice particles             
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmbndicelw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the asymmetry         
+   factor for ice particles                        
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cliqlw"></a>
+<h4>cliqlw</h4>
+<pre>
+<b>call cliqlw </b>(conc_drop, cldextbnddroplw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Calculates longwave absorption optical depth for liquid.
+   Follows Held et al. (J. Atmos. Sci., 1993).
+   <br>
+<br>
+   Leo Donner, GFDL, 1 Feb 1999 </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   the cloud drop concentration in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextbnddroplw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the extinction         
+   coefficient for cloud drops in kilometers**(-1)  
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="furainlw"></a>
+<h4>furainlw</h4>
+<pre>subroutine <b>furainlw</b> &amp; (conc_rain , &amp; cldextbndrainlw, cldssalbbndrainlw, cldasymmbndrainlw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Calculates absorption coefficient for cloud rain water for
+   longwave radiation (Fu et al., 1995, J. Atmos. Sci.)
+   To be used for rain water with radii between 60 um and 1.8 mm.
+   See also notes from Q. Fu (4 Sept 98)
+   note: the size of the rain water from the microphysical
+   model (if existing) does not enter into the calculations.
+   <br>
+<br>
+   Leo Donner, GFDL, 20 Mar 99 </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_rain&nbsp;&nbsp;&nbsp;</tt></td><td>   the rain drop water concentration in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextbndrainlw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the extinction          
+   coefficient for rain water in kilometers**(-1)
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbbndrainlw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the single-           
+   scattering albedo for rain water             
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmbndrainlw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the asymmetry         
+   factor for rain water                       
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="fusnowlw"></a>
+<h4>fusnowlw</h4>
+<pre>subroutine <b>fusnowlw</b> &amp; (conc_snow , &amp; cldextbndsnowlw, cldssalbbndsnowlw, cldasymmbndsnowlw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Calculates absorption coefficient for cloud rain water for
+   longwave radiation (Fu et al., 1995, J. Atmos. Sci.)
+   To be used for rain water with radii between 60 um and 1.8 mm.
+   See also notes from Q. Fu (4 Sept 98)
+   note: the size of the rain water from the microphysical
+   model (if existing) does not enter into the calculations.
+   <br>
+<br>
+   Leo Donner, GFDL, 20 Mar 99 </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>conc_snow&nbsp;&nbsp;&nbsp;</tt></td><td>   the snow drop water concentration in grams / meter**3 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldextbndsnowlw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the extinction          
+   coefficient for snow drop water in kilometers**(-1)
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldssalbbndsnowlw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the single-           
+   scattering albedo for snow drop water             
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldasymmbndsnowlw&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified values of the asymmetry         
+   factor for snow drop water                       
+   over wavenumber bands used by the radiation code <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module longwave_clouds_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module longwave_clouds_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   This code calculates longwave cloud radiative parameters, i.e.
+   cloud optical depth, flux, and heating rate. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>          fms_mod<br>    constants_mod<br>rad_utilities_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#longwave_clouds_init">longwave_clouds_init</a>:</dt>
+<dd>   The constructor method of longwave_clouds module. </dd>
+<dt>
+<a href="#cldtau">cldtau</a>:</dt>
+<dd>   Subroutine to calculate cloud optical depth </dd>
+<dt>
+<a href="#cloud">cloud</a>:</dt>
+<dd>   Subroutine to calculate cloud transmission function </dd>
+<dt>
+<a href="#thickcld">thickcld</a>:</dt>
+<dd>   Subroutine to calculate longwave cloud flux </dd>
+<dt>
+<a href="#lw_clouds_dealloc">lw_clouds_dealloc</a>:</dt>
+<dd>   subroutine to deallocate the array components of the
+   lw_clouds_type variable that is input. </dd>
+<dt>
+<a href="#longwave_clouds_end">longwave_clouds_end</a>:</dt>
+<dd>   The destructor for longwave_clouds module. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="longwave_clouds_init"></a>
+<h4>longwave_clouds_init</h4>
+<pre>
+<b>call longwave_clouds_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This method does the initialization of longwave cloud module. It
+   reads the longwave clouds namelist from input namelist file. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="cldtau"></a>
+<h4>cldtau</h4>
+<pre>
+<b>call cldtau </b>(Cldrad_props, Cld_spec, Lw_clouds)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calculates cloud transmission function from cloud
+   emissivity. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification input data to cloud optical depth calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_clouds&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud longwave parameters <br>&nbsp;&nbsp;&nbsp;<span class="type">[Lw_clouds]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud"></a>
+<h4>cloud</h4>
+<pre>
+<b>call cloud </b>(kl, Cldrad_props, Cld_spec, Lw_clouds, cldtf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calculates cloud transmission functions above certain
+   level. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>kl&nbsp;&nbsp;&nbsp;</tt></td><td>   the vertical level above which cloud transmission functions are desired. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification input data to cloud optical depth calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lw_clouds&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud longwave radiative properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_clouds_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cldtf&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="thickcld"></a>
+<h4>thickcld</h4>
+<pre>
+<b>call thickcld </b>(pflux_in, Cldrad_props, Cld_spec, Lw_output)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calculates longwave cloud flux at model pressure
+   levels and heating rate. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pflux_in&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at flux levels of model <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification input data to cloud optical depth calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud longwave radiative flux <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_output_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="lw_clouds_dealloc"></a>
+<h4>lw_clouds_dealloc</h4>
+<pre>
+<b>call lw_clouds_dealloc </b>(Lw_clouds)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine deallocates the array components of the
+   lw_clouds_type variable that is input. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_clouds&nbsp;&nbsp;&nbsp;</tt></td><td>   lw_clouds_type variable containing cloud trans-
+   mission function information <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_clouds_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="longwave_clouds_end"></a>
+<h4>longwave_clouds_end</h4>
+<pre>
+<b>call longwave_clouds_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine closes the longwave cloud module. </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

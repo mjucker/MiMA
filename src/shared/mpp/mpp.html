@@ -1,0 +1,213 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module mpp_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module mpp_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:V.Balaji@noaa.gov">   V. Balaji </a>
+<br>
+<b>Reviewers:&nbsp;</b>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/shared/mpp">WebCVS Log</a>
+<br>
+<b>RCS Log:&nbsp;</b><a href="http://www.gfdl.noaa.gov/~vb/changes_mpp.html">RCS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text"> 
+<tt>mpp_mod</tt>, is a set of simple calls to provide a uniform interface
+   to different message-passing libraries. It currently can be
+   implemented either in the SGI/Cray native SHMEM library or in the MPI
+   standard. Other libraries (e.g MPI-2, Co-Array Fortran) can be
+   incorporated as the need arises. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   The data transfer between a processor and its own memory is based
+   on <tt>load</tt>   and <tt>store</tt>   operations upon
+   memory. Shared-memory systems (including distributed shared memory
+   systems) have a single address space and any processor can acquire any
+   data within the memory by <tt>load</tt>   and <tt>store</tt>. The situation is different for distributed
+   parallel systems. Specialized MPP systems such as the T3E can simulate
+   shared-memory by direct data acquisition from remote memory. But if
+   the parallel code is distributed across a cluster, or across the Net,
+   messages must be sent and received using the protocols for
+   long-distance communication, such as TCP/IP. This requires a
+   ``handshaking'' between nodes of the distributed system. One can think
+   of the two different methods as involving <tt>put</tt>s or <tt>get</tt>s (e.g the SHMEM library), or in the case of
+   negotiated communication (e.g MPI), <tt>send</tt>s and <tt>recv</tt>s.
+   <br>
+<br>
+   The difference between SHMEM and MPI is that SHMEM uses one-sided
+   communication, which can have very low-latency high-bandwidth
+   implementations on tightly coupled systems. MPI is a standard
+   developed for distributed computing across loosely-coupled systems,
+   and therefore incurs a software penalty for negotiating the
+   communication. It is however an open industry standard whereas SHMEM
+   is a proprietary interface. Besides, the <tt>put</tt>s or <tt>get</tt>s on which it is based cannot currently be implemented in
+   a cluster environment (there are recent announcements from Compaq that
+   occasion hope).
+   <br>
+<br>
+   The message-passing requirements of climate and weather codes can be
+   reduced to a fairly simple minimal set, which is easily implemented in
+   any message-passing API. <tt>mpp_mod</tt>   provides this API.
+   <br>
+<br>
+   Features of <tt>mpp_mod</tt>   include:
+   <br>
+<br>
+   1) Simple, minimal API, with free access to underlying API for
+   more complicated stuff.<br>   2) Design toward typical use in climate/weather CFD codes.<br>   3) Performance to be not significantly lower than any native API.
+   <br>
+<br>
+   This module is used to develop higher-level calls for <a href="mpp_domains.html">domain decomposition</a>   and <a href="mpp_io.html">parallel I/O</a>.
+   <br>
+<br>
+   Parallel computing is initially daunting, but it soon becomes
+   second nature, much the way many of us can now write vector code
+   without much effort. The key insight required while reading and
+   writing parallel code is in arriving at a mental grasp of several
+   independent parallel execution streams through the same code (the SPMD
+   model). Each variable you examine may have different values for each
+   stream, the processor ID being an obvious example. Subroutines and
+   function calls are particularly subtle, since it is not always obvious
+   from looking at a call what synchronization between execution streams
+   it implies. An example of erroneous code would be a global barrier
+   call (see <a href="#mpp_sync">mpp_sync</a>   below) placed
+   within a code block that not all PEs will execute, e.g:
+   <br>
+<br> 
+<pre>   if( pe.EQ.0 )call mpp_sync()</pre>   Here only PE 0 reaches the barrier, where it will wait
+   indefinitely. While this is a particularly egregious example to
+   illustrate the coding flaw, more subtle versions of the same are
+   among the most common errors in parallel code.
+   <br>
+<br>
+   It is therefore important to be conscious of the context of a
+   subroutine or function call, and the implied synchronization. There
+   are certain calls here (e.g <tt>mpp_declare_pelist, mpp_init,
+   mpp_malloc, mpp_set_stack_size</tt>) which must be called by all
+   PEs. There are others which must be called by a subset of PEs (here
+   called a <tt>pelist</tt>) which must be called by all the PEs in the <tt>pelist</tt>   (e.g <tt>mpp_max, mpp_sum, mpp_sync</tt>). Still
+   others imply no synchronization at all. I will make every effort to
+   highlight the context of each call in the MPP modules, so that the
+   implicit synchronization is spelt out.  
+   <br>
+<br>
+   For performance it is necessary to keep synchronization as limited
+   as the algorithm being implemented will allow. For instance, a single
+   message between two PEs should only imply synchronization across the
+   PEs in question. A <i>global</i>   synchronization (or <i>barrier</i>)
+   is likely to be slow, and is best avoided. But codes first
+   parallelized on a Cray T3E tend to have many global syncs, as very
+   fast barriers were implemented there in hardware.
+   <br>
+<br>
+   Another reason to use pelists is to run a single program in MPMD
+   mode, where different PE subsets work on different portions of the
+   code. A typical example is to assign an ocean model and atmosphere
+   model to different PE subsets, and couple them concurrently instead of
+   running them serially. The MPP module provides the notion of a <i>current pelist</i>, which is set when a group of PEs branch off
+   into a subset. Subsequent calls that omit the <tt>pelist</tt>   optional
+   argument (seen below in many of the individual calls) assume that the
+   implied synchronization is across the current pelist. The calls <tt>mpp_root_pe</tt>   and <tt>mpp_npes</tt>   also return the values
+   appropriate to the current pelist. The <tt>mpp_set_current_pelist</tt>   call is provided to set the current pelist. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>mpp_parameter_mod<br>     mpp_data_mod<br>     mpp_comm_mod<br>     mpp_util_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>   F90 is a strictly-typed language, and the syntax pass of the
+   compiler requires matching of type, kind and rank (TKR). Most calls
+   listed here use a generic type, shown here as <tt>MPP_TYPE_</tt>. This
+   is resolved in the pre-processor stage to any of a variety of
+   types. In general the MPP operations work on 4-byte and 8-byte
+   variants of <tt>integer, real, complex, logical</tt>   variables, of
+   rank 0 to 5, leading to 48 specific module procedures under the same
+   generic interface. Any of the variables below shown as <tt>MPP_TYPE_</tt>   is treated in this way. <dl></dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a"></ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

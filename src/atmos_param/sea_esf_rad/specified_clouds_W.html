@@ -1,0 +1,469 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module specified_clouds_W_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module specified_clouds_W_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:fei.liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:"> </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text"> 
+</p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre> time_manager_mod<br>  cloud_zonal_mod<br>    cloud_obs_mod<br>          fms_mod<br>rad_utilities_mod<br>    constants_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#specified_clouds_W_init">specified_clouds_W_init</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#specified_clouds_W_end">specified_clouds_W_end</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#specified_clouds_amt">specified_clouds_amt</a>:</dt>
+<dd>   specified_clouds_amt defines the location, amount (cloud fraction),
+   number and type (hi, mid, low) of clouds present on the model grid.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#obtain_bulk_lw_specified">obtain_bulk_lw_specified</a>:</dt>
+<dd>   obtain_bulk_lw_specified defines bulk longwave cloud radiative
+   properties for the specified cloud scheme.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#obtain_bulk_sw_specified">obtain_bulk_sw_specified</a>:</dt>
+<dd>   obtain_bulk_sw_specified defines bulk shortwave cloud radiative
+   properties for the specified cloud scheme.
+   <br>
+<br> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="specified_clouds_W_init"></a>
+<h4>specified_clouds_W_init</h4>
+<pre>
+<b>call specified_clouds_W_init </b>(lonb, latb)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="specified_clouds_W_end"></a>
+<h4>specified_clouds_W_end</h4>
+<pre>
+<b>call specified_clouds_W_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="specified_clouds_amt"></a>
+<h4>specified_clouds_amt</h4>
+<pre>
+<b>call specified_clouds_amt </b>(is, ie, js, je, Rad_time, lat, pflux, &amp; Cld_spec)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   specified_clouds_amt defines the location, amount (cloud fraction),
+   number and type (hi, mid, low) of clouds present on the model grid.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   is,ie,js,je  starting/ending subdomain i,j indices of data in
+   the physics_window being integrated
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_time&nbsp;&nbsp;&nbsp;</tt></td><td>   Rad_time     time at which the climatologically-determined,
+   time-varying specified cloud fields should apply
+   [ time_type, days and seconds]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   lat          latitude of model points  [ radians ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pflux&nbsp;&nbsp;&nbsp;</tt></td><td>   pflux        average of pressure at adjacent model levels
+   [ (kg /( m s^2) ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cld_spec     cld_specification_type variable containing the
+   cloud specification input fields needed by the
+   radiation package
+   <br>
+<br>
+   the following elements of Cld_spec are defined here:
+   <br>
+<br>
+   %cmxolw  fraction of maximally overlapped clouds
+   seen by the longwave radiation
+   [ dimensionless ]
+   %crndlw  fraction of randomly overlapped clouds
+   seen by the longwave radiation
+   [ dimensionless ]
+   %camtsw  cloud fraction seen by the shortwave
+   radiation; the sum of the maximally
+   overlapped and randomly overlapped
+   longwave cloud fractions  [ dimensionless ]
+   %nmxolw  number of maximally overlapped longwave
+   clouds in each grid column.
+   %nrndlw  number of randomly overlapped longwave
+   clouds in each grid column.
+   %ncldsw  number of clouds seen by he shortwave
+   radiation in each grid column.
+   %hi_cld  logical flag indicating the presence of
+   high clouds in a grid box
+   %mid_cld  logical flag indicating the presence of
+   middle clouds in a grid box
+   %low_cld  logical flag indicating the presence of
+   low clouds in a grid box
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_bulk_lw_specified"></a>
+<h4>obtain_bulk_lw_specified</h4>
+<pre>
+<b>call obtain_bulk_lw_specified </b>(is, ie, js, je, Cld_spec, &amp; Cldrad_props)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_bulk_lw_specified defines bulk longwave cloud radiative
+   properties for the specified cloud scheme.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   is,ie,js,je  starting/ending subdomain i,j indices of data in
+   the physics_window being integrated
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cld_spec          cloud specification arrays defining the
+   location, amount and type (hi, middle, lo)
+   of clouds that are present, provides input
+   to this subroutine
+   [ cld_specification_type ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Cldrad_props      cloud radiative properties on model grid,
+   [ cldrad_properties_type ]
+   <br>
+<br>
+   the following components of this variable are output
+   from this routine:
+   <br>
+<br>
+   %emrndlw   longwave cloud emissivity for
+   randomly overlapped clouds
+   in each of the longwave
+   frequency bands  [ dimensionless ]
+   %emmxolw   longwave cloud emissivity for
+   maximally overlapped clouds
+   in each of the longwave
+   frequency bands  [ dimensionless ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_bulk_sw_specified"></a>
+<h4>obtain_bulk_sw_specified</h4>
+<pre>
+<b>call obtain_bulk_sw_specified </b>(is, ie, js, je, Cld_spec, &amp; Cldrad_props)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_bulk_sw_specified defines bulk shortwave cloud radiative
+   properties for the specified cloud scheme.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   is,ie,js,je  starting/ending subdomain i,j indices of data in
+   the physics_window being integrated
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cld_spec          cloud specification arrays defining the
+   location, amount and type (hi, middle, lo)
+   of clouds that are present, provides input
+   to this subroutine
+   [ cld_specification_type ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Cldrad_props      cloud radiative properties on model grid,
+   [ cldrad_properties_type ]
+   <br>
+<br>
+   the following components of this variable are output
+   from this routine:
+   <br>
+<br>
+   %cirabsw   absorptivity of clouds in the
+   infrared frequency band
+   [ dimensionless ]
+   %cirrfsw   reflectivity of clouds in the
+   infrared frequency band
+   [ dimensionless ]
+   %cvisrfsw  reflectivity of clouds in the
+   visible frequency band
+   [ dimensionless ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

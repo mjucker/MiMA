@@ -1,0 +1,303 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module shortwave_driver_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module shortwave_driver_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Stuart.Freidenreich@noaa.gov">   smf </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Code to carry out shortwave calculation. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This code initializes, prepares, and ends shortwave radiation calculation.
+   This code is called by sea_esf_rad.f90 and calls shortwave subroutines
+   to do shortwave flux calculation. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>             fms_mod<br>   rad_utilities_mod<br>esfsw_parameters_mod<br>     lhsw_driver_mod<br>    esfsw_driver_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#shortwave_driver_init">shortwave_driver_init</a>:</dt>
+<dd>   Code that initializes shortwave radiation calculation. </dd>
+<dt>
+<a href="#shortwave_driver">shortwave_driver</a>:</dt>
+<dd>   Code that deploys shortwave radiation calculation </dd>
+<dt>
+<a href="#shortwave_driver_end">shortwave_driver_end</a>:</dt>
+<dd>   Code that ends shortwave radiation calculation </dd>
+<dt>
+<a href="#shortwave_driver_alloc">shortwave_driver_alloc</a>:</dt>
+<dd>   Code that allocates and initializes shortwave output variables </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="shortwave_driver_init"></a>
+<h4>shortwave_driver_init</h4>
+<pre>
+<b>call shortwave_driver_init </b>(latb, pref)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Initialize utilities and radiation utilities if necessary. They
+   should have been initialized in the radiation initialiation subroutine
+   in the sea_esf_rad.f90. The code then reads in input.nml namelist
+   and logs input parameters to logfile. It uses lhsw or esfsw package
+   depends on namelist parameter. Initializes apropriate shortwave
+   package subroutines and set up the initialize parameter. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   An array of model latitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   An array containing two reference pressure profiles [pascals] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="shortwave_driver"></a>
+<h4>shortwave_driver</h4>
+<pre>
+<b>call shortwave_driver </b>(is, ie, js, je, Atmos_input, Surface, Astro, &amp; Rad_gases, Cldrad_props, Cld_spec, Sw_output, &amp; Cldspace_rad)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   shortwave_driver initializes shortwave radiation output variables, 
+   determines if shortwave radiation is present in the current physics
+   window, selects one of the available shortwave parameterizations,
+   executes it, and returns the output fields to sea_esf_rad_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain i indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   ending subdomain i indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain j indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   ending subdomain j indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmos_input_type variable containing the atmospheric
+   input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Astro&nbsp;&nbsp;&nbsp;</tt></td><td>   Astronomy_type variable containing the astronomical
+   input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[astronomy_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol input data of shortwave radiation calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Aerosol_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol radiative property input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   Radiative_gases_type variable containing the radiative 
+   gas input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   The cloud radiative property input fields on the
+   radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surface&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface data as boundary condition to radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[surface_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud specification data as initial condition to radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Sw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   The shortwave radiation calculation result <br>&nbsp;&nbsp;&nbsp;<span class="type">[sw_output_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldspace_rad&nbsp;&nbsp;&nbsp;</tt></td><td>   Optional cloud radiative forcing output used in lacis-hansen
+   formulation. <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_space_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="shortwave_driver_end"></a>
+<h4>shortwave_driver_end</h4>
+<pre>
+<b>call shortwave_driver_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine that simply reset shortwave_driver_initialized to false </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="shortwave_driver_alloc"></a>
+<h4>shortwave_driver_alloc</h4>
+<pre>
+<b>call shortwave_driver_alloc </b>(ix, jx, kx, Sw_output)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Shortwave_driver_alloc allocates and initializes the components
+   of the sw_output_type variable Sw_output, which is used to hold
+   output data from shortwave_driver_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   x dimention of the radiation grid where shortwave output is desired <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>jx&nbsp;&nbsp;&nbsp;</tt></td><td>   y dimention of the radiation grid where shortwave output is desired <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kx&nbsp;&nbsp;&nbsp;</tt></td><td>   z dimention of the radiation grid where shortwave output is desired <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Sw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   shortwave radiation output variable <br>&nbsp;&nbsp;&nbsp;<span class="type">[sw_output_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

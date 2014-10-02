@@ -1,0 +1,387 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module esfsw_driver_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module esfsw_driver_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Stuart.Freidenreich@noaa.gov">   smf </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Code that initializes and calculates shortwave radiative quantities
+   such as flux and heating rate. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This code initializes the necessary shortwave radiative parameters
+   in the initialization subroutine. It then uses delta-eddington approximation
+   and doubling and adding technique to calculate solar flux and
+   heating rate. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>             fms_mod<br>       constants_mod<br>esfsw_parameters_mod<br>   rad_utilities_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#esfsw_driver_init">esfsw_driver_init</a>:</dt>
+<dd>   Subroutine that defines the time-independent quantities associated
+   with the incoming shortwave radiation in the multiple-band solar
+   radiation parameterization. </dd>
+<dt>
+<a href="#swresf">swresf</a>:</dt>
+<dd>   Subroutine that uses the delta-eddington technique in conjunction
+   with a multi-band parameterization for h2o+co2+o2+o3 absorption
+   in the solar spectrum to derive solar fluxes and heating rates. </dd>
+<dt>
+<a href="#adding">adding</a>:</dt>
+<dd>   Subroutine that implements doubling and adding technique to combine
+   multiple atmospheric layers to calculate solar fluxes </dd>
+<dt>
+<a href="#deledd">deledd</a>:</dt>
+<dd>   Subroutine that calculates reflectivity and transmissivity in a
+   scattering layer using delta-eddington method </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="esfsw_driver_init"></a>
+<h4>esfsw_driver_init</h4>
+<pre>
+<b>call esfsw_driver_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   It first reads in the input namelist and then allocates gas absorption
+   coefficient variables. It then reads in the shortwave input namelist
+   file and assigns the gas absorption coefficients. Rayleigh scattering
+   coefficient is also calculated based on the temperature and pressure
+   structure of the atmosphere. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="swresf"></a>
+<h4>swresf</h4>
+<pre>
+<b>call swresf </b>(is, ie, js, je, Atmos_input, Surface, Rad_gases, Aerosol, Astro, &amp; Cldrad_props, Cld_spec, Sw_output)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calculates optical depth, single scattering albedo,
+   asymmetry parameter of a layer based on gaseous absorbers,
+   clouds, aerosols, and rayleigh scattering. It then uses delta-
+   eddington technique to calculate radiative flux at each layer. 
+   Doubling and adding technique is used to combine the layers
+   and calculate flux at TOA and surface and heating rate. This
+   subroutine allocates a substantial amount of memory and deallocates
+   the allocated memory at the end of the subroutine. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain i indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   ending subdomain i indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain j indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   ending subdomain j indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmos_input_type variable containing the atmospheric
+   input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol input data for shortwave radiation calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Astro&nbsp;&nbsp;&nbsp;</tt></td><td>   Astronomy_type variable containing the astronomical
+   input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[astronomy_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   Radiative_gases_type variable containing the radiative 
+   gas input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   The cloud radiative property input fields on the
+   radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surface&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface data as boundary condition to radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[surface_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud specification data as initial condition to radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Sw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   The shortwave radiation calculation result <br>&nbsp;&nbsp;&nbsp;<span class="type">[sw_output_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="adding"></a>
+<h4>adding</h4>
+<pre>
+<b>call adding </b>( ix, jx, kx, &amp; rlayerdir, tlayerdir, rlayerdif, tlayerdif, &amp; tlayerde, sfcalb, calc_flag, reflectance, &amp; transmittance)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine implements the standard doubling and adding
+   technique to combine reflectance and transmittance of multiple 
+   atmospheric layers to compute solar flux and heating rate. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   ix is the current longitudinal index in the physics cell being
+   integrated. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>jx&nbsp;&nbsp;&nbsp;</tt></td><td>   jx is the current latitudinal index in the physics cell being
+   integrated. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kx&nbsp;&nbsp;&nbsp;</tt></td><td>   ix is the current vertical index in the physics cell being
+   integrated. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rlayerdir&nbsp;&nbsp;&nbsp;</tt></td><td>   layer reflectivity to direct incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tlayerdir&nbsp;&nbsp;&nbsp;</tt></td><td>   layer transmissivity to direct incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rlayerdif&nbsp;&nbsp;&nbsp;</tt></td><td>   layer reflectivity to diffuse incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tlayerdir&nbsp;&nbsp;&nbsp;</tt></td><td>   layer transmissivity to diffuse incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tlayerde&nbsp;&nbsp;&nbsp;</tt></td><td>   layer diffuse transmissivity to direct incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>sfcalb&nbsp;&nbsp;&nbsp;</tt></td><td>   surface albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>calcflag&nbsp;&nbsp;&nbsp;</tt></td><td>   flag to indicate columns where adding is to be done <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>reflectance&nbsp;&nbsp;&nbsp;</tt></td><td>   diffuse reflectance at a level <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>transmittance&nbsp;&nbsp;&nbsp;</tt></td><td>   diffuse transmittance at a level <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="deledd"></a>
+<h4>deledd</h4>
+<pre>
+<b>call deledd </b>(ix, jx, kx, &amp; taustr, omegastr, gstr, cosang, ng , daylight, &amp; rlayerdir, tlayerdir, rlayerdif, tlayerdif, &amp; tlayerde, cloud)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine takes layer optical depth, single scattering abledo,
+   and asymmetry parameter, using delta-eddington method, to calculate
+   direct/diffuse reflectivity/transmissivity to direct/diffuse incident
+   radiation. The approximation uses the strong forward scattering of
+   aerosol particles. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   ix is the current longitudinal index in the physics cell being
+   integrated. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>jx&nbsp;&nbsp;&nbsp;</tt></td><td>   jx is the current latitudinal index in the physics cell being
+   integrated. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kx&nbsp;&nbsp;&nbsp;</tt></td><td>   ix is the current vertical index in the physics cell being
+   integrated. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>taustr&nbsp;&nbsp;&nbsp;</tt></td><td>   the scaled optical depth, true optical depth normalized using
+   delta-eddington approximation <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>omegastr&nbsp;&nbsp;&nbsp;</tt></td><td>   the scaled single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gstr&nbsp;&nbsp;&nbsp;</tt></td><td>   the scaled asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cosang&nbsp;&nbsp;&nbsp;</tt></td><td>   cosine of the solar zenith angle <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ng&nbsp;&nbsp;&nbsp;</tt></td><td>   the number of gaussian angles to compute the diurnally    
+   averaged solar radiation (=1 unless lswg = true) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cloud&nbsp;&nbsp;&nbsp;</tt></td><td>   flag for existence of a cloud (used only in 'ovc' mode) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>rlayerdir&nbsp;&nbsp;&nbsp;</tt></td><td>   layer reflectivity to direct incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tlayerdir&nbsp;&nbsp;&nbsp;</tt></td><td>   layer transmissivity to direct incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rlayerdif&nbsp;&nbsp;&nbsp;</tt></td><td>   layer reflectivity to diffuse incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tlayerdir&nbsp;&nbsp;&nbsp;</tt></td><td>   layer transmissivity to diffuse incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tlayerde&nbsp;&nbsp;&nbsp;</tt></td><td>   layer diffuse transmissivity to direct incident beam <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

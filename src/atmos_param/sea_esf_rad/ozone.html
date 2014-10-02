@@ -1,0 +1,460 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module ozone_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module ozone_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   This code supplies mass mixing ratios of ozone (g/g) to the 
+   sea_esf_rad radiation_package (and the original_fms_rad package). </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This code supplies mass mixing ratios of ozone (g/g) to the 
+   sea_esf_rad radiation_package (and the original_fms_rad package).
+   Recent changes allow provision for predicted ozone to be considered. 
+   This is a field passed in the tracer array, r </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>           fms_mod<br>        fms_io_mod<br>  time_manager_mod<br>  diag_manager_mod<br>   time_interp_mod<br>     constants_mod<br>  interpolator_mod<br>tracer_manager_mod<br> field_manager_mod<br> rad_utilities_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#ozone_init">ozone_init</a>:</dt>
+<dd>   ozone_init is the constructor for ozone_mod. </dd>
+<dt>
+<a href="#ozone_driver">ozone_driver</a>:</dt>
+<dd>   ozone_driver obtains the current ozone distributions and returns 
+   them in Rad_gases%qo3. </dd>
+<dt>
+<a href="#ozone_end">ozone_end</a>:</dt>
+<dd>   ozone_end is the destructor for ozone_mod. </dd>
+<dt>
+<a href="#obtain_input_file_data">obtain_input_file_data</a>:</dt>
+<dd>   obtain_input_file_data reads an input file containing a single
+   column ozone profile. </dd>
+<dt>
+<a href="#obtain_gfdl_zonal_ozone_data">obtain_gfdl_zonal_ozone_data</a>:</dt>
+<dd>   obtain_gfdl_zonal_ozone_data generates data at the appropriate time
+   from the basic fms_zonal_ozone input data set, allowing the use of
+   annual mean, fixed seasonal, or seasonally-varying ozone distrib-
+   utions. </dd>
+<dt>
+<a href="#obtain_clim_zonal_ozone_data">obtain_clim_zonal_ozone_data</a>:</dt>
+<dd>   obtain_clim_zonal_ozone_data provides the necessary information 
+   to interpolator_mod so that the appropriate clim_ozone data may
+   be obtained later on when needed. </dd>
+<dt>
+<a href="#geto3_3d">geto3_3d</a>:</dt>
+<dd>   geto3_3d retrieves an (i,j,k) array of ozone mass mixing ratio 
+   (g / g ) valid at the specified time to be returned to the 
+   calling routine. </dd>
+<dt>
+<a href="#geto3_2d">geto3_2d</a>:</dt>
+<dd>   geto3_2d retrieves an (i,k) array of ozone mass mixing ratio 
+   (g / g ) valid at the specified time to be returned to the 
+   calling routine. </dd>
+<dt>
+<a href="#get_clim_ozone">get_clim_ozone</a>:</dt>
+<dd>   get_clim_ozone retrieves the clim_ozone field at the desired place 
+   and time from the o3.climatology.nc file by accessing 
+   interpolator_mod. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="ozone_init"></a>
+<h4>ozone_init</h4>
+<pre>
+<b>call ozone_init </b>(latb, lonb)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   ozone_init is the constructor for ozone_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model latitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model longitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="ozone_driver"></a>
+<h4>ozone_driver</h4>
+<pre>
+<b>call ozone_driver </b>(is, ie, js, je, lat, Rad_time, Atmos_input, &amp; Rad_gases )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   ozone_driver obtains the current ozone distributions and returns 
+   them in Rad_gases%qo3. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,ie,js,je&nbsp;&nbsp;&nbsp;</tt></td><td>   starting/ending subdomain i,j indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   latitude of model points  [ radians ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_time&nbsp;&nbsp;&nbsp;</tt></td><td>   time at which the climatologically-determined,
+   time-varying ozone field should apply <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmos_input_type variable containing the atmospheric
+   input fields needed by the radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   radiative_gases_type variable which will return
+   the ozone mass mixing ratio (g/g) to the calling
+   routine <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="ozone_end"></a>
+<h4>ozone_end</h4>
+<pre>
+<b>call ozone_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   ozone_end is the destructor for ozone_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_input_file_data"></a>
+<h4>obtain_input_file_data</h4>
+<pre>
+<b>call obtain_input_file_data </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_input_file_data reads an input file containing a single
+   column ozone profile. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_gfdl_zonal_ozone_data"></a>
+<h4>obtain_gfdl_zonal_ozone_data</h4>
+<pre>
+<b>call obtain_gfdl_zonal_ozone_data </b>(season)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_gfdl_zonal_ozone_data generates data at the appropriate time
+   from the basic fms_zonal_ozone input data set, allowing the use of
+   annual mean, fixed seasonal, or seasonally-varying ozone distrib-
+   utions. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>season&nbsp;&nbsp;&nbsp;</tt></td><td>   scalar integer between 0-5, where 1-4 uses fixed
+   data (1=winter, 2=spring, etc.), season=0 is 
+   annual mean ozone, and season=5 is seasonally
+   varying ozone <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_clim_zonal_ozone_data"></a>
+<h4>obtain_clim_zonal_ozone_data</h4>
+<pre>
+<b>call obtain_clim_zonal_ozone_data </b>(lonb, latb)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_clim_zonal_ozone_data provides the necessary information 
+   to interpolator_mod so that the appropriate clim_ozone data may
+   be obtained later on when needed. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>lonb, latb&nbsp;&nbsp;&nbsp;</tt></td><td>   lonb      array of model longitudes at cell boundaries [radians]
+   latb      array of model latitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="geto3_3d"></a>
+<h4>geto3_3d</h4>
+<pre>
+<b>call geto3_3d </b>(Time, lat, phalf, ozone)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   geto3_3d retrieves an (i,j,k) array of ozone mass mixing ratio 
+   (g / g ) valid at the specified time to be returned to the 
+   calling routine. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current model time [ time_type (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   latitude of model points  [ radians ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model layer interfaces [ kg / (m s^2) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ozone&nbsp;&nbsp;&nbsp;</tt></td><td>   ozone mass mixing ratio at model levels [ g / g ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="geto3_2d"></a>
+<h4>geto3_2d</h4>
+<pre>
+<b>call geto3_2d </b>(Time, lat, phalf, ozone)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   geto3_2d retrieves an (i,k) array of ozone mass mixing ratio 
+   (g / g ) valid at the specified time to be returned to the 
+   calling routine. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current model time [ time_type (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   latitude of model points  [ radians ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model layer interfaces [ kg / (m s^2) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ozone&nbsp;&nbsp;&nbsp;</tt></td><td>   ozone mass mixing ratio at model levels [ g / g ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_clim_ozone"></a>
+<h4>get_clim_ozone</h4>
+<pre>
+<b>call get_clim_ozone </b>(is, js, model_time, p_half, model_data)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   get_clim_ozone retrieves the clim_ozone field at the desired place 
+   and time from the o3.climatology.nc file by accessing 
+   interpolator_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>model_time&nbsp;&nbsp;&nbsp;</tt></td><td>   time at which the climatologically-determined,
+   time-varying ozone field should apply <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_half&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model layer interfaces [ kg / (m s^2) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>is, js&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: starting subdomain i,j indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>model_data&nbsp;&nbsp;&nbsp;</tt></td><td>   output field containing ozone field at desired time <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

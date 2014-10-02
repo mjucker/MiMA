@@ -1,0 +1,1201 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module lw_gases_stdtf_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module lw_gases_stdtf_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Module that computes longwave gas transmission functions </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>          fms_mod<br>       fms_io_mod<br>rad_utilities_mod<br>       gas_tf_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#lw_gases_stdtf_init">lw_gases_stdtf_init</a>:</dt>
+<dd>   Subroutine to initialize longwave gas transmission function 
+   calculation </dd>
+<dt>
+<a href="#lw_gases_stdtf_time_vary">lw_gases_stdtf_time_vary</a>:</dt>
+<dd>   Allocate transmission function memory tables </dd>
+<dt>
+<a href="#ch4_lblinterp">ch4_lblinterp</a>:</dt>
+<dd>   Subroutine to interpolate ch4 transmission function to user
+   specified pressure levels and ch4 concentration </dd>
+<dt>
+<a href="#co2_lblinterp">co2_lblinterp</a>:</dt>
+<dd>   Subroutine to interpolate co2 transmission function to user
+   specified pressure levels and co2 concentration </dd>
+<dt>
+<a href="#n2o_lblinterp">n2o_lblinterp</a>:</dt>
+<dd>   Subroutine to interpolate n2o transmission function to user
+   specified pressure levels and n2o concentration </dd>
+<dt>
+<a href="#lw_gases_stdtf_dealloc">lw_gases_stdtf_dealloc</a>:</dt>
+<dd>   Subroutine to deallocate long wave gas transmission functions </dd>
+<dt>
+<a href="#cfc_exact">cfc_exact</a>:</dt>
+<dd>   cfc_exact computes exact cool-to-space transmission function 
+   for cfc for the desired band (given by index). </dd>
+<dt>
+<a href="#cfc_exact_part">cfc_exact_part</a>:</dt>
+<dd>   cfc_exact computes exact cool-to-space transmission function 
+   at levels below klevel for cfc for the band given by index. </dd>
+<dt>
+<a href="#cfc_indx8">cfc_indx8</a>:</dt>
+<dd>   cfc_indx8 computes transmission function for cfc for the band 8. </dd>
+<dt>
+<a href="#cfc_indx8_part">cfc_indx8_part</a>:</dt>
+<dd>   cfc_indx8 computes transmission function for cfc for the band 8. </dd>
+<dt>
+<a href="#cfc_overod">cfc_overod</a>:</dt>
+<dd>   cfc_overod computes transmission function for cfc that is used   
+   with overod variable in the 15 um (560-800 cm-1) band. </dd>
+<dt>
+<a href="#cfc_overod_part">cfc_overod_part</a>:</dt>
+<dd>   cfc_overod computes transmission function for cfc that is used   
+   with overod variable in the 15 um (560-800 cm-1) band from klevel down. </dd>
+<dt>
+<a href="#lw_gases_stdtf_end">lw_gases_stdtf_end</a>:</dt>
+<dd>   lw_gases_stdtf_end is the destructor for lw_gases_stdtf_mod. </dd>
+<dt>
+<a href="#std_lblpressures">std_lblpressures</a>:</dt>
+<dd>   calculation of pa -- the "table" of (NSTDCO2LVLS) grid pressures </dd>
+<dt>
+<a href="#approx_fn">approx_fn</a>:</dt>
+<dd>   Subroutine to compute co2 approximation function </dd>
+<dt>
+<a href="#approx_fn_std">approx_fn_std</a>:</dt>
+<dd>   Subroutine to compute co2 approximation function </dd>
+<dt>
+<a href="#gasins">gasins</a>:</dt>
+<dd>   gasins processes transmission functions to produce 
+   "consolidated" functions over the specific frequency band
+   ranges needed by the SEA code, and the derivatives needed
+   by the SEA algorithm. </dd>
+<dt>
+<a href="#gasint">gasint</a>:</dt>
+<dd>   gasint interpolates carbon dioxide transmission functions
+   from the standard level grid,for which the transmission functions
+   have been pre-calculated, to the grid structure specified by the
+   user. </dd>
+<dt>
+<a href="#coeint">coeint</a>:</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method </dd>
+<dt>
+<a href="#intcoef_1d">intcoef_1d</a>:</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method (1 dimensional) </dd>
+<dt>
+<a href="#intcoef_2d">intcoef_2d</a>:</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method (2 dimensional) </dd>
+<dt>
+<a href="#intcoef_2d_std">intcoef_2d_std</a>:</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method (2 dimensional) </dd>
+<dt>
+<a href="#interp_error">interp_error</a>:</dt>
+<dd>   Subroutine to examine error associated with interpolation onto
+   pressure grids. </dd>
+<dt>
+<a href="#interp_error_r">interp_error_r</a>:</dt>
+<dd>   Subroutine to examine error associated with interpolation onto
+   pressure grids. </dd>
+<dt>
+<a href="#pathv1">pathv1</a>:</dt>
+<dd>   Subroutine to compute the path function for the co2 interpolation pgm. 
+   between a pressure (press_lo) and a variable pressure (press_hi) </dd>
+<dt>
+<a href="#rctrns">rctrns</a>:</dt>
+<dd>   Subroutine to compute co2 transmission functions for actual co2 
+   concentration </dd>
+<dt>
+<a href="#read_lbltfs">read_lbltfs</a>:</dt>
+<dd>   Subroutine to read gas transmission functions from input file </dd>
+<dt>
+<a href="#allocate_interp_arrays">allocate_interp_arrays</a>:</dt>
+<dd>   Subroutine to allocate interpolation arrays </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="lw_gases_stdtf_init"></a>
+<h4>lw_gases_stdtf_init</h4>
+<pre>
+<b>call lw_gases_stdtf_init </b>( pref)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to initialize longwave gas transmission function 
+   calculation </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   reference level pressure array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="lw_gases_stdtf_time_vary"></a>
+<h4>lw_gases_stdtf_time_vary</h4>
+<pre>
+<b>call lw_gases_stdtf_time_vary </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Allocate transmission function memory tables </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="ch4_lblinterp"></a>
+<h4>ch4_lblinterp</h4>
+<pre>
+<b>call ch4_lblinterp </b>(ch4_vmr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   this routine is 1) a standalone program for a ch4 interpolation
+   to user-specified pressure levels and ch4 concentration;
+   2) an interface between a GCM and ch4 interpolation </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ch4_vmr&nbsp;&nbsp;&nbsp;</tt></td><td>   ch4 volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="co2_lblinterp"></a>
+<h4>co2_lblinterp</h4>
+<pre>
+<b>call co2_lblinterp </b>(co2_vmr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   this routine is 1) a standalone program for a co2 interpolation
+   to user-specified pressure levels and co2 concentration;
+   2) an interface between a GCM and co2 interpolation </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>co2_vmr&nbsp;&nbsp;&nbsp;</tt></td><td>   co2 volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="n2o_lblinterp"></a>
+<h4>n2o_lblinterp</h4>
+<pre>
+<b>call n2o_lblinterp </b>(n2o_vmr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   this routine is 1) a standalone program for a n2o interpolation
+   to user-specified pressure levels and n2o concentration;
+   2) an interface between a GCM and n2o interpolation </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>n2o_vmr&nbsp;&nbsp;&nbsp;</tt></td><td>   n2o volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="lw_gases_stdtf_dealloc"></a>
+<h4>lw_gases_stdtf_dealloc</h4>
+<pre>
+<b>call lw_gases_stdtf_dealloc </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to deallocate long wave gas transmission functions </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="cfc_exact"></a>
+<h4>cfc_exact</h4>
+<pre>
+<b>call cfc_exact </b>(index, Optical, cfc_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cfc_exact computes exact cool-to-space transmission function 
+   for cfc for the desired band (given by index). </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>index&nbsp;&nbsp;&nbsp;</tt></td><td>   the spectral index where exact CTS transmision function is computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   The CFC gas optical depth <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_depth_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cfc_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   exact CTS transmission function output <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cfc_exact_part"></a>
+<h4>cfc_exact_part</h4>
+<pre>
+<b>call cfc_exact_part </b>(index, Optical, cfc_tf, klevel)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cfc_exact computes exact cool-to-space transmission function 
+   at levels below klevel for cfc for the band given by index. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>index&nbsp;&nbsp;&nbsp;</tt></td><td>   The spectral index where exact CTS transmision function is computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   The CFC gas optical depth <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_depth_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>klevel&nbsp;&nbsp;&nbsp;</tt></td><td>   The level below which exact CTS transmision function is computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cfc_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   exact CTS transmission function output <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cfc_indx8"></a>
+<h4>cfc_indx8</h4>
+<pre>
+<b>call cfc_indx8 </b>(index, Optical, tcfc8)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cfc_indx8 computes transmission function for cfc for the band 8. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>index&nbsp;&nbsp;&nbsp;</tt></td><td>   The spectral index where exact CTS transmision function is computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   The CFC gas optical depth <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_depth_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tcfc8&nbsp;&nbsp;&nbsp;</tt></td><td>   exact CTS transmission function output for the band 8 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cfc_indx8_part"></a>
+<h4>cfc_indx8_part</h4>
+<pre>
+<b>call cfc_indx8_part </b>(index, Optical, tcfc8, klevel)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cfc_indx8 computes transmission function for cfc for the band 8. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>index&nbsp;&nbsp;&nbsp;</tt></td><td>   The spectral index where exact CTS transmision function is computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   The CFC gas optical depth <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_depth_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>klevel&nbsp;&nbsp;&nbsp;</tt></td><td>   The level below which exact CTS transmision function is computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tcfc8&nbsp;&nbsp;&nbsp;</tt></td><td>   exact CTS transmission function output for the band 8 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cfc_overod"></a>
+<h4>cfc_overod</h4>
+<pre>
+<b>call cfc_overod </b>(Optical, cfc_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cfc_overod computes transmission function for cfc that is used   
+   with overod variable in the 15 um (560-800 cm-1) band. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC optical depth values <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cfc_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cfc_overod_part"></a>
+<h4>cfc_overod_part</h4>
+<pre>
+<b>call cfc_overod_part </b>(Optical, cfc_tf, klevel)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cfc_overod computes transmission function for cfc that is used   
+   with overod variable in the 15 um (560-800 cm-1) band from klevel down. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Optical&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC optical depth values <br>&nbsp;&nbsp;&nbsp;<span class="type">[optical_path_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>klevel&nbsp;&nbsp;&nbsp;</tt></td><td>   The level below which exact CTS transmision function is computed <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cfc_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   CFC transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="lw_gases_stdtf_end"></a>
+<h4>lw_gases_stdtf_end</h4>
+<pre>
+<b>call lw_gases_stdtf_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   lw_gases_stdtf_end is the destructor for lw_gases_stdtf_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="std_lblpressures"></a>
+<h4>std_lblpressures</h4>
+<pre>
+<b>call std_lblpressures </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   calculation of pa -- the "table" of (NSTDCO2LVLS) grid pressures </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="approx_fn"></a>
+<h4>approx_fn</h4>
+<pre>
+<b>call approx_fn </b>(press_hi_app, press_lo_app, do_triangle, &amp; nklo, nkhi, nkplo, nkphi, &amp; ca_app, sexp_app, xa_app, uexp_app, approx)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute co2 approximation function </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>press_hi_app&nbsp;&nbsp;&nbsp;</tt></td><td>   high standard pressure array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>press_lo_app&nbsp;&nbsp;&nbsp;</tt></td><td>   low standard pressure array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_triangle&nbsp;&nbsp;&nbsp;</tt></td><td>   state variable of interpolation scheme <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nklo, nkhi&nbsp;&nbsp;&nbsp;</tt></td><td>   vertical level pairs: the upper and lower level index <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nkplo, nkphi&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure level pairs: the upper and lower level index <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ca_app, sexp_app, xa_app, uexp_app&nbsp;&nbsp;&nbsp;</tt></td><td>   The interpolation coefficients <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>approx&nbsp;&nbsp;&nbsp;</tt></td><td>   co2 approximation function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="approx_fn_std"></a>
+<h4>approx_fn_std</h4>
+<pre>
+<b>call approx_fn_std </b>(press_hi_app, press_lo_app, do_triangle, &amp; ca_app, sexp_app, xa_app, uexp_app, approx)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute co2 approximation function </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>press_hi_app&nbsp;&nbsp;&nbsp;</tt></td><td>   high standard pressure array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>press_lo_app&nbsp;&nbsp;&nbsp;</tt></td><td>   low standard pressure array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_triangle&nbsp;&nbsp;&nbsp;</tt></td><td>   state variable of interpolation scheme <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ca_app, sexp_app, xa_app, uexp_app&nbsp;&nbsp;&nbsp;</tt></td><td>   The interpolation coefficients <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>approx&nbsp;&nbsp;&nbsp;</tt></td><td>   co2 approximation function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="gasins"></a>
+<h4>gasins</h4>
+<pre>
+<b>call gasins </b>(gas_type, do_lvlcalc, do_lvlctscalc, do_lyrcalc, &amp; nf, ntbnd, ndimkp, ndimk, &amp; dgasdt10_lvl, dgasdt10_lvlcts, dgasdt10_lyr, &amp; gasp10_lvl, gasp10_lvlcts, gasp10_lyr, &amp; d2gast10_lvl, d2gast10_lvlcts, d2gast10_lyr, &amp; dgasdt8_lvl, dgasdt8_lvlcts, dgasdt8_lyr , &amp; gasp8_lvl, gasp8_lvlcts, gasp8_lyr , &amp; d2gast8_lvl, d2gast8_lvlcts, d2gast8_lyr )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   gasins processes transmission functions to produce 
+   "consolidated" functions over the specific frequency band
+   ranges needed by the SEA code, and the derivatives needed
+   by the SEA algorithm. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_type&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas type information <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_lvlcalc, do_lvlctscalc, do_lyrcalc&nbsp;&nbsp;&nbsp;</tt></td><td>   State variables that determines calculation paths
+   do_lvlcalc     : compute level co2 transmissivities if true.
+   do_lyrcalc     : compute layer co2 transmissivities if true.
+   do_lvlctscalc  : compute cts level co2 transmissivities if true <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   frequency band number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ntbnd&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature index of the frequency band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ndimkp, ndimk&nbsp;&nbsp;&nbsp;</tt></td><td>   extents of dimensions for output interpolation transmissivity arrays. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>dgasdt10_lvl gasp10_lvl d2gast10_lvl dgasdt8_lvl gasp8_lvl d2gast8_lvl&nbsp;&nbsp;&nbsp;</tt></td><td>   variables used in do_lvlcalc calculation path <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dgasdt10_lvlcts gasp10_lvlcts d2gast10_lvlcts dgasdt8_lvlcts gasp8_lvlcts d2gast8_lvlcts&nbsp;&nbsp;&nbsp;</tt></td><td>   variables used in do_lvlctscalc calculation path <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dgasdt10_lyr gasp10_lyr d2gast10_lyr dgasdt8_lyr gasp8_lyr d2gast8_lyr&nbsp;&nbsp;&nbsp;</tt></td><td>   variables used in do_lyrcalc calculation path <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="gasint"></a>
+<h4>gasint</h4>
+<pre>
+<b>call gasint </b>(gas_type, co2_vmr, co2_std_lo, co2_std_hi, &amp; callrctrns, do_lvlcalc, do_lvlctscalc, do_lyrcalc, &amp; nf, nt)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   gasint interpolates carbon dioxide transmission functions
+   from the standard level grid,for which the transmission functions
+   have been pre-calculated, to the grid structure specified by the
+   user. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_type&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas type information <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_lvlcalc, do_lvlctscalc, do_lyrcalc&nbsp;&nbsp;&nbsp;</tt></td><td>   State variables that determine calculation paths
+   do_lvlcalc     : compute level co2 transmissivities if true.
+   do_lyrcalc     : compute layer co2 transmissivities if true.
+   do_lvlctscalc  : compute cts level co2 transmissivities if true <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   frequency band number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nt&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature index of the frequency band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>co2_vmr&nbsp;&nbsp;&nbsp;</tt></td><td>   co2 volume mixing ratio <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>co2_std_lo, co2_std_hi&nbsp;&nbsp;&nbsp;</tt></td><td>   standard co2 high and low volume mixing ratio (ppmv) pair <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>callrctrns&nbsp;&nbsp;&nbsp;</tt></td><td>   state variable that determines calculation path <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="coeint"></a>
+<h4>coeint</h4>
+<pre>
+<b>call coeint </b>(gas_type, nf, trns_val, ca, sexp, xa, uexp)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_type&nbsp;&nbsp;&nbsp;</tt></td><td>   Gas type information <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   number of frequency band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trns_val&nbsp;&nbsp;&nbsp;</tt></td><td>   transmission function array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ca, xa, sexp, uexp&nbsp;&nbsp;&nbsp;</tt></td><td>   coefficients in the transmission function between two pressure
+   levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="intcoef_1d"></a>
+<h4>intcoef_1d</h4>
+<pre>
+<b>call intcoef_1d </b>(press_hi, press_lo, cav, sexpv, xav, uexpv)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method (1 dimensional) </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>press_hi, press_lo&nbsp;&nbsp;&nbsp;</tt></td><td>   high and low pressure pair <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cav, xav, sexpv, uexpv&nbsp;&nbsp;&nbsp;</tt></td><td>   coefficients in the transmission function between two pressure
+   levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="intcoef_2d"></a>
+<h4>intcoef_2d</h4>
+<pre>
+<b>call intcoef_2d </b>(press_hiv, press_lov, do_triangle, &amp; nklo, nkhi, nkplo, nkphi, &amp; indx_hiv, indx_lov, &amp; caintv, sexpintv, xaintv, uexpintv)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method (2 dimensional) </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>press_hiv, press_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   high and low pressure pair <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_triangle&nbsp;&nbsp;&nbsp;</tt></td><td>   State variable of triangle interpolation scheme <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nklo, nkhi, nkplo, nkphi&nbsp;&nbsp;&nbsp;</tt></td><td>   the high and low level and pressure pairs <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>indx_hiv, indx_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   the high and low index pair <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>caintv, xaintv, sexpintv, uexpintv&nbsp;&nbsp;&nbsp;</tt></td><td>   coefficients in the transmission function between two pressure
+   levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="intcoef_2d_std"></a>
+<h4>intcoef_2d_std</h4>
+<pre>
+<b>call intcoef_2d_std </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to inverse coefficients from transmission functions
+   using newton method (2 dimensional) </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>press_hiv, press_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   high and low pressure pair <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   number of frequency bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nt&nbsp;&nbsp;&nbsp;</tt></td><td>   number of temperature values <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_triangle&nbsp;&nbsp;&nbsp;</tt></td><td>   State variable of triangle interpolation scheme <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nklo, nkhi, nkplo, nkphi&nbsp;&nbsp;&nbsp;</tt></td><td>   the high and low level and pressure pairs <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>indx_hiv, indx_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   the high and low index pair <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>caintv, xaintv, sexpintv, uexpintv&nbsp;&nbsp;&nbsp;</tt></td><td>   coefficients in the transmission function between two pressure
+   levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="interp_error"></a>
+<h4>interp_error</h4>
+<pre>
+<b>call interp_error </b>(error, pressint_hiv, pressint_lov, &amp; indx_press_hiv, indx_press_lov, &amp; do_triangle, nklo, nkhi, nkplo, nkphi, &amp; errorint)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to examine error associated with interpolation onto
+   pressure grids. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>error&nbsp;&nbsp;&nbsp;</tt></td><td>   interpolation error at standard pa grid. evaluated on
+   a (NSTDCO2LVLS,NSTDCO2LVLS) grid when kp ge k). <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pressint_hiv, pressint_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   pressint_hiv = pressure of high(kp) interpolated pressure
+   pressint_lov = pressure of low (kp) interpolated pressure <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>indx_press_hiv, indx_press_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   indx_press_hiv = pressure on std pa grid of high (kp) pressure
+   indx_press_lov = pressure on std pa grid of low  (kp) pressure <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_triangle&nbsp;&nbsp;&nbsp;</tt></td><td>   state variable that determines the interpolation scheme <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nkl, nkhi, nkplo, nkphi&nbsp;&nbsp;&nbsp;</tt></td><td>   The index of level and pressure high/low pair <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>errorint&nbsp;&nbsp;&nbsp;</tt></td><td>   error at interpolated grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="interp_error_r"></a>
+<h4>interp_error_r</h4>
+<pre>
+<b>call interp_error_r </b>(error, pressint_hiv, pressint_lov, &amp; indx_press_hiv, indx_press_lov, &amp; do_triangle, errorint)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to examine error associated with interpolation onto
+   pressure grids. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>error&nbsp;&nbsp;&nbsp;</tt></td><td>   interpolation error at standard pa grid. evaluated on
+   a (NSTDCO2LVLS,NSTDCO2LVLS) grid when kp ge k). <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pressint_hiv, pressint_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   pressint_hiv = pressure of high(kp) interpolated pressure
+   pressint_lov = pressure of low (kp) interpolated pressure <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>indx_press_hiv, indx_press_lov&nbsp;&nbsp;&nbsp;</tt></td><td>   indx_press_hiv = pressure on std pa grid of high (kp) pressure
+   indx_press_lov = pressure on std pa grid of low  (kp) pressure <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>do_triangle&nbsp;&nbsp;&nbsp;</tt></td><td>   state variable that determines the interpolation scheme <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>errorint&nbsp;&nbsp;&nbsp;</tt></td><td>   error at interpolated grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="pathv1"></a>
+<h4>pathv1</h4>
+<pre>
+<b>call pathv1 </b>(press_hi, press_lo, ndimlo, ndimhi, upath)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute the path function for the co2 interpolation pgm. 
+   between a pressure (press_lo) and a variable pressure (press_hi) </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>press_hi, press_lo&nbsp;&nbsp;&nbsp;</tt></td><td>   The reference pressure levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ndimlo, ndimhi&nbsp;&nbsp;&nbsp;</tt></td><td>   the index of pressure level bound <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>upath&nbsp;&nbsp;&nbsp;</tt></td><td>   The path function for the co2 interpolation pgm. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="rctrns"></a>
+<h4>rctrns</h4>
+<pre>
+<b>call rctrns </b>(gas_type, co2_std_lo, co2_std_hi, co2_vmr, &amp; nf, nt, trns_vmr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute co2 transmission functions for actual co2 
+   concentration </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="read_lbltfs"></a>
+<h4>read_lbltfs</h4>
+<pre>
+<b>call read_lbltfs </b>(gas_type, callrctrns, nstd_lo, nstd_hi, nf, &amp; ntbnd, trns_std_hi_nf, trns_std_lo_nf )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to read gas transmission functions from input file </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="allocate_interp_arrays"></a>
+<h4>allocate_interp_arrays</h4>
+<pre>
+<b>call allocate_interp_arrays </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to allocate interpolation arrays </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

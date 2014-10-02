@@ -1,0 +1,8 @@
+# specific humidity for moist runs
+
+ "TRACER", "atmos_mod", "sphum"
+           "longname",     "specific humidity"
+           "units",        "kg/kg"
+           "advect_vert", "FINITE_VOLUME_PARABOLIC"
+	   "numerical_representation", "grid" /
+

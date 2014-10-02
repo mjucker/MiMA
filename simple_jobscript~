@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -l procs=16
+#PBS -l walltime=08:00:00
+#PBS -l mem=8gb
+#PBS -M -m abe mjucker@nyu.edu
+#PBS -N spectral_rrtm
+
+ulimit -s unlimited
+
+WKDR=/scratch/mj93/run/
+CCOMB=/home/mj93/models/code/spectral_rrtm/bin/mppnccombine.nyu
+
+cd $WKDR
+
+if [ -e atmos_daily.nc ]; then
+    rm atmos_daily.nc
+done
+if [ -e atmos_avg.nc ]; then
+    rm atmos_avg.nc
+done
+
+mpiexec -n $PBS_NP ./fms.x > stdout
+
+# combine netcdf files
+for ncfile in $(/bin/ls *.nc.0000)
+do
+   filename=$(basename $ncfile)
+   filename=${filename%.*}
+   $CCOMB -r $filename ${filename}.????
+   ncpdq -O $filename $filename
+done
+
+#mj
+cd RESTART
+for ncfile in $(/bin/ls *.nc.0000)
+do
+   filename=$(basename "$ncfile")
+   filename="${filename%.*}"
+   $CCOMB -r $filename ${filename}.????
+done
+cd ../
+#jm    
+

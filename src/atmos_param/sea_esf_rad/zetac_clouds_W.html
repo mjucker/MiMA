@@ -1,0 +1,224 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module zetac_clouds_W_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module zetac_clouds_W_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Stephen.Klein@noaa.gov">   sak </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   zetac_clouds_W_mod obtains the cloud specification variables
+   for the zetac cloud parameterization from microphys_cloud_mod
+   and makes them available to the radiation package. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>   time_manager_mod<br>            fms_mod<br>      constants_mod<br>  rad_utilities_mod<br>microphys_cloud_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#zetac_clouds_W_init">zetac_clouds_W_init</a>:</dt>
+<dd>   zetac_clouds_W_init is the constructor for zetac_clouds_W_mod. </dd>
+<dt>
+<a href="#zetac_clouds_amt">zetac_clouds_amt</a>:</dt>
+<dd>   zetac_clouds_amt defines the location, amount (cloud fraction), 
+   and number of clouds present on the model grid, in addition to
+   liquid and ice-water paths, cloud thickness, and effective drop 
+   and crystal sizes. </dd>
+<dt>
+<a href="#zetac_clouds_W_end">zetac_clouds_W_end</a>:</dt>
+<dd>   zetac_clouds_W_end is the destructor for zetac_clouds_W_mod. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="zetac_clouds_W_init"></a>
+<h4>zetac_clouds_W_init</h4>
+<pre>
+<b>call zetac_clouds_W_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   zetac_clouds_W_init is the constructor for zetac_clouds_W_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="zetac_clouds_amt"></a>
+<h4>zetac_clouds_amt</h4>
+<pre>
+<b>call zetac_clouds_amt </b>(is, ie, js, je, z_half, z_full, land, &amp; phalf, deltaz, Cld_spec, Lsc_microphys)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   zetac_clouds_amt defines the location, amount (cloud fraction), 
+   and number of clouds present on the model grid, in addition to
+   liquid and ice-water paths, cloud thickness, and effective drop 
+   and crystal sizes. if a microphysically-based cloud parameter-
+   ization is being used, particle sizes and concentrations are also
+   provided. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is, ie, js, je&nbsp;&nbsp;&nbsp;</tt></td><td>   starting/ending subdomain i,j indices of data in
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pflux&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure values at flux levels (average of pressure values at
+   model grid points <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>press&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure values at model grid points. surface 
+   pressure is stored at index value nlev+1 <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>temp&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature at model levels (1:nlev), to be used
+   in cloud calculations <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>land&nbsp;&nbsp;&nbsp;</tt></td><td>   fraction of grid box covered by land <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_specification_type variable containing the 
+   cloud specification input fields needed by the 
+   radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysics_type variable containing the size,
+   concentration and fraction of the four condensate 
+   types (cloud drop, cloud ice, rain, snow) in the 
+   grid box, present when microphysically-based
+   cloud radiation properties are desired. <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphys_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="zetac_clouds_W_end"></a>
+<h4>zetac_clouds_W_end</h4>
+<pre>
+<b>call zetac_clouds_W_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   zetac_clouds_W_end is the destructor for zetac_clouds_W_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

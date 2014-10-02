@@ -1,0 +1,950 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module radiative_gases_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module radiative_gases_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Module that defines mixing ratios of radiatively-active 
+   gases to be used in the calculation of longwave and shortwave
+   radiative fluxes and heating rates in the sea_esf_rad radiation
+   package. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   Module that defines mixing ratios of radiatively-active 
+   gases to be used in the calculation of longwave and shortwave
+   radiative fluxes and heating rates in the sea_esf_rad radiation
+   package. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre> time_manager_mod<br> diag_manager_mod<br>          fms_mod<br>       fms_io_mod<br>  time_interp_mod<br>    constants_mod<br>rad_utilities_mod<br>        ozone_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#radiative_gases_init">radiative_gases_init</a>:</dt>
+<dd>   Subroutine to initialize radiative_gases module </dd>
+<dt>
+<a href="#define_radiative_gases">define_radiative_gases</a>:</dt>
+<dd>   Subroutine that returns the current values of the radiative 
+   gas mixing ratios to radiation_driver in Rad_gases. </dd>
+<dt>
+<a href="#radiative_gases_end">radiative_gases_end</a>:</dt>
+<dd>   radiative_gases_end is the destructor for radiative_gases_mod. </dd>
+<dt>
+<a href="#radiative_gases_dealloc">radiative_gases_dealloc</a>:</dt>
+<dd>   radiative_gases_end is the destructor for radiative_gases_mod. </dd>
+<dt>
+<a href="#validate_time_varying_inputs">validate_time_varying_inputs</a>:</dt>
+<dd>   validate_time_varying_inputs checks for consistency among the 
+   namelist parameters defining the time variation of the input gas.
+   NOTE: THIS IS A PRIVATE SUBROUTINE.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#read_restart_radiative_gases">read_restart_radiative_gases</a>:</dt>
+<dd>   Subroutine to read the radiative_gases.res file </dd>
+<dt>
+<a href="#read_restart_nc">read_restart_nc</a>:</dt>
+<dd>   Subroutine to read the radiative_gases.res.nc file </dd>
+<dt>
+<a href="#define_ch4">define_ch4</a>:</dt>
+<dd>   Subroutine that provides initial values for ch4 mixing ratio. </dd>
+<dt>
+<a href="#define_n2o">define_n2o</a>:</dt>
+<dd>   Subroutine that provides initial values for n2o mixing ratio. </dd>
+<dt>
+<a href="#define_f11">define_f11</a>:</dt>
+<dd>   Subroutine that provides initial values for f11 mixing ratio. </dd>
+<dt>
+<a href="#define_f12">define_f12</a>:</dt>
+<dd>   Subroutine that provides initial values for f12 mixing ratio. </dd>
+<dt>
+<a href="#define_f113">define_f113</a>:</dt>
+<dd>   Subroutine that provides initial values for f113 mixing ratio. </dd>
+<dt>
+<a href="#define_f22">define_f22</a>:</dt>
+<dd>   Subroutine that provides initial values for f22 mixing ratio. </dd>
+<dt>
+<a href="#define_co2">define_co2</a>:</dt>
+<dd>   Subroutine that provides initial values for co2 mixing ratio. </dd>
+<dt>
+<a href="#read_gas_timeseries">read_gas_timeseries</a>:</dt>
+<dd>   Subroutine that reads in data values for well-mixed greenhouse
+   gases at specified times. </dd>
+<dt>
+<a href="#define_gas_amount">define_gas_amount</a>:</dt>
+<dd>   define_gas_amount defines the values of the gas mixing ratio needed !   at the current time, when the gas is varying with time. </dd>
+<dt>
+<a href="#write_restart_radiative_gases">write_restart_radiative_gases</a>:</dt>
+<dd>   Subroutine to write the radiative restart files </dd>
+<dt>
+<a href="#write_restart_nc">write_restart_nc</a>:</dt>
+<dd>   Subroutine to write the radiative restart files in netcdf format </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="radiative_gases_init"></a>
+<h4>radiative_gases_init</h4>
+<pre>
+<b>call radiative_gases_init </b>(pref, latb, lonb)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to initialize radiative_gases module </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   reference prssure profiles <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model latitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model longitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_radiative_gases"></a>
+<h4>define_radiative_gases</h4>
+<pre>
+<b>call define_radiative_gases </b>(is, ie, js, je, Rad_time, lat, &amp; Atmos_input, Time_next, Rad_gases)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine that returns the current values of the radiative 
+   gas mixing ratios to radiation_driver in Rad_gases. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,ie,js,je&nbsp;&nbsp;&nbsp;</tt></td><td>   starting/ending subdomain i,j indices of data in 
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_time&nbsp;&nbsp;&nbsp;</tt></td><td>   time at which radiation is to be calculated
+   [ time_type (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   latitude of model points [ radians ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmospheric input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time_next&nbsp;&nbsp;&nbsp;</tt></td><td>   time on next timestep, used as stamp for diagnostic 
+   output  [ time_type  (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   radiative_gases_type variable containing the radi-
+   ative gas input fields needed by the radiation 
+   package <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="radiative_gases_end"></a>
+<h4>radiative_gases_end</h4>
+<pre>
+<b>call radiative_gases_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   radiative_gases_end is the destructor for radiative_gases_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="radiative_gases_dealloc"></a>
+<h4>radiative_gases_dealloc</h4>
+<pre>
+<b>call radiative_gases_dealloc </b>(Rad_gases)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   radiative_gases_end is the destructor for radiative_gases_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   radiative_gases_type variable containing the radi-
+   ative gas input fields needed by the radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="validate_time_varying_inputs"></a>
+<h4>validate_time_varying_inputs</h4>
+<pre>!
+!NOTE: THIS IS A PRIVATE SUBROUTINE.
+!
+
+subroutine validate_time_varying_inputs   &amp;
+                      (gas, base_time, base_value, specification_type, &amp;
+                       change_rate,  gas_dataset_entry,  &amp;
+                       negative_offset_gas, Gas_offset, Gas_entry, &amp;
+                       variation_type, Gas_time_list, gas_value)
+
+!---------------------------------------------------------------------
+!    validate_time_varying_inputs checks for consistency among the 
+!    namelist parameters defining the time variation of the input gas.
+!--------------------------------------------------------------------
+
+character(len=*),      intent(in)  :: gas
+integer, dimension(6), intent(in)  :: base_time, gas_dataset_entry
+real,                  intent(in)  :: base_value,            &amp;
+                                      change_rate
+logical,               intent(inout)  :: negative_offset_gas
+character(len=*),     intent(in)  :: specification_type, variation_type
+type(time_type),dimension(:), intent(inout)  :: Gas_time_list
+type(time_type), intent(inout)  :: Gas_offset, Gas_entry
+real, dimension(:), intent(in) :: gas_value
+
+!--------------------------------------------------------------------
+!   local variables:
+
+      integer :: n</pre>
+<pre>
+<b>call validate_time_varying_inputs </b>&amp; (gas, base_time, base_value, specification_type, &amp; change_rate, variation_type, Gas_time_list, &amp; gas_value)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine validate_time_varying_inputs performs the following 
+   checks of the namelist variables:
+   1) Verifies that base_time has a non-zero month and day number,
+   indicating a change from the default;
+   2) Verifies that the base value of gas mixing ratio is non-zero;
+   3) Verifies that specification_type is valid, either 
+   'base_and_trend' or 'time_series';
+   4) Verifies that variation_type is valid, either 'linear' or
+   'logarithmic';
+   5) When specification_type is 'base_and_trend', verifies that 
+   change_rate is non-zero; </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas&nbsp;&nbsp;&nbsp;</tt></td><td>   name associated with the current gas </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>base_time&nbsp;&nbsp;&nbsp;</tt></td><td>   time at which the base_value is applicable
+   [ year, month, day, hour, minute, second ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>base_value&nbsp;&nbsp;&nbsp;</tt></td><td>   base value for vol. mixing ratio of gas 
+   [ number / number ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>specification_type&nbsp;&nbsp;&nbsp;</tt></td><td>   specification of form of time variation of gas </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>change_rate&nbsp;&nbsp;&nbsp;</tt></td><td>   rate of change of gas; 1.00 + [ percent change / year ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>variation_type&nbsp;&nbsp;&nbsp;</tt></td><td>   form of the temporal behavior of gas; either 'linear' or 
+   'logarithmic' </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_value&nbsp;&nbsp;&nbsp;</tt></td><td>   array of values of gas concentrations corresponding to the times
+   in Gas_time_list [ number / number ] </td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_time_list&nbsp;&nbsp;&nbsp;</tt></td><td>   array of time_type variables defining the data times for the gas;
+   if specification_type is timeseries, then it is the set of times
+   in the daa set, if specification type is base_and_trend, then it
+   is an array of dimension 1 containing the xxx_base_time. 
+   [ time_type ] </td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="read_restart_radiative_gases"></a>
+<h4>read_restart_radiative_gases</h4>
+<pre>
+<b>call read_restart_radiative_gases </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to read the radiative_gases.res file </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="read_restart_nc"></a>
+<h4>read_restart_nc</h4>
+<pre>
+<b>call read_restart_nc </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to read the radiative_gases.res.nc file </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_ch4"></a>
+<h4>define_ch4</h4>
+<pre>
+<b>call define_ch4 </b>(data_source)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine that provides initial values for ch4 mixing ratio.if ch4
+   is fixed in time, the value is given by the namelist specification.
+   if ch4 is time-varying, the values are obtained from either a
+   restart or input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data_source&nbsp;&nbsp;&nbsp;</tt></td><td>   character string defining source to use to define ch4 initial values <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_n2o"></a>
+<h4>define_n2o</h4>
+<pre>
+<b>call define_n2o </b>(data_source)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine that provides initial values for n2o mixing ratio.if n2o
+   is fixed in time, the value is given by the namelist specification.
+   if n2o is time-varying, the values are obtained from either a
+   restart or input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data_source&nbsp;&nbsp;&nbsp;</tt></td><td>   character string defining source to use to define n2o initial values <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_f11"></a>
+<h4>define_f11</h4>
+<pre>
+<b>call define_f11 </b>(data_source)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define_f11 provides initial values for f11 mixing ratio. if f11
+   is fixed in time, the value is given by the namelist specification.
+   if f11 is time-varying, the values are obtained from either a
+   restart or input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data_source&nbsp;&nbsp;&nbsp;</tt></td><td>   character string defining source to use to define f11 initial values <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_f12"></a>
+<h4>define_f12</h4>
+<pre>
+<b>call define_f12 </b>(data_source)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define_f12 provides initial values for f12 mixing ratio. if f12
+   is fixed in time, the value is given by the namelist specification.
+   if f12 is time-varying, the values are obtained from either a
+   restart or input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data_source&nbsp;&nbsp;&nbsp;</tt></td><td>   character string defining source to use to define f12 initial values <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_f113"></a>
+<h4>define_f113</h4>
+<pre>
+<b>call define_f113 </b>(data_source)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define_f113 provides initial values for f113 mixing ratio. if f113
+   is fixed in time, the value is given by the namelist specification.
+   if f113 is time-varying, the values are obtained from either a
+   restart or input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data_source&nbsp;&nbsp;&nbsp;</tt></td><td>   character string defining source to use to define f113 initial values <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_f22"></a>
+<h4>define_f22</h4>
+<pre>
+<b>call define_f22 </b>(data_source)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define_f22 provides initial values for f22 mixing ratio. if f22
+   is fixed in time, the value is given by the namelist specification.
+   if f22 is time-varying, the values are obtained from either a
+   restart or input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data_source&nbsp;&nbsp;&nbsp;</tt></td><td>   character string defining source to use to define f22 initial values <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_co2"></a>
+<h4>define_co2</h4>
+<pre>
+<b>call define_co2 </b>(data_source)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define_co2 provides initial values for co2 mixing ratio. if co2
+   is fixed in time, the value is given by the namelist specification.
+   if co2 is time-varying, the values are obtained from either a
+   restart or input data file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data_source&nbsp;&nbsp;&nbsp;</tt></td><td>   character string defining source to use to define co2 initial values <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="read_gas_timeseries"></a>
+<h4>read_gas_timeseries</h4>
+<pre>
+<b>call read_gas_timeseries </b>(gas, gas_value, Gas_time_list, rgas)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   read_gas_timeseries obtains global values for well-mixed
+   greenhouse gases from observed data sources for gas xxx.
+   the data are obtained from an input file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas&nbsp;&nbsp;&nbsp;</tt></td><td>   name associated with the current gas </td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_value&nbsp;&nbsp;&nbsp;</tt></td><td>   array of volume mixing ratio of gas 'gas' for each time in 
+   Gas_time_list gas_year. [no. /no. ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_time_list&nbsp;&nbsp;&nbsp;</tt></td><td>   list of times (time_type) associated with the gas_value data </td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>rgas&nbsp;&nbsp;&nbsp;</tt></td><td>   gas volume mixing ratio at the start of the timeseries </td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="define_gas_amount"></a>
+<h4>define_gas_amount</h4>
+<pre>!
+!NOTE: THIS IS A PRIVATE SUBROUTINE&gt;
+!
+subroutine define_gas_amount      &amp;
+         (gas, Rad_time, gas_specification_type,  &amp;
+!         negative_offset_gas, Gas_offset, gas_variation_type, &amp;
+                                           gas_variation_type, &amp;
+          gas_floor, gas_ceiling, rgas, gas_uses_tfs, gas_change_rate, &amp;
+          rrvgas, Gas_time_list, gas_value, gas_tf_calc_intrvl,  &amp;
+          gas_tf_time_displacement, calc_gas_tfs_on_first_step,  &amp;
+          calc_gas_tfs_monthly, &amp;
+          use_current_gas_for_tf, gas_tf_offset, gas_for_last_tf_calc, &amp;
+          gas_for_next_tf_calc,  gas_tfs_needed,  &amp;
+          define_gas_for_last_tf_calc)
+
+!--------------------------------------------------------------------
+character(len=*),              intent(in)    :: gas
+type(time_type),               intent(in)    :: Rad_time
+character(len=*),              intent(in)    :: gas_specification_type,&amp;
+                                                gas_variation_type
+real,                          intent(in)    :: gas_floor, gas_ceiling,&amp;
+                                                rgas
+logical,                       intent(in)    :: gas_uses_tfs  
+!logical,                       intent(in)    :: negative_offset_gas  
+real,                          intent(inout) :: gas_change_rate, rrvgas
+
+type(time_type), dimension(:), intent(in)    :: Gas_time_list
+!type(time_type),               intent(inout) :: Gas_offset      
+real, dimension(:),            intent(in)    :: gas_value
+real,               intent(in),    optional  :: gas_tf_calc_intrvl,    &amp;
+                                                gas_tf_time_displacement
+logical,            intent(in),    optional  ::   &amp;
+                                           gas_tfs_needed, &amp;
+                                          calc_gas_tfs_on_first_step, &amp;
+                                          calc_gas_tfs_monthly,  &amp;
+                                          use_current_gas_for_tf 
+real,               intent(out),   optional  :: gas_tf_offset, &amp;
+                                                gas_for_last_tf_calc, &amp;
+                                                gas_for_next_tf_calc
+logical,            intent(inout), optional  :: &amp;  
+                                          define_gas_for_last_tf_calc
+
+!---------------------------------------------------------------------
+!  local variables:
+
+     type(time_type)    :: Gas_yrs   
+     integer            :: days, seconds
+     real               :: years_of_gas, years_of_gas_till_next
+     integer            :: days2, seconds2
+     integer            :: days3, seconds3
+     real               :: mean_days, calc_time
+     character(len=16)  :: chvers7, chvers8, chvers9, chvers11
+     integer            :: alarm, minutes_from_start
+     integer            :: dum, year
+     real               :: percent_of_period
+     type(time_type)    :: Tf_offset, Tf_calc_intrvl 
+     real               :: rseconds3
+     integer            :: index1, index2
+     integer            :: yr, mo, dy, hr, mn, sc
+     integer            :: days7, seconds7
+     type(time_type)    :: Tf_displ, First_of_month, Gas_tf_next, &amp;
+                           Time_left
+!---------------------------------------------------------------------
+!  local variables:
+!    
+!     Gas_yrs                 time interval from start of time variation
+!                             until current time [ time_type ]
+!     days                    days component of Gas_yrs  [ days ]   
+!     seconds                 seconds component of Gas_yrs  [ seconds ]
+!     minutes_from_start      time interval from start of time variation
+!                             until current time [ minutes ]
+!     years_of_gas            time interval from start of time variation
+!                             until current time [ years ]
+!     years_of_gas_till_next  time interval from start of time variation
+!                             until next tf calculation [ years ]
+!     days2                   days component of the mean length of year
+!                             time_type variable [ days ]
+!     seconds2                seconds component of the mean length of 
+!                             year time_type variable [ seconds ]
+!     mean_days               average number of days in a year [ days ]
+!     calc_time               time at which tfs were last calculated
+!                             [ years from start of gas time variation ]
+!     chvers7                 character variable used to output model
+!                             variables through error_mesg interface
+!     chvers8                 character variable used to output model
+!                             variables through error_mesg interface
+!     chvers9                 character variable used to output model
+!                             variables through error_mesg interface
+!     chvers11                character variable used to output model
+!                             variables through error_mesg interface
+!     alarm                   time since last tf calculation until
+!                             current time [ minutes ]              
+!
+!--------------------------------------------------------------------
+
+!     type(time_type)  :: Gas_time  ! time for which gas data is desired</pre>
+<pre>
+<b>call define_gas_amount </b>&amp; (gas, Rad_time, gas_specification_type, gas_variation_type, &amp; gas_floor, gas_ceiling, rgas, gas_uses_tfs, gas_change_rate, &amp; rrvgas, Gas_time_list, gas_value, gas_tf_calc_intrvl, &amp; gas_tf_time_displacement, calc_gas_tfs_on_first_step, &amp; use_current_gas_for_tf, gas_tf_offset, gas_for_last_tf_calc, &amp; gas_for_next_tf_calc, define_gas_for_last_tf_calc)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   define_gas_amount performs the following actions:
+   1) checks for the presence of needed optional arguments;
+   2) determines how long the gas has been varying with time;
+   3) calculates values for the gas mixing ratio at the current time;
+   4) constrains calculated gas values to lie between the
+   specified floor and ceiling;
+   <br>
+<br>
+   if transmission functions are calculated for the gas, then:
+   1) it is determined if the gas value used when the tfs were last
+   calculated is needed;
+   2) if the gas does not use its current value at the time when tfs
+   are calculated, the offset from the current time to the time
+   used for tfs is obtained;
+   3) if the gas value used when the tfs were last calculated is 
+   needed, it is calculated along with the time offset of that
+   time from the present time;
+   4) if the gas value at the time when the tfs are next to be cal-
+   culated is needed, it is calculated;
+   5) gas values relevant at the time when tfs are next to be 
+   calculated are constrained to lie between the specified floor 
+   and ceiling; </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas&nbsp;&nbsp;&nbsp;</tt></td><td>   character string associated with the gas being processed </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_time&nbsp;&nbsp;&nbsp;</tt></td><td>   time at which radiation calculation is to apply </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_specification_type&nbsp;&nbsp;&nbsp;</tt></td><td>   indicator as to the form of time variation of vol. mixing ratio;
+   either 'base_and_trend' or 'time_series'. </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_variation_type&nbsp;&nbsp;&nbsp;</tt></td><td>   indicator as to the form of time variation of the vol. mixing ratio
+   of gas; either 'linear' or 'logarithmic' </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_floor&nbsp;&nbsp;&nbsp;</tt></td><td>   smallest value allowed for gas xxx vol. mixing ratio [ no. / no. ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_ceiling&nbsp;&nbsp;&nbsp;</tt></td><td>   largest value allowed for gas xxx vol. mixing ratio [ no. / no. ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rgas&nbsp;&nbsp;&nbsp;</tt></td><td>   initially specified gas mixing ratio [ no. / no. ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_uses_tfs&nbsp;&nbsp;&nbsp;</tt></td><td>   this gas has transmission functions associated with it ? </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_time_list&nbsp;&nbsp;&nbsp;</tt></td><td>   list of times in gas timeseries [ time_type ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_value&nbsp;&nbsp;&nbsp;</tt></td><td>   gas concentrations [ no. / no. ] associated with the times 
+   in Gas_time_list </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_tf_calc_intrvl&nbsp;&nbsp;&nbsp;</tt></td><td>   time interval between calculating gas tfs  [ hours ]
+   OPTIONAL: present only when the gas has tfs associated with it </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_tf_time_displacement&nbsp;&nbsp;&nbsp;</tt></td><td>   time displacement from present to the time at which gas values are
+   to be used in the calculation of tfs. may be &lt;0, ==0, or &gt; 0.
+   [ hours ]
+   OPTIONAL: present only when the gas has tfs associated with it, only
+   used when calc_gas_tfs_on_first_step is .true. </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>calc_gas_tfs_on_first_step&nbsp;&nbsp;&nbsp;</tt></td><td>   if true, tfs are calculated ONLY on the first time step of a run,
+   using gas mixing ratios valid gas_tf_time_displacement hours from 
+   the start time
+   OPTIONAL: present only when the gas has tfs associated with it </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>use_current_gas_for_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   if true, the gas  mixing ratio at the current time is used to cal-
+   culate the gas tfs
+   OPTIONAL: present only when the gas has tfs associated with it </td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_change_rate&nbsp;&nbsp;&nbsp;</tt></td><td>   time rate of change of gas xxx vol. mixing ratio
+   [  1 +/- % per year ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rrvgas&nbsp;&nbsp;&nbsp;</tt></td><td>   gas mixing ratio at current time [ no. / no. ] </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>define_gas_for_last_tf_calc&nbsp;&nbsp;&nbsp;</tt></td><td>   logical indicating if the gas value used for the last tf calculation
+   must be obtained </td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_tf_offset&nbsp;&nbsp;&nbsp;</tt></td><td>   time between last tf calculation and present [ hours ]
+   OPTIONAL: present only when the gas has tfs associated with it </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_for_last_tf_calc&nbsp;&nbsp;&nbsp;</tt></td><td>   value of gas mixing ratio used in last tf calculation [ no. / no. ]
+   OPTIONAL: present only when the gas has tfs associated with it </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_for_next_tf_calc&nbsp;&nbsp;&nbsp;</tt></td><td>   value of gas mixing ratio to be used in next tf calculation 
+   OPTIONAL: present only when the gas has tfs associated with it
+   [ no. / no. ] </td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="write_restart_radiative_gases"></a>
+<h4>write_restart_radiative_gases</h4>
+<pre>
+<b>call write_restart_radiative_gases </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to write the radiative restart files </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="write_restart_nc"></a>
+<h4>write_restart_nc</h4>
+<pre>
+<b>call write_restart_nc </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to write the radiative restart files in netcdf format </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

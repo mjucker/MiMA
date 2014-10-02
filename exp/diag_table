@@ -1,0 +1,51 @@
+"Model results from the Held-Suarez benchmark"
+0 0 0 0 0 0
+#output files
+"atmos_daily",    24, "hours", 1, "days", "time",
+"atmos_average",  -1, "hours", 1, "days", "time",
+#diagnostic field entries.
+ "dynamics",    "ps",             "ps",             "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",    "bk",             "bk",             "atmos_average",  "all", .false., "none", 2,
+ "dynamics",    "pk",             "pk",             "atmos_average",  "all", .false., "none", 2,
+ "dynamics",    "zsurf",          "zsurf",          "atmos_average",  "all", .false., "none", 2,
+ "dynamics",    "ps",             "ps",             "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "ucomp",          "ucomp",          "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "vcomp",          "vcomp",          "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "temp",           "temp",           "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "omega",          "omega",          "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "div",            "div",            "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "vor",            "vor",            "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "tracer1",        "tracer1",        "atmos_average",  "all", .true.,  "none", 2,
+ "dynamics",    "tracer2",        "tracer2",        "atmos_average",  "all", .true.,  "none", 2,
+#"hs_forcing",  "teq",            "teq",            "atmos_average",  "all", .true.,  "none", 2,
+
+#=============================================================================================
+#
+#  FORMATS FOR FILE ENTRIES (not all input values are used)
+#  ------------------------
+#
+#"file_name", output_freq, "output_units", format, "time_units", "long_name"
+#
+#
+#   output_freq:  > 0  output frequency in "output_units"
+#                 = 0  output frequency every time step
+#                 =-1  output frequency at end of run
+#
+#   output_units = units used for output frequency
+#                  (years, months, days, minutes, hours, seconds)
+#
+#   time_units   = units used to label the time axis
+#                  (days, minutes, hours, seconds)
+#
+#
+#  FORMAT FOR FIELD ENTRIES (not all input values are used)
+#  ------------------------
+#
+#"module_name", "field_name", "output_name", "file_name", "time_sampling", time_avg, "other_opts", packing
+#
+#   time_avg = .true. or .false.
+#
+#   packing  = 1  double precision
+#            = 2  float
+#            = 4  packed 16-bit integers
+#            = 8  packed 1-byte (not tested?)

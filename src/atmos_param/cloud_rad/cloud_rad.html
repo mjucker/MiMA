@@ -1,0 +1,1111 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module cloud_rad_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module cloud_rad_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Stephen.Klein@noaa.gov">   Steve Klein </a>
+<br>
+<b>Reviewers:&nbsp;</b>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/cloud_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   The cloud radiation module uses the stored values of the
+   prognostic cloud variables, and computes the cloud albedo and
+   absorption for the two shortwave bands (ultra-violet/visible and
+   near-infrared), the longwave cloud emissivity, and the 
+   fractional areas covered by clouds. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   The cloud radiation module condenses the cloud information 
+   provided by the stratiform cloud scheme and converts it into
+   the areas covered by, the water paths and the effective particle 
+   sizes of liquid and ice. This cloud information is stored into 
+   cloud blocks which are assumed to be randomly overlapped (done 
+   in CLOUD_ORGANIZE subroutine). From these, the single-scattering 
+   albedo, asymmetry parameter, and optical depth for the two short 
+   wave bands and the longwave cloud emissivity for each cloud are 
+   calculated in the subroutine CLOUD_OPTICAL_PROPERTIES. Finally, 
+   the subroutine CLOUD_RAD takes the shortwave cloud properties 
+   and converts them using the Delta-Eddington solution to albedo 
+   and absorption in each of the shortwave bands.
+   <br>
+<br>
+   In CLOUD_OPTICAL_PROPERTIES, the parameterization of Slingo (1989)
+   and Ebert and Curry (1992) are used for the shortwave properties of 
+   liquid and ice clouds, respectively.  For the longwave cloud 
+   emissivity, the empirical observation result of Stephens (1978) is
+   used for liquid clouds whereas the parameterization of Ebert and
+   Curry (1992) is used for ice clouds.
+   <br>
+<br>
+   In CLOUD_ORGANIZE, the effective radius for liquid clouds is 
+   calculated using the parameterization of Martin et al. (1994)
+   whereas the effective radius of ice clouds is parameterized using
+   that of Donner et al. (1997).
+   <br>
+<br> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>         fms_mod<br>   constants_mod<br>diag_manager_mod<br>time_manager_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#cloud_rad_init">cloud_rad_init</a>:</dt>
+<dd>   Called once to initialize cloud_rad module.   This routine reads the
+   namelist, registers any requested diagnostic fields, and (when
+   called from strat_cloud_init [standard practice]) returns the
+   overlap assumption to strat_cloud for use in determining cloud and
+   large-scale precipitation overlap. 
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#cloud_rad_end">cloud_rad_end</a>:</dt>
+<dd>   A destructor routine for the cloud_rad module.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#lw_emissivity">lw_emissivity</a>:</dt>
+<dd>   Subroutine lw_emissivity computes the longwave cloud emissivity 
+   using the cloud mass absorption coefficient and the water path.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#cloud_summary3">cloud_summary3</a>:</dt>
+<dd>   cloud_summary3 returns the specification properties of the clouds
+   present in the strat_cloud_mod.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#max_rnd_overlap">max_rnd_overlap</a>:</dt>
+<dd>   max_rnd_overlap returns various cloud specification properties
+   obtained with the maximum-random overlap assumption.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#rnd_overlap">rnd_overlap</a>:</dt>
+<dd>   rnd_overlap returns various cloud specification properties, 
+   obtained with the random-overlap assumption. implicit in this
+   assumption is that all clouds are only a single layer thick; i.e.,
+   clouds at adjacent levels in the same column are independent of
+   one another.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#CLOUD_RAD_k_diag">CLOUD_RAD_k_diag</a>:</dt>
+<dd>   This subroutine calculates the following radiative properties
+   for each cloud:
+   <br>
+<br> 
+<pre>               1. r_uv : cloud reflectance in uv band
+               2. r_nir: cloud reflectance in nir band
+               3. ab_uv: cloud absorption in uv band
+               4. ab_nir:cloud absorption in nir band</pre> 
+</dd>
+<dt>
+<a href="#cloud_rad_k">cloud_rad_k</a>:</dt>
+<dd>   Subroutine cloud_rad_k calculates the cloud reflectances and
+   absorptions in the uv and nir wavelength bands. These quantities 
+   are computed by dividing the shortwave spectrum into 4 bands and 
+   then computing the reflectance and absorption for each band 
+   individually and then setting the uv reflectance and absorption 
+   equal to that of band 1 and the nir reflectance and absorption 
+   equal to the spectrum-weighted results of bands 2,3,and 4.  The 
+   limits of bands are defined in subroutine sw_optical_properties.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#sw_optical_properties">sw_optical_properties</a>:</dt>
+<dd>   sw_optical_properties computes the needed optical parameters and
+   then calls cloud_rad_k in order to compute the cloud radiative
+   properties.
+   <br>
+<br> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="cloud_rad_init"></a>
+<h4>cloud_rad_init</h4>
+<pre>
+<b>call cloud_rad_init </b>(axes, Time, qmin_in, N_land_in, N_ocean_in, &amp; overlap_out)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Initializes values of qmin, N_land, and  N_ocean using values from
+   strat_cloud namelist as well as reads its own namelist variables. In
+   addition, it registers diagnostic fields if needed, and returns the 
+   value of the cloud overlap to strat_cloud.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   Axis integers for diagnostics <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   Time type variable for diagnostics <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qmin_in&nbsp;&nbsp;&nbsp;</tt></td><td>   Input value of minimum permissible cloud liquid, ice,
+   or fraction <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, kg condensate/kg air, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>N_land_in&nbsp;&nbsp;&nbsp;</tt></td><td>   Input value of number of cloud drop per cubic meter
+   over land <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, #/(m*m*m), optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>N_ocean_in&nbsp;&nbsp;&nbsp;</tt></td><td>   Input value of number of cloud drop per cubic meter
+   over ocean <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, #/(m*m*m), optional]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>overlap_out&nbsp;&nbsp;&nbsp;</tt></td><td>   Integer indicating the overlap assumption being used 
+   (1 = maximum-random, 2 = random) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer, optional]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_rad_end"></a>
+<h4>cloud_rad_end</h4>
+<pre>
+<b>call cloud_rad_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   A destructor routine for the cloud_rad module.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="lw_emissivity"></a>
+<h4>lw_emissivity</h4>
+<pre>
+<b>call lw_emissivity </b>(is, js, lwp, iwp, reff_liq, reff_ice, &amp; nclds, em_lw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting subdomain i index of data 
+   in the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting subdomain j index of data 
+   in the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Liquid water path [ kg / m**2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Ice water path [ kg / m**2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_liq&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective cloud drop radius used with
+   bulk cloud physics scheme [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective ice crystal radius used with
+   bulk cloud physics scheme [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nclds&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of random overlapping clouds in column <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>em_lw&nbsp;&nbsp;&nbsp;</tt></td><td>   longwave cloud emmissivity [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_summary3"></a>
+<h4>cloud_summary3</h4>
+<pre>
+<b>call cloud_summary3 </b>(is, js, land, ql, qi, qa, pfull, phalf, &amp; tkel, nclds, cldamt, lwp, iwp, reff_liq, &amp; reff_ice, ktop, kbot, conc_drop, conc_ice, &amp; size_drop, size_ice)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cloud_summary3 returns the specification properties of the clouds
+   present in the strat_cloud_mod.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,js&nbsp;&nbsp;&nbsp;</tt></td><td>   Indices for model slab <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>land&nbsp;&nbsp;&nbsp;</tt></td><td>   Fraction of the grid box covered by land
+   [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ql&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud liquid condensate [ kg condensate/kg air ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qi&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud ice condensate [ kg condensate/kg air ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qa&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud volume fraction [ fraction ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pfull&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure at full levels [ Pascals ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure at half levels [ Pascals ]
+   NOTE: it is assumed that phalf(j+1) &gt; phalf(j) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tkel&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperature [ deg. Kelvin ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nclds&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of random-overlap clouds in a column <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldamt&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud amount of condensed cloud <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Liquid water path <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Ice water path <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_liq&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective radius of cloud drops <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective radius of ice crystals <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ktop&nbsp;&nbsp;&nbsp;</tt></td><td>   Integer level for top of cloud, present when 
+   max-random overlap assumption made. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   Integer level for bottom of cloud, present when
+   max-random overlap assumption made. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   Liquid cloud droplet mass concentration, present 
+   when microphysically-based cloud radiative
+   properties are desired. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   Ice cloud mass concentration, present when
+   microphysically-based cloud radiative
+   properties are desired <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective diameter of liquid cloud droplets, 
+   present when microphysically-based cloud radiative
+   properties are desired. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective diameter of ice cloud, present when 
+   microphysically-based cloud radiative
+   properties are desired. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="max_rnd_overlap"></a>
+<h4>max_rnd_overlap</h4>
+<pre>
+<b>call max_rnd_overlap </b>(ql, qi, qa, pfull, phalf, tkel, N_drop, &amp; k_ratio, nclds, ktop, kbot, cldamt, lwp, &amp; iwp, reff_liq, reff_ice)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   max_rnd_overlap returns various cloud specification properties
+   obtained with the maximum-random overlap assumption.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ql&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud liquid condensate [ kg condensate/kg air ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qi&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud ice condensate [ kg condensate/kg air ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qa&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud volume fraction [ fraction ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pfull&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure at full levels [ Pascals ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure at half levels, index 1 at model top 
+   [ Pascals ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tkel&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperature [ deg Kelvin ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>N_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of cloud droplets per cubic meter <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_ratio&nbsp;&nbsp;&nbsp;</tt></td><td>   Ratio of effective radius to mean volume radius <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nclds&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of (random overlapping) clouds in column <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ktop&nbsp;&nbsp;&nbsp;</tt></td><td>   Level of the top of the cloud. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   Level of the bottom of the cloud. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldamt&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud amount of condensed cloud [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud liquid water path [ kg condensate / m **2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud ice path [ kg condensate / m **2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_liq&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective radius for liquid clouds [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective particle size for ice clouds [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="rnd_overlap"></a>
+<h4>rnd_overlap</h4>
+<pre>
+<b>call rnd_overlap </b>(ql, qi, qa, pfull, phalf, tkel, N_drop, &amp; k_ratio, nclds, cldamt, lwp, iwp, reff_liq, &amp; reff_ice, conc_drop_org, conc_ice_org, &amp; size_drop_org, size_ice_org)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   rnd_overlap returns various cloud specification properties, 
+   obtained with the random-overlap assumption. implicit in this
+   assumption is that all clouds are only a single layer thick; i.e.,
+   clouds at adjacent levels in the same column are independent of
+   one another.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ql&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud liquid condensate [ kg condensate/kg air ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qi&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud ice condensate [ kg condensate/kg air ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qa&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud volume fraction [ fraction ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pfull&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure at full levels [ Pascals ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure at half levels, index 1 at model top 
+   [ Pascals ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tkel&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperature [ deg Kelvin ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>N_drop&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of cloud droplets per cubic meter <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_ratio&nbsp;&nbsp;&nbsp;</tt></td><td>   Ratio of effective radius to mean volume radius <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nclds&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of (random overlapping) clouds in column <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cldamt&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud amount of condensed cloud [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud liquid water path [ kg condensate / m **2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud ice path [ kg condensate / m **2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_liq&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective radius for liquid clouds [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective particle size for ice clouds [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_drop_org&nbsp;&nbsp;&nbsp;</tt></td><td>   Liquid cloud droplet mass concentration 
+   [ g / m**3 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>conc_ice_org&nbsp;&nbsp;&nbsp;</tt></td><td>   Ice cloud mass concentration [ g / m**3 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_drop_org&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective diameter of liquid cloud droplets 
+   [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>size_ice_org&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective diameter of ice clouds [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="CLOUD_RAD_k_diag"></a>
+<h4>CLOUD_RAD_k_diag</h4>
+<pre>
+<b>call CLOUD_RAD_k_diag </b>(tau, direct, w0,gg,coszen,r_uv,r_nir,ab_uv,ab_nir)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calculates the following radiative properties
+   for each cloud:
+   <br>
+<br> 
+<pre>               1. r_uv : cloud reflectance in uv band
+               2. r_nir: cloud reflectance in nir band
+               3. ab_uv: cloud absorption in uv band
+               4. ab_nir:cloud absorption in nir band</pre>   These quantities are computed by dividing the shortwave
+   spectrum into 4 bands and then computing the reflectance
+   and absorption for each band individually and then setting
+   the uv reflectance and absorption equal to that of band
+   1 and the nir reflectance and absorption equal to the
+   spectrum weighted results of bands 2,3,and 4.  The limits
+   of bands are described in CLOUD_OPTICAL_PROPERTIES.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tau&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth in 4 bands [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>direct&nbsp;&nbsp;&nbsp;</tt></td><td>   Logical variable for each cloud indicating whether
+   or not to use the direct beam solution for the
+   delta-eddington radiation or the diffuse beam
+   radiation solution. <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>w0&nbsp;&nbsp;&nbsp;</tt></td><td>   Single scattering albedo in 4 bands [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gg&nbsp;&nbsp;&nbsp;</tt></td><td>   Asymmetry parameter in 4 bands  [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>coszen&nbsp;&nbsp;&nbsp;</tt></td><td>   Cosine of the zenith angle  [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>r_uv&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud reflectance in uv band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>r_nir&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud reflectance in nir band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ab_nir&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud absorption in nir band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ab_uv&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud absorption in uv band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_rad_k"></a>
+<h4>cloud_rad_k</h4>
+<pre>
+<b>call cloud_rad_k </b>(tau, w0, gg, coszen, r_uv, r_nir, &amp; ab_nir, ab_uv_out)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine cloud_rad_k calculates the cloud reflectances and
+   absorptions in the uv and nir wavelength bands. These quantities 
+   are computed by dividing the shortwave spectrum into 4 bands and 
+   then computing the reflectance and absorption for each band 
+   individually and then setting the uv reflectance and absorption 
+   equal to that of band 1 and the nir reflectance and absorption 
+   equal to the spectrum-weighted results of bands 2,3,and 4.  The 
+   limits of bands are defined in subroutine sw_optical_properties.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tau&nbsp;&nbsp;&nbsp;</tt></td><td>   Optical depth [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>w0&nbsp;&nbsp;&nbsp;</tt></td><td>   Single scattering albedo [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gg&nbsp;&nbsp;&nbsp;</tt></td><td>   Asymmetry parameter for each band
+   [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>coszen&nbsp;&nbsp;&nbsp;</tt></td><td>   Cosine of zenith angle  [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>r_uv&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud reflectance in uv band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>r_nir&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud reflectance in nir band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ab_nir&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud absorption in nir band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ab_uv_out&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud absorption in uv band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="sw_optical_properties"></a>
+<h4>sw_optical_properties</h4>
+<pre>
+<b>call sw_optical_properties </b>(nclds, lwp, iwp, reff_liq, reff_ice, &amp; coszen, r_uv, r_nir, ab_nir)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   sw_optical_properties computes the needed optical parameters and
+   then calls cloud_rad_k in order to compute the cloud radiative
+   properties.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nclds&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of random overlapping clouds in column <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Liquid water path [ kg / m**2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iwp&nbsp;&nbsp;&nbsp;</tt></td><td>   Ice water path [ kg / m**2 ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_liq&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective cloud drop radius  used with
+   bulk cloud physics scheme [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>reff_ice&nbsp;&nbsp;&nbsp;</tt></td><td>   Effective ice crystal radius used with
+   bulk cloud physics scheme [ microns ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>coszen&nbsp;&nbsp;&nbsp;</tt></td><td>   Cosine of zenith angle [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>r_uv&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud reflectance in uv band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>r_nir&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud reflectance in nir band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ab_nir&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud absorption in nir band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<hr>
+<h4>NAMELIST</h4>
+<div>
+<b>&amp;cloud_rad_nml</b>
+<br>
+<br>
+<div>
+<dl>
+<dt>
+<tt>overlap</tt>
+</dt>
+<dl>   integer variable indicating which overlap 
+   assumption to use:
+   overlap = 1. means condensate in adjacent levels 
+   is treated as part of the same cloud
+   i.e. maximum-random overlap
+   overlap = 2. means condensate in adjacent levels 
+   is treated as different clouds
+   i.e. random overlap <br>
+<span class="type">[, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>l2strem</tt>
+</dt>
+<dl>   logical variable indicating which solution for 
+   cloud radiative properties is being used.
+   l2strem = T  2 stream solution
+   l2strem = F  Delta-Eddington solution
+   Note that IF l2strem = T then the solution does 
+   not depend on solar zenith angle <br>
+<span class="type">[, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>taucrit</tt>
+</dt>
+<dl>   critical optical depth for switching direct beam 
+   to diffuse beam for use in Delta-Eddington 
+   solution [ dimensionless] <br>
+<span class="type">[, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>adjust_top</tt>
+</dt>
+<dl>   logical variable indicating whether or not to use 
+   the code which places the top and bottom of the 
+   cloud at the faces which are most in view from
+   the top and bottom of the cloud block. this is 
+   done to avoid undue influence of very small cloud
+   fractions. if true this adjustment of tops is 
+   performed; if false this is not performed. <br>
+<span class="type">[, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>scale_factor</tt>
+</dt>
+<dl>   factor which multiplies actual cloud optical 
+   depths to account for the plane-parallel homo-
+   genous cloud bias  (e.g. Cahalan effect).
+   [ dimensionless] <br>
+<span class="type">[, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>qamin</tt>
+</dt>
+<dl>   minimum permissible cloud fraction 
+   [ dimensionless] <br>
+<span class="type">[, dimension, units: , default: ]</span>
+</dl>
+<dt>
+<tt>do_brenguier</tt>
+</dt>
+<dl>   should drops at top of stratocumulus clouds be
+   scaled? <br>
+<span class="type">[, dimension, units: , default: ]</span>
+</dl>
+</dl>
+</div>
+</div>
+<br>
+<!-- END NAMELIST -->
+<a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<hr>
+<h4>DIAGNOSTIC FIELDS</h4>
+<div>Diagnostic fields may be output to a netcdf file by
+              specifying the module name identifier <b></b> and the desired field names (given below) in
+               file <b>diag_table</b>. See the documentation for diag_manager.<pre>Diagnostic fields for module name identifier: <b></b>
+</pre>
+<div>
+<table cellpadding="0" border="0">
+<tr>
+<td>
+<pre></pre>
+</td><td>
+<pre></pre>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<!-- END DIAGNOSTIC FIELDS -->
+<a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>
+<dl>
+<dt>
+<b>FATAL in cloud_rad_init</b>
+</dt>
+<dd>
+<span class="errmsg"></span>
+</dd>
+<dd>   Fatal crashes occur in initialization of the module if:
+   
+   1. overlap does not equal 1 or 2
+   
+   2. taucrit &lt; 0.
+   
+   3. scale_factor &lt; 0.
+   
+   4. qamin outside of the range of 0 to 1. </dd>
+</dl>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<a name="REFERENCES"></a>
+<hr>
+<h4>REFERENCES</h4>
+<!-- BEGIN REFERENCES -->
+<div>
+<ol>
+<li>   The shortwave properties of liquid clouds come from:
+   <br>
+<br>
+   Slingo, A., 1989: A GCM parameterization for the shortwave 
+   radiative properties of water clouds. J. Atmos. Sci., vol. 46, 
+   pp. 1419-1427.
+   <br>
+<br> 
+</li>
+<li>   The shortwave and longwave properties of ice clouds come from:
+   <br>
+<br>
+   Ebert, E. E. and J. A. Curry, 1992: A parameterization of ice cloud
+   optical properties for climate models. J. Geophys. Res., vol. 97,
+   D1, pp. 3831-3836.
+   <br>
+<br> 
+</li>
+<li>   The longwave emissivity parameterization of liquid clouds comes from:
+   <br>
+<br>
+   Stephens, G. L., 1978: Radiation profiles in extended water clouds.
+   II: Parameterization schemes. J. Atmos. Sci., vol. 35, 
+   pp. 2123-2132.
+   <br>
+<br> 
+</li>
+<li>   The parameterization of liquid cloud effective radius comes from:
+   <br>
+<br>
+   Martin, G. M., D. W. Johnson, and A. Spice, 1994: The measurement 
+   and parameterization of effective radius of droplets in warm stratocumulus
+   clouds. J. Atmos. Sci, vol 51, pp. 1823-1842.
+   <br>
+<br> 
+</li>
+<li>   The parameterization of ice cloud effective radius comes from:
+   <br>
+<br>
+   Donner, L. J., C. J. Seman, B. J. Soden, R. S. Hemler, J. C. Warren,
+   J. Strom, and K.-N. Liou, 1997: Large-scale ice clouds in the GFDL
+   SKYHI general circulation model. J. Geophys. Res., vol. 102, D18,
+   pp. 21,745-21,768.
+   <br>
+<br> 
+</li>
+<li>   The algorithm to reproduce the ISCCP satellite view of clouds comes from:
+   <br>
+<br>
+   Klein, S. A., and C. Jakob, 1999: Validation and sensitivities of 
+   frontal clouds simulated by the ECMWF model. Monthly Weather Review,
+   127(10),  2514-2531.
+   <br>
+<br> 
+</li>
+</ol>
+</div>
+<br>
+<!-- END REFERENCES -->
+<a name="COMPILER SPECIFICS"></a>
+<hr>
+<h4>COMPILER SPECIFICS</h4>
+<!-- BEGIN COMPILER SPECIFICS -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END COMPILER SPECIFICS -->
+<a name="PRECOMPILER OPTIONS"></a>
+<hr>
+<h4>PRECOMPILER OPTIONS</h4>
+<!-- BEGIN PRECOMPILER OPTIONS -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PRECOMPILER OPTIONS -->
+<a name="LOADER OPTIONS"></a>
+<hr>
+<h4>LOADER OPTIONS</h4>
+<!-- BEGIN LOADER -->
+<div>
+<p> 
+</p>
+<pre>        
+</pre>
+</div>
+<!-- END LOADER OPTIONS -->
+<a name="TEST PROGRAM"></a>
+<hr>
+<h4>TEST PROGRAM</h4>
+<!-- BEGIN TEST PROGRAM -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END TEST PROGRAM -->
+<a name="KNOWN BUGS"></a>
+<hr>
+<h4>KNOWN BUGS</h4>
+<!-- BEGIN KNOWN BUGS -->
+<div>
+<p> 
+</p>
+</div>
+<br>
+<!-- END KNOWN BUGS -->
+<a name="NOTES"></a>
+<hr>
+<h4>NOTES</h4>
+<!-- BEGIN NOTES -->
+<div> 
+</div>
+<br>
+<!-- END NOTES -->
+<a name="FUTURE PLANS"></a>
+<hr>
+<h4>FUTURE PLANS</h4>
+<!-- BEGIN FUTURE PLANS -->
+<div>
+<p>The optical depth and particle size for every model level will
+   become a diagnostic output field. </p>
+</div>
+<br>
+<!-- END FUTURE PLANS -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

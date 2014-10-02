@@ -1,0 +1,328 @@
+<HTML>
+<TITLE>module atmosphere_mod</TITLE>
+<BODY BGCOLOR="#AABBCC" TEXT="#332211" >
+
+<DIV ALIGN="CENTER"> <FONT SIZE=1>
+<A HREF="#INTERFACE">PUBLIC INTERFACE</A> / 
+<A HREF="#DATA_TYPES">DATA</A> / 
+<A HREF="#ROUTINES">ROUTINES</A> / 
+<A HREF="#NAMELIST">NAMELIST</A> / 
+<A HREF="#CHANGES">CHANGES</A> / 
+<A HREF="#ERRORS">ERRORS</A> / 
+<A HREF="#COLD_START">PROCEDURE FOR COLD START</A>
+</FONT>
+<BR><BR></DIV><HR>
+
+
+<H2>module atmosphere_mod</H2>
+<A NAME="HEADER">
+<!-- BEGIN HEADER -->
+<PRE>
+     <B>Reviewers:</B> Isaac Held,  Peter Phillipps
+
+</PRE>
+<!-- END HEADER --></A>
+<!--------------------------------------------------------------------->
+<A NAME="OVERVIEW">
+<HR>
+<H4>OVERVIEW</H4>
+<!-- BEGIN OVERVIEW -->
+<PRE>
+
+     Atmospheric driver for the spectral dynamics and modular physics.
+
+</PRE>
+<!-- END OVERVIEW --></A>
+<!--------------------------------------------------------------------->
+<A NAME="DESCRIPTION">
+<!-- BEGIN DESCRIPTION -->
+<PRE>
+
+     This module provides a standard interface to the spectral
+     dynamical core and interface to the modular physics.
+
+     Similar interfaces exist for the bgrid dynamical core
+     and the spectral two-layer model that may be easily
+     switched with this interface.
+
+</PRE>
+<!-- END DESCRIPTION --></A>
+<!--------------------------------------------------------------------->
+<A NAME="MODULES_USED">
+<HR>
+<H4>OTHER MODULES USED</H4>
+<!-- BEGIN MODULES_USED -->
+<PRE>
+
+                 mpp_mod
+                 fms_mod
+    spectral_physics_mod
+           constants_mod
+          transforms_mod
+    press_and_geopot_mod
+        time_manager_mod
+   spectral_dynamics_mod
+         mpp_domains_mod
+      physics_driver_mod
+       field_manager_mod
+      tracer_manager_mod
+         tracer_type_mod
+
+</PRE>
+<!-- END MODULES_USED --></A>
+<!--------------------------------------------------------------------->
+<A NAME="INTERFACE">
+<HR>
+<H4>PUBLIC INTERFACE</H4>
+<!-- BEGIN INTERFACE -->
+<PRE>
+
+  use atmosphere_mod [,only: atmosphere_init,       atmosphere_end,
+                             atmosphere_down,       atmosphere_up,
+                             atmosphere_resolution, atmosphere_boundary,
+                             get_bottom_mass,       get_bottom_wind,
+                             get_atmosphere_axes,   atmosphere_domain
+
+</PRE>
+<!-- END INTERFACE --></A>
+<!--------------------------------------------------------------------->
+<A NAME="DATA_TYPES">
+<HR>
+<H4>PUBLIC DATA</H4>
+<!-- BEGIN DATA_TYPES -->
+<PRE>
+
+ There are no public derived data types other than surf_diff_type,
+ but surf_diff_type will be removed in a future release.
+ For explanation of surf_diff_type see surf_diff.html
+
+</PRE>
+<!-- END DATA_TYPES --></A>
+<!--------------------------------------------------------------------->
+<A NAME="ROUTINES">
+<HR>
+<H4>PUBLIC ROUTINES</H4>
+<!-- BEGIN ROUTINES -->
+<PRE>
+
+<A HREF="#atmosphere_init">atmosphere_init</A>
+<A HREF="#atmosphere_end">atmosphere_end</A>
+<A HREF="#atmosphere_down">atmosphere_down</A>
+<A HREF="#atmosphere_up">atmosphere_up</A>
+<A HREF="#get_bottom_mass">get_bottom_mass</A>
+<A HREF="#get_bottom_wind">get_bottom_wind</A>
+<A HREF="#atmosphere_resolution">atmosphere_resolution</A>
+<A HREF="#atmosphere_boundary">atmosphere_boundary</A>
+<A HREF="#atmosphere_boundary">get_atmosphere_axes</A>
+
+<A NAME="atmosphere_init">
+
+call atmosphere_init (Time_init, Time, Time_step, Surf_diff)
+
+intent(in)
+
+   type(time_type) :: Time_init --  reference (or initial) time
+
+   type(time_type) :: Time      --  current time
+
+   type(time_type) :: Time_step --  time step
+
+intent(inout)
+
+   type(surf_diff_type) :: Surf_diff
+
+<!-- END atmosphere_init --></A>
+---------------------------------------------------------------------
+<A NAME="atmosphere_end">
+
+call atmosphere_end (Time)
+
+input
+
+   type(time_type) :: Time --  current time
+
+<!-- END atmosphere_end --></A>
+---------------------------------------------------------------------
+<A NAME="atmosphere_down">
+
+call atmosphere_down (Time, frac_land, t_surf,  albedo,  rough_mom,
+                            u_star,  b_star, dtau_du, dtau_dv, tau_x, tau_y,
+                            gust,   flux_sw, flux_lw, Surf_diff)
+
+intent(in)
+
+  type(time_type) :: Time -- current time
+
+  real, dimension(:,:) :: frac_land --  fraction (0. to 1.) of surface which covered by land
+
+  real, dimension(:,:) :: t_surf    --  surface (skin) temperature (in deg k)
+
+  real, dimension(:,:) :: albedo    --  surface albedo
+
+  real, dimension(:,:) :: rough_mom --  surface roughness for momentum (m)
+
+  real, dimension(:,:) :: u_star    --  friction velocity
+
+  real, dimension(:,:) :: b_star    --  bouyancy scale
+
+  real, dimension(:,:) :: dtau_du   --  derivative of zonal wind stress w.r.t. the lowest level wind speed
+
+  real, dimension(:,:) :: dtau_dv   --  derivative of meridional wind stress w.r.t. the lowest level wind speed
+
+intent(inout)
+
+  real, dimension(:,:) :: tau_x -- zonal wind stress
+
+  real, dimension(:,:) :: tau_y -- meridional wind stress
+
+  type(surf_diff_type) :: Surf_diff
+
+intent(out)
+
+  real, dimension(:,:) :: gust    -- wind gustiness
+
+  real, dimension(:,:) :: flux_sw -- net shortwave surface flux (down minus up) (in watts/m**2)
+
+  real, dimension(:,:) :: flux_lw -- downward longwave surface flux (in watts/m**2)
+
+<!-- END atmosphere_down --></A>
+---------------------------------------------------------------------
+<A NAME="atmosphere_up">
+
+call atmosphere_up (Time, frac_land, lprec, fprec )
+
+intent(in)
+
+  type(time_type) :: Time -- current time
+
+  real, dimension(:,:) :: frac_land --  fraction (0. to 1.) of surface which covered by land
+
+intent(inout)
+
+  type(surf_diff_type) :: Surf_diff
+
+output
+
+  real, dimension(:,:) :: lprec -- liquid precipitiaton rate (rain) in kg/m2/s
+
+  real, dimension(:,:) :: fprec -- frozen precipitation rate (snow) in kg/m2/s
+
+<!-- END atmosphere_up --></A>
+---------------------------------------------------------------------
+<A NAME="get_bottom_mass">
+
+call get_bottom_mass (t_bot, q_bot, p_bot, z_bot, p_surf)
+
+intent(out)
+
+  real, dimension(:,:) ::  t_bot  -- temperature at lowest model level (deg k)
+
+  real, dimension(:,:) ::  q_bot  -- specific humidity at lowest model level (kg/kg)
+
+  real, dimension(:,:) ::  p_bot  -- pressure at lowest model level (pa)
+
+  real, dimension(:,:) ::  z_bot  -- height above the surface for the lowest model level (m)
+
+  real, dimension(:,:) ::  p_surf -- surface pressure (pa)
+
+<!-- END get_bottom_mass --></A>
+---------------------------------------------------------------------
+<A NAME="get_bottom_wind">
+
+call get_bottom_wind (u_bot, v_bot)
+
+intent(out)
+
+  real, dimension(:,:) :: u_bot -- zonal wind component at lowest model level (m/s)
+
+  real, dimension(:,:) :: v_bot -- meridional wind component at lowest model level (m/s)
+
+<!-- END get_bottom_wind --></A>
+---------------------------------------------------------------------
+<A NAME="atmosphere_resolution">
+
+call atmosphere_resolution (nlon, nlat)
+
+intent(out)
+
+  integer :: nlon -- number of longitude points in the (global) computational grid
+
+  integer :: nlat -- number of latitude  points in the (global) computational grid
+
+<!-- END atmosphere_resolution --></A>
+---------------------------------------------------------------------
+<A NAME="atmosphere_boundary">
+
+call atmosphere_boundary (blon, blat [, mask] )
+
+output
+
+ real, dimension(:) ::  blon -- boundary edges of longitude grid boxes
+
+ real, dimension(:) ::  blat -- boundary edges of latitude  grid boxes
+
+optional output
+
+   mask   dummy grid mask (for the atmosphere all values are true)
+            [logical, dimension(nlon,nlat)]
+
+
+<!-- END atmosphere_boundary --></A>
+---------------------------------------------------------------------
+<A NAME="get_atmosphere_axes">
+
+<!-- END get_atmosphere_axes --></A>
+
+call get_atmosphere_axes(axes_id)
+
+output
+
+  integer, dimension(4) :: axes_id -- Id numbers of grid axes in this order:
+                              longitude, latitude, full levels, half levels
+
+Notes: Used by atmos_coupled_mod
+
+
+</PRE>
+</A><!-- END ROUTINES -->
+<!--------------------------------------------------------------------->
+<A NAME="NAMELIST">
+<HR>
+<H4>NAMELIST</H4>
+<!-- BEGIN NAMELIST -->
+<PRE>
+
+&atmosphere_nml
+
+ do_mcm_moist_processes = .true -- Execute the Manabe Climate Model
+                                    moist processes algorithm.
+
+                        = .false. -- Execute the standard moist processes algorithm. 
+
+         default = .false.
+
+</PRE>
+<!-- END NAMELIST --></A>
+<!--------------------------------------------------------------------->
+<A NAME="CHANGES">
+<HR>
+<H4>CHANGE HISTORY</H4>
+<!-- BEGIN CHANGES -->
+<PRE>
+
+</PRE>
+<!-- END CHANGES --></A>
+<!--------------------------------------------------------------------->
+<A NAME="ERRORS">
+<HR>
+<H4>ERROR MESSAGES</H4>
+<!-- BEGIN ERRORS -->
+<PRE>
+
+
+</PRE>
+<!-- END ERRORS --></A>
+
+<HR>
+</BODY>
+</HTML>

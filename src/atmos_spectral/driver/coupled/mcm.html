@@ -1,0 +1,564 @@
+<HTML>
+<TITLE>Manabe Climate Model</TITLE>
+<BODY BGCOLOR="#AABBCC" TEXT="#332211" >
+
+<DIV ALIGN="CENTER"> <FONT SIZE=1>
+<A HREF="#NAMELIST">NAMELIST</A> / 
+<A HREF="#INPUT">INPUT FILES</A> / 
+<A HREF="#FILES">MODIFIED FILES</A> / 
+<A HREF="#BUGS">KNOWN BUGS</A> / 
+</FONT>
+<BR><BR></DIV><HR>
+
+
+<H2>Manabe Climate Model</H2>
+<A NAME="HEADER">
+<PRE>
+     <B>Contacts:</B> Isaac Held, Tom Knutson, Mike Spelman, Tony Broccoli, Ron Stouffer, Peter Phillipps
+</PRE>
+<!--------------------------------------------------------------------->
+<A NAME="OVERVIEW">
+<HR>
+<H4>OVERVIEW</H4>
+<PRE>
+   Mimics the behavior of the GFDL Manabe climate model,
+   also known as the "supersource" climate model.
+</PRE>
+<!--------------------------------------------------------------------->
+<A NAME="DESCRIPTION">
+<PRE>
+
+</PRE>
+</A>
+<!--------------------------------------------------------------------->
+<A NAME="NAMELIST">
+<HR>
+<H4>NAMELIST</H4>
+<PRE>
+
+ The following are the namelist settings necessary
+ to invoke the Manabe Climate Model.
+
+ &spectral_dynamics_nml
+   damping_option          = 'resolution_indepenent',
+   damping_order           = 2,
+   damping_coeff           = 1.e16,
+   do_mass_correction      =.true.,
+   do_energy_correction    =.true.,
+   do_water_correction     =.true.,
+   vert_advect_uv          = 'second_centered',
+   vert_advect_t           = 'second_centered',
+   use_virtual_temperature =.false.,
+   use_implicit            =.true.,
+   longitude_origin        = 0.0,
+   robert_coeff            = .04,
+   alpha_implicit          = .5,
+   vert_difference_option  = 'mcm',
+   reference_sea_level_press=101325.,
+   lon_max                 = 96,
+   lat_max                 = 80,
+   num_levels              = 14,
+   num_fourier             = 30
+   num_spherical           = 31,
+   fourier_inc             = 1,
+   triang_trunc            =.false.,
+   grid_temperature        =.false.,
+   topography_option       = 'input',
+   vert_coord_option       = 'mcm' /
+
+ &atmosphere_nml
+   do_mcm_moist_processes=.true. /
+
+ &transforms_nml 
+   check_fourier_imag=.true. /
+
+ &mcm_mca_lsc_nml
+   use_mixing_ratio = .true. /
+
+ &ice_model_nml 
+    spec_ice       = .true.,
+    heat_rough_ice = 3.5e-4,
+    mom_rough_ice  = 3.5e-4,
+    alb_sno        = 0.80,
+    alb_ice        = 0.65 /
+
+ &ocean_rough_nml
+    roughness_mom   = 3.5e-4,
+    roughness_heat  = 3.5e-4,
+    roughness_moist = 3.5e-4 /
+
+ &ocean_albedo_nml
+    ocean_albedo_option = 2 /
+
+ &surface_flux_nml
+    no_neg_q = .true.,
+    use_virtual_temp = .false.,
+    alt_gustiness = .true.,
+    use_mixing_ratio = .true. /
+
+ &diag_integral_nml
+    file_name  = 'diag_integral.out',
+    time_units = 'days',
+    output_interval = 1.0 /
+
+ &diffusivity_nml
+    fixed_depth = .true.,
+    depth_0     =  4900.0,
+    frac_inner  = .015306122449,
+    pbl_mcm     = .true. /
+
+ &rh_clouds_nml
+    tuning_coeff_low_cld = 0.937,
+    do_mcm_no_clouds_top = .true.,
+    do_mcm_crit_rh       = .true. /
+
+ &dry_adj_nml
+    itermax = 20,
+    small   = 0.01,
+    do_mcm_dry_adj = .true. /
+
+ &rad_utilities_nml
+    peripherals_source='fms',
+    application_type='gcm' /
+
+ &radiation_driver_nml
+    rad_time_step=86400,
+    zenith_spec='daily_mean', 
+    rad_package = 'original_fms',
+    do_clear_sky_pass=.true.,
+    use_mixing_ratio=.true. /
+
+ &original_fms_rad_nml
+    do_mcm_radiation = .true. /
+
+ &radiative_gases_nml
+    ch4_data_source  = 'absent',
+    n2o_data_source  = 'absent',
+    f11_data_source  = 'absent',
+    f12_data_source  = 'absent',
+    f113_data_source = 'absent',
+    f22_data_source  = 'absent',
+    co2_data_source  = 'input' /
+
+ &physics_driver_nml
+    do_moist_process = .false. /
+
+ &vert_diff_driver_nml
+    do_conserve_energy         = .true.,
+    do_mcm_no_neg_q            = .true.,
+    use_virtual_temp_vert_diff = .false.,
+    do_mcm_plev                = .true.,
+    do_mcm_vert_diff_tq        = .true. /
+
+ &clouds_nml
+    do_isccp_cloud_diags = .true. /
+
+ &vert_turb_driver_nml
+    do_mellor_yamada = .false.,
+    do_diffusivity = .true. /
+
+ &monin_obukhov_nml
+    neutral = .true. /
+
+ &ozone_nml 
+   do_mcm_o3_clim= .true. /
+
+ &damping_driver_nml
+    do_conserve_energy = .true.,
+    trayfric = -20.,
+    do_mg_drag = .true.    /
+
+ &mg_drag_nml
+    xl_mtn       = 45454.545,
+    low_lev_frac = 0.15,
+    do_conserve_energy = .true.,
+    do_mcm_mg_drag = .true. /
+
+ &soil_nml
+    n_levels = 1,
+    dz = 0.001 /
+
+ &land_properties_nml
+    do_all_mcm = .true. /
+
+</PRE>
+</A>
+<!--------------------------------------------------------------------->
+<A NAME="INPUT">
+<HR>
+<H4>INPUT FILES</H4>
+<PRE>
+
+ Execute lhe following commands in the work directory to get
+ the input data files needed for the Manabe Climate Model:
+
+ /home/fms/bin/get_fms_data -r havana ggrpsst lad oldrad mcm
+ cp /archive/fms/grids/exchange/havana/R30_MCM.nc  INPUT/grid_spec.nc
+
+
+ Specify co2 concentration in an ascii file named INPUT/id1co2
+ For example: echo "3.6e-4" > INPUT/id1co2
+
+
+ Because water vapor is now a tracer, it must be specified in the field_table.
+ The field_table needed to do this is as follows:
+
+ "TRACER", "atmos_mod",                "mix_rat"
+           "longname",                 "mixing ratio"
+           "units",                    "kg/kg"
+           "numerical_representation", "spectral"
+           "hole_filling",             "on"
+           "advect_vert",              "FOURTH_CENTERED" /
+
+</PRE>
+</A>
+<!--------------------------------------------------------------------->
+<A NAME="FILES">
+<HR>
+<H4>MODIFIED FILES</H4>
+<PRE>
+
+  The following files have been modified for the Manabe Climate Model:
+
+<A HREF="#diffusivity.f90">atmos_param/diffusivity/diffusivity.f90</A>
+<A HREF="#dry_adj.f90">atmos_param/dry_adj/dry_adj.f90</A>
+<A HREF="#fsrad.f90">atmos_param/fsrad/fsrad.f90</A>
+<A HREF="#original_fms_rad.f90">atmos_param/sea_esf_rad/original_fms_rad.f90</A>
+<A HREF="#rad_utilities.f90">atmos_param/sea_esf_rad/rad_utilities.f90</A>
+<A HREF="#mg_drag.f90">atmos_param/mg_drag/mg_drag.f90</A>
+<A HREF="#physics_driver.f90">atmos_param/physics_driver/physics_driver.f90</A>
+<A HREF="#radiation_driver.f90">atmos_param/radiation_driver/radiation_driver.f90</A>
+<A HREF="#rh_clouds.f90">atmos_param/rh_clouds/rh_clouds.f90</A>
+<A HREF="#clouds.f90">atmos_param/clouds/clouds.f90</A>
+<A HREF="#vert_diff.f90">atmos_param/vert_diff/vert_diff.f90</A>
+<A HREF="#vert_diff_driver.f90">atmos_param/vert_diff_driver/vert_diff_driver.f90</A>
+<A HREF="#vert_turb_driver.f90">atmos_param/vert_turb_driver/vert_turb_driver.f90</A>
+<A HREF="#ozone.f90">atmos_param/sea_esf_rad/ozone.f90</A>
+<A HREF="#atmosphere.f90">atmos_spectral/driver/coupled/atmosphere.f90</A>
+<A HREF="#spectral_diagnostics.f90">atmos_spectral/driver/diagnostics/spectral_diagnostics.f90</A>
+<A HREF="#implicit.f90">atmos_spectral/model/implicit.f90</A>
+<A HREF="#leapfrog.f90">atmos_spectral/model/leapfrog.f90</A>
+<A HREF="#press_and_geopot.f90">atmos_spectral/model/press_and_geopot.f90</A>
+<A HREF="#spectral_dynamics.f90">atmos_spectral/model/spectral_dynamics.f90</A>
+<A HREF="#ocean_albedo.f90">ice_param/ocean_albedo.f90</A>
+<A HREF="#ice_spec.f90">ice_sis/ice_spec.f90</A>
+<A HREF="#ice_grid.f90">ice_sis/ice_grid.f90</A>
+<A HREF="#ice_model.f90">ice_sis/ice_model.f90</A>
+<A HREF="#land_properties.f90">land_lad/land_properties.f90</A>
+<A HREF="#climap_albedo.f90">land_param/climap_albedo.f90</A>
+<A HREF="#surface_flux.f90">coupler/surface_flux.f90</A>
+
+The following are new files added for the Manabe Climate Model:
+
+<A HREF="#fsrad/mcm_lw.f90">atmos_param/fsrad/mcm_lw.f90</A>
+<A HREF="#fsrad/mcm_sw_driver.f90">atmos_param/fsrad/mcm_sw_driver.f90</A>
+<A HREF="#fsrad/mcm_swnew.f">atmos_param/fsrad/mcm_swnew.f</A>
+<A HREF="#fsrad/mcm_swtabl0.h">atmos_param/fsrad/mcm_swtabl0.h</A>
+<A HREF="#fsrad/mcm_swtbls.F">atmos_param/fsrad/mcm_swtbls.F</A>
+<A HREF="#mcm_mca_lsc.f">atmos_spectral/driver/coupled/mcm_mca_lsc.f</A>
+<A HREF="#mcm_moist_processes.f90">atmos_spectral/driver/coupled/mcm_moist_processes.f90</A>
+
+---------------------------------------------------------------------
+<A NAME="diffusivity.f90">
+ diffusivity.f90
+
+ One new namelist variable: pbl_mcm
+
+ p_full, p_half added to arguments of subroutine diffusivity and
+ passed through to subroutine diffusivity_pbl_mcm where
+ they used in the computation of Manabe Climate Model diffusivities.
+
+</A>
+---------------------------------------------------------------------
+<A NAME="dry_adj.f90">
+ dry_adj.f90
+
+ Added two new namelist variables: small and do_mcm_dry_adj.
+</A>
+---------------------------------------------------------------------
+<A NAME="fsrad.f90">
+ fsrad.f90
+
+ phalf and do_mcm_radiation added to the calling arguments of
+ subroutine fsrad. When do_mcm_radiation=.true. mcm_shortwave_driver
+ and mcm_lw_rad are called instead of swrad and lwrad.
+ phalf is passed through to mcm_shortwave_driver and mcm_lw_rad.
+</A>
+---------------------------------------------------------------------
+<A NAME="mg_drag.f90">
+ mg_drag.f90
+
+ One new namelist variable: do_mcm_mg_drag
+
+ The bulk of the code comprising subroutine mg_drag is contained
+ within an if block controlled by this namelist switch.
+</A>
+---------------------------------------------------------------------
+<A NAME="physics_driver.f90">
+ physics_driver.f90
+
+ One new namelist variable: do_mcm_moist_process
+
+ p_full added to calling arguments of vert_diff_driver_down.
+
+ When do_mcm_moist_process=.true., moist_processes is
+ not called. Instead, mcm_moist_processes is called from
+ subroutine atmosphere_up.
+</A>
+---------------------------------------------------------------------
+<A NAME="radiation_driver.f90">
+ radiation_driver.f90
+
+ One new namelist variable: use_mixing_ratio
+
+ phalf passed to radiation_calc and passed though to 
+ subroutine original_fms_rad.
+
+ Fixed a bug where unallocated arrays were attempted
+ to be deallocated.
+
+ When use_mixing_ratio=.true., q is interpreted as
+ mixing ration instead of specific humidity.
+
+</A>
+---------------------------------------------------------------------
+<A NAME="original_fms_rad.f90">
+ original_fms_rad.f90
+
+ One new namelist variable: do_mcm_radiation
+ do_mcm_radiation is passed to fsrad.
+
+ Subroutines mcm_lw_init and mcm_shortwave_driver_init are called
+ when do_mcm_radiation=.true.
+
+ phalf added to calling arguments of subroutine original_fms_rad.
+ It is passed through to fsrad.
+
+</A>
+---------------------------------------------------------------------
+<A NAME="rh_clouds.f90">
+ rh_clouds.f90
+
+ Three variables added to namelist: tuning_coeff_low_cld,
+ do_mcm_no_clouds_top and do_mcm_crit_rh.
+ All three control various Manabe Climate Model behaviors.
+ 
+</A>
+---------------------------------------------------------------------
+<A NAME="clouds.f90">
+ clouds.f90
+
+ One variable added to namelist: do_isccp_cloud_diag
+ 
+</A>
+---------------------------------------------------------------------
+<A NAME="vert_diff_driver.f90">
+ vert_diff_driver.f90
+
+ Four variables added to namelist: do_mcm_no_neg_q,
+ use_virtual_temp_vert_diff, do_mcm_plev, do_mcm_vert_diff_tq.
+ All four control various Manabe Climate Model behaviors.
+
+ p_full added to calling arguments of subroutine vert_diff_driver_down.
+</A>
+---------------------------------------------------------------------
+<A NAME="vert_diff.f90">
+ vert_diff.f90
+
+ Added use_virtual_temp_vert_diff and do_mcm_plev to calling
+ arguments of subroutine gcm_vert_diff_init.
+
+ Added p_full to calling arguments of subroutine gcm_vert_diff_down.
+ It is passes down to compute_nu where it is needed in the computation
+ of Manabe Climate Model vertical diffusion.
+</A>
+---------------------------------------------------------------------
+<A NAME="vert_turb_driver.f90">
+ vert_turb_driver.f90
+
+ p_full and p_half added to the calling arguments of 
+ subroutine diffusivity
+</A>
+---------------------------------------------------------------------
+<A NAME="ozone.f90">
+ ozone.f90
+
+ Given a namelist with just one variable: do_mcm_o3_clim
+ When do_mcm_o3_clim = .true., alternative values of phaf are used.
+</A>
+---------------------------------------------------------------------
+<A NAME="rad_utilities.f90">
+ rad_utilities.f90
+
+ phalf added to components of atmos_input_type.
+ It is used in ozone.f90 to compute alternative values of phaf.
+</A>
+---------------------------------------------------------------------
+<A NAME="atmosphere.f90">
+ atmosphere.f90
+
+ Subroutines mcm_moist_processes and complete_leapfrog_tq are called
+ when do_mcm_moist_processes=.true.
+</A>
+---------------------------------------------------------------------
+<A NAME="spectral_diagnostics.f90">
+ spectral_diagnostics.f90
+
+ Sea level pressure added to diagnostic fields.
+</A>
+---------------------------------------------------------------------
+<A NAME="implicit.f90">
+ implicit.f90
+
+ vert_difference_option is passed to subroutine initialize_implicit.
+</A>
+---------------------------------------------------------------------
+<A NAME="leapfrog.f90">
+ leapfrog.f90
+
+ Added subroutines leapfrog_2level_A and leapfrog_2level_B.
+ These are called when both do_mcm_time_step_tq and
+ do_mcm_moist_process are .true.
+</A>
+---------------------------------------------------------------------
+<A NAME="press_and_geopot.f90">
+ press_and_geopot.f90
+
+ vert_difference_option is passed to subroutine press_and_geopot_init.
+</A>
+---------------------------------------------------------------------
+<A NAME="spectral_dynamics.f90">
+ spectral_dynamics.f90
+
+ Added do_mcm_time_step_tq and vert_difference_option to namelist.
+
+ vert_difference_option is passed to subroutine press_and_geopot_init.
+
+ vert_difference_option controls the way vertical velocity is computed
+ in subroutine four_in_one.
+
+ Added subroutine complete_leapfrog_tq
+
+ Uses subroutines leapfrog_2level_A and leapfrog_2level_B from
+ leapfrog_mod and calls then when both do_mcm_time_step_tq and
+ do_mcm_moist_process are .true.
+</A>
+---------------------------------------------------------------------
+<A NAME="ocean_albedo.f90">
+ ocean_albedo.f90
+
+ ocean_albedo option added for MCM albedos.
+
+ Manabe Climate Model ocean albedos put in a data statement.
+ Added optional arguments for ocean mask and latitudes to ocean_albedo_init
+ compute_ocean_albedo. These are used to compute ocean albedos.
+</A>
+---------------------------------------------------------------------
+<A NAME="ice_spec.f90">
+ ice_spec.f90
+
+ Adjustment factor of 1.06 applied to sea ice thickness.
+ This change was made in response to the needs of MCM,
+ but it effects all models, not just MCM.
+ (This has been OK'ed by Mike Winton)
+</A>
+---------------------------------------------------------------------
+<A NAME="ice_grid.f90">
+ ice_grid.f90
+
+ Publishes latitude, which is used by ice_model_mod
+</A>
+---------------------------------------------------------------------
+<A NAME="ice_model.f90">
+ ice_model.f90
+
+ Used latitude from ice_grid_mod and passes it to compute_ocean_albedo
+</A>
+---------------------------------------------------------------------
+<A NAME="land_properties.f90">
+ land_properties.f90
+
+ do_mcm_masking added to namelist. When .true. get_climap_glacier_ss
+ and get_climap_albedo_ss are called.
+
+ Changed the name of a namelist variable: Changed use_ssl to do_all_mcm
+</A>
+---------------------------------------------------------------------
+<A NAME="climap_albedo.f90">
+ climap_albedo.f90
+
+ Added two new public subroutines: get_climap_albedo_ss and get_climap_glacier_ss.
+ They are used by land_properties_mod
+</A>
+---------------------------------------------------------------------
+<A NAME="surface_flux.f90">
+ surface_flux.f90
+
+ Added one new namelist variable: use_mixing_ratio
+</A>
+---------------------------------------------------------------------
+<A NAME="mcm_lw.f90">
+ mcm_lw.f90
+
+ A module containing Manabe Climate Model longwave radiation code.
+ Contains interfaces used by radiation_driver_mod and fsrad_mod.
+</A>
+---------------------------------------------------------------------
+<A NAME="mcm_sw_driver.f90">
+ mcm_sw_driver.f90
+
+ A module containing Manabe Climate Model shortwave radiation code.
+ Contains interfaces used by radiation_driver_mod and fsrad_mod.
+</A>
+---------------------------------------------------------------------
+<A NAME="mcm_swnew.f">
+ mcm_swnew.f
+
+ Not a FORTRAN 90 module, but contains a subroutine used in
+ mcm_sw_driver_mod.
+</A>
+---------------------------------------------------------------------
+<A NAME="mcm_swtabl0.h">
+ mcm_swtabl0.h
+
+ An include file included by mcm_swnew.f and mcm_swtbls.F
+ It contains a FORTAN 77 style common block. The arrays
+ of this common block are assigned by the block data
+ code of mcm_swtbls.F
+</A>
+---------------------------------------------------------------------
+<A NAME="mcm_swtbls.F">
+ mcm_swtbls.F
+
+ This file contains a FORTAN 77 style block data construct.
+</A>
+---------------------------------------------------------------------
+<A NAME="mcm_mca_lsc.f">
+ mcm_mca_lsc.f
+
+ Added a namelist with one variable: use_mixing_ratio
+
+ Contains a driver for Manabe Climate Model MCA and large-scale condensation.
+ Used by mcm_moist_processes_mod.
+</A>
+---------------------------------------------------------------------
+<A NAME="mcm_moist_processes.f90">
+ mcm_moist_processes.f90
+
+ Contains a driver for Manabe Climate Model moist convective adjustment. 
+ Used by atmosphere_mod
+</A>
+---------------------------------------------------------------------
+<!--------------------------------------------------------------------->
+<A NAME="BUGS">
+<HR>
+<H4>KNOWN BUGS</H4>
+
+ Does not run when num_subwindows is not equal to one.
+ num_subwindows is a variable in spectral_dynamics_nml.
+ The default value is one.
+
+</A>
+<HR>
+</BODY>
+</HTML>

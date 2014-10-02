@@ -1,0 +1,385 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module atmos_model_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module atmos_model_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Bruce.Wyman@noaa.gov">   Bruce Wyman </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Zhi.Liang@noaa.gov">   Zhi Liang </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/driver/coupled">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Driver for the atmospheric model, contains routines to advance the
+   atmospheric model state by one time step. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This version of atmos_model_mod has been designed around the implicit
+   version diffusion scheme of the GCM. It requires two routines to advance
+   the atmospheric model one time step into the future. These two routines
+   correspond to the down and up sweeps of the standard tridiagonal solver.
+   Most atmospheric processes (dynamics,radiation,etc.) are performed
+   in the down routine. The up routine finishes the vertical diffusion
+   and computes moisture related terms (convection,large-scale condensation,
+   and precipitation).
+   The boundary variables needed by other component models for coupling
+   are contained in a derived data type. A variable of this derived type
+   is returned when initializing the atmospheric model. It is used by other
+   routines in this module and by coupling routines. The contents of
+   this derived type should only be modified by the atmospheric model. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>           mpp_mod<br>   mpp_domains_mod<br>           fms_mod<br>        fms_io_mod<br>  time_manager_mod<br> field_manager_mod<br>tracer_manager_mod<br> diag_integral_mod<br>    atmosphere_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#update_atmos_model_down">update_atmos_model_down</a>:</dt>
+<dd>   compute the atmospheric tendencies for dynamics, radiation, 
+   vertical diffusion of momentum, tracers, and heat/moisture. </dd>
+<dt>
+<a href="#update_atmos_model_up">update_atmos_model_up</a>:</dt>
+<dd>   upward vertical diffusion of heat/moisture and moisture processes </dd>
+<dt>
+<a href="#atmos_model_init">atmos_model_init</a>:</dt>
+<dd>   Routine to initialize the atmospheric model </dd>
+<dt>
+<a href="#atmos_model_end">atmos_model_end</a>:</dt>
+<dd>   termination routine for atmospheric model </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="update_atmos_model_down"></a>
+<h4>update_atmos_model_down</h4>
+<pre>
+<b>call update_atmos_model_down </b>( Surface_boundary, Atmos )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Called every time step as the atmospheric driver to compute the
+   atmospheric tendencies for dynamics, radiation, vertical diffusion of
+   momentum, tracers, and heat/moisture.  For heat/moisture only the
+   downward sweep of the tridiagonal elimination is performed, hence
+   the name "_down". </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Surface_boundary&nbsp;&nbsp;&nbsp;</tt></td><td>   Derived-type variable that contains quantities going from land+ice to atmos. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(land_ice_atmos_boundary_type)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos&nbsp;&nbsp;&nbsp;</tt></td><td>   Derived-type variable that contains fields needed by the flux exchange module.
+   These fields describe the atmospheric grid and are needed to
+   compute/exchange fluxes with other component models.  All fields in this
+   variable type are allocated for the global grid (without halo regions). <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(atmos_data_type)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="update_atmos_model_up"></a>
+<h4>update_atmos_model_up</h4>
+<pre>
+<b>call update_atmos_model_up </b>( Surface_boundary, Atmos )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Called every time step as the atmospheric driver to finish the upward
+   sweep of the tridiagonal elimination for heat/moisture and compute the
+   convective and large-scale tendencies.  The atmospheric variables are
+   advanced one time step and tendencies set back to zero. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Surface_boundary&nbsp;&nbsp;&nbsp;</tt></td><td>   Derived-type variable that contains quantities going from land+ice to atmos. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(land_ice_atmos_boundary_type)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos&nbsp;&nbsp;&nbsp;</tt></td><td>   Derived-type variable that contains fields needed by the flux exchange module.
+   These fields describe the atmospheric grid and are needed to
+   compute/exchange fluxes with other component models.  All fields in this
+   variable type are allocated for the global grid (without halo regions). <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(atmos_data_type)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="atmos_model_init"></a>
+<h4>atmos_model_init</h4>
+<pre>
+<b>call atmos_model_init </b>(Atmos, Time_init, Time, Time_step)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This routine allocates storage and returns a variable of type
+   atmos_boundary_data_type, and also reads a namelist input and restart file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time_init&nbsp;&nbsp;&nbsp;</tt></td><td>   The base (or initial) time of the experiment. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(time_type)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   The current time. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(time_type)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time_step&nbsp;&nbsp;&nbsp;</tt></td><td>   The atmospheric model/physics time step. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(time_type)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos&nbsp;&nbsp;&nbsp;</tt></td><td>   Derived-type variable that contains fields needed by the flux exchange module. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(atmos_data_type)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="atmos_model_end"></a>
+<h4>atmos_model_end</h4>
+<pre>
+<b>call atmos_model_end </b>(Atmos)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Call once to terminate this module and any other modules used.
+   This routine writes a restart file and deallocates storage
+   used by the derived-type variable atmos_boundary_data_type. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos&nbsp;&nbsp;&nbsp;</tt></td><td>   Derived-type variable that contains fields needed by the flux exchange module. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(atmos_data_type)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<hr>
+<h4>PUBLIC TYPES</h4>
+<div>
+<table cellspacing="0" CELLPADDING="0" BORDER="0">
+<tr>
+<td>
+<pre> type atmos_data_type
+     type (domain2d)               :: domain             ! domain decomposition
+     integer                       :: axes(4)            ! axis indices (returned by diag_manager) for the atmospheric grid 
+                                                         ! (they correspond to the x, y, pfull, phalf axes)
+     real, pointer, dimension(:)   :: glon_bnd =&gt; NULL() ! global longitude axis grid box boundaries in radians.
+     real, pointer, dimension(:)   :: glat_bnd =&gt; NULL() ! global latitude axis grid box boundaries in radians.
+     real, pointer, dimension(:)   :: lon_bnd  =&gt; NULL() ! local longitude axis grid box boundaries in radians.
+     real, pointer, dimension(:)   :: lat_bnd  =&gt; NULL() ! local latitude axis grid box boundaries in radians.
+     real, pointer, dimension(:,:) :: t_bot    =&gt; NULL() ! temperature at lowest model level
+     real, pointer, dimension(:,:) :: q_bot    =&gt; NULL() ! specific humidity at lowest model level
+     real, pointer, dimension(:,:) :: z_bot    =&gt; NULL() ! height above the surface for the lowest model level
+     real, pointer, dimension(:,:) :: p_bot    =&gt; NULL() ! pressure at lowest model level
+     real, pointer, dimension(:,:) :: u_bot    =&gt; NULL() ! zonal wind component at lowest model level
+     real, pointer, dimension(:,:) :: v_bot    =&gt; NULL() ! meridional wind component at lowest model level
+     real, pointer, dimension(:,:) :: p_surf   =&gt; NULL() ! surface pressure 
+     real, pointer, dimension(:,:) :: gust     =&gt; NULL() ! gustiness factor
+     real, pointer, dimension(:,:) :: coszen   =&gt; NULL() ! cosine of the zenith angle
+     real, pointer, dimension(:,:) :: flux_sw  =&gt; NULL() ! net shortwave flux (W/m2) at the surface
+     real, pointer, dimension(:,:) :: flux_sw_dir            =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_dif            =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_down_vis_dir   =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_down_vis_dif   =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_down_total_dir =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_down_total_dif =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_vis            =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_vis_dir        =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_sw_vis_dif        =&gt;NULL()
+     real, pointer, dimension(:,:) :: flux_lw  =&gt; NULL() ! net longwave flux (W/m2) at the surface
+     real, pointer, dimension(:,:) :: lprec    =&gt; NULL() ! mass of liquid precipitation since last time step (Kg/m2)
+     real, pointer, dimension(:,:) :: fprec    =&gt; NULL() ! ass of frozen precipitation since last time step (Kg/m2)
+     type (surf_diff_type)         :: Surf_diff          ! store data needed by the multi-step version of the diffusion algorithm
+     type (time_type)              :: Time               ! current time
+     type (time_type)              :: Time_step          ! atmospheric time step.
+     type (time_type)              :: Time_init          ! reference time.
+     integer, pointer              :: pelist(:) =&gt;NULL() ! pelist where atmosphere is running.
+     logical                       :: pe                 ! current pe.
+ end type</pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre>type land_ice_atmos_boundary_type
+   ! variables of this type are declared by coupler_main, allocated by flux_exchange_init.
+!quantities going from land+ice to atmos
+   real, dimension(:,:),   pointer :: t              =&gt;NULL() ! surface temperature for radiation calculations
+   real, dimension(:,:),   pointer :: albedo         =&gt;NULL() ! surface albedo for radiation calculations
+   real, dimension(:,:),   pointer :: albedo_vis_dir =&gt;NULL()
+   real, dimension(:,:),   pointer :: albedo_nir_dir =&gt;NULL()
+   real, dimension(:,:),   pointer :: albedo_vis_dif =&gt;NULL()
+   real, dimension(:,:),   pointer :: albedo_nir_dif =&gt;NULL()
+   real, dimension(:,:),   pointer :: land_frac      =&gt;NULL() ! fraction amount of land in a grid box 
+   real, dimension(:,:),   pointer :: dt_t           =&gt;NULL() ! temperature tendency at the lowest level
+   real, dimension(:,:),   pointer :: dt_q           =&gt;NULL() ! specific humidity tendency at the lowest level
+   real, dimension(:,:),   pointer :: u_flux         =&gt;NULL() ! zonal wind stress
+   real, dimension(:,:),   pointer :: v_flux         =&gt;NULL() ! meridional wind stress
+   real, dimension(:,:),   pointer :: dtaudu         =&gt;NULL() ! derivative of zonal wind stress w.r.t. the lowest zonal level wind speed
+   real, dimension(:,:),   pointer :: dtaudv         =&gt;NULL() ! derivative of meridional wind stress w.r.t. the lowest meridional level wind speed
+   real, dimension(:,:),   pointer :: u_star         =&gt;NULL() ! friction velocity
+   real, dimension(:,:),   pointer :: b_star         =&gt;NULL() ! bouyancy scale
+   real, dimension(:,:),   pointer :: q_star         =&gt;NULL() ! moisture scale
+   real, dimension(:,:),   pointer :: rough_mom      =&gt;NULL() ! surface roughness (used for momentum)
+   real, dimension(:,:,:), pointer :: data           =&gt;NULL() !collective field for "named" fields above
+   integer                         :: xtype                   !REGRID, REDIST or DIRECT
+end type land_ice_atmos_boundary_type</pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre>type :: land_atmos_boundary_type
+   real, dimension(:,:), pointer :: data =&gt;NULL() ! quantities going from land alone to atmos (none at present)
+end type land_atmos_boundary_type</pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre>!quantities going from ice alone to atmos (none at present)
+type :: ice_atmos_boundary_type
+   real, dimension(:,:), pointer :: data =&gt;NULL() ! quantities going from ice alone to atmos (none at present)
+end type ice_atmos_boundary_type</pre>
+</td>
+</tr>
+</table>
+</div>
+<br>
+<!-- END PUBLIC TYPES -->
+<a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

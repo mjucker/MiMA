@@ -1,0 +1,257 @@
+<HTML>
+<TITLE>module dry_adj_mod</TITLE>
+<BODY BGCOLOR="#AABBCC" TEXT="#332211" >
+
+<DIV ALIGN="CENTER"> <FONT SIZE=1>
+<A HREF="#INTERFACE">PUBLIC INTERFACE</A> / 
+<A HREF="#ROUTINES">ROUTINES</A> / 
+<A HREF="#NAMELIST">NAMELIST</A> / 
+<A HREF="#CHANGES">CHANGES</A> / 
+<A HREF="#ERRORS">ERRORS</A> / 
+<A HREF="#REFERENCES">REFERENCES</A> / 
+<A HREF="#NOTES">NOTES</A> 
+</FONT>
+<BR><BR></DIV><HR>
+
+
+<H2>Module dry_adj_mod</H2>
+<A NAME="HEADER">
+<PRE>
+     <B>Contact:</B>   Joe Sirutis
+     <B>Reviewers:</B>
+
+     <B><A HREF=".doc.log#dry_adj.f90">Tags/Status</A></B>
+</PRE>
+</A><!-- END HEADER -->
+<!--------------------------------------------------------------------->
+<A NAME="OVERVIEW">
+<HR>
+<H4>OVERVIEW</H4>
+<!-- BEGIN OVERVIEW -->
+<PRE>
+
+     Dry Adiabatic Adjustment Module
+
+     An adjustment to neutral stability is done wherever the model
+     lapse rate is unstable with respect to the dry adiabatic lapse rate. 
+
+</PRE>
+</A><!-- END OVERVIEW -->
+<!--------------------------------------------------------------------->
+<A NAME="DESCRIPTION">
+<!-- BEGIN DESCRIPTION -->
+<PRE>
+
+    Given a temperature profile at the model's pressure levels, this 
+    module checks for instability with respect to the dry adiabatic
+    lapse rate. Where instability exists the temperature is adjusted 
+    to neutral stability such that the vertical integral of potential
+    temperature is conserved. The output from this module is a 
+    temperature tendency.
+
+    This parameterization is a substitute for the vertical diffusion of 
+    temperature and should NOT be used if the vertical diffusion scheme
+    being used already does this.
+
+</PRE>
+</A><!-- END DESCRIPTION -->
+<!--------------------------------------------------------------------->
+<A NAME="MODULES_USED">
+<HR>
+<H4>OTHER MODULES USED</H4>
+<!-- BEGIN MODULES_USED -->
+<PRE>
+
+          constants_mod
+          utilities_mod
+
+</PRE>
+</A><!-- END MODULES_USED -->
+<!--------------------------------------------------------------------->
+<A NAME="INTERFACE">
+<HR>
+<H4>PUBLIC INTERFACE</H4>
+<!-- BEGIN INTERFACE -->
+<PRE>
+
+use dry_adj_mod [,only: dry_adj_init, dry_adj, dry_adj_bdgt]
+
+dry_adj_init  - Called once to initialize dry_adj. Also reads namelist.
+                Must be called before dry_adj.
+
+dry_adj       - Does dry adiabatic adjustment
+
+dry_adj_bdgt  - Optional debugging tool. Can be called to do budget checks
+                for tendencies computed in dry_adj.
+
+Notes:
+ * A namelist interface ( &dry_adj_nml ) controls runtime options.
+
+</PRE>
+</A><!-- END INTERFACE -->
+<!--------------------------------------------------------------------->
+<A NAME="ROUTINES">
+<HR>
+<H4>PUBLIC ROUTINES</H4>
+<!-- BEGIN ROUTINES -->
+<PRE>
+
+<b>call dry_adj_init</b> ()
+
+There are no arguments to this routine
+
+---------------------------------------------------------------------
+
+  <b>call dry_adj</b> ( temp0, pres, pres_in, dtemp, mask )
+
+input
+
+    temp0     Temperature [deg k] at full model levels,
+              [real, dimension(:,:,nlev)]
+
+    pres      Pressure at full levels in pascals
+              [real, dimension(:,:,nlev)]
+
+    pres_int  Pressure at half levels in pascals
+              [real, dimension(:,:,nlev+1)]
+
+output
+
+    dtemp     Temperature tendency [deg k/time step] 
+              [real, dimension(:,:,nlev)]
+
+input (optional) - for use with the step-mountain (eta) vertical coordinate
+
+    mask      Mask (1. or 0.) for grid boxes above or below the ground.
+              [real, dimension(:,:,nlev)]
+
+---------------------------------------------------------------------
+
+  <b>call dry_adj_bdgt</b> ( dtemp, pres_int )
+
+input
+
+    dtemp     Temperature tendency [deg k/time step] 
+              [real, dimension(:,:,nlev)]
+
+    pres_int  Pressure at half levels in pascals
+              [real, dimension(:,:,nlev)]
+
+</PRE>
+</A><!-- END ROUTINES -->
+<!--------------------------------------------------------------------->
+<A NAME="NAMELIST">
+<HR>
+<H4>NAMELIST</H4>
+<!-- BEGIN NAMELIST -->
+<PRE>
+
+<b>&dry_adj_nml</b>
+
+   itermax      Max number of iterations over column.
+                [integer, default: itermax = 5 ]
+
+   small        Critical potential temperature difference.
+                A Manabe Climate Model option.
+                [real, default: small = .001 ]
+		        
+   do_mcm_dry_adj  When true, executes the dry adjustment
+                       scheme of the Manabe Climate Model.
+                [logical, default: do_mcm_dry_adj = .false.]
+
+</PRE>
+</A><!-- END NAMELIST -->
+<!--------------------------------------------------------------------->
+<A NAME="CHANGES">
+<HR>
+<H4>CHANGE HISTORY</H4>
+<!-- BEGIN CHANGES -->
+<PRE>
+<B><A HREF=".doc.log#dry_adj.f90">Revision history</A></B>
+
+<b>Prior Changes</b>
+
+     MPP version created. Minor changes in open_file, error_mesg,
+     and Fortran write statements. Answers should reproduce the
+     previous version.
+
+</PRE>
+</A><!-- END CHANGES -->
+<!--------------------------------------------------------------------->
+<A NAME="ERRORS">
+<HR>
+<H4>ERROR MESSAGES</H4>
+<!-- BEGIN ERRORS -->
+<PRE>
+
+<b>Fatal errors in dry_adj:</b>
+
+    <b>dry_adj_init has not been called</b>
+       You have not called dry_adj_init before calling dry_adj.
+
+
+<b>Non-fatal errors in dry_adj:</b>
+
+    <b>Non-convergence in dry_adj</b>
+       The max number of iterations over the column has been reached,
+       and there still is instability within the column. Use a larger 
+       value for the namelist parameter "itermax".
+
+</PRE>
+</A><!-- END ERRORS -->
+<!--------------------------------------------------------------------->
+<A NAME="REFERENCES">
+<HR>
+<H4>REFERENCES</H4>
+<!-- BEGIN REFERENCES -->
+<PRE>
+
+     Manabe, S., J. Smagorinsky and R.F. Strickler, 1965: Simulated
+         climatology of a general circulation model with a hydrological
+         cycle. Mon. Wea. Rev., 93, 769-798.
+
+     Smagorinsky, J., S. Manabe and J.L. Holloway, 1965: Numerical 
+         results from a nine-level general circulation model of the 
+         atmosphere. Mon. Wea. Rev., 93, 727-768.
+
+</PRE>
+</A><!-- END REFERENCES -->
+<!--------------------------------------------------------------------->
+<A NAME="BUGS">
+<HR>
+<H4>KNOWN BUGS</H4>
+<!-- BEGIN BUGS -->
+<PRE>
+
+    Routine DRY_ADJ_BDGT is not set up for MPP machines.
+    This routine will print data on all PEs.
+
+</PRE>
+</A><!-- END BUGS -->
+<!--------------------------------------------------------------------->
+<A NAME="NOTES">
+<HR>
+<H4>NOTES</H4>
+<!-- BEGIN NOTES -->
+<PRE>
+
+    None.
+
+</PRE>
+</A><!-- END NOTES -->
+<!--------------------------------------------------------------------->
+<A NAME="PLANS">
+<HR>
+<H4>FUTURE PLANS</H4>
+<!-- BEGIN PLANS -->
+<PRE>
+
+    None.
+
+</PRE>
+</A><!-- END PLANS -->
+<!--------------------------------------------------------------------->
+</HTML>
+<HR>
+</BODY>
+<!-- BEGIN  -->

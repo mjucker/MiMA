@@ -1,0 +1,280 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module rad_output_file_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module rad_output_file_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Module that provides subroutines to write radiation output to
+   history file </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>             fms_mod<br>    time_manager_mod<br>    diag_manager_mod<br>       constants_mod<br>   rad_utilities_mod<br>esfsw_parameters_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#rad_output_file_init">rad_output_file_init</a>:</dt>
+<dd>   Constructor of rad_output_file module </dd>
+<dt>
+<a href="#write_rad_output_file">write_rad_output_file</a>:</dt>
+<dd>   write_rad_output_file produces a netcdf output file containing
+   the user-specified radiation-related variables. </dd>
+<dt>
+<a href="#rad_output_file_end">rad_output_file_end</a>:</dt>
+<dd>   rad_output_file_end is the destructor for rad_output_file_mod </dd>
+<dt>
+<a href="#register_fields">register_fields</a>:</dt>
+<dd>   register_fields send the relevant information concerning the 
+   user-desired output fields to diag_manager_mod. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="rad_output_file_init"></a>
+<h4>rad_output_file_init</h4>
+<pre>
+<b>call rad_output_file_init </b>(axes, Time, names)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to initialize and set up rad_output_file module </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time [ time_type(days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>names&nbsp;&nbsp;&nbsp;</tt></td><td>   aerosol names <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="write_rad_output_file"></a>
+<h4>write_rad_output_file</h4>
+<pre>
+<b>call write_rad_output_file </b>(is, ie, js, je, Atmos_input, Surface, &amp; Rad_output, &amp; Sw_output, Lw_output, Rad_gases, &amp; Cldrad_props, Cld_spec, &amp; Time_diag, aerosol_in)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   write_rad_output_file produces a netcdf output file containing
+   the user-specified radiation-related variables. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is, ie, js, je&nbsp;&nbsp;&nbsp;</tt></td><td>   starting/ending subdomain i,j indices of data 
+   in the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmos_input_type variable containing atmos-
+   pheric input data for the radiation package 
+   on the model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surface&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface input data to radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[surface_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_output&nbsp;&nbsp;&nbsp;</tt></td><td>   rad_output_type variable containing radiation
+   output data needed by other modules <br>&nbsp;&nbsp;&nbsp;<span class="type">[rad_output_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Sw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   sw_output_type variable containing shortwave 
+   radiation output data from the sea_esf_rad
+   radiation package on the model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[sw_output_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   lw_output_type variable containing longwave 
+   radiation output data from the sea_esf_rad
+   radiation package on the model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_output_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   radiative_gases_type variable containing rad-
+   iative gas input data for the radiation package
+   on the model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_pros&nbsp;&nbsp;&nbsp;</tt></td><td>   cldrad_properties_type variable containing 
+   cloud radiative property input data for the 
+   radiation package on the model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_specification_type variable containing cloud
+   microphysical data <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_diagnostics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time_diag&nbsp;&nbsp;&nbsp;</tt></td><td>   time on next timestep, used as stamp for diag-
+   nostic output  [ time_type  (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>aerosol_in&nbsp;&nbsp;&nbsp;</tt></td><td>   optional aerosol data <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="rad_output_file_end"></a>
+<h4>rad_output_file_end</h4>
+<pre>
+<b>call rad_output_file_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   rad_output_file_end is the destructor for rad_output_file_mod </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="register_fields"></a>
+<h4>register_fields</h4>
+<pre>
+<b>call register_fields </b>(Time, axes, nfilds, names)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   register_fields send the relevant information concerning the 
+   user-desired output fields to diag_manager_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time [ time_type(days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nfields&nbsp;&nbsp;&nbsp;</tt></td><td>   number of aerosol fields <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>names&nbsp;&nbsp;&nbsp;</tt></td><td>   names of aerosol fields <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

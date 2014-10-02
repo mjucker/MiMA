@@ -1,0 +1,470 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module cloudrad_diagnostics_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module cloudrad_diagnostics_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   cloudrad_diagnostics_mod generates any desired netcdf output
+   fields involving the cloud fields seen by the radiation package
+   or the cloud radiation interaction variables. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>             fms_mod<br>    time_manager_mod<br>    diag_manager_mod<br>   rad_utilities_mod<br>esfsw_parameters_mod<br>   microphys_rad_mod<br>    isccp_clouds_mod<br>       constants_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#cloudrad_diagnostics_init">cloudrad_diagnostics_init</a>:</dt>
+<dd>   cloudrad_diagnostics_init is the constructor for 
+   cloudrad_diagnostics_mod. </dd>
+<dt>
+<a href="#cloudrad_netcdf">cloudrad_netcdf</a>:</dt>
+<dd>   cloudrad_netcdf generates and outputs netcdf fields describing the
+   cloud radiative properties, along with isccp cloud diagnostics
+   fields. </dd>
+<dt>
+<a href="#cloudrad_diagnostics_end">cloudrad_diagnostics_end</a>:</dt>
+<dd>   cloudrad_diagnostics_end is the destructor for 
+   cloudrad_diagnostics_mod. </dd>
+<dt>
+<a href="#diag_field_init">diag_field_init</a>:</dt>
+<dd>   diag_field_init registers the potential netcdf output variables
+   with diag_manager_mod. </dd>
+<dt>
+<a href="#isccp_diag">isccp_diag</a>:</dt>
+<dd>   subroutine isccp_diag maps the model cloud distribution to the
+   isccp cloud categories, and provides netcdf output if desired. </dd>
+<dt>
+<a href="#isccp_diag_stochastic">isccp_diag_stochastic</a>:</dt>
+<dd>   subroutine isccp_diag maps the model cloud distribution to the
+   isccp cloud categories, and provides netcdf output if desired. </dd>
+<dt>
+<a href="#compute_isccp_clds">compute_isccp_clds</a>:</dt>
+<dd>   subroutine compute_isccp_clds maps the model clouds into isccp
+   categories (high, middle, low) and defines the cloud fraction of
+   each. </dd>
+<dt>
+<a href="#cloud_optical_properties_diag">cloud_optical_properties_diag</a>:</dt>
+<dd>   cloud_optical_properties_diag calculates the cloud optical depth,
+   ice cloud optical depth and longwave cloud emissivity for each
+   cloudy grid box. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="cloudrad_diagnostics_init"></a>
+<h4>cloudrad_diagnostics_init</h4>
+<pre>
+<b>call cloudrad_diagnostics_init </b>(axes, Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cloudrad_diagnostics_init is the constructor for 
+   cloudrad_diagnostics_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time [ time_type(days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloudrad_netcdf"></a>
+<h4>cloudrad_netcdf</h4>
+<pre>
+<b>call cloudrad_netcdf </b>(is, js, Time_diag, Atmos_input, cosz, &amp; Lsc_microphys, Meso_microphys, &amp; Cell_microphys, Lscrad_props, &amp; Mesorad_props, Cellrad_props, Cldrad_props,&amp; Cld_spec, mask)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cloudrad_netcdf generates and outputs netcdf fields describing the
+   cloud radiative properties, along with isccp cloud diagnostics
+   fields. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain i,j indices of data in
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time_diag&nbsp;&nbsp;&nbsp;</tt></td><td>   time on next timestep, used as stamp for 
+   diagnostic output [ time_type (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmospheric input fields on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cosz&nbsp;&nbsp;&nbsp;</tt></td><td>   cosine of solar zenith angle <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lscrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Mesorad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the meso-scale
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cellrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties for the convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud radiative properties on model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   mask to remove points below ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloudrad_diagnostics_end"></a>
+<h4>cloudrad_diagnostics_end</h4>
+<pre>
+<b>call cloudrad_diagnostics_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cloudrad_diagnostics_end is the destructor for 
+   cloudrad_diagnostics_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="diag_field_init"></a>
+<h4>diag_field_init</h4>
+<pre>
+<b>call diag_field_init </b>(axes, Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   diag_field_init registers the potential netcdf output variables
+   with diag_manager_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time [ time_type(days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_diag"></a>
+<h4>isccp_diag</h4>
+<pre>
+<b>call isccp_diag </b>(is, js, Cld_spec, Atmos_input, coszen, Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   subroutine isccp_diag maps the model cloud distribution to the
+   isccp cloud categories, and provides netcdf output if desired. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain i,j indices of data in
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   time on next timestep, used as stamp for 
+   diagnostic output [ time_type (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmospheric input fields on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>coszen&nbsp;&nbsp;&nbsp;</tt></td><td>   cosine of solar zenith angle <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsctau&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud optical thickness in the visible <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsclwem&nbsp;&nbsp;&nbsp;</tt></td><td>   10 micron cloud emissivity <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_diag_stochastic"></a>
+<h4>isccp_diag_stochastic</h4>
+<pre>
+<b>call isccp_diag_stochastic </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   subroutine isccp_diag maps the model cloud distribution to the
+   isccp cloud categories, and provides netcdf output if desired. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting subdomain i,j indices of data in
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   time on next timestep, used as stamp for 
+   diagnostic output [ time_type (days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmospheric input fields on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>coszen&nbsp;&nbsp;&nbsp;</tt></td><td>   cosine of solar zenith angle <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsctau&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud optical thickness in the visible <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsclwem&nbsp;&nbsp;&nbsp;</tt></td><td>   10 micron cloud emissivity <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="compute_isccp_clds"></a>
+<h4>compute_isccp_clds</h4>
+<pre>
+<b>call compute_isccp_clds </b>(pflux, camtsw, hml_ca)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   subroutine compute_isccp_clds maps the model clouds into isccp
+   categories (high, middle, low) and defines the cloud fraction of
+   each. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pflux&nbsp;&nbsp;&nbsp;</tt></td><td>   average of pressure at adjacent model levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>camtsw&nbsp;&nbsp;&nbsp;</tt></td><td>   total cloud amount [ nondimensional ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>hml_ca&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud fraction for the 3 isccp cloud types <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_optical_properties_diag"></a>
+<h4>cloud_optical_properties_diag</h4>
+<pre>
+<b>call cloud_optical_properties_diag </b>(Cld_spec, tau, em_lw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cloud_optical_properties_diag calculates the cloud optical depth,
+   ice cloud optical depth and longwave cloud emissivity for each
+   cloudy grid box. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tau&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud optical depth in each of the
+   num_slingo_bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>em_lw&nbsp;&nbsp;&nbsp;</tt></td><td>   longwave cloud emissivity <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

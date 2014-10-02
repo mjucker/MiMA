@@ -1,0 +1,522 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module isccp_clouds_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module isccp_clouds_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   isccp_clouds partitions the model cloud fields into the isccp
+   cloud categories, by cld top height and cld optical thickness
+   and provides netcdf output. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>         fms_mod<br>time_manager_mod<br>diag_manager_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#isccp_clouds_init">isccp_clouds_init</a>:</dt>
+<dd>   isccp_clouds_init is the constructor for isccp_clouds_mod. </dd>
+<dt>
+<a href="#isccp_output">isccp_output</a>:</dt>
+<dd>   subroutine isccp_diag maps the model cloud distribution to the
+   isccp cloud categories, and provides netcdf output if desired. </dd>
+<dt>
+<a href="#isccp_cloudtypes">isccp_cloudtypes</a>:</dt>
+<dd>   isccp_cloudtypes calculates the fraction of each model grid box 
+   covered by each of the 49 ISCCP D level cloud types 
+   (i.e. stratified by optical depth and cloud top pressure) by 
+   accounting for model overlap. </dd>
+<dt>
+<a href="#isccp_cloudtypes_stochastic">isccp_cloudtypes_stochastic</a>:</dt>
+<dd>   isccp_cloudtypes calculates the fraction of each model grid box 
+   covered by each of the 49 ISCCP D level cloud types 
+   (i.e. stratified by optical depth and cloud top pressure). 
+   This version uses the columns generated for the McICA treatment
+   of radiation. </dd>
+<dt>
+<a href="#isccp_clouds_end">isccp_clouds_end</a>:</dt>
+<dd>   isccp_clouds_end is the destructor for isccp_clouds_mod. </dd>
+<dt>
+<a href="#diag_field_init">diag_field_init</a>:</dt>
+<dd>   diag_field_init registers the potential netcdf output variables
+   with diag_manager_mod. </dd>
+<dt>
+<a href="#ran0">ran0</a>:</dt>
+<dd>   ran0 is a platform-independent random number generator from
+   Numerical Recipes -- Mark Webb July 1999 </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="isccp_clouds_init"></a>
+<h4>isccp_clouds_init</h4>
+<pre>
+<b>call isccp_clouds_init </b>(axes, Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   isccp_clouds_init is the constructor for isccp_clouds_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time [ time_type(days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_output"></a>
+<h4>isccp_output</h4>
+<pre>
+<b>call isccp_output </b>(is, js, fq_isccp, npoints, inhomogeneity_parameter, ninhomog, Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   subroutine isccp_diag maps the model cloud distribution to the
+   isccp cloud categories, and provides netcdf output if desired. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is, js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting/ending subdomain i,j indices of data 
+   in the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   time on next timestep, used as stamp for 
+   diagnostic output <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>fq_isccp&nbsp;&nbsp;&nbsp;</tt></td><td>   matrix of fractional area covered by cloud
+   types of a given optical depth and cloud
+   top pressure range.  The matrix is 7x7 for
+   7 cloud optical depths and 7 cloud top 
+   pressure ranges <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>npoints&nbsp;&nbsp;&nbsp;</tt></td><td>   flag indicating whether isccp cloud is present
+   in column (cloud + daylight needed) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ninhomog&nbsp;&nbsp;&nbsp;</tt></td><td>   flag indicating cloud inhomogeneity calculations have been
+   performed [1.=True, 0.=False] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>inhomogeneity_parameter&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud inhomogeneity parameter (between 0 and 1 if valid
+   point, -1. if not computed at this point [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_cloudtypes"></a>
+<h4>isccp_cloudtypes</h4>
+<pre>
+<b>call isccp_cloudtypes </b>(sunlit, pfull, phalf, qv, at, skt, cc, &amp; dtau_s, dem_s, fq_isccp, nisccp,&amp; inhomogeneity_parameter, ninhomog)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   isccp_cloudtypes calculates the fraction of each model grid box 
+   covered by each of the 49 ISCCP D level cloud types 
+   (i.e. stratified by optical depth and cloud top pressure) by 
+   accounting for model overlap. For further explanation see Klein 
+   and Jakob, Monthly Weather Review, (2000), vol x, pp. . </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>sunlit&nbsp;&nbsp;&nbsp;</tt></td><td>   integer flag indicating whether or not a given point is sunlit
+   [1 = True, 0 = False ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pfull&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure of full model levels, pfull(1) is top
+   level of model, pfull(nlev) is bottom level of
+   model <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure of half model levels, phalf(1) is top
+   of model, phalf(nlev+1) is the surface pressure <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qv&nbsp;&nbsp;&nbsp;</tt></td><td>   water vapor specific humidity on model levels.
+   used only if top_height = 1 or top_height = 3. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>at&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature in each model level [ deg K ]
+   used only if top_height = 1 or top_height = 3. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>skt&nbsp;&nbsp;&nbsp;</tt></td><td>   skin temperature [ deg K ]
+   used only if top_height = 1 or top_height = 3. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ninhomog&nbsp;&nbsp;&nbsp;</tt></td><td>   flag indicating cloud inhomogeneity calculations have been
+   performed [1.=True, 0.=False] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cc&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud cover in each model layer [ fraction ]
+   this includes convective clouds if any
+   NOTE:  This is the HORIZONTAL area of each
+   grid box covered by clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dtau_s&nbsp;&nbsp;&nbsp;</tt></td><td>   mean 0.67 micron optical depth of stratiform
+   clouds in each model level [ dimensionless ]
+   NOTE:  this the cloud optical depth of only the
+   cloudy part of the grid box, it is not 
+   weighted with the 0 cloud optical depth 
+   of the clear part of the grid box <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dem_s&nbsp;&nbsp;&nbsp;</tt></td><td>   10.5 micron longwave emissivity of stratiform
+   clouds in each model level. 
+   used only if top_height = 1 or top_height = 3.
+   Same note applies as in dtau. [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>fq_isccp&nbsp;&nbsp;&nbsp;</tt></td><td>   matrix of fractional area covered by cloud
+   types of a given optical depth and cloud
+   top pressure range.  The matrix is 7x7 for
+   7 cloud optical depths and 7 cloud top 
+   pressure ranges. [ fraction ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nisccp&nbsp;&nbsp;&nbsp;</tt></td><td>   real flag indicating whether or not isccp_cloudtypes produced
+   valid output [ 1.=True, 0.=False ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>inhomogeneity_parameter&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud inhomogeneity parameter (between 0 and 1 if valid
+   point, -1. if not computed at this point [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_cloudtypes_stochastic"></a>
+<h4>isccp_cloudtypes_stochastic</h4>
+<pre>
+<b>call isccp_cloudtypes_stochastic </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   isccp_cloudtypes calculates the fraction of each model grid box 
+   covered by each of the 49 ISCCP D level cloud types 
+   (i.e. stratified by optical depth and cloud top pressure). 
+   For further explanation see Klein 
+   and Jakob, Monthly Weather Review, (2000), vol x, pp. .
+   This version uses the columns generated for the McICA treatment
+   of radiation; overlap is imposed in the "cloud generator" that 
+   takes the place of SCOPS, and internal inhomogeneity can be 
+   added too.  
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>sunlit&nbsp;&nbsp;&nbsp;</tt></td><td>   integer flag indicating whether or not a given point is sunlit
+   [1 = True, 0 = False ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pfull&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure of full model levels, pfull(1) is top
+   level of model, pfull(nlev) is bottom level of
+   model <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure of half model levels, phalf(1) is top
+   of model, phalf(nlev+1) is the surface pressure <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qv&nbsp;&nbsp;&nbsp;</tt></td><td>   water vapor specific humidity on model levels.
+   used only if top_height = 1 or top_height = 3. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>at&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature in each model level [ deg K ]
+   used only if top_height = 1 or top_height = 3. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>skt&nbsp;&nbsp;&nbsp;</tt></td><td>   skin temperature [ deg K ]
+   used only if top_height = 1 or top_height = 3. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ninhomog&nbsp;&nbsp;&nbsp;</tt></td><td>   flag indicating cloud inhomogeneity calculations have been
+   performed [1.=True, 0.=False] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>cc&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud cover in each model layer [ fraction ]
+   this includes convective clouds if any
+   NOTE:  This is the HORIZONTAL area of each
+   grid box covered by clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dtau_s&nbsp;&nbsp;&nbsp;</tt></td><td>   mean 0.67 micron optical depth of stratiform
+   clouds in each model level [ dimensionless ]
+   NOTE:  this the cloud optical depth of only the
+   cloudy part of the grid box, it is not 
+   weighted with the 0 cloud optical depth 
+   of the clear part of the grid box <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dem_s&nbsp;&nbsp;&nbsp;</tt></td><td>   10.5 micron longwave emissivity of stratiform
+   clouds in each model level. 
+   used only if top_height = 1 or top_height = 3.
+   Same note applies as in dtau. [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>fq_isccp&nbsp;&nbsp;&nbsp;</tt></td><td>   matrix of fractional area covered by cloud
+   types of a given optical depth and cloud
+   top pressure range.  The matrix is 7x7 for
+   7 cloud optical depths and 7 cloud top 
+   pressure ranges. [ fraction ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nisccp&nbsp;&nbsp;&nbsp;</tt></td><td>   real flag indicating whether or not isccp_cloudtypes produced
+   valid output [ 1.=True, 0.=False ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>inhomogeneity_parameter&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud inhomogeneity parameter (between 0 and 1 if valid
+   point, -1. if not computed at this point [ dimensionless ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="isccp_clouds_end"></a>
+<h4>isccp_clouds_end</h4>
+<pre>
+<b>call isccp_clouds_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   isccp_clouds_end is the destructor for isccp_clouds_mod. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="diag_field_init"></a>
+<h4>diag_field_init</h4>
+<pre>
+<b>call diag_field_init </b>(Time, axes )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   diag_field_init registers the potential netcdf output variables
+   with diag_manager_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   initialization time for the netcdf output fields <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="ran0"></a>
+<h4>ran0</h4>
+<pre>x = <b>ran0</b> (idum)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   ran0 is a platform-independent random number generator from
+   Numerical Recipes -- Mark Webb July 1999 </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>idum&nbsp;&nbsp;&nbsp;</tt></td><td>   seed for random number generator <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module sea_esf_rad_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module sea_esf_rad_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Stuart.Freidenreich@noaa.gov">   smf </a>,&nbsp;
+    <a href="mailto:"> </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Code to initialize, commpute, and clean up radiation calculation. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   The radiation component that initializes, deployes, and ends longwave,
+   shortwave, and diagnostics calculation in the FMS model. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>             fms_mod<br>    time_manager_mod<br>   rad_utilities_mod<br>  radiation_diag_mod<br> longwave_driver_mod<br>shortwave_driver_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#sea_esf_rad_init">sea_esf_rad_init</a>:</dt>
+<dd>   Routine to initialize the radiation calculation </dd>
+<dt>
+<a href="#sea_esf_rad">sea_esf_rad</a>:</dt>
+<dd>   The radiation component interface of the climate model </dd>
+<dt>
+<a href="#sea_esf_rad_end">sea_esf_rad_end</a>:</dt>
+<dd>   Ends radiation calculation. </dd>
+<dt>
+<a href="#deallocate_arrays">deallocate_arrays</a>:</dt>
+<dd>   A routine to deallocate arrays allocated temporarily during
+   radiation calculation. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="sea_esf_rad_init"></a>
+<h4>sea_esf_rad_init</h4>
+<pre>
+<b>call sea_esf_rad_init </b>(lonb, latb, pref_r)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This routine initializes the utilities and radiation utilities
+   modules. Then it reads in the radiation namelist from the input
+   namelist file and log the namelist in an output log file. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   Array of model longitudes on cell boundaries in [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   Array of model latitudes on cell boundaries in [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pref_r&nbsp;&nbsp;&nbsp;</tt></td><td>   Array containing two reference pressure profiles 
+   on the radiation grid for use in defining 
+   transmission functions in [pascals] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="sea_esf_rad"></a>
+<h4>sea_esf_rad</h4>
+<pre>
+<b>call sea_esf_rad </b>(is, ie, js, je, Atmos_input, Surface, Astro, Rad_gases, &amp; Aerosol, Cldrad_props, Cld_spec, Cld_diagnostics, Lw_output, Sw_output)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine calls longwave radiation computation subroutine, 
+   shortwave radiation computation subroutine, radiation diagnostics
+   computation routine, and finally it deallocates all previously
+   allocated memory spaces of temporary arrays. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting subdomain i indice of data in the physics window being
+   modeled (longitudinal) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   Starting subdomain j indice of data in the physics window being
+   modeled (latitudinal) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   Ending subdomain i indice of data in the physics window being
+   modeled  (longitudinal) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   Ending subdomain j indice of data in the physics window being
+   modeled (latitudinal) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   Atmos_input_type variable containing the atmospheric
+   input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Astro&nbsp;&nbsp;&nbsp;</tt></td><td>   Astronomy_type variable containing the astronomical
+   input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[astronomy_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_gases&nbsp;&nbsp;&nbsp;</tt></td><td>   Radiative_gases_type variable containing the radiative 
+   gas input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[radiative_gases_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Aerosol&nbsp;&nbsp;&nbsp;</tt></td><td>   Aerosol input data to the shortwave radiation calculation <br>&nbsp;&nbsp;&nbsp;<span class="type">[aerosol_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   The cloud radiative property input fields on the
+   radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   The cloud diagnostics input fields on the radiation grid <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_diagnostics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surface&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface data as boundary condition to radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[surface_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cloud specification data as initial condition to radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   The longwave radiation calculation result <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_output_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Sw_output&nbsp;&nbsp;&nbsp;</tt></td><td>   The shortwave radiation calculation result <br>&nbsp;&nbsp;&nbsp;<span class="type">[sw_output_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="sea_esf_rad_end"></a>
+<h4>sea_esf_rad_end</h4>
+<pre>
+<b>call sea_esf_rad_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine ends longwave, shortwave, and radiation
+   diagnostics calculation. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="deallocate_arrays"></a>
+<h4>deallocate_arrays</h4>
+<pre>
+<b>call deallocate_arrays </b>(Lw_diagnostics, Cldspace_rad)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine deallocates arrays used in longwave 
+   diagnostics and cloud space parameters used in the
+   lacis-hansen formulation. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   Desired diagnostics from longwave_driver
+   so they may be passed to radiation_diag_mod <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cldspace_rad&nbsp;&nbsp;&nbsp;</tt></td><td>   Cld_space_properties_type variable which
+   holds lacis-hansen sw cloud-radiation
+   variables in cloud-space, rather than 
+   k-space, as the third dimension. <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_space_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

@@ -1,0 +1,1030 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module rad_utilities_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module rad_utilities_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Stuart.Freidenreich@noaa.gov">   smf </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Code to define the derived data types and provide table search routines. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This code is used in the radiation code package as a helper module.
+   It defines many derived data types used in radiation calculation.
+   This code also provides table search routines and simple arithmatic
+   routines. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>         fms_mod<br>time_manager_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#rad_utilities_init">rad_utilities_init</a>:</dt>
+<dd>   Subroutine to initialize radiation utility package. </dd>
+<dt>
+<a href="#check_derived_types">check_derived_types</a>:</dt>
+<dd>   Subroutine to verify that all logical elements of derived-type
+   variables were initialized during the initialization phase. </dd>
+<dt>
+<a href="#locate_in_table">locate_in_table</a>:</dt>
+<dd>   Subroutine to locate index and residual value from an array provided 
+   with array and axis information </dd>
+<dt>
+<a href="#looktab_type1">looktab_type1</a>:</dt>
+<dd>   Subroutine to calculate answer from input differentials. </dd>
+<dt>
+<a href="#looktab_type2">looktab_type2</a>:</dt>
+<dd>   Subroutine to calculate answer from input differentials. </dd>
+<dt>
+<a href="#looktab_type3">looktab_type3</a>:</dt>
+<dd>   Subroutine to calculate answer from input differentials. </dd>
+<dt>
+<a href="#table1_alloc">table1_alloc</a>:</dt>
+<dd>   Allocate the longwave tables. </dd>
+<dt>
+<a href="#table2_alloc">table2_alloc</a>:</dt>
+<dd>   Allocate the longwave tables. </dd>
+<dt>
+<a href="#table3_alloc">table3_alloc</a>:</dt>
+<dd>   Allocate the longwave tables. </dd>
+<dt>
+<a href="#thickavg_3d">thickavg_3d</a>:</dt>
+<dd>   Subroutine to use thick-averaging technique to define band interval
+   single scattering properties. </dd>
+<dt>
+<a href="#thickavg_0d">thickavg_0d</a>:</dt>
+<dd>   Subroutine to use thick-averaging technique to define band interval
+   single scattering properties. </dd>
+<dt>
+<a href="#thickavg_isccp">thickavg_isccp</a>:</dt>
+<dd>   Subroutine to use thick-averaging technique to define band interval
+   single scattering properties for a single specified band. </dd>
+<dt>
+<a href="#thickavg_1band">thickavg_1band</a>:</dt>
+<dd>   Subroutine to use thick-averaging technique to define band interval
+   single scattering properties for a single specified band. </dd>
+<dt>
+<a href="#thinavg">thinavg</a>:</dt>
+<dd>   Subroutine to use thin-averaging technique to define band interval
+   single scattering properties. </dd>
+<dt>
+<a href="#rad_utilities_end">rad_utilities_end</a>:</dt>
+<dd>   Subroutine to close out the radiation utility package. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="rad_utilities_init"></a>
+<h4>rad_utilities_init</h4>
+<pre>
+<b>call rad_utilities_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine reads the input namelist file and initializes 
+   rad_utilities_nml. It then writes out this namelist to the output
+   logfile. It also sets up the radiation calculation environment
+   and the initialization flag variable. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="check_derived_types"></a>
+<h4>check_derived_types</h4>
+<pre>
+<b>call check_derived_types </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine checks that all of the variable names ending in 
+   "_iz" in its public derived-type module variables are set to .true..
+   If additional types or variables within current public types are
+   added, it is necessary to also add the corresponding "_iz" variable,
+   initialized in this module to .false., and then set to .true. when 
+   the variable is initialized, and add a check in this routine to 
+   verify that initialization. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="locate_in_table"></a>
+<h4>locate_in_table</h4>
+<pre>
+<b>call locate_in_table </b>(table_axis, x, dx, ix, k_min, k_max)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   given array x and an arithmetic sequence of table column headings
+   tabxmin, tabxmin+tabdeltax, ..., corresponding to column ixlow, 
+   ixlow+1, ..., ixupp, Locate returns the array ix is column 
+   indices and the array dx of residuals. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>table_axis&nbsp;&nbsp;&nbsp;</tt></td><td>   table_axis contains the axis information such as, min, increment,
+   and first column values. <br>&nbsp;&nbsp;&nbsp;<span class="type">[table_axis_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>x&nbsp;&nbsp;&nbsp;</tt></td><td>   array from which data is to be searched <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_min&nbsp;&nbsp;&nbsp;</tt></td><td>   minimum k value of the search domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_max&nbsp;&nbsp;&nbsp;</tt></td><td>   maximum k value of the search domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>dx&nbsp;&nbsp;&nbsp;</tt></td><td>   residual between x and x(ix+first_column) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   index values of the searched domain in the array <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="looktab_type1"></a>
+<h4>looktab_type1</h4>
+<pre>
+<b>call looktab_type1 </b>(tab, ix, iy, dx, dy, answer, k_min, k_max)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   given arrays ix(:,:,:) and iy(:,:,:) of integral subscripts and
+   arrays dx(:,:,:) and dy(:,:,:) of differences from x(:,:,:) and
+   y(:,:,:), calculate answer(:,:,:) = f(x(:,:,:), y(:,:,:))
+   from four tables of values, f, df/dx, df/dy, and d2f/dxdy. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tab&nbsp;&nbsp;&nbsp;</tt></td><td>   The data array that contains function values and differentials <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   x subscript of input data array <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iy&nbsp;&nbsp;&nbsp;</tt></td><td>   y subscript of input data array <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dx&nbsp;&nbsp;&nbsp;</tt></td><td>   x step in the x subscript space <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dy&nbsp;&nbsp;&nbsp;</tt></td><td>   y step in the y subscript space <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_min&nbsp;&nbsp;&nbsp;</tt></td><td>   the minimum k value of the domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_max&nbsp;&nbsp;&nbsp;</tt></td><td>   the maximum k value of the domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>answer&nbsp;&nbsp;&nbsp;</tt></td><td>   the answer to be calculated <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="looktab_type2"></a>
+<h4>looktab_type2</h4>
+<pre>
+<b>call looktab_type2 </b>(tab, ix, iy, dx, dy, answer, k_min, k_max, m)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   given arrays ix(:,:,:) and iy(:,:,:) of integral subscripts and
+   arrays dx(:,:,:) and dy(:,:,:) of differences from x(:,:,:) and
+   y(:,:,:), calculate answer(:,:,:) = f(x(:,:,:), y(:,:,:))
+   from four tables of values, f, df/dx, df/dy, and d2f/dxdy.
+   The difference between this version about the version above is
+   that the differential arrays are 3 dimensional. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tab&nbsp;&nbsp;&nbsp;</tt></td><td>   The data array that contains function values and differentials <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   x subscript of input data array <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>iy&nbsp;&nbsp;&nbsp;</tt></td><td>   y subscript of input data array <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dx&nbsp;&nbsp;&nbsp;</tt></td><td>   x step in the x subscript space <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dy&nbsp;&nbsp;&nbsp;</tt></td><td>   y step in the y subscript space <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_min&nbsp;&nbsp;&nbsp;</tt></td><td>   the minimum k value of the domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_max&nbsp;&nbsp;&nbsp;</tt></td><td>   the maximum k value of the domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>m&nbsp;&nbsp;&nbsp;</tt></td><td>   the z indice of the differential arrays <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>answer&nbsp;&nbsp;&nbsp;</tt></td><td>   the answer to be calculated <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="looktab_type3"></a>
+<h4>looktab_type3</h4>
+<pre>
+<b>call looktab_type3 </b>(tab, ix, dx, answer, k_min, k_max, n)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   given arrays ix(:,:,:) and iy(:,:,:) of integral subscripts and
+   arrays dx(:,:,:) and dy(:,:,:) of differences from x(:,:,:) and
+   y(:,:,:), calculate answer(:,:,:) = f(x(:,:,:), y(:,:,:))
+   from four tables of values, f, df/dx, df/dy, and d2f/dxdy.
+   In this version, only f(x,y) and f(x,y)+dx*df/dx is used. Probably
+   the f(x,y) is homogeneous in y space. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tab&nbsp;&nbsp;&nbsp;</tt></td><td>   The data array that contains function values and differentials <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables3_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ix&nbsp;&nbsp;&nbsp;</tt></td><td>   x subscript of input data array <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dx&nbsp;&nbsp;&nbsp;</tt></td><td>   x step in the x subscript space <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_min&nbsp;&nbsp;&nbsp;</tt></td><td>   the minimum k value of the domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>k_max&nbsp;&nbsp;&nbsp;</tt></td><td>   the maximum k value of the domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>n&nbsp;&nbsp;&nbsp;</tt></td><td>   the z indice of the differential arrays <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>answer&nbsp;&nbsp;&nbsp;</tt></td><td>   the answer to be calculated <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="table1_alloc"></a>
+<h4>table1_alloc</h4>
+<pre>
+<b>call table1_alloc </b>(tab, dim1, dim2)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Allocate the longwave tables based on 2 dimension sizes </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>dim1&nbsp;&nbsp;&nbsp;</tt></td><td>   size of the x dimension <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dim2&nbsp;&nbsp;&nbsp;</tt></td><td>   size of the y dimension <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tab&nbsp;&nbsp;&nbsp;</tt></td><td>   The longwave tables <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="table2_alloc"></a>
+<h4>table2_alloc</h4>
+<pre>
+<b>call table2_alloc </b>(tab, dim1, dim2)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Allocate the longwave tables based on 3 dimension sizes </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>dim1&nbsp;&nbsp;&nbsp;</tt></td><td>   size of the x dimension <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dim2&nbsp;&nbsp;&nbsp;</tt></td><td>   size of the y dimension <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dim3&nbsp;&nbsp;&nbsp;</tt></td><td>   size of the z dimension <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tab&nbsp;&nbsp;&nbsp;</tt></td><td>   The longwave tables <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="table3_alloc"></a>
+<h4>table3_alloc</h4>
+<pre>
+<b>call table3_alloc </b>(tab, dim1, dim2)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Allocate the longwave tables based on 2 dimension sizes </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>dim1&nbsp;&nbsp;&nbsp;</tt></td><td>   size of the x dimension <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dim2&nbsp;&nbsp;&nbsp;</tt></td><td>   size of the y dimension <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tab&nbsp;&nbsp;&nbsp;</tt></td><td>   The longwave tables <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables3_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="thickavg_3d"></a>
+<h4>thickavg_3d</h4>
+<pre>
+<b>call thickavg_3d </b>(nivl1 , nivl2 , nivls , &amp; nbands, $ extivl , ssalbivl , asymmivl, solflxivl, &amp; solflxband, extband , ssalbband , asymmband)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   use the thick-averaging technique to define the single-scattering    
+   properties of the parameterization band spectral intervals from the  
+   specified spectral intervals of the particular scatterer.            
+   <br>
+<br>
+   references:                                                          
+   <br>
+<br>
+   edwards,j.m. and a. slingo, studies with a flexible new radiation    
+   code I: choosing a configuration for a large-scale model.,      
+   q.j.r. meteorological society, 122, 689-719, 1996.              
+   <br>
+<br>
+   note: the 1.0E-100 factor to calculate asymmband is to prevent        
+   division by zero. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nivl1&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering                
+   properties corresponding to the first psuedo-           
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivl2&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering     
+   properties corresponding to the last psuedo-            
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivls&nbsp;&nbsp;&nbsp;</tt></td><td>   number of specified scattering spectral intervals <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nbands&nbsp;&nbsp;&nbsp;</tt></td><td>   number of spectral bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>extivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each specified scattering spectral interval <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxband&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each parameterization band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ssalbivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>extband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ssalbband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="thickavg_0d"></a>
+<h4>thickavg_0d</h4>
+<pre>
+<b>call thickavg_0d </b>(nivl1 , nivl2 , nivls , &amp; nbands, &amp; extivl , ssalbivl , asymmivl, solflxivl, &amp; solflxband, extband , ssalbband , asymmband)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   use the thick-averaging technique to define the single-scattering    
+   properties of the parameterization band spectral intervals from the  
+   specified spectral intervals of the particular scatterer.            
+   <br>
+<br>
+   references:                                                          
+   <br>
+<br>
+   edwards,j.m. and a. slingo, studies with a flexible new radiation    
+   code I: choosing a configuration for a large-scale model.,      
+   q.j.r. meteorological society, 122, 689-719, 1996.              
+   <br>
+<br>
+   note: the 1.0E-100 factor to calculate asymmband is to prevent        
+   division by zero. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nivl1&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering                
+   properties corresponding to the first psuedo-           
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivl2&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering     
+   properties corresponding to the last psuedo-            
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivls&nbsp;&nbsp;&nbsp;</tt></td><td>   number of specified scattering spectral intervals <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nbands&nbsp;&nbsp;&nbsp;</tt></td><td>   number of spectral bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>extivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each specified scattering spectral interval <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxband&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each parameterization band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ssalbivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>extband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ssalbband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="thickavg_isccp"></a>
+<h4>thickavg_isccp</h4>
+<pre>
+<b>call thickavg_isccp </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   use the thick-averaging technique to define the single-scattering    
+   properties of the specified parameterization band spectral interval 
+   from the specified spectral intervals of the particular scatterer.    
+   <br>
+<br>
+   references:                                                          
+   <br>
+<br>
+   edwards,j.m. and a. slingo, studies with a flexible new radiation    
+   code I: choosing a configuration for a large-scale model.,      
+   q.j.r. meteorological society, 122, 689-719, 1996.              
+   <br>
+<br>
+   note: the 1.0E-100 factor to calculate asymmband is to prevent        
+   division by zero. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nband&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivl1&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering                
+   properties corresponding to the first psuedo-           
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivl2&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering     
+   properties corresponding to the last psuedo-            
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>extivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each specified scattering spectral interval <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxband&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each parameterization band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   mask is .true. at gridpoints where extband needs to be calculated <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>extband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="thickavg_1band"></a>
+<h4>thickavg_1band</h4>
+<pre>
+<b>call thickavg_1band </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   use the thick-averaging technique to define the single-scattering    
+   properties of the specified parameterization band spectral interval 
+   from the specified spectral intervals of the particular scatterer.    
+   <br>
+<br>
+   references:                                                          
+   <br>
+<br>
+   edwards,j.m. and a. slingo, studies with a flexible new radiation    
+   code I: choosing a configuration for a large-scale model.,      
+   q.j.r. meteorological society, 122, 689-719, 1996.              
+   <br>
+<br>
+   note: the 1.0E-100 factor to calculate asymmband is to prevent        
+   division by zero. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nband&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivl1&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering                
+   properties corresponding to the first psuedo-           
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivl2&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering     
+   properties corresponding to the last psuedo-            
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivls&nbsp;&nbsp;&nbsp;</tt></td><td>   number of specified scattering spectral intervals <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nbands&nbsp;&nbsp;&nbsp;</tt></td><td>   number of spectral bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>extivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each specified scattering spectral interval <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxband&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each parameterization band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   mask is .true. at gridpoints where band calculations are needed <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ssalbivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>extband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ssalbband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="thinavg"></a>
+<h4>thinavg</h4>
+<pre>
+<b>call thinavg </b>(nivl1 , nivl2 , nivls , &amp; nbands, &amp; extivl , ssalbivl , asymmivl, solflxivl, &amp; solflxband, extband , ssalbband , asymmband)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   use the thin-averaging technique to define the single-scattering    
+   properties of the parameterization band spectral intervals from the  
+   specified spectral intervals of the particular scatterer.            
+   <br>
+<br>
+   references:                                                          
+   <br>
+<br>
+   edwards,j.m. and a. slingo, studies with a flexible new radiation    
+   code I: choosing a configuration for a large-scale model.,      
+   q.j.r. meteorological society, 122, 689-719, 1996.              
+   <br>
+<br>
+   note: the 1.0E-100 factor to calculate asymmband is to prevent        
+   division by zero. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nivl1&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering                
+   properties corresponding to the first psuedo-           
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivl2&nbsp;&nbsp;&nbsp;</tt></td><td>   interval number for the specified single-scattering     
+   properties corresponding to the last psuedo-            
+   monochromatic frequency in a given parameterization     
+   band <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nivls&nbsp;&nbsp;&nbsp;</tt></td><td>   number of specified scattering spectral intervals <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>extivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nbands&nbsp;&nbsp;&nbsp;</tt></td><td>   number of spectral bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each specified scattering spectral interval <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>solflxband&nbsp;&nbsp;&nbsp;</tt></td><td>   the solar flux in each parameterization band <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ssalbivl&nbsp;&nbsp;&nbsp;</tt></td><td>   the specified spectral values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>extband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the extinction coefficient <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ssalbband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the single-scattering albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>asymmband&nbsp;&nbsp;&nbsp;</tt></td><td>   the parameterization band values of the asymmetry factor <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="rad_utilities_end"></a>
+<h4>rad_utilities_end</h4>
+<pre>
+<b>call rad_utilities_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine is the destructor for rad_utilies_mod. it marks
+   the module as uninitialized. </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

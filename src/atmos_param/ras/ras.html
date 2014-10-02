@@ -1,0 +1,496 @@
+<HTML>
+<TITLE>module ras_mod</TITLE>
+<BODY BGCOLOR="#AABBCC" TEXT="#332211" >
+
+<DIV ALIGN="CENTER"> <FONT SIZE=1>
+<A HREF="#INTERFACE">PUBLIC INTERFACE</A> / 
+<A HREF="#ROUTINES">ROUTINES</A> / 
+<A HREF="#NAMELIST">NAMELIST</A> / 
+<A HREF="#CHANGES">CHANGES</A> / 
+<A HREF="#ERRORS">ERRORS</A> / 
+<A HREF="#REFERENCES">REFERENCES</A> / 
+<A HREF="#NOTES">NOTES</A> 
+</FONT>
+<BR><BR></DIV><HR>
+
+
+<H2>module ras_mod</H2>
+<A NAME="HEADER">
+<PRE>
+     <B>Contact:</B>   Joe Sirutis, Steve Klein
+     <B>Reviewers:</B>
+
+     <B><A HREF=".doc.log#ras.f90">Tags/Status</A></B>
+</PRE>
+</A><!-- END HEADER -->
+<!--------------------------------------------------------------------->
+<A NAME="OVERVIEW">
+<HR>
+<H4>OVERVIEW</H4>
+<!-- BEGIN OVERVIEW -->
+<PRE>
+
+     RAS - Relaxed Arakawa/Schubert Cumulus Parameterization Scheme
+
+     A mass based parameterization of cumulus precipitation, 
+     heating and moistening based upon the Arakawa-Schubert 
+     Quasi-Equilibrium idea.
+   
+</PRE>
+</A><!-- END OVERVIEW -->
+<!--------------------------------------------------------------------->
+<A NAME="DESCRIPTION">
+<!-- BEGIN DESCRIPTION -->
+<PRE>
+     Given temperature, moisture and wind profiles at the model's 
+     pressure levels, this module returns tendencies of temperature, 
+     moisture and wind due to cumulus convection. It also returns the
+     convective precipitation rate.
+
+     If run with the prognostic cloud scheme (strat_cloud), the
+     routine converts a fraction of the condensed water to
+     stratiform liquid and ice as well as increases the stratiform
+     cloud fraction.
+
+     This parameterization was developed by Moorthi and Suarez 
+     (see reference), with local modifications by Joe  Sirutis and
+     Steve Klein. The local modifications include: 1) re-evaporation
+     of convective scale precip was added, 2) the entrainment parameter
+     was made a function of cloud type, and was used in tuning the 
+     moisture distribution produced by the scheme, 3) an option of 
+     detraining condensed liquid and ice into stratiform cloud was
+     added.
+    
+</PRE>
+</A><!-- END DESCRIPTION -->
+<!--------------------------------------------------------------------->
+<A NAME="MODULES_USED">
+<HR>
+<H4>OTHER MODULES USED</H4>
+<!-- BEGIN MODULES_USED -->
+<PRE>
+
+          constants_mod
+     sat_vapor_pres_mod
+          utilities_mod
+       diag_manager_mod
+       time_manager_mod
+
+Note: Version v2.0 was used by all modules for testing this version
+      of ras_mod.
+
+</PRE>
+</A><!-- END MODULES_USED -->
+<!--------------------------------------------------------------------->
+<A NAME="INTERFACE">
+<HR>
+<H4>PUBLIC INTERFACE</H4>
+<!-- BEGIN INTERFACE -->
+<PRE>
+
+use ras_mod [,only: ras_init, ras, ras_bdgt]
+
+ras_init  - Called once to initialize ras. Also reads namelist.
+            Must be called before ras.
+
+ras       - Driver for ras module
+
+ras_bdgt  - Optional debugging tool. Can be called to do budget checks
+            for tendencies computed in ras.
+
+Notes:
+ * A namelist interface ( &ras_nml ) controls runtime options.
+
+</PRE>
+</A><!-- END INTERFACE -->
+<!--------------------------------------------------------------------->
+<A NAME="ROUTINES">
+<HR>
+<H4>PUBLIC ROUTINES</H4>
+<!-- BEGIN ROUTINES -->
+<PRE>
+
+       call ras_init (axes, Time )
+
+input
+    axes       Axes for diagnostics
+        	[integer, dimension(4) ]
+
+    Time       Time used for diagnostics 
+               [time_type]
+
+---------------------------------------------------------------------
+
+        call ras( is,     js,      Time,    temp0,      qvap0,     &
+                  uwnd0,  vwnd0,   pres0,   pres0_int,  coldT0,    &
+                  dtime,  dtemp0,  dqvap0,  duwnd0,     dvwnd0,    &
+                  rain0,  snow0,   kbot,    ql0,        qi0,       &
+                  qa0,    mc0,     Dl0,     Di0,        Da0  )
+
+input
+    is, js     Starting indices for window
+               [integer]
+
+    Time       Time used for diagnostics 
+               [time_type]
+
+    temp0      Temperature [deg k] at full model levels,
+               [real, dimension(:,:,nlev)]
+
+    qvap0      Specific humidity of water vapor [kg/kg] at full model levels,
+               [real, dimension(:,:,nlev)]
+
+    uwnd0      Zonal wind component [m/s] at full model levels,
+               [real, dimension(:,:,nlev)]
+
+    vwnd0      Meridional wind component [m/s] at full model levels,
+               [real, dimension(:,:,nlev)]
+
+    pres0      Pressure at full levels in pascals
+               [real, dimension(:,:,nlev)]
+
+    pres0_int  Pressure at half levels in pascals
+               [real, dimension(:,:,nlev+1)]
+
+    coldT0     Should the precipitation assume to be frozen?
+               [logical, dimension(nlon,nlat)]
+
+    dtime      Time step in seconds.
+               [real]
+
+output
+
+    dtemp0    Temperature tendency [deg k/time step] 
+              [real, dimension(:,:,nlev)]
+
+    dqvap0    Specific humidity of water vapor tendency [1/time step]
+              [real, dimension(:,:,nlev)]
+
+    duwnd0    Zonal wind component tendency [m/s/time step]
+              [real, dimension(:,:,nlev)]
+
+    dvwnd0    Meridional wind component tendency [m/s/time step]
+              [real, dimension(:,:,nlev)]
+
+    rain0     Liquid precipitation (rain) in kg/m2
+              [real, dimension(:,:)]
+
+    snow0     Frozen precipitation (snow) in kg/m2
+              [real, dimension(:,:)]
+
+input (optional) - for use with the step-mountain (eta) vertical coordinate
+
+    kbot      Index of the lowest model level
+              [integer, dimension(:,:)]
+
+input (optional) - for use with prognostic stratiform cloud module
+
+    ql0       Cloud liquid [kg/kg]
+              [real, dimension(:,:,nlev)]
+
+    qi0       Cloud ice [kg/kg]
+              [real, dimension(:,:,nlev)]
+
+    qa0       Cloud/saturated volume fraction 
+              [real, dimension(:,:,nlev)]
+
+output (optional) 
+
+    mc0       Cumulus mass flux (for diagnostic purposes)
+              [real, dimension(:,:,nlev)]
+
+    Dl0       Cloud liquid change (for use with prognostic stratiform cloud module)
+              [real, dimension(:,:,nlev)]
+
+    Di0       Cloud ice change (for use with prognostic stratiform cloud module)
+              [real, dimension(:,:,nlev)]
+
+    Da0       Cloud fraction change (for use with prognostic stratiform cloud module)
+              [real, dimension(:,:,nlev)]
+
+-----------------------------------------------------------------
+
+ call ras_bdgt ( precip,   coldT, dtemp, dqvap, duwnd, dvwnd, 
+                 pres_int, dql,   dqi )
+
+input
+
+    precip    Liquid precipitation (rain) in kg/m2
+              [real, dimension(:,:)]
+
+    coldT     Should the precipitation assume to be frozen?
+              [logical, dimension(:,:)]
+
+    dtemp     Temperature tendency [deg k/time step] 
+              [real, dimension(:,:,nlev)]
+
+    dqvap     Specific humidity of water vapor tendency [1/time step]
+              [real, dimension(:,:,nlev)]
+
+    duwnd     Zonal wind component tendency [m/s/time step]
+              [real, dimension(:,:,nlev)]
+
+    dvwnd     Meridional wind component tendency [m/s/time step]
+              [real, dimension(:,:,nlev)]
+
+    pres_int   Pressure at half levels in pascals
+               [real, dimension(:,:,nlev+1)]
+
+input (optional) 
+
+    dql       Cloud liquid change 
+              [real, dimension(:,:,nlev)]
+
+    dqi       Cloud ice change 
+              [real, dimension(:,:,nlev)]
+
+Notes:
+  * The optional arguments qldt and qidt must be supplied if
+    strat_cloud is running to get the actual moisture budget.
+
+</PRE>
+</A><!-- END ROUTINES -->
+<!--------------------------------------------------------------------->
+<A NAME="NAMELIST">
+<HR>
+<H4>NAMELIST</H4>
+<!-- BEGIN NAMELIST -->
+<PRE>
+
+&ras_nml 
+
+   fracs        Fraction of PBL mass allowed to be used 
+                by a cloud-type in time DT
+                [real, default: fracs = 0.25 ]
+
+   rasal0       Base value for cloud type relaxation parameter
+                [real, default: rasal0 = 0.25 ]
+
+   puplim       Upper limit for cloud tops of deepest clouds
+                [real, default: puplim = 20.0E2 Pascals]
+
+   aratio       Ratio of critical cloud work function to standard
+                value of cloud work function
+                [real, default: aratio = 1.4 ]
+
+   cufric       Should Cumulus friction (momentum transport) occur?
+                [logical, default: cufric = .false. ]
+
+   rh_trig      Convection takes place only if the relative humidity
+                of the lowest model level exceeds rh_trig
+                [real, default: rh_trig = 0.0 ]
+
+   alm_min      Min value for entrainment parameter.
+                [real, default: alm_min = 0.0 ]
+
+   Tokioka_on   If true, alm_min computed using Tokioka formulation
+                [logical, default: Tokioka_on = .false. ]
+
+   Tokioka_con  Constant for alm_min computed using Tokioka formulation
+                [real, default: Tokioka_con = 0.05 ]
+
+Tokioka_plim   Tokioka applied only to clouds detraining above Tokioka_plim
+                [real, default: Tokioka_plim = 500.0E2 ]
+
+   modify_pbl   If true, mass flux in sub cloud layer varies linearly
+                between value at cloud base and zero at surface, and
+                tendencies are spread out throughout the entire sub cloud layer.
+                [logical, default: modify_pbl = .false. ]
+
+ --- Evaporation of convective scale precip 
+
+   evap_on      Turn on evaporation if true
+                [logical, default: evap_on = .true. ]
+
+   cfrac        Fraction of grid box assumed to be covered by convection
+                [real, default: cfrac = 0.05 ]
+
+   hcevap       Evap allowed while q <= hcevap * qsat
+                [real, default: hcevap = 0.80 ]
+
+ --- Partitioning of cloud liquid water into precip, detrained vapor & liquid
+
+   rn_ptop      rn_frac_top of parcel liquid water converted to precip 
+                for cloud top pressures above rn_ptop
+                [real, default: rn_ptop = 500.0E2 Pascals]
+
+   rn_pbot      rn_frac_bot of parcel liquid water converted to precip 
+                for cloud top pressures below rn_pbot  
+                (linear profile in between)
+                [real, default: rn_pbot = 800.0E2 Pascals]
+
+   rn_frac_bot  Fraction of parcel liquid water converted to 
+                precip for cloud top pressures below rn_pbot
+                [real, default: rn_frac_bot = 0.8 ]
+
+   rn_frac_top  Fraction of liquid water converted to
+                precip for cloud top pressures above rn_ptop
+                [real, default: rn_frac_top = 1.0 ]
+
+ --- Cloud order specification
+
+   ncrnd        Number of random cloud-types between krmin and krmax
+                to be invoked in a single call to ras
+                [integer, default: ncrnd = 0 ]
+
+   iseed        Integer seed used in generating random numbers
+                -- used only when ncrnd > 0
+                [integer, default: iseed = 123 ]
+
+   krmin        Index of the top most level to which random clouds may
+                be invoked
+                [integer, default: krmin = 2 ]
+
+   krmax        Index of the bottom most level to which random clouds 
+                may be invoked. krmin should be <= krmax. 
+                If ncrnd is specified as zero, then all cloud-types 
+                below the level krmax will be called sequentially.
+                [integer, default: krmax = 2 ]
+
+   botop        A logical variable -- .true. if sequential clouds are 
+                called from bottom to top and .false. if top to bottom.
+                Level krmax will be called sequentially.
+                [logical, default: botop = .true. ]
+
+Notes:
+
+   * For parameters listed in the "Cloud order specification" section above,
+     very limited testing has been done with values other than the defaults.
+
+   * Diagnostics of RAS are controlled by the namelist to moist_processes
+     module.
+
+</PRE>
+</A><!-- END NAMELIST -->
+<!--------------------------------------------------------------------->
+<A NAME="DIAGNOSTICS">
+<HR>
+<H4>DIAGNOSTIC FIELDS</H4>
+<PRE>
+Diagnostic fields may be output to a netcdf file by specifying the
+module name <b>ras</b> and the desired field names (given below)
+in file <b>diag_table</b>. See the documentation for diag_manager.
+</PRE>
+<!-- BEGIN DIAGNOSTICS -->
+<PRE>
+
+Diagnostic fields for module name: <b>ras</b>
+
+   field name   field description
+   ----------   -----------------
+   tdt_revap    temperature tendency from re-evaporation of convective
+                precip [deg_K/s]
+   qdt_revap    specific humidity tendency from re-evaporation of convective
+                precip [kg/kg/s]
+  prec_revap    total convective precip evaporated [kg/m2/s]
+  snow_revap    frozen convective precip evaporated [kg/m2/s]
+  prec_conv_3d  3D precipitation rate  [kg/m2/s]
+  pcldb         Pressure at cloud base from RAS
+
+</PRE>
+</A><!-- END DIAGNOSTICS -->
+
+<!--------------------------------------------------------------------->
+<A NAME="CHANGES">
+<HR>
+<H4>CHANGE HISTORY</H4>
+<!-- BEGIN CHANGES -->
+<PRE>
+<B><A HREF=".doc.log#ras.f90">Revision history</A></B>
+
+
+<b>changes</b> (10/4/1999)
+
+     MPP version created. Minor changes for open_file, error_mesg,
+     and Fortran write statements. Answers should reproduce the
+     previous version.
+
+<b>changes</b> (8/31/1999)
+
+    Code is rewritten to permit a user to request as diagnostic output
+    the cumulus mass flux.  The cumulus mass flux may be requested 
+    whether or not the strat cloud scheme is being run.
+
+<b>changes</b> (9/25/2001)
+
+    Code almost completely rewritten for increased efficiency and clarity.
+    Extra diagnostics added. Several new namelist options added.
+
+
+</PRE>
+</A><!-- END CHANGES -->
+<!--------------------------------------------------------------------->
+<A NAME="ERRORS">
+<HR>
+<H4>ERROR MESSAGES</H4>
+<!-- BEGIN ERRORS -->
+<PRE>
+
+<b>Fatal errors in ras:</b>
+
+    <b>ras_init has not been called</b>
+       You have not called ras_init before calling ras.
+
+<b>Fatal errors in ras_bdgt:</b>
+
+    <b>RAS BUDGET CHECK AT i,j =</b>
+       The enthalpy, and/or moisture, and/or momentum budgets did 
+       not balance. This usually happens for one of two reasons:
+       1) "bad" data is being passed into ras; 2) a code error ( or 
+       inconsistency ) has been introduced into the ras module. 
+          
+</PRE>
+</A><!-- END ERRORS -->
+<!--------------------------------------------------------------------->
+<A NAME="REFERENCES">
+<HR>
+<H4>REFERENCES</H4>
+<!-- BEGIN REFERENCES -->
+<PRE>
+
+   Moorthi, S., and M. J. Suarez, 1992: Relaxed Arakawa-Schubert:
+         A Parameterization of Moist Convection for General Circulation
+         Models. Mon. Wea. Rev., 120, 978-1002.
+
+</PRE>
+</A><!-- END REFERENCES -->
+<!--------------------------------------------------------------------->
+<A NAME="BUGS">
+<HR>
+<H4>KNOWN BUGS</H4>
+<!-- BEGIN BUGS -->
+<PRE>
+
+     There are no known bugs.
+
+</PRE>
+</A><!-- END BUGS -->
+<!--------------------------------------------------------------------->
+<A NAME="NOTES">
+<HR>
+<H4>NOTES</H4>
+<!-- BEGIN NOTES -->
+<PRE>
+
+   Developed by Shrinivas Moorthi & Max J. Suarez
+   Original code dated: 04 August 1992.
+   First Fortran 90 version created by Joe Sirutis in April 1997.
+
+</PRE>
+</A><!-- END NOTES -->
+<!--------------------------------------------------------------------->
+<A NAME="PLANS">
+<HR>
+<H4>FUTURE PLANS</H4>
+<!-- BEGIN PLANS -->
+<PRE>
+
+  
+
+</PRE>
+</A><!-- END PLANS -->
+<!--------------------------------------------------------------------->
+
+<HR>
+</BODY>
+</HTML>

@@ -1,0 +1,254 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module atmos_convection_tracer_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module atmos_convection_tracer_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:rsh@gfdl.noaa.gov">   Richard Hemler </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:lwh@gfdl.noaa.gov"> </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/shared/tracer_driver">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   This code allows the incorporation of an arbitrarily-specified   
+   tracer for testing within the donner_deep module.
+   <br>
+<br>
+   This module is to serve as a testbed for assessing convective 
+   transport of tracers. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This module presents an implementation of an arbirary tracer, 
+   including its convective transport by the donner_deep module. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>                   fms_mod<br>          time_manager_mod<br>          diag_manager_mod<br>        tracer_manager_mod<br>         field_manager_mod<br>atmos_tracer_utilities_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#atmos_cnvct_tracer_sourcesink">atmos_cnvct_tracer_sourcesink</a>:</dt>
+<dd>   The routine that calculate the sources and sinks of the 
+   convection tracer. </dd>
+<dt>
+<a href="#atmos_convection_tracer_init">atmos_convection_tracer_init</a>:</dt>
+<dd>   The constructor routine for the convection tracer module. </dd>
+<dt>
+<a href="#atmos_convection_tracer_end">atmos_convection_tracer_end</a>:</dt>
+<dd>   The destructor routine for the convection tracer module. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="atmos_cnvct_tracer_sourcesink"></a>
+<h4>atmos_cnvct_tracer_sourcesink</h4>
+<pre>
+<b>call atmos_cnvct_tracer_sourcesink </b>(lon, lat, land, pwt, convtr, convtr_dt, Time, is, ie, js, je, kbot)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This is an implementation of an arbitrarily-specified tracer.
+   At this time it is assumed to have no source or sink.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>lon&nbsp;&nbsp;&nbsp;</tt></td><td>   Longitude of the centre of the model gridcells <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   Latitude of the centre of the model gridcells <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>land&nbsp;&nbsp;&nbsp;</tt></td><td>   Land/sea mask. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pwt&nbsp;&nbsp;&nbsp;</tt></td><td>   The pressure weighting array. = dP/grav <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:,:)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>convtr&nbsp;&nbsp;&nbsp;</tt></td><td>   The array of the convection tracer mixing ratio. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:,:)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   Model time. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(time_type)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>is, ie, js, je&nbsp;&nbsp;&nbsp;</tt></td><td>   Local domain boundaries. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   Integer array describing which model layer intercepts the surface. <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer, optional, dimension(:,:)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>convtr_dt&nbsp;&nbsp;&nbsp;</tt></td><td>   The array of the tendency of the convection tracer mixing ratio. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:,:)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="atmos_convection_tracer_init"></a>
+<h4>atmos_convection_tracer_init</h4>
+<pre>
+<b>call atmos_convection_tracer_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   A routine to initialize the convection tracer module. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model interface levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:,:)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   optional mask (0. or 1.) that designates which grid points
+   are above (=1.) or below (=0.) the ground dimensioned as
+   (nlon,nlat,nlev). <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, optional, dimension(:,:,:)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   Model time. <br>&nbsp;&nbsp;&nbsp;<span class="type">[type(time_type)]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   The axes relating to the tracer array dimensioned as
+   (nlon, nlat, nlev, ntime) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer, dimension(4)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>r&nbsp;&nbsp;&nbsp;</tt></td><td>   Tracer fields dimensioned as (nlon,nlat,nlev,ntrace). <br>&nbsp;&nbsp;&nbsp;<span class="type">[real, dimension(:,:,:,:)]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="atmos_convection_tracer_end"></a>
+<h4>atmos_convection_tracer_end</h4>
+<pre>
+<b>call atmos_convection_tracer_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine marks the module as uninitialized and exits. </dd>
+<br>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

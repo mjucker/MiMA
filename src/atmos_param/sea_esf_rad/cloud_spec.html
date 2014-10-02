@@ -1,0 +1,462 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module cloud_spec_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module cloud_spec_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   cloud_spec_mod defines the variables that are used in a partic-
+   ular cloud parameterization to specify the cloud location, cloud
+   type and cloud magnitude for the active cloud parameterization(s). </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   if microphysically-based radiative properties are desired, then
+   cloud_spec_mod also provides the microphysical parameters used in
+   determining the radiative properties, either from the cloud scheme
+   itself if they are present, or from a prescribed formula based on
+   prescribed water paths for high, middle and low clouds. </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>        time_manager_mod<br>                 fms_mod<br>      tracer_manager_mod<br>       field_manager_mod<br>       data_override_mod<br>       rad_utilities_mod<br>    esfsw_parameters_mod<br>      strat_clouds_W_mod<br>       diag_clouds_W_mod<br>      zetac_clouds_W_mod<br>  specified_clouds_W_mod<br>     rh_based_clouds_mod<br>donner_deep_clouds_W_mod<br>     mgrp_prscr_clds_mod<br>   standalone_clouds_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#cloud_spec_init">cloud_spec_init</a>:</dt>
+<dd>   Contructor of cloud_spec_package module </dd>
+<dt>
+<a href="#cloud_spec">cloud_spec</a>:</dt>
+<dd>   cloud_radiative_properties defines the cloud radiative properties 
+   appropriate for the radiation options that are active. </dd>
+<dt>
+<a href="#cloud_spec_dealloc">cloud_spec_dealloc</a>:</dt>
+<dd>   cloud_spec_dealloc deallocates the component arrays of the 
+   cld_specification_type structure Cld_spec and the microphysics_type
+   structures Lsc_microphys, Meso_microphys and Cell_microphys. </dd>
+<dt>
+<a href="#initialize_cldamts">initialize_cldamts</a>:</dt>
+<dd>   initialize_cldamts allocates and initializes the array components 
+   of the structures used to specify the model cloud and microphysics
+   fields. </dd>
+<dt>
+<a href="#combine_cloud_properties">combine_cloud_properties</a>:</dt>
+<dd>   combine_cloud_properties produces cloud specification property 
+   arrays for the total cloud field in each grid box, using as input 
+   the specification of the component cloud types that may be present
+   (large-scale, mesoscale and cell-scale). </dd>
+<dt>
+<a href="#microphs_presc_conc">microphs_presc_conc</a>:</dt>
+<dd>   Subroutine to determine water droplet and ice crystal based on
+   prescribed microphysics model. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="cloud_spec_init"></a>
+<h4>cloud_spec_init</h4>
+<pre>
+<b>call cloud_spec_init </b>( pref, lonb, latb, axes, Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Contructor of cloud_spec_package module </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   reference pressure levels containing two reference pressure profiles 
+   for use in defining transmission functions [ Pa ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   the longitude array of the model grid point <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   the latitude array of the model grid point <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   diagnostic variable axes for netcdf files <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time [ time_type(days, seconds) ] <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_spec"></a>
+<h4>cloud_spec</h4>
+<pre>
+<b>call cloud_spec </b>(is, ie, js, je, lat, z_half, z_full, Rad_time, Atmos_input, &amp; Surface, Cld_spec, Lsc_microphys, &amp; Meso_microphys, Cell_microphys, cloud_water_in, &amp; cloud_ice_in, cloud_area_in, r, kbot, mask)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cloud_radiative_properties defines the cloud radiative properties 
+   appropriate for the radiation options that are active. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is,ie,js,je&nbsp;&nbsp;&nbsp;</tt></td><td>   starting/ending subdomain i,j indices of data in
+   the physics_window being integrated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Rad_time&nbsp;&nbsp;&nbsp;</tt></td><td>   time at which radiation calculation is to apply <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cloud_water_in&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: cloud water mixing ratio  present when running 
+   standalone columns or sa_gcm <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cloud_ice_in&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: cloud ice mixing ratio  present when running 
+   standalone columns or sa_gcm <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cloud_area_in&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: fractional cloud area, present when running 
+   standalone columns or sa_gcm <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>r&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: model tracer fields on the current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   index of lowest model level above ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   mask to remove points below ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   atmospheric input fields on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surface&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface boundary condition to radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[Surface]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cloud_spec_dealloc"></a>
+<h4>cloud_spec_dealloc</h4>
+<pre>
+<b>call cloud_spec_dealloc </b>(Cld_spec, Lsc_microphys, Meso_microphys,&amp; Cell_microphys)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cloud_spec_dealloc deallocates the component arrays of the 
+   cld_specification_type structure Cld_spec and the microphysics_type
+   structures Lsc_microphys, Meso_microphys and Cell_microphys. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="initialize_cldamts"></a>
+<h4>initialize_cldamts</h4>
+<pre>
+<b>call initialize_cldamts </b>(ix, jx, kx, Lsc_microphys, &amp; Meso_microphys, Cell_microphys, Cld_spec)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   initialize_cldamts allocates and initializes the array components 
+   of the structures used to specify the model cloud and microphysics
+   fields. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>ix, jx, kx&nbsp;&nbsp;&nbsp;</tt></td><td>   ix             size of i dimension of physics window
+   jx             size of j dimension of physics window
+   kx             size of k dimension of physics window <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="combine_cloud_properties"></a>
+<h4>combine_cloud_properties</h4>
+<pre>
+<b>call combine_cloud_properties </b>(Lsc_microphys, Meso_microphys, &amp; Cell_microphys, Cld_spec)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   combine_cloud_properties produces cloud specification property 
+   arrays for the total cloud field in each grid box, using as input 
+   the specification of the component cloud types that may be present
+   (large-scale, mesoscale and cell-scale). </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Meso_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for meso-scale 
+   clouds assciated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cell_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for convective cell
+   clouds associated with donner convection <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="microphs_presc_conc"></a>
+<h4>microphs_presc_conc</h4>
+<pre>
+<b>call microphs_presc_conc </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine uses prescribed microphysics model to determine
+   concentrations of water droplets and ice crystals. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of the x dimension in the physics domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   ending indice of the x dimension in the physics domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   starting indice of the y dimension in the physics domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   ending indice of the y dimension in the physics domain <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>deltaz&nbsp;&nbsp;&nbsp;</tt></td><td>   Height of each pressure layers. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>temp&nbsp;&nbsp;&nbsp;</tt></td><td>   Temperatures of pressure levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   cloud specification properties on model grid, <br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lsc_microphys&nbsp;&nbsp;&nbsp;</tt></td><td>   microphysical specification for large-scale 
+   clouds <br>&nbsp;&nbsp;&nbsp;<span class="type">[microphysics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

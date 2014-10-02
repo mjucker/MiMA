@@ -1,0 +1,868 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module gas_tf_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module gas_tf_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   ds </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Module that calculates gas transmission functions </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>            fms_mod<br>      constants_mod<br>  rad_utilities_mod<br>longwave_params_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#gas_tf_init">gas_tf_init</a>:</dt>
+<dd>   Initialize gas transmission function calculation from input 
+   namelist, model pressure coordinate system, etc. </dd>
+<dt>
+<a href="#co2coef">co2coef</a>:</dt>
+<dd>   Calculate CO2 absorption coefficients and transmission function </dd>
+<dt>
+<a href="#transcol">transcol</a>:</dt>
+<dd>   Subroutine to compute temperature-corrected co2 transmission 
+   functions at a particular (krow). </dd>
+<dt>
+<a href="#transcolrow">transcolrow</a>:</dt>
+<dd>   Subroutine to compute temperature-corrected co2/ch4/n2o transmission 
+   functions at a particular row and particular column. </dd>
+<dt>
+<a href="#trans_nearby">trans_nearby</a>:</dt>
+<dd>   Compute nearby layer transmission functions at certain level in
+   the frequency band at 15 um </dd>
+<dt>
+<a href="#trans_sfc">trans_sfc</a>:</dt>
+<dd>   Compute nearby layer transmission functions at certain level in
+   the frequency band at 15 um </dd>
+<dt>
+<a href="#put_co2_stdtf_for_gas_tf">put_co2_stdtf_for_gas_tf</a>:</dt>
+<dd>   Assign co2 transmission functions </dd>
+<dt>
+<a href="#put_co2_nbltf_for_gas_tf">put_co2_nbltf_for_gas_tf</a>:</dt>
+<dd>   Assign co2 transmission functions </dd>
+<dt>
+<a href="#put_ch4_stdtf_for_gas_tf">put_ch4_stdtf_for_gas_tf</a>:</dt>
+<dd>   Assign ch4 transmission functions </dd>
+<dt>
+<a href="#put_n2o_stdtf_for_gas_tf">put_n2o_stdtf_for_gas_tf</a>:</dt>
+<dd>   Assign n2o transmission functions </dd>
+<dt>
+<a href="#get_control_gas_tf">get_control_gas_tf</a>:</dt>
+<dd>   Turn on gas transmission function flag </dd>
+<dt>
+<a href="#gas_tf_dealloc">gas_tf_dealloc</a>:</dt>
+<dd>   gas_tf_dealloc deallocates the array components of the gas_tf_type
+   input variable. </dd>
+<dt>
+<a href="#gas_tf_end">gas_tf_end</a>:</dt>
+<dd>   End and clean up gas tranmission function calculation </dd>
+<dt>
+<a href="#process_co2_input_file">process_co2_input_file</a>:</dt>
+<dd>   Subroutine to process co2 input file information </dd>
+<dt>
+<a href="#process_ch4_input_file">process_ch4_input_file</a>:</dt>
+<dd>   Subroutine to process ch4 input file information </dd>
+<dt>
+<a href="#process_n2o_input_file">process_n2o_input_file</a>:</dt>
+<dd>   Subroutine to process n2o input file information </dd>
+<dt>
+<a href="#ptz">ptz</a>:</dt>
+<dd>   Subroutine to calculate temperatures at up to 200 user     
+   specified pressures. </dd>
+<dt>
+<a href="#antemp">antemp</a>:</dt>
+<dd>   Subroutine to analytically calculate temperature profiles of
+   atmosphere with arbitrary levels </dd>
+<dt>
+<a href="#transfn">transfn</a>:</dt>
+<dd>   Subroutine to compute the temperature corrected co2 nearby layer
+   transmission functions </dd>
+<dt>
+<a href="#process_gas_input_file">process_gas_input_file</a>:</dt>
+<dd>   Subroutine to process gas input file information </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="gas_tf_init"></a>
+<h4>gas_tf_init</h4>
+<pre>
+<b>call gas_tf_init </b>(pref)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Initialize gas transmission function calculation from input 
+   namelist, model pressure coordinate system, etc. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   Model pressure coordinate array <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="co2coef"></a>
+<h4>co2coef</h4>
+<pre>
+<b>call co2coef </b>(Atmos_input, Gas_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Calculate CO2 absorption coefficients and transmission function </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   The input data of the atmosphere structure and gas concentration <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   The gas transmission function table <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="transcol"></a>
+<h4>transcol</h4>
+<pre>
+<b>call transcol </b>(kcol, krow, kcols, kcole, co21c, Gas_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute temperature-corrected co2 transmission 
+   functions at a particular (krow). </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>kcol&nbsp;&nbsp;&nbsp;</tt></td><td>   Not used <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>krow&nbsp;&nbsp;&nbsp;</tt></td><td>   The row index where co2 transmission is calculated <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kcols&nbsp;&nbsp;&nbsp;</tt></td><td>   The starting column index number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kcole&nbsp;&nbsp;&nbsp;</tt></td><td>   The ending column index number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   The pre temperature-corrected co2 transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>co21c&nbsp;&nbsp;&nbsp;</tt></td><td>   The column of transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="transcolrow"></a>
+<h4>transcolrow</h4>
+<pre>
+<b>call transcolrow </b>(Gas_tf, kcol, krow, kcols, kcole, krows, krowe, &amp; co21c, co21r, tch4n2oe)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute temperature-corrected co2/ch4/n2o transmission 
+   functions at a particular row and particular column. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>kcol&nbsp;&nbsp;&nbsp;</tt></td><td>   The column index of temperature-corrected transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>krow&nbsp;&nbsp;&nbsp;</tt></td><td>   The row index of temperature-corrected transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kcols&nbsp;&nbsp;&nbsp;</tt></td><td>   The starting column index number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kcole&nbsp;&nbsp;&nbsp;</tt></td><td>   The ending column index number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>krows&nbsp;&nbsp;&nbsp;</tt></td><td>   The starting row index number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>krowe&nbsp;&nbsp;&nbsp;</tt></td><td>   The ending row index number <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tch4n2oe&nbsp;&nbsp;&nbsp;</tt></td><td>   The ch4 and n2o transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   The pre temperature-corrected co2 transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>co21c&nbsp;&nbsp;&nbsp;</tt></td><td>   The column of transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>co21r&nbsp;&nbsp;&nbsp;</tt></td><td>   The row of transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="trans_nearby"></a>
+<h4>trans_nearby</h4>
+<pre>
+<b>call trans_nearby </b>(Gas_tf, Atmos_input, overod, co2diag)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Compute "nearby  layer" transmission functions at level k 
+   ( tau(p(k),p(k))) in the frequency band at 15 um. include all
+   gases (co2, h2o, h2o cont) used in computing fluxes in this band. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   The gas transmission functions at model coordinate system <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   The atmospheric input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>overod&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 data <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>co21diag&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="trans_sfc"></a>
+<h4>trans_sfc</h4>
+<pre>
+<b>call trans_sfc </b>(Gas_tf, Atmos_input, overod, co21c, co21r)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Compute "nearby  layer" transmission functions at level k 
+   ( tau(p(k),p(k))) in the frequency band at 15 um. include all
+   gases (co2, h2o, h2o cont) used in computing fluxes in this band. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   The gas transmission functions at model coordinate system <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Atmos_input&nbsp;&nbsp;&nbsp;</tt></td><td>   The atmospheric input data <br>&nbsp;&nbsp;&nbsp;<span class="type">[atmos_input_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>overod&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 data <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>co21c&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>co21r&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 transmission function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="put_co2_stdtf_for_gas_tf"></a>
+<h4>put_co2_stdtf_for_gas_tf</h4>
+<pre>
+<b>call put_co2_stdtf_for_gas_tf </b>(nf, &amp; co251_o, co258_o, &amp; cdt51_o, cdt58_o, &amp; c2d51_o, c2d58_o)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Assign co2 transmission functions </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   index variable <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>co251_o co258_o  cdt51_o cdt58_o  c2d51_o c2d58_o&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="put_co2_nbltf_for_gas_tf"></a>
+<h4>put_co2_nbltf_for_gas_tf</h4>
+<pre>
+<b>call put_co2_nbltf_for_gas_tf </b>(nf, &amp; co2m51_o, cdtm51_o, c2dm51_o, &amp; co2m58_o, cdtm58_o, c2dm58_o, &amp; co215nbps1_o, co215nbps8_o, &amp; co2dt15nbps1_o, co2dt15nbps8_o, &amp; co2d2t15nbps1_o, co2d2t15nbps8_o )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Assign co2 transmission functions </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   index variable <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>co2m51_o, cdtm51_o, c2dm51_o, co2m58_o, cdtm58_o, c2dm58_o, co215nbps1_o, co215nbps8_o, co2dt15nbps1_o, co2dt15nbps8_o, co2d2t15nbps1_o, co2d2t15nbps8_o&nbsp;&nbsp;&nbsp;</tt></td><td>   CO2 transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="put_ch4_stdtf_for_gas_tf"></a>
+<h4>put_ch4_stdtf_for_gas_tf</h4>
+<pre>
+<b>call put_ch4_stdtf_for_gas_tf </b>( &amp; ch451_o, ch458_o, &amp; ch4dt51_o, ch4dt58_o, &amp; ch4d2t51_o, ch4d2t58_o)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Assign ch4 transmission functions </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   index variable <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ch451_o, ch458_o, ch4dt51_o, ch4dt58_o, ch4d2t51_o, ch4d2t58_o&nbsp;&nbsp;&nbsp;</tt></td><td>   CH4 transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="put_n2o_stdtf_for_gas_tf"></a>
+<h4>put_n2o_stdtf_for_gas_tf</h4>
+<pre>
+<b>call put_n2o_stdtf_for_gas_tf </b>(nf, &amp; n2o1_o, n2o8_o, &amp; n2odt1_o, n2odt8_o, &amp; n2od2t1_o, n2od2t8_o)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Assign n2o transmission functions </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>nf&nbsp;&nbsp;&nbsp;</tt></td><td>   index variable <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>n2o1_o, n2o8_o, n2odt1_o, n2odt8_o, n2od2t1_o, n2od2t8_o&nbsp;&nbsp;&nbsp;</tt></td><td>   N2O transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_control_gas_tf"></a>
+<h4>get_control_gas_tf</h4>
+<pre>
+<b>call get_control_gas_tf </b>(calc_co2, calc_ch4, calc_n2o)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Turn on gas transmission function flag </dd>
+<br>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>calc_co2, calc_ch4, calc_n2o&nbsp;&nbsp;&nbsp;</tt></td><td>   logical variables that determine whether gas transmission functions
+   should be calculated. <br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="gas_tf_dealloc"></a>
+<h4>gas_tf_dealloc</h4>
+<pre>
+<b>call gas_tf_dealloc </b>(Gas_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   gas_tf_dealloc deallocates the array components of the gas_tf_type
+   input variable. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   gas_tf_type variable containing information needed
+   to define the gas transmission functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="gas_tf_end"></a>
+<h4>gas_tf_end</h4>
+<pre>
+<b>call gas_tf_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   End and clean up gas tranmission function calculation </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="process_co2_input_file"></a>
+<h4>process_co2_input_file</h4>
+<pre>
+<b>call process_co2_input_file </b>(gas_name, gas_amount, nstdlvls, &amp; kbegin, kend, pd, plm, pa)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to process co2 input file information </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_name&nbsp;&nbsp;&nbsp;</tt></td><td>   Name of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_amount&nbsp;&nbsp;&nbsp;</tt></td><td>   Amount of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nstdlvls&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of standard levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbegin, kend&nbsp;&nbsp;&nbsp;</tt></td><td>   Index of the starting and ending vertical levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pd, plm, pa&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure coordinate variables, at boundaries, mid points. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="process_ch4_input_file"></a>
+<h4>process_ch4_input_file</h4>
+<pre>
+<b>call process_ch4_input_file </b>(gas_name, gas_amount, nstdlvls, &amp; kbegin, kend, pd, plm, pa)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to process ch4 input file information </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_name&nbsp;&nbsp;&nbsp;</tt></td><td>   Name of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_amount&nbsp;&nbsp;&nbsp;</tt></td><td>   Amount of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nstdlvls&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of standard levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbegin, kend&nbsp;&nbsp;&nbsp;</tt></td><td>   Index of the starting and ending vertical levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pd, plm, pa&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure coordinate variables, at boundaries, mid points. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="process_n2o_input_file"></a>
+<h4>process_n2o_input_file</h4>
+<pre>
+<b>call process_n2o_input_file </b>(gas_name, gas_amount, nstdlvls, &amp; kbegin, kend, pd, plm, pa)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to process n2o input file information </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_name&nbsp;&nbsp;&nbsp;</tt></td><td>   Name of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_amount&nbsp;&nbsp;&nbsp;</tt></td><td>   Amount of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nstdlvls&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of standard levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbegin, kend&nbsp;&nbsp;&nbsp;</tt></td><td>   Index of the starting and ending vertical levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pd, plm, pa&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure coordinate variables, at boundaries, mid points. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="ptz"></a>
+<h4>ptz</h4>
+<pre>
+<b>call ptz </b>(plm, pd)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to calculate temperatures at up to 200 user     
+   specified pressures. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>plm&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at midpoint of layer (average of adjacent
+   pd values) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pd&nbsp;&nbsp;&nbsp;</tt></td><td>   pressures (mb) for layer boundaries. (also known
+   as flux levels). <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="antemp"></a>
+<h4>antemp</h4>
+<pre>temp = <b>antemp</b> (z)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to analytically calculate temperature profiles of
+   atmosphere with arbitrary levels </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>z&nbsp;&nbsp;&nbsp;</tt></td><td>   Height <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="transfn"></a>
+<h4>transfn</h4>
+<pre>
+<b>call transfn </b>( Gas_tf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute the temperature corrected co2 nearby layer
+   transmission functions </dd>
+<br>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Gas_tf&nbsp;&nbsp;&nbsp;</tt></td><td>   The output variable of temperature corrected co2 transmission
+   functions <br>&nbsp;&nbsp;&nbsp;<span class="type">[gas_tf_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="process_gas_input_file"></a>
+<h4>process_gas_input_file</h4>
+<pre>
+<b>call process_gas_input_file </b>(gas_name, gas_amount, nstdlvls, &amp; kbegin, kend, pd, plm, pa, unit)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to process gas input file information </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>gas_name&nbsp;&nbsp;&nbsp;</tt></td><td>   Name of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gas_amount&nbsp;&nbsp;&nbsp;</tt></td><td>   Amount of the gas specy <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>nstdlvls&nbsp;&nbsp;&nbsp;</tt></td><td>   Number of standard levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbegin, kend&nbsp;&nbsp;&nbsp;</tt></td><td>   Index of the starting and ending vertical levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pd, plm, pa&nbsp;&nbsp;&nbsp;</tt></td><td>   Pressure coordinate variables, at boundaries, mid points. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>unit&nbsp;&nbsp;&nbsp;</tt></td><td>   The input file descriptor <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

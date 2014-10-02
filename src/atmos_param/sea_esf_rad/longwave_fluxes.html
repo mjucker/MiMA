@@ -1,0 +1,399 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module longwave_fluxes_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module longwave_fluxes_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   Fei Liu </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:Dan.Schwarzkopf@noaa.gov">   Dan Schwartzkopf </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   This code is a helper module that provides various operations on 
+   longwave flux variables. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>          fms_mod<br>rad_utilities_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#longwave_fluxes_init">longwave_fluxes_init</a>:</dt>
+<dd>   Subroutine to initialize longwave fluxes namelist </dd>
+<dt>
+<a href="#longwave_fluxes_ks">longwave_fluxes_ks</a>:</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<dt>
+<a href="#longwave_fluxes_k_down">longwave_fluxes_k_down</a>:</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<dt>
+<a href="#longwave_fluxes_KE_KEp1">longwave_fluxes_KE_KEp1</a>:</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<dt>
+<a href="#longwave_fluxes_diag">longwave_fluxes_diag</a>:</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<dt>
+<a href="#longwave_fluxes_sum">longwave_fluxes_sum</a>:</dt>
+<dd>   Subroutine to compute summation of diagnostic longwave fluxes over
+   all bands </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="longwave_fluxes_init"></a>
+<h4>longwave_fluxes_init</h4>
+<pre>
+<b>call longwave_fluxes_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to initialize longwave fluxes namelist </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="longwave_fluxes_ks"></a>
+<h4>longwave_fluxes_ks</h4>
+<pre>
+<b>call longwave_fluxes_ks </b>( source, trans, source2, trans2, &amp; cld_trans, cld_ind, Lw_diagnostics)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>source&nbsp;&nbsp;&nbsp;</tt></td><td>   source is longwave source function. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans&nbsp;&nbsp;&nbsp;</tt></td><td>   trans is longwve transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>source2&nbsp;&nbsp;&nbsp;</tt></td><td>   source2 is longwave source function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans2&nbsp;&nbsp;&nbsp;</tt></td><td>   trans2 is longwve transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_trans&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_trans is longwave cloud transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_ind&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_ind is a lookup table to translate longwave band index to cloud index <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   Lw_diagnostics contains the longwave diagnostics flux values <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="longwave_fluxes_k_down"></a>
+<h4>longwave_fluxes_k_down</h4>
+<pre>
+<b>call longwave_fluxes_k_down </b>(klevel, source, trans, trans2, &amp; cld_trans, cld_ind, Lw_diagnostics)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>klevel&nbsp;&nbsp;&nbsp;</tt></td><td>   klevel is the starting vertical level to calculate longwave fluxes <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>source&nbsp;&nbsp;&nbsp;</tt></td><td>   source is longwave flux source function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans&nbsp;&nbsp;&nbsp;</tt></td><td>   trans is longwave flux transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans2&nbsp;&nbsp;&nbsp;</tt></td><td>   trans2 is longwave flux transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_trans&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_trans is longwave cloud transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_ind&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_ind is a lookup table to translate longwave band index to cloud index <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   Lw_diagnostics contains the longwave diagnostics flux values <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="longwave_fluxes_KE_KEp1"></a>
+<h4>longwave_fluxes_KE_KEp1</h4>
+<pre>
+<b>call longwave_fluxes_KE_KEp1 </b>(source, trans, trans2, &amp; cld_trans, cld_ind, Lw_diagnostics)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>source&nbsp;&nbsp;&nbsp;</tt></td><td>   source is longwave flux source function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans&nbsp;&nbsp;&nbsp;</tt></td><td>   trans is longwave flux transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans2&nbsp;&nbsp;&nbsp;</tt></td><td>   trans2 is longwave flux transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_trans&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_trans is longwave cloud transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_ind&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_ind is a lookup table to translate longwave band index to cloud index <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   Lw_diagnostics contains the longwave diagnostics flux values <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="longwave_fluxes_diag"></a>
+<h4>longwave_fluxes_diag</h4>
+<pre>
+<b>call longwave_fluxes_diag </b>(source, trans, &amp; cld_trans, cld_ind, Lw_diagnostics)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to calculate longwave diagnostic fluxes </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>source&nbsp;&nbsp;&nbsp;</tt></td><td>   source is longwave flux source function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>trans&nbsp;&nbsp;&nbsp;</tt></td><td>   trans is longwave flux transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_trans&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_trans is longwave cloud transmittance function <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cld_ind&nbsp;&nbsp;&nbsp;</tt></td><td>   cld_ind is a lookup table to translate longwave band index to cloud index <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   Lw_diagnostics contains the longwave diagnostics flux values <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="longwave_fluxes_sum"></a>
+<h4>longwave_fluxes_sum</h4>
+<pre>
+<b>call longwave_fluxes_sum </b>(is, ie, js, je, flux, NBTRGE, &amp; Lw_diagnostics, fluxcf)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Subroutine to compute summation of diagnostic longwave fluxes over
+   all bands </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   Obsolete <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td>   Obsolete <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td>   Obsolete <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td>   Obsolete <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>NBTRGE&nbsp;&nbsp;&nbsp;</tt></td><td>   number of longwave flux bands <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Lw_diagnostics&nbsp;&nbsp;&nbsp;</tt></td><td>   longwave flux diagnostics <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_diagnostics_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>flux&nbsp;&nbsp;&nbsp;</tt></td><td>   all sky total longwave flux <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>fluxcf&nbsp;&nbsp;&nbsp;</tt></td><td>   clear sky total longwave flux <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

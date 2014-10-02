@@ -1,0 +1,615 @@
+
+
+module simple_surface_mod
+
+!use atmos_coupled_mod, only: atmos_boundary_data_type
+use atmos_model_mod, only: atmos_data_type
+
+use surface_flux_mod, only: surface_flux
+
+
+use diag_integral_mod, only: diag_integral_field_init, &
+                             sum_diag_integral_field
+
+use           fms_mod, only: file_exist, open_namelist_file, check_nml_error, &
+                             error_mesg, FATAL, mpp_pe, mpp_root_pe, &
+                             open_file, close_file, read_data, write_data, &
+                             write_version_number, stdlog, set_domain
+
+use  diag_manager_mod, only: register_diag_field,  &
+                             register_static_field, send_data
+
+use  time_manager_mod, only: time_type
+
+use      constants_mod, only: rdgas, rvgas, cp_air, hlv, hlf
+
+use ocean_rough_mod, only: compute_ocean_roughness
+
+
+implicit none
+private
+
+public :: simple_surface_init,   &
+          compute_flux,          &
+          update_simple_surface, &
+          simple_surface_end
+
+!-----------------------------------------------------------------------
+character(len=128) :: version = '$Id: simple_surface.f90,v 1.1.2.3 2005/05/21 02:02:04 pjp Exp $'
+character(len=128) :: tagname = '$Name:  $'
+
+!-----------------------------------------------------------------------
+!-------- namelist (for diagnostics) ------
+
+character(len=14), parameter :: mod_name = 'simple_surface'
+
+integer :: id_drag_moist,  id_drag_heat,  id_drag_mom,              &
+           id_rough_moist, id_rough_heat, id_rough_mom,             &
+           id_u_star, id_b_star, id_u_flux, id_v_flux, id_t_surf,   &
+           id_t_flux, id_q_flux, id_r_flux,                         &
+           id_t_atm,  id_u_atm,  id_v_atm,  id_wind,                &
+           id_t_ref,  id_rh_ref, id_u_ref,  id_v_ref,               &
+           id_del_h,  id_del_m,  id_del_q, id_albedo, id_entrop_evap, &
+           id_entrop_shflx, id_entrop_lwflx
+
+logical :: first_static = .true.
+logical :: do_init = .true.
+
+!-----------------------------------------------------------------------
+
+real ::  z_ref_heat      = 2.,       &
+         z_ref_mom       = 10.,      &
+          heat_capacity   = 1.e07,    &
+          const_roughness = 3.21e-05, &
+          const_albedo    = 0.12
+
+integer :: surface_choice   = 1
+integer :: roughness_choice = 1
+integer :: albedo_choice    = 1
+
+namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
+                              surface_choice,  heat_capacity,    &
+                              roughness_choice, const_roughness, &
+                              albedo_choice, const_albedo
+
+!-----------------------------------------------------------------------
+
+!---- allocatable module storage ------
+
+  real, allocatable, dimension(:,:) :: e_t_n, f_t_delt_n, &
+                                       e_q_n, f_q_delt_n   
+
+  real, allocatable, dimension(:,:) :: dhdt_surf, dedt_surf, dedq_surf, &
+                                       drdt_surf, dhdt_atm, dedq_atm, &
+                                       flux_t, flux_q, flux_lw
+
+  real, allocatable, dimension(:,:) :: sst, flux_u, flux_v
+
+contains
+
+!#######################################################################
+
+ subroutine compute_flux     ( dt, Time, Atm, land_frac,            &
+                               t_surf_atm, albedo, rough_mom,       &
+                               flux_u_atm, flux_v_atm, dtaudv_atm,  &
+                               u_star, b_star                       )
+
+ real,                   intent(in)  :: dt
+ type       (time_type), intent(in)  :: Time
+ type (atmos_data_type), intent(in)  :: Atm
+ real, dimension(:,:),   intent(out) :: albedo,    rough_mom,       &
+                                        land_frac, dtaudv_atm,      &
+                                        flux_u_atm, flux_v_atm,     &
+                                        u_star, b_star
+
+real, dimension(:,:),   intent(out) :: t_surf_atm
+       
+real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
+       u_surf, v_surf, rough_heat, rough_moist,          &
+       stomatal, snow, water, max_water,                 &
+       q_star, q_surf, cd_q, cd_t, cd_m, wind, dtaudu_atm
+       
+logical, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
+       mask, glacier, seawater
+
+logical :: used
+
+
+!-----------------------------------------------------------------------
+
+   if (do_init) call error_mesg ('compute_flux',  &
+                 'must call simple_surface_init first', FATAL)
+
+!-----------------------------------------------------------------------
+!------ allocate storage also needed in flux_up_to_atmos -----
+
+   allocate (e_t_n      (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             e_q_n      (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             f_t_delt_n (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             f_q_delt_n (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             dhdt_surf  (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             dedt_surf  (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             dedq_surf  (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             drdt_surf  (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             dhdt_atm   (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             dedq_atm   (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             flux_t     (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             flux_q     (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
+             flux_lw    (size(Atm%t_bot,1), size(Atm%t_bot,2))  )
+   
+   u_surf     = 0.0
+   v_surf     = 0.0
+   stomatal   = 0.0
+   snow       = 0.0
+   water      = 1.0
+   max_water  = 1.0
+   
+   mask    = .true.
+   glacier = .false.
+   seawater= .false. 
+   
+   if(roughness_choice == 1) then
+     rough_mom   = const_roughness
+     rough_heat  = const_roughness
+     rough_moist = const_roughness
+   elseif(roughness_choice == 2) then
+!    call compute_ocean_roughness (mask, flux_u, flux_v,   & ! Fez
+     call compute_ocean_roughness (mask, u_star, &           ! Inchon and beyond. Changes answers.
+                         rough_mom, rough_heat, rough_moist)
+   endif
+   
+   if(albedo_choice == 1) then
+     albedo = const_albedo
+   elseif(albedo_choice == 2) then
+     albedo = const_albedo
+   endif
+   
+   
+   cd_t = 0.0
+   cd_m = 0.0
+   cd_q = 0.0
+
+   t_surf_atm = sst
+
+!  call surface_flux (Atm%t_bot, Atm%q_bot, Atm%u_bot, Atm%v_bot,        & ! Fez
+!                     Atm%p_bot, Atm%z_bot,                              &
+!                     Atm%p_surf, t_surf_atm, u_surf, v_surf,            &
+!                     rough_mom, rough_heat, rough_moist,                &
+!                     Atm%gust, stomatal,                                &
+!                     snow, water,  max_water,                           &
+!                     flux_t, flux_q, flux_lw, flux_u, flux_v,           &
+!                     cd_m,   cd_t, cd_q, wind,                          &
+!                     u_star, b_star, q_star, q_surf,                    &
+!                     dhdt_surf, dedt_surf,  drdt_surf,                  &
+!                     dhdt_atm,  dedq_atm,   dtaudv_atm,                 &
+!                     dt, mask, glacier)
+
+   call surface_flux (Atm%t_bot, Atm%q_bot, Atm%u_bot, Atm%v_bot,        & ! Lima
+                      Atm%p_bot, Atm%z_bot, Atm%p_surf, t_surf_atm,      &
+                      t_surf_atm,                                        & ! Required argument, intent(in). t_surf_atm instead of Land%t_ca
+                      q_surf, u_surf, v_surf,                            &
+                      rough_mom, rough_heat, rough_moist,                &
+                      rough_mom,                                         & ! Required argument, intent(in). rough_mom instead of Land%rough_scale
+                      Atm%gust, flux_t, flux_q, flux_lw, flux_u, flux_v, &
+                      cd_m, cd_t, cd_q, wind, u_star, b_star, q_star,    &
+                      dhdt_surf, dedt_surf,                              &
+                      dedq_surf,                                         & ! Required argument, intent(out), but not needed by this model.
+                      drdt_surf, dhdt_atm, dedq_atm,                     &
+                      dtaudu_atm,                                        & ! Required argument, intent(out), but not needed by this model.
+                      dtaudv_atm, dt,                                    & ! Required argument, intent(in). Looks like it should be .false. everywhere.
+                      .not.mask,                                         &
+                      seawater,                                          & ! Required argument, intent(in). Looks like fudgefactor for salt water. Use .false.
+                      mask )                                               ! Required argument, intent(in). Looks like it should be .true. everywhere.
+
+! intent(out):: flux_t, flux_q, flux_lw, flux_u, flux_v, cd_m, cd_t, cd_q, wind, u_star, b_star, q_star,
+! intent(out):: dhdt_surf, dedt_surf, dedq_surf, drdt_surf, dhdt_atm, dedq_atm, dtaudu_atm, dtaudv_atm
+! intent(inout) :: q_surf
+! All others intent(in)
+
+   flux_u_atm = flux_u
+   flux_v_atm = flux_v
+
+   land_frac = 0.0
+   
+!=======================================================================
+!-------------------- diagnostics section ------------------------------
+
+   if ( id_wind       > 0 ) used = send_data ( id_wind,       wind,               Time )
+   if ( id_drag_moist > 0 ) used = send_data ( id_drag_moist, cd_q,               Time )
+   if ( id_drag_heat  > 0 ) used = send_data ( id_drag_heat,  cd_t,               Time )
+   if ( id_drag_mom   > 0 ) used = send_data ( id_drag_mom,   cd_m,               Time )
+   if ( id_rough_heat > 0 ) used = send_data ( id_rough_heat, rough_heat,         Time )
+   if ( id_rough_mom  > 0 ) used = send_data ( id_rough_mom,  rough_mom,          Time )
+   if ( id_u_star     > 0 ) used = send_data ( id_u_star,     u_star,             Time )
+   if ( id_b_star     > 0 ) used = send_data ( id_b_star,     b_star,             Time )
+   if ( id_t_atm      > 0 ) used = send_data ( id_t_atm,      Atm%t_bot,          Time )
+   if ( id_u_atm      > 0 ) used = send_data ( id_u_atm,      Atm%u_bot,          Time )
+   if ( id_v_atm      > 0 ) used = send_data ( id_v_atm,      Atm%v_bot,          Time )
+   if ( id_albedo     > 0 ) used = send_data ( id_albedo,     albedo,             Time )
+
+
+
+!=======================================================================
+
+ end subroutine compute_flux
+
+!#######################################################################
+
+subroutine update_simple_surface (dt, Time, Atm, dt_t_atm, dt_q_atm  )
+
+real, intent(in) :: dt
+type       (time_type), intent(in)  :: Time
+type (atmos_data_type), intent(in)  :: Atm
+ 
+real, dimension(:,:),   intent(out) :: dt_t_atm, dt_q_atm
+   
+real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
+                     gamma, dtmass, delta_t, delta_q, dflux_t, dflux_q, &
+                     flux, deriv, dt_t_surf, &
+                     entrop_evap, entrop_shflx, entrop_lwflx
+ 
+
+ real    :: cp_inv
+ logical :: used
+
+   flux_lw = Atm%flux_lw - flux_lw
+   
+   dtmass  = Atm%Surf_Diff%dtmass
+   delta_t = Atm%Surf_Diff%delta_t
+   delta_q = Atm%Surf_Diff%delta_q
+   dflux_t = Atm%Surf_Diff%dflux_t
+   dflux_q = Atm%Surf_Diff%dflux_q
+   
+ cp_inv = 1.0/cp_air
+ 
+ ! temperature
+
+   gamma      =  1./ (1.0 - dtmass*(dflux_t + dhdt_atm*cp_inv))
+   e_t_n      =  dtmass*dhdt_surf*cp_inv*gamma
+   f_t_delt_n = (delta_t + dtmass * flux_t*cp_inv) * gamma    
+
+   flux_t     =  flux_t        + dhdt_atm * f_t_delt_n 
+   dhdt_surf  =  dhdt_surf     + dhdt_atm * e_t_n   
+
+! moisture
+
+   gamma      =  1./ (1.0 - dtmass*(dflux_q + dedq_atm))
+   e_q_n      =  dtmass*dedt_surf*gamma
+   f_q_delt_n = (delta_q  + dtmass * flux_q) * gamma    
+
+   flux_q     =  flux_q        + dedq_atm * f_q_delt_n 
+   dedt_surf  =  dedt_surf     + dedq_atm * e_q_n   
+   
+if(surface_choice == 1) then
+   
+  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
+          - (flux_t + hlv*flux_q))*dt/heat_capacity
+
+  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
+
+  dt_t_surf = flux/(1.0 -deriv)
+  sst = sst + dt_t_surf
+  
+elseif(surface_choice == 2) then
+
+  dt_t_surf  = 0.0
+  
+endif
+
+
+  flux_t     = flux_t      + dt_t_surf*dhdt_surf
+  flux_q     = flux_q      + dt_t_surf*dedt_surf
+  flux_lw    = flux_lw     - dt_t_surf*drdt_surf
+  dt_t_atm   = f_t_delt_n  + dt_t_surf*e_t_n
+  dt_q_atm   = f_q_delt_n  + dt_t_surf*e_q_n
+
+ 
+
+
+!=======================================================================
+!-------------------- diagnostics section ------------------------------
+
+   if ( id_t_surf > 0 ) used = send_data ( id_t_surf, sst, Time )
+   if ( id_t_flux > 0 ) used = send_data ( id_t_flux, flux_t, Time )
+   if ( id_r_flux > 0 ) used = send_data ( id_r_flux, flux_lw, Time )
+   if ( id_q_flux > 0 ) used = send_data ( id_q_flux, flux_q, Time )
+   if ( id_entrop_evap > 0 ) then 
+      entrop_evap = flux_q/sst
+      used = send_data ( id_entrop_evap, entrop_evap, Time)
+   endif
+   if (id_entrop_shflx > 0 ) then
+      entrop_shflx = flux_t/sst
+      used = send_data ( id_entrop_shflx, entrop_shflx, Time)
+   endif
+   if (id_entrop_lwflx > 0 ) then
+      entrop_lwflx = flux_lw/sst
+      used = send_data ( id_entrop_lwflx, entrop_lwflx, Time)
+   endif
+
+   call sum_diag_integral_field ('evap', flux_q*86400.)
+
+!=======================================================================
+!---- deallocate module storage ----
+
+
+   deallocate (f_t_delt_n, f_q_delt_n, e_t_n, e_q_n)
+   deallocate(dhdt_surf, dedt_surf, dedq_surf, drdt_surf, dhdt_atm, dedq_atm, &
+              flux_t, flux_q, flux_lw)  
+
+
+
+!-----------------------------------------------------------------------
+
+ end subroutine update_simple_surface
+
+!#######################################################################
+
+ subroutine simple_surface_init ( Time, Atm)
+
+ type       (time_type), intent(in)  :: Time
+ type (atmos_data_type), intent(in)  :: Atm
+
+ integer :: unit, ierr, io
+ 
+ integer :: j
+ real :: xx, xx2, lat
+
+!-----------------------------------------------------------------------
+!------ read namelist ------
+
+   if ( file_exist('input.nml')) then
+      unit = open_namelist_file ( )
+      ierr=1; do while (ierr /= 0)
+         read  (unit, nml=simple_surface_nml, iostat=io, end=10)
+         ierr = check_nml_error(io,'simple_surface_nml')
+      enddo
+ 10   call close_file (unit)
+   endif
+
+!--------- write version number and namelist ------------------
+
+   call write_version_number ( version, tagname )
+   if ( mpp_pe() == mpp_root_pe() ) then
+        write (stdlog(), nml=simple_surface_nml)
+   endif
+
+   call diag_integral_field_init ('evap', 'f6.3')
+   call diag_field_init ( Time, Atm%axes(1:2) )
+   
+allocate(sst   (size(Atm%t_bot,1),size(Atm%t_bot,2)))
+allocate(flux_u(size(Atm%t_bot,1),size(Atm%t_bot,2)))
+allocate(flux_v(size(Atm%t_bot,1),size(Atm%t_bot,2)))
+   
+if(file_exist('INPUT/simple_surface.res.nc')) then
+  call read_data('INPUT/simple_surface.res.nc', 'sst',    sst,    domain=Atm%domain)
+  call read_data('INPUT/simple_surface.res.nc', 'flux_u', flux_u, domain=Atm%domain)
+  call read_data('INPUT/simple_surface.res.nc', 'flux_v', flux_v, domain=Atm%domain)
+else if(file_exist('INPUT/simple_surface.res')) then
+  unit = open_file(file='INPUT/simple_surface.res',form='unformatted',&
+                   action='read')
+  call set_domain(Atm%domain)
+  
+  call read_data(unit, sst)
+  call read_data(unit, flux_u)
+  call read_data(unit, flux_v)
+  
+  call close_file(unit)
+else 
+  do j = 1, size(Atm%t_bot,2)
+    lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
+!    xx = 1. - sin(1.5*lat)*sin(1.5*lat)
+!    if(abs(lat) .gt. atan(1.0)*60.0/45.0) xx = 0.0
+!    sst(:,j) = 273.15 + 27.0*xx
+    xx = sin(lat)*sin(lat)
+    xx2 = xx*xx
+    sst(:,j) = 305.0 - 10.0*xx2 - 30.0*xx
+!    sst(:,j) = 290.0
+!    sst(:,j) = 300.0 - 35.0*xx2
+  end do
+  flux_u = 0.0
+  flux_v = 0.0
+endif
+   
+
+   do_init = .false.
+
+!-----------------------------------------------------------------------
+
+ end subroutine simple_surface_init
+
+!#######################################################################
+
+subroutine diag_field_init ( Time, atmos_axes )
+
+  type(time_type), intent(in) :: Time
+  integer,         intent(in) :: atmos_axes(2)
+
+  integer :: iref
+  character(len=6) :: label_zm, label_zh
+  real, dimension(2) :: trange = (/  100., 400. /), &
+                        vrange = (/ -400., 400. /), &
+                        frange = (/ -0.01, 1.01 /)
+!-----------------------------------------------------------------------
+!  initializes diagnostic fields that may be output from this module
+!  (the id numbers may be referenced anywhere in this module)
+!-----------------------------------------------------------------------
+
+!------ labels for diagnostics -------
+!  (z_ref_mom, z_ref_heat are namelist variables)
+
+   iref = int(z_ref_mom+0.5)
+   if ( real(iref) == z_ref_mom ) then
+                     write (label_zm,105) iref
+      if (iref < 10) write (label_zm,100) iref
+   else
+        write (label_zm,110) z_ref_mom
+   endif
+
+   iref = int(z_ref_heat+0.5)
+   if ( real(iref) == z_ref_heat ) then
+                    write (label_zh,105) iref
+     if (iref < 10) write (label_zh,100) iref
+   else
+        write (label_zh,110) z_ref_heat
+   endif
+
+100 format (i1,' m',3x)
+105 format (i2,' m',2x)
+110 format (f4.1,' m')
+
+ 
+   id_wind = &
+   register_diag_field ( mod_name, 'wind', atmos_axes, Time, &
+                        'wind speed for flux calculations', 'm/s', &
+                         range=(/0.,vrange(2)/) )
+
+   id_drag_moist = &
+   register_diag_field ( mod_name, 'drag_moist', atmos_axes, Time, &
+                        'drag coeff for moisture',    'none'     )
+
+   id_drag_heat  = &
+   register_diag_field ( mod_name, 'drag_heat', atmos_axes, Time, &
+                        'drag coeff for heat',    'none'     )
+
+   id_drag_mom   = &
+   register_diag_field ( mod_name, 'drag_mom',  atmos_axes, Time, &
+                        'drag coeff for momentum',     'none'     )
+
+   id_rough_moist = &
+   register_diag_field ( mod_name, 'rough_moist', atmos_axes, Time, &
+                        'surface roughness for moisture',  'm'  )
+
+   id_rough_heat = &
+   register_diag_field ( mod_name, 'rough_heat', atmos_axes, Time, &
+                        'surface roughness for heat',  'm'  )
+
+   id_rough_mom  = &
+   register_diag_field ( mod_name, 'rough_mom',  atmos_axes, Time, &
+                        'surface roughness for momentum',  'm'  )
+
+   id_u_star     = &
+   register_diag_field ( mod_name, 'u_star',     atmos_axes, Time, &
+                        'friction velocity',   'm/s'   )
+      
+   id_b_star     = &
+   register_diag_field ( mod_name, 'b_star',     atmos_axes, Time, &
+                        'buoyancy scale',      'm/s2'   )
+
+   id_u_flux     = &
+   register_diag_field ( mod_name, 'tau_x',      atmos_axes, Time, &
+                        'zonal wind stress',     'pa'   )
+
+   id_v_flux     = &
+   register_diag_field ( mod_name, 'tau_y',      atmos_axes, Time, &
+                        'meridional wind stress',     'pa'   )
+
+   id_t_surf     = &
+   register_diag_field ( mod_name, 't_surf',     atmos_axes, Time, &
+                        'surface temperature',    'deg_k', &
+                        range=trange    )
+
+   id_t_flux     = &
+   register_diag_field ( mod_name, 'shflx',      atmos_axes, Time, &
+                        'sensible heat flux',     'w/m2'    )
+
+   id_q_flux     = &
+   register_diag_field ( mod_name, 'evap',       atmos_axes, Time, &
+                        'evaporation rate',        'kg/m2/s'  )
+
+   id_r_flux     = &
+   register_diag_field ( mod_name, 'lwflx',      atmos_axes, Time, &
+                        'net (down-up) longwave flux',   'w/m2'    )
+
+   id_t_atm      = &
+   register_diag_field ( mod_name, 't_atm',      atmos_axes, Time, &
+                        'temperature at btm level',    'deg_k', &
+                        range=trange     )
+
+   id_u_atm      = &
+   register_diag_field ( mod_name, 'u_atm',      atmos_axes, Time, &
+                        'u wind component at btm level',  'm/s', &
+                        range=vrange    )
+
+   id_v_atm      = &
+   register_diag_field ( mod_name, 'v_atm',      atmos_axes, Time, &
+                        'v wind component at btm level',  'm/s', &
+                        range=vrange    )
+
+   id_t_ref      = &
+   register_diag_field ( mod_name, 't_ref',      atmos_axes, Time, &
+                        'temperature at '//label_zh, 'deg_k' , &
+                        range=trange      )
+
+   id_rh_ref     = &
+   register_diag_field ( mod_name, 'rh_ref',     atmos_axes, Time,   &
+                        'relative humidity at '//label_zh, 'percent' )
+
+   id_u_ref      = &
+   register_diag_field ( mod_name, 'u_ref',      atmos_axes, Time, &
+                        'zonal wind component at '//label_zm,  'm/s', &
+                        range=vrange )
+
+   id_v_ref      = &
+   register_diag_field ( mod_name, 'v_ref',      atmos_axes, Time,     &
+                      'meridional wind component at '//label_zm, 'm/s', &
+                        range=vrange )
+
+   id_del_h      = &
+   register_diag_field ( mod_name, 'del_h',      atmos_axes, Time,  &
+                        'ref height interp factor for heat', 'none' )
+   id_del_m      = &
+   register_diag_field ( mod_name, 'del_m',      atmos_axes, Time,     &
+                        'ref height interp factor for momentum','none' )
+   id_del_q      = &
+   register_diag_field ( mod_name, 'del_q',      atmos_axes, Time,     &
+                        'ref height interp factor for moisture','none' )
+   id_albedo      = &
+   register_diag_field ( mod_name, 'albedo',      atmos_axes, Time,     &
+                        'surface albedo','none' )
+   id_entrop_evap      = &
+   register_diag_field ( mod_name, 'entrop_evap', atmos_axes, Time,     &
+                        'entropy source from evap','kg/m2/s/K' )
+
+   id_entrop_shflx      = &
+   register_diag_field ( mod_name, 'entrop_shflx', atmos_axes, Time,     &
+                        'entropy source from SH flux','w/m2/K' )
+
+   id_entrop_lwflx      = &
+   register_diag_field ( mod_name, 'entrop_lwflx', atmos_axes, Time,     &
+                        'entropy source from LW flux','w/m2/K' )
+
+
+
+
+!-----------------------------------------------------------------------
+
+end subroutine diag_field_init
+
+
+!########################################################################
+
+subroutine simple_surface_end (Atm)
+
+type (atmos_data_type), intent(in)  :: Atm
+integer :: unit
+
+call write_data('RESTART/simple_surface.res.nc', 'sst',    sst,    domain=Atm%domain)
+call write_data('RESTART/simple_surface.res.nc', 'flux_u', flux_u, domain=Atm%domain)
+call write_data('RESTART/simple_surface.res.nc', 'flux_v', flux_v, domain=Atm%domain)
+
+!unit = open_file(file='RESTART/simple_surface.res',form='unformatted', &
+!                       action='write')
+!call set_domain(Atm%domain)
+
+!call write_data(unit, sst)
+!call write_data(unit, flux_u)
+!call write_data(unit, flux_v)
+
+!call close_file(unit)
+
+end subroutine simple_surface_end
+
+!#######################################################################
+
+end module simple_surface_mod
+

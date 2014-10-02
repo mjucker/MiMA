@@ -1,0 +1,264 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module longwave_tables_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module longwave_tables_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   Fei Liu </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:ds@gfdl.noaa.gv">   Dan Schwarzkopf </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   This code defines longwave radiation tables, it also
+   allocate, compute related parameters based on prescribed
+   tables. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>            fms_mod<br>  rad_utilities_mod<br>longwave_params_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#longwave_tables_init">longwave_tables_init</a>:</dt>
+<dd>   Constructor of longwave_tables module </dd>
+<dt>
+<a href="#longwave_tables_end">longwave_tables_end</a>:</dt>
+<dd>   Destructor of longwave_tables module </dd>
+<dt>
+<a href="#idrbtsh2o">idrbtsh2o</a>:</dt>
+<dd>   Subroutine to read h2o roberts continuum quantities used in longwave
+   radiation </dd>
+<dt>
+<a href="#table">table</a>:</dt>
+<dd>   Subroutine to compute table entries used in longwave radiation </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="longwave_tables_init"></a>
+<h4>longwave_tables_init</h4>
+<pre>
+<b>call longwave_tables_init </b>(Lw_tables, tabsr, &amp; tab1, tab2, tab3, tab1w, tab1a, tab2a, tab3a)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Defines continuum coefficients and random band parameters for longwave
+   gas species. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Lw_tables&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[lw_table_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tabsr&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables3_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab1&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tabs2&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab3&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab1w&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab1a&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tabs2a&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab3a&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="longwave_tables_end"></a>
+<h4>longwave_tables_end</h4>
+<pre>
+<b>call longwave_tables_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   Closes out longwave tables module. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="idrbtsh2o"></a>
+<h4>idrbtsh2o</h4>
+<pre>
+<b>call idrbtsh2o </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine reads h2o roberts continuum quantities used in
+   longwave radiation from an INPUT file. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="table"></a>
+<h4>table</h4>
+<pre>
+<b>call table </b>(tabsr, tab1, tab2, tab3, tab1w, tab1a, tab2a, tab3a)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   This subroutine computes the table entries used in longwave radiation </dd>
+<br>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>tabsr&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables3_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab1&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tabs2&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab3&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab1w&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables1_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab1a&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tabs2a&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tab3a&nbsp;&nbsp;&nbsp;</tt></td><td>   Contains the tables used in longwave radiation <br>&nbsp;&nbsp;&nbsp;<span class="type">[longwave_tables2_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

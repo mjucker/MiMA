@@ -1,0 +1,654 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module rh_based_clouds_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module rh_based_clouds_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:fei.liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:"> </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/sea_esf_rad">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   module which defines cloud locations
+   based on model relative humidity
+   <br>
+<br> 
+</p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div> 
+</div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>          fms_mod<br>    rh_clouds_mod<br>rad_utilities_mod<br>    constants_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#rh_based_clouds_init">rh_based_clouds_init</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#rh_based_clouds_end">rh_based_clouds_end</a>:</dt>
+<dd> 
+</dd>
+<dt>
+<a href="#rh_clouds_amt">rh_clouds_amt</a>:</dt>
+<dd>   rh_clouds_amt defines the location, amount (cloud fraction), number
+   and type (hi, mid, low) of clouds present on the model grid.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#obtain_bulk_lw_rh">obtain_bulk_lw_rh</a>:</dt>
+<dd>   obtain_bulk_lw_rh defines bulk longwave cloud radiative
+   properties for the rh cloud scheme.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#obtain_bulk_sw_rh">obtain_bulk_sw_rh</a>:</dt>
+<dd>   obtain_bulk_sw_rh defines bulk shortwave cloud radiative
+   properties for the rh cloud scheme.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#cldalb">cldalb</a>:</dt>
+<dd>   cldalb calculates a zenith angle dependency for the cloud albedos.
+   the cloud albedos are interpolated using data adapted from fritz
+   (1954).  the solar zenith angle is the only input required.
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#albcld_lw">albcld_lw</a>:</dt>
+<dd>   albcld_lw computes the lw cloud emissivities. This calculation is
+   based on sigma and cloud thickness in the old scheme (cldht60)
+   and sigma, cloud thickness and latitude in the new scheme
+   (cldht93).
+   <br>
+<br> 
+</dd>
+<dt>
+<a href="#albcld_sw">albcld_sw</a>:</dt>
+<dd>   albcld_sw computes the cloud albedos. This calculation is based on
+   sigma and cloud thickness in the old scheme (cldht60) and sigma,
+   cloud thickness  and latitude in the new scheme (cldht93).
+   <br>
+<br> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>None.<br>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="rh_based_clouds_init"></a>
+<h4>rh_based_clouds_init</h4>
+<pre>
+<b>call rh_based_clouds_init </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="rh_based_clouds_end"></a>
+<h4>rh_based_clouds_end</h4>
+<pre>
+<b>call rh_based_clouds_end </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd> 
+</dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="rh_clouds_amt"></a>
+<h4>rh_clouds_amt</h4>
+<pre>
+<b>call rh_clouds_amt </b>(is, ie, js, je, press, lat, Cld_spec)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   rh_clouds_amt defines the location, amount (cloud fraction), number
+   and type (hi, mid, low) of clouds present on the model grid.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   is,ie,js,je  starting/ending subdomain i,j indices of data in
+   the physics_window being integrated
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>press&nbsp;&nbsp;&nbsp;</tt></td><td>   press        pressure at model levels (1:nlev), surface
+   pressure is stored at index value nlev+1
+   [ (kg /( m s^2) ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   lat          latitude of model points  [ radians ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cld_spec     cld_specification_type variable containing the
+   cloud specification input fields needed by the
+   radiation package
+   <br>
+<br>
+   the following elements of Cld_spec are defined here:
+   <br>
+<br>
+   %cmxolw  fraction of maximally overlapped clouds
+   seen by the longwave radiation
+   [ dimensionless ]
+   %crndlw  fraction of randomly overlapped clouds
+   seen by the longwave radiation
+   [ dimensionless ]
+   %camtsw  cloud fraction seen by the shortwave
+   radiation; the sum of the maximally
+   overlapped and randomly overlapped
+   longwave cloud fractions  [ dimensionless ]
+   %nmxolw  number of maximally overlapped longwave
+   clouds in each grid column.
+   %nrndlw  number of randomly overlapped longwave
+   clouds in each grid column.
+   %ncldsw  number of clouds seen by he shortwave
+   radiation in each grid column.
+   %hi_cld  logical flag indicating the presence of
+   high clouds in a grid box
+   %mid_cld  logical flag indicating the presence of
+   middle clouds in a grid box
+   %low_cld  logical flag indicating the presence of
+   low clouds in a grid box
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_bulk_lw_rh"></a>
+<h4>obtain_bulk_lw_rh</h4>
+<pre>
+<b>call obtain_bulk_lw_rh </b>(is, ie, js, je, Cld_spec, Cldrad_props)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_bulk_lw_rh defines bulk longwave cloud radiative
+   properties for the rh cloud scheme.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   is,ie,js,je  starting/ending subdomain i,j indices of data in
+   the physics_window being integrated
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cld_spec          cloud specification arrays defining the
+   location, amount and type (hi, middle, lo)
+   of clouds that are present, provides input
+   to this subroutine
+   [ cld_specification_type ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Cldrad_props      cloud radiative properties on model grid,
+   [ cldrad_properties_type ]
+   <br>
+<br>
+   the following components of this variable are output
+   from this routine:
+   <br>
+<br>
+   %emrndlw   longwave cloud emissivity for
+   randomly overlapped clouds
+   in each of the longwave
+   frequency bands  [ dimensionless ]
+   %emmxolw   longwave cloud emissivity for
+   maximally overlapped clouds
+   in each of the longwave
+   frequency bands  [ dimensionless ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="obtain_bulk_sw_rh"></a>
+<h4>obtain_bulk_sw_rh</h4>
+<pre>
+<b>call obtain_bulk_sw_rh </b>(is, ie, js, je, cosz, Cld_spec, &amp; Cldrad_props)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   obtain_bulk_sw_rh defines bulk shortwave cloud radiative
+   properties for the rh cloud scheme.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>is&nbsp;&nbsp;&nbsp;</tt></td><td>   is,ie,js,je  starting/ending subdomain i,j indices of data in
+   the physics_window being integrated
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>ie&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>js&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>je&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cosz&nbsp;&nbsp;&nbsp;</tt></td><td>   cosz         cosine of the zenith angle [ dimensionless ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Cld_spec&nbsp;&nbsp;&nbsp;</tt></td><td>   Cld_spec          cloud specification arrays defining the
+   location, amount and type (hi, middle, lo)
+   of clouds that are present, provides input
+   to this subroutine
+   [ cld_specification_type ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cld_specification_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Cldrad_props&nbsp;&nbsp;&nbsp;</tt></td><td>   Cldrad_props      cloud radiative properties on model grid,
+   [ cldrad_properties_type ]
+   <br>
+<br>
+   the following components of this variable are output
+   from this routine:
+   <br>
+<br>
+   %cirabsw   absorptivity of clouds in the
+   infrared frequency band
+   [ dimensionless ]
+   %cirrfsw   reflectivity of clouds in the
+   infrared frequency band
+   [ dimensionless ]
+   %cvisrfsw  reflectivity of clouds in the
+   visible frequency band
+   [ dimensionless ]
+   <br>
+<br> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[cldrad_properties_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="cldalb"></a>
+<h4>cldalb</h4>
+<pre>
+<b>call cldalb </b>(zenith)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   cldalb calculates a zenith angle dependency for the cloud albedos.
+   the cloud albedos are interpolated using data adapted from fritz
+   (1954).  the solar zenith angle is the only input required.
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>zenith&nbsp;&nbsp;&nbsp;</tt></td><td>   zenith angle <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="albcld_lw"></a>
+<h4>albcld_lw</h4>
+<pre>
+<b>call albcld_lw </b>(hi_cloud, mid_cloud, low_cloud, &amp; cmxolw, crndlw, emmxolw, emrndlw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   albcld_lw computes the lw cloud emissivities. This calculation is
+   based on sigma and cloud thickness in the old scheme (cldht60)
+   and sigma, cloud thickness and latitude in the new scheme
+   (cldht93).
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>hi_cloud&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mid_cloud&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>low_cloud&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cmxolw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>crndlw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>emmxolw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>emrndlw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="albcld_sw"></a>
+<h4>albcld_sw</h4>
+<pre>
+<b>call albcld_sw </b>(i,j, hi_cloud, mid_cloud, low_cloud, &amp; camtsw, cmxolw, crndlw, cvisrfsw, cirrfsw, cirabsw)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   albcld_sw computes the cloud albedos. This calculation is based on
+   sigma and cloud thickness in the old scheme (cldht60) and sigma,
+   cloud thickness  and latitude in the new scheme (cldht93).
+   <br>
+<br> 
+</dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>j&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>hi_cloud&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mid_cloud&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>low_cloud&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[logical]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>camtsw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cmxolw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>crndlw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>i&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cvisrfsw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cirrfsw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>cirabsw&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<!-- END NAMELIST --><a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<!-- END DIAGNOSTIC FIELDS --><a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>None.<br>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>

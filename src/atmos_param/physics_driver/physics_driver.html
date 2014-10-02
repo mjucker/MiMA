@@ -1,0 +1,1072 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+<title>Module physics_driver_mod</title>
+<link type="text/css" href="http://www.gfdl.noaa.gov/~fms/style/doc.css" rel="stylesheet">
+<STYLE TYPE="text/css">
+          .fixed {
+            font-size:medium;
+            font-family:monospace;
+            border-style:none;
+            border-width:0.1em;
+            padding:0.1em;
+            color:#663366;
+          }
+        </STYLE>
+</head>
+<body>
+<a name="TOP"></a><font class="header" size="1"><a href="#PUBLIC INTERFACE">PUBLIC INTERFACE </a>~
+          <a href="#PUBLIC DATA">PUBLIC DATA </a>~
+          <a href="#PUBLIC ROUTINES">PUBLIC ROUTINES </a>~
+          <a href="#NAMELIST">NAMELIST </a>~
+          <a href="#DIAGNOSTIC FIELDS">DIAGNOSTIC FIELDS </a>~
+          <a href="#ERROR MESSAGES">ERROR MESSAGES </a>~
+          <a href="#REFERENCES">REFERENCES </a>~ 
+          <a href="#NOTES">NOTES</a></font>
+<hr>
+<h2>Module physics_driver_mod</h2>
+<a name="HEADER"></a>
+<!-- BEGIN HEADER -->
+<div>
+<b>Contact:&nbsp;</b><a href="mailto:Fei.Liu@noaa.gov">   fil </a>
+<br>
+<b>Reviewers:&nbsp;</b><a href="mailto:"> </a>
+<br>
+<b>Change History:&nbsp;</b><a href="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/atmos/param/physics_driver">WebCVS Log</a>
+<br>
+<br>
+</div>
+<!-- END HEADER -->
+<a name="OVERVIEW"></a>
+<hr>
+<h4>OVERVIEW</h4>
+<!-- BEGIN OVERVIEW -->
+<p class="text">   Provides high level interfaces for calling the entire
+   FMS atmospheric physics package.
+   <br>
+<br>
+   physics_driver_mod accesses the model's physics modules and
+   obtains tendencies and boundary fluxes due to the physical
+   processes that drive atmospheric time tendencies and supply 
+   boundary forcing to the surface models. </p>
+<!-- END OVERVIEW -->
+<a name="DESCRIPTION"></a>
+<!-- BEGIN DESCRIPTION -->
+<div>   This version of physics_driver_mod has been designed around the implicit
+   version diffusion scheme of the GCM. It requires two routines to advance
+   the model one time step into the future. These two routines
+   correspond to the down and up sweeps of the standard tridiagonal solver.
+   Radiation, Rayleigh damping, gravity wave drag, vertical diffusion of
+   momentum and tracers, and the downward pass of vertical diffusion for
+   temperature and specific humidity are performed in the down routine.
+   The up routine finishes the vertical diffusion and computes moisture
+   related terms (convection,large-scale condensation, and precipitation). </div>
+<br>
+<!-- END DESCRIPTION -->
+<a name="OTHER MODULES USED"></a>
+<hr>
+<h4>OTHER MODULES USED</h4>
+<!-- BEGIN OTHER MODULES USED -->
+<div>
+<pre>       time_manager_mod<br>      field_manager_mod<br>     tracer_manager_mod<br>atmos_tracer_driver_mod<br>                fms_mod<br>             fms_io_mod<br>      rad_utilities_mod<br>    moist_processes_mod<br>   vert_turb_driver_mod<br>   vert_diff_driver_mod<br>   radiation_driver_mod<br>         cloud_spec_mod<br>            aerosol_mod<br>    radiative_gases_mod<br>     damping_driver_mod</pre>
+</div>
+<!-- END OTHER MODULES USED -->
+<!-- BEGIN PUBLIC INTERFACE -->
+<a name="PUBLIC INTERFACE"></a>
+<hr>
+<h4>PUBLIC INTERFACE</h4>
+<div>
+<dl>
+<dt>
+<a href="#physics_driver_init">physics_driver_init</a>:</dt>
+<dd>   physics_driver_init is the constructor for physics_driver_mod. </dd>
+<dt>
+<a href="#physics_driver_down">physics_driver_down</a>:</dt>
+<dd>   physics_driver_down calculates "first pass" physics tendencies,
+   associated with radiation, damping and turbulence, and obtains
+   the vertical diffusion tendencies to be passed to the surface and
+   used in the semi-implicit vertical diffusion calculation. </dd>
+<dt>
+<a href="#physics_driver_up">physics_driver_up</a>:</dt>
+<dd>   physics_driver_up completes the calculation of vertical diffusion 
+   and also handles moist physical processes. </dd>
+<dt>
+<a href="#physics_driver_end">physics_driver_end</a>:</dt>
+<dd>   physics_driver_end is the destructor for physics_driver_mod. </dd>
+<dt>
+<a href="#do_moist_in_phys_up">do_moist_in_phys_up</a>:</dt>
+<dd>   do_moist_in_phys_up returns the value of do_moist_processes </dd>
+<dt>
+<a href="#get_diff_t">get_diff_t</a>:</dt>
+<dd>   returns the values of array diff_t </dd>
+<dt>
+<a href="#get_radturbten">get_radturbten</a>:</dt>
+<dd>   returns the values of array radturbten </dd>
+<dt>
+<a href="#zero_radturbten">zero_radturbten</a>:</dt>
+<dd>   sets all values of array radturbten to zero </dd>
+<dt>
+<a href="#read_restart_file">read_restart_file</a>:</dt>
+<dd>   read_restart_file will read the physics_driver.res file and process
+   its contents. if no restart data can be found, the module variables
+   are initialized to flag values. </dd>
+<dt>
+<a href="#read_restart_nc">read_restart_nc</a>:</dt>
+<dd>   read_restart_nc will read the physics_driver.res file and process
+   its contents. if no restart data can be found, the module variables
+   are initialized to flag values. </dd>
+<dt>
+<a href="#check_args">check_args</a>:</dt>
+<dd>   check_args determines if the input arrays to physics_driver_down
+   are of a consistent size. </dd>
+<dt>
+<a href="#check_dim_2d">check_dim_2d</a>:</dt>
+<dd>   check_dim_2d compares the size of two-dimensional input arrays
+   with supplied expected dimensions and returns an error if any
+   inconsistency is found. </dd>
+<dt>
+<a href="#check_dim_3d">check_dim_3d</a>:</dt>
+<dd>   check_dim_3d compares the size of three-dimensional input arrays
+   with supplied expected dimensions and returns an error if any
+   inconsistency is found. </dd>
+<dt>
+<a href="#check_dim_4d">check_dim_4d</a>:</dt>
+<dd>   check_dim_4d compares the size of four-dimensional input arrays
+   with supplied expected dimensions and returns an error if any
+   inconsistency is found. </dd>
+</dl>
+</div>
+<br>
+<!-- END PUBLIC INTERFACE -->
+<a name="PUBLIC DATA"></a>
+<hr>
+<h4>PUBLIC DATA</h4>
+<!-- BEGIN PUBLIC DATA -->
+<div>
+<table align="center" cellspacing="2" CELLPADDING="2" BORDER="2">
+<tr>
+<th> Name  </th><th> Type  </th><th> Value  </th><th> Units  </th><th> Description  </th>
+</tr>
+<tr>
+<td> surf_diff_type  </td><td> surf_diff_type, dimension  </td><td>   </td><td>   </td><td>    Defined in vert_diff_driver_mod, republished here. See vert_diff_mod for details.   </td>
+</tr>
+</table>
+<br>
+</div>
+<!-- END PUBLIC DATA -->
+<a name="PUBLIC ROUTINES"></a>
+<hr>
+<h4>PUBLIC ROUTINES</h4>
+<!-- BEGIN PUBLIC ROUTINES -->
+<ol type="a">
+<li>
+<a name="physics_driver_init"></a>
+<h4>physics_driver_init</h4>
+<pre>
+<b>call physics_driver_init </b>(Time, lonb, latb, axes, pref, &amp; trs, Surf_diff, phalf, mask, kbot )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   physics_driver_init is the constructor for physics_driver_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>pref&nbsp;&nbsp;&nbsp;</tt></td><td>   reference prssure profiles <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>latb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model latitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lonb&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model longitudes at cell boundaries [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>axes&nbsp;&nbsp;&nbsp;</tt></td><td>   axis indices, (/x,y,pf,ph/)
+   (returned from diag axis manager) <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>phalf&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model interface levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   index of lowest model level above ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   mask to remove points below ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>trs&nbsp;&nbsp;&nbsp;</tt></td><td>   atmospheric tracer fields <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surf_diff&nbsp;&nbsp;&nbsp;</tt></td><td>   surface diffusion derived type <br>&nbsp;&nbsp;&nbsp;<span class="type">[surf_diff_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="physics_driver_down"></a>
+<h4>physics_driver_down</h4>
+<pre>
+<b>call physics_driver_down </b>(is, ie, js, je, &amp; Time_prev, Time, Time_next, &amp; lat, lon, area, &amp; p_half, p_full, z_half, z_full, &amp; u, v, t, q, r, um, vm, tm, qm, rm, &amp; frac_land, rough_mom, &amp; albedo, t_surf_rad, &amp; u_star, b_star, q_star, &amp; dtau_du, dtau_dv, tau_x, tau_y, &amp; udt, vdt, tdt, qdt, rdt, &amp; flux_sw, flux_lw, coszen, gust, &amp; Surf_diff, &amp; mask, kbot</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   physics_driver_down calculates "first pass" physics tendencies,
+   associated with radiation, damping and turbulence, and obtains
+   the vertical diffusion tendencies to be passed to the surface and
+   used in the semi-implicit vertical diffusion calculation. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time_prev&nbsp;&nbsp;&nbsp;</tt></td><td>   previous time, for variable um, vm, tm, qm, rm <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time_next&nbsp;&nbsp;&nbsp;</tt></td><td>   next time, used for diagnostics <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model latitudes at model points [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lon&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model longitudes at model points [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>area&nbsp;&nbsp;&nbsp;</tt></td><td>   grid box area - current not used <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_half&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model interface levels (offset from t,q,u,v,r) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_full&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at full levels </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_half&nbsp;&nbsp;&nbsp;</tt></td><td>   height at model interface levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_full&nbsp;&nbsp;&nbsp;</tt></td><td>   height at full levels </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>u&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>v&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>t&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>q&nbsp;&nbsp;&nbsp;</tt></td><td>   specific humidity at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>r&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple 3d tracer fields at current time step </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>um&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vm&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tm&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qm&nbsp;&nbsp;&nbsp;</tt></td><td>   specific humidity at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rm&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple 3d tracer fields at previous time step </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>frac_land&nbsp;&nbsp;&nbsp;</tt></td><td>   fraction of land coverage in a model grid point <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rough_mom&nbsp;&nbsp;&nbsp;</tt></td><td>   boundary layer roughness <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>albedo&nbsp;&nbsp;&nbsp;</tt></td><td>   surface albedo <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>t_surf_rad&nbsp;&nbsp;&nbsp;</tt></td><td>   surface radiative temperature <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>u_star&nbsp;&nbsp;&nbsp;</tt></td><td>   boundary layer wind speed (frictional speed) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>b_star&nbsp;&nbsp;&nbsp;</tt></td><td>   ??? <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>q_star&nbsp;&nbsp;&nbsp;</tt></td><td>   boundary layer specific humidity <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dtau_du&nbsp;&nbsp;&nbsp;</tt></td><td>   derivative of zonal surface stress w.r.t zonal wind speed <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>dtau_dv&nbsp;&nbsp;&nbsp;</tt></td><td>   derivative of meridional surface stress w.r.t meridional wind speed <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   index of lowest model level above ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   mask to remove points below ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>diff_cum_mom&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when do_moist_processes=.false.
+   cu_mo_trans diffusion coefficients, which are passed through to vert_diff_down.
+   Should not be present when do_moist_processes=.true., since these
+   values are passed out from moist_processes. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>moist_convect&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when do_moist_processes=.false.
+   Should not be present when do_moist_processes=.true., since these
+   values are passed out from moist_processes. <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>rd&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple 3d diagnostic tracer fields <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tau_x&nbsp;&nbsp;&nbsp;</tt></td><td>   boundary layer meridional component of wind shear <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tau_y&nbsp;&nbsp;&nbsp;</tt></td><td>   boundary layer zonal component of wind shear <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>udt&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vdt&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tdt&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qdt&nbsp;&nbsp;&nbsp;</tt></td><td>   moisture tracer tendencies <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rdt&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple tracer tendencies <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surf_diff&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface diffusion <br>&nbsp;&nbsp;&nbsp;<span class="type">[surface_diffusion_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>flux_sw&nbsp;&nbsp;&nbsp;</tt></td><td>   Shortwave flux from radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>flux_lw&nbsp;&nbsp;&nbsp;</tt></td><td>   Longwave flux from radiation package <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>coszen&nbsp;&nbsp;&nbsp;</tt></td><td>   cosine of zenith angle <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gust&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="physics_driver_up"></a>
+<h4>physics_driver_up</h4>
+<pre>
+<b>call physics_driver_up </b>(is, ie, js, je, &amp; Time_prev, Time, Time_next, &amp; lat, lon, area, &amp; p_half, p_full, z_half, z_full, &amp; omega, &amp; u, v, t, q, r, um, vm, tm, qm, rm, &amp; frac_land, &amp; udt, vdt, tdt, qdt, rdt, &amp; Surf_diff, &amp; lprec, fprec, gust, &amp; mask, kbot )</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   physics_driver_up completes the calculation of vertical diffusion 
+   and also handles moist physical processes. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time_prev&nbsp;&nbsp;&nbsp;</tt></td><td>   previous time, for variable um, vm, tm, qm, rm <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Time_next&nbsp;&nbsp;&nbsp;</tt></td><td>   next time, used for diagnostics <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model latitudes at model points [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lon&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model longitudes at model points [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>area&nbsp;&nbsp;&nbsp;</tt></td><td>   grid box area - current not used <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_half&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model interface levels (offset from t,q,u,v,r) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_full&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at full levels </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_half&nbsp;&nbsp;&nbsp;</tt></td><td>   height at model interface levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_full&nbsp;&nbsp;&nbsp;</tt></td><td>   height at full levels </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>omega&nbsp;&nbsp;&nbsp;</tt></td><td>   Veritical pressure tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>u&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>v&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>t&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>q&nbsp;&nbsp;&nbsp;</tt></td><td>   specific humidity at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>r&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple 3d tracer fields at current time step </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>um&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vm&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tm&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qm&nbsp;&nbsp;&nbsp;</tt></td><td>   specific humidity at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rm&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple 3d tracer fields at previous time step </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>frac_land&nbsp;&nbsp;&nbsp;</tt></td><td>   fraction of land coverage in a model grid point <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   index of lowest model level above ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   mask to remove points below ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>INPUT/OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>udt&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vdt&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tdt&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qdt&nbsp;&nbsp;&nbsp;</tt></td><td>   moisture tracer tendencies <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rdt&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple tracer tendencies <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>Surf_diff&nbsp;&nbsp;&nbsp;</tt></td><td>   Surface diffusion <br>&nbsp;&nbsp;&nbsp;<span class="type">[surface_diffusion_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+<dt>
+<b>OUTPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>lprec&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>fprec&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>gust&nbsp;&nbsp;&nbsp;</tt></td><td> 
+<br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="physics_driver_end"></a>
+<h4>physics_driver_end</h4>
+<pre>
+<b>call physics_driver_end </b>(Time)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   physics_driver_end is the destructor for physics_driver_mod. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>Time&nbsp;&nbsp;&nbsp;</tt></td><td>   current time <br>&nbsp;&nbsp;&nbsp;<span class="type">[time_type]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="do_moist_in_phys_up"></a>
+<h4>do_moist_in_phys_up</h4>
+<pre>logical = <b>do_moist_in_phys_up</b> ()</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   do_moist_in_phys_up returns the value of do_moist_processes </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_diff_t"></a>
+<h4>get_diff_t</h4>
+<pre>diff_t(:,:,:) = <b>get_diff_t</b> ()</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   returns the values of array diff_t </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="get_radturbten"></a>
+<h4>get_radturbten</h4>
+<pre>radturbten(:,:,:) = <b>get_radturbten</b> ()</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   returns the values of array radturbten </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="zero_radturbten"></a>
+<h4>zero_radturbten</h4>
+<pre>
+<b>call zero_radturbten </b>()</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   sets all values of array radturbten to zero </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="read_restart_file"></a>
+<h4>read_restart_file</h4>
+<pre>
+<b>call read_restart_file </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   read_restart_file will read the physics_driver.res file and process
+   its contents. if no restart data can be found, the module variables
+   are initialized to flag values. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="read_restart_nc"></a>
+<h4>read_restart_nc</h4>
+<pre>
+<b>call read_restart_nc </b>
+</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   read_restart_nc will read the physics_driver.res file and process
+   its contents. if no restart data can be found, the module variables
+   are initialized to flag values. </dd>
+<br>
+<br>
+</dl>
+</li>
+<li>
+<a name="check_args"></a>
+<h4>check_args</h4>
+<pre>
+<b>call check_args </b>(lat, lon, area, p_half, p_full, z_half, z_full,&amp; u, v, t, q, r, um, vm, tm, qm, rm, &amp; udt, vdt, tdt, qdt, rdt, mask, kbot)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   check_args determines if the input arrays to physics_driver_down
+   are of a consistent size. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>lat&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model latitudes at model points [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>lon&nbsp;&nbsp;&nbsp;</tt></td><td>   array of model longitudes at model points [radians] <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>area&nbsp;&nbsp;&nbsp;</tt></td><td>   grid box area - current not used <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_half&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at model interface levels (offset from t,q,u,v,r) <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>p_full&nbsp;&nbsp;&nbsp;</tt></td><td>   pressure at full levels </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_half&nbsp;&nbsp;&nbsp;</tt></td><td>   height at model interface levels <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>z_full&nbsp;&nbsp;&nbsp;</tt></td><td>   height at full levels </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>u&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>v&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>t&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>q&nbsp;&nbsp;&nbsp;</tt></td><td>   specific humidity at current time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>r&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple 3d tracer fields at current time step </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>um&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vm&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tm&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qm&nbsp;&nbsp;&nbsp;</tt></td><td>   specific humidity at previous time step <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rm&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple 3d tracer fields at previous time step </td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>udt&nbsp;&nbsp;&nbsp;</tt></td><td>   zonal wind tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>vdt&nbsp;&nbsp;&nbsp;</tt></td><td>   meridional wind tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>tdt&nbsp;&nbsp;&nbsp;</tt></td><td>   temperature tendency <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>qdt&nbsp;&nbsp;&nbsp;</tt></td><td>   moisture tracer tendencies <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>rdt&nbsp;&nbsp;&nbsp;</tt></td><td>   multiple tracer tendencies <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>kbot&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   index of lowest model level above ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>mask&nbsp;&nbsp;&nbsp;</tt></td><td>   OPTIONAL: present when running eta vertical coordinate,
+   mask to remove points below ground <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="check_dim_2d"></a>
+<h4>check_dim_2d</h4>
+<pre> 
+<b>check_dim_2d</b> (data,name,id,jd) result (ierr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   check_dim_2d compares the size of two-dimensional input arrays
+   with supplied expected dimensions and returns an error if any
+   inconsistency is found. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data&nbsp;&nbsp;&nbsp;</tt></td><td>   array of data to be checked <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>name&nbsp;&nbsp;&nbsp;</tt></td><td>   name associated with array to be checked <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>id, jd&nbsp;&nbsp;&nbsp;</tt></td><td>   expected i and j dimensions <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="check_dim_3d"></a>
+<h4>check_dim_3d</h4>
+<pre> 
+<b>check_dim_3d</b> (data,name,id,jd, kd) result (ierr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   check_dim_3d compares the size of three-dimensional input arrays
+   with supplied expected dimensions and returns an error if any
+   inconsistency is found. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data&nbsp;&nbsp;&nbsp;</tt></td><td>   array of data to be checked <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>name&nbsp;&nbsp;&nbsp;</tt></td><td>   name associated with array to be checked <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>id, jd, kd&nbsp;&nbsp;&nbsp;</tt></td><td>   expected i, j and k dimensions <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+<li>
+<a name="check_dim_4d"></a>
+<h4>check_dim_4d</h4>
+<pre> 
+<b>check_dim_4d</b> (data,name,id,jd, kd, nt) result (ierr)</pre>
+<dl>
+<dt>
+<b>DESCRIPTION</b>
+</dt>
+<dd>   check_dim_4d compares the size of four-dimensional input arrays
+   with supplied expected dimensions and returns an error if any
+   inconsistency is found. </dd>
+<br>
+<br>
+<dt>
+<b>INPUT</b>
+</dt>
+<dd>
+<table border="0">
+<tr>
+<td valign="top" align="left"><tt>data&nbsp;&nbsp;&nbsp;</tt></td><td>   array of data to be checked <br>&nbsp;&nbsp;&nbsp;<span class="type">[real]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>name&nbsp;&nbsp;&nbsp;</tt></td><td>   name associated with array to be checked <br>&nbsp;&nbsp;&nbsp;<span class="type">[character]</span></td>
+</tr>
+<tr>
+<td valign="top" align="left"><tt>id, jd, kd, nt&nbsp;&nbsp;&nbsp;</tt></td><td>   expected i, j, k and 4th dimensions <br>&nbsp;&nbsp;&nbsp;<span class="type">[integer]</span></td>
+</tr>
+</table>
+</dd>
+<br>
+</dl>
+</li>
+</ol>
+<!-- END PUBLIC ROUTINES -->
+<a name="PUBLIC TYPES"></a>
+<!-- BEGIN PUBLIC TYPES -->
+<!-- END PUBLIC TYPES --><a name="NAMELIST"></a>
+<!-- BEGIN NAMELIST -->
+<hr>
+<h4>NAMELIST</h4>
+<div>
+<b>&amp;physics_driver_nml</b>
+<br>
+<br>
+<div>
+<dl>
+<dt>
+<tt>do_netcdf_restart</tt>
+</dt>
+<dl>   netcdf/native format restart file <br>
+<span class="type">[logical, dimension, units: , default: .true.]</span>
+</dl>
+<dt>
+<tt>do_radiation</tt>
+</dt>
+<dl>   calculating radiative fluxes and
+   heating rates? <br>
+<span class="type">[logical, dimension, units: , default: .true.]</span>
+</dl>
+<dt>
+<tt>do_moist_processes</tt>
+</dt>
+<dl>   call moist_processes routines <br>
+<span class="type">[logical, dimension, units: , default: .true.]</span>
+</dl>
+<dt>
+<tt>tau_diff</tt>
+</dt>
+<dl>   time scale for smoothing diffusion 
+   coefficients <br>
+<span class="type">[real, dimension, units: , default: 3600.]</span>
+</dl>
+<dt>
+<tt>diff_min</tt>
+</dt>
+<dl>   minimum value of a diffusion 
+   coefficient beneath which the
+   coefficient is reset to zero <br>
+<span class="type">[real, dimension, units: , default: 1.e-3]</span>
+</dl>
+<dt>
+<tt>diffusion_smooth</tt>
+</dt>
+<dl>   diffusion coefficients should be 
+   smoothed in time? <br>
+<span class="type">[logical, dimension, units: , default: .true.]</span>
+</dl>
+</dl>
+</div>
+</div>
+<br>
+<!-- END NAMELIST -->
+<a name="DIAGNOSTIC FIELDS"></a>
+<!-- BEGIN DIAGNOSTIC FIELDS -->
+<hr>
+<h4>DIAGNOSTIC FIELDS</h4>
+<div>Diagnostic fields may be output to a netcdf file by
+              specifying the module name identifier <b></b> and the desired field names (given below) in
+               file <b>diag_table</b>. See the documentation for diag_manager.<pre>Diagnostic fields for module name identifier: <b></b>
+</pre>
+<div>
+<table cellpadding="0" border="0">
+<tr>
+<td>
+<pre></pre>
+</td><td>
+<pre></pre>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<!-- END DIAGNOSTIC FIELDS -->
+<a name="DATA SETS"></a>
+<!-- BEGIN DATA SETS -->
+<hr>
+<h4>DATA SETS</h4>
+<div>
+<dl>
+<dt>physics_driver.res</dt>
+<dd>   native format restart file </dd>
+<dt>physics_driver.res.nc</dt>
+<dd>   netcdf format restart file </dd>
+</dl>
+<br>
+</div>
+<!-- END DATA SETS -->
+<a name="PUBLIC CODE"></a>
+<!-- BEGIN PUBLIC CODE -->
+<!-- END PUBLIC CODE --><a name="ERROR MESSAGES"></a>
+<!-- BEGIN ERROR MESSAGES -->
+<hr>
+<h4>ERROR MESSAGES</h4>
+<div>
+<dl>
+<dt>
+<b>FATAL in physics_driver_init</b>
+</dt>
+<dd>
+<span class="errmsg">physics_driver_init must be called first</span>
+</dd>
+<dd> 
+</dd>
+</dl>
+<br>
+</div>
+<!-- END ERROR MESSAGES -->
+<a name="REFERENCES"></a>
+<hr>
+<h4>REFERENCES</h4>
+<!-- BEGIN REFERENCES -->
+<div>
+<ol>
+<li> 
+</li>
+</ol>
+</div>
+<br>
+<!-- END REFERENCES -->
+<a name="COMPILER SPECIFICS"></a>
+<hr>
+<h4>COMPILER SPECIFICS</h4>
+<!-- BEGIN COMPILER SPECIFICS -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END COMPILER SPECIFICS -->
+<a name="PRECOMPILER OPTIONS"></a>
+<hr>
+<h4>PRECOMPILER OPTIONS</h4>
+<!-- BEGIN PRECOMPILER OPTIONS -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END PRECOMPILER OPTIONS -->
+<a name="LOADER OPTIONS"></a>
+<hr>
+<h4>LOADER OPTIONS</h4>
+<!-- BEGIN LOADER -->
+<div>
+<p> 
+</p>
+<pre>        
+</pre>
+</div>
+<!-- END LOADER OPTIONS -->
+<a name="TEST PROGRAM"></a>
+<hr>
+<h4>TEST PROGRAM</h4>
+<!-- BEGIN TEST PROGRAM -->
+<div>
+<dl>
+<dt></dt>
+<dd> 
+</dd>
+</dl>
+</div>
+<br>
+<!-- END TEST PROGRAM -->
+<a name="KNOWN BUGS"></a>
+<hr>
+<h4>KNOWN BUGS</h4>
+<!-- BEGIN KNOWN BUGS -->
+<div>
+<p> 
+</p>
+</div>
+<br>
+<!-- END KNOWN BUGS -->
+<a name="NOTES"></a>
+<hr>
+<h4>NOTES</h4>
+<!-- BEGIN NOTES -->
+<div> 
+</div>
+<br>
+<!-- END NOTES -->
+<a name="FUTURE PLANS"></a>
+<hr>
+<h4>FUTURE PLANS</h4>
+<!-- BEGIN FUTURE PLANS -->
+<div>
+<p>   Deal with conservation of total energy? </p>
+</div>
+<br>
+<!-- END FUTURE PLANS -->
+<hr>
+<div align="right">
+<font size="-1"><a href="#TOP">top</a></font>
+</div>
+</body>
+</html>
