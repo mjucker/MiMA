@@ -23,5 +23,5 @@ git_message
 *.o
 *.mod
 *.tmp
-./*.e*
-./*.o*
+*.e*
+*.o*
