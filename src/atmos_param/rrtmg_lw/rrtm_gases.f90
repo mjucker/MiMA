@@ -278,7 +278,7 @@
           use rrtmg_sw_rad, only: rrtmg_sw
           use rrtm_astro, only: compute_zenith
           use rrtm_vars
-          use time_manager_mod,only: time_type,get_time
+          use time_manager_mod,only: time_type,get_time,set_time
           use interpolator_mod,only: interpolator
           implicit none
 
@@ -304,7 +304,7 @@
           real(kind=rb),dimension(ncols_rrt,nlay_rrt+1):: phalf,thalf
           real(kind=rb),dimension(ncols_rrt)   :: tsrf,cosz_rr,albedo_rr
           real(kind=rb) :: dlon,dlat,dj,di 
-          logical   :: do_rad
+          type(time_type) :: Time_loc
 
           if(.not. rrtm_init)&
                call error_mesg('run_rrtm','module not initialized', FATAL)
@@ -312,16 +312,7 @@
 !check if we really want to recompute radiation
           call get_time(Time,seconds)
           if(seconds < dt_last) dt_last=dt_last-86400 !it's a new day
-          do_rad=.false.
-          if(seconds - dt_last .ge. dt_rad) do_rad=.true.
-!compute zenith angle at every time step anyway
-          if(do_rad_time_avg .and. do_rad) then
-             call compute_zenith(Time,dt_rad,lat,lon,coszen,dyofyr)
-          elseif(do_rad) then
-             call compute_zenith(Time,0     ,lat,lon,coszen,dyofyr)
-          end if
-
-          if( do_rad )then
+          if(seconds - dt_last .ge. dt_rad) then
              dt_last = seconds
           else
              if(store_intermediate_rad)then
@@ -338,6 +329,19 @@
              return !not time yet
           endif
 
+!make sure we run perpetual when solday > 0)
+          if(solday > 0.)then
+             Time_loc = set_time(seconds,floor(solday))
+          else
+             Time_loc = Time
+          endif
+!compute zenith angle at every time step anyway
+          if(do_rad_time_avg) then
+             call compute_zenith(Time_loc,dt_rad,lat,lon,coszen,dyofyr)
+          else
+             call compute_zenith(Time_loc,0     ,lat,lon,coszen,dyofyr)
+          end if
+
           si=size(tdt,1)
           sj=size(tdt,2)
           sk=size(tdt,3)
@@ -346,7 +350,7 @@
 
           !get ozone 
           if(do_read_ozone)then
-             call interpolator( o3_interp, Time, p_half, o3f, trim(ozone_file))
+             call interpolator( o3_interp, Time_loc, p_half, o3f, trim(ozone_file))
           endif
 
           !RRTM's first pressure level is at the surface - need to inverse order
