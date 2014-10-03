@@ -1003,9 +1003,6 @@ real,  dimension(:,:,:), intent(out)  ,optional :: diffm, difft
       real             ::    dt, alpha, dt2
       logical          ::    need_aerosols, need_clouds, need_gases,   &
                              need_basic
- !mj debug
-      character*128 :: input
-      integer :: writeproc=0,dummy(3)
  
 !---------------------------------------------------------------------
 !   local variables:
