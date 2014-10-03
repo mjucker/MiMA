@@ -19,10 +19,10 @@
         real(kind=rb),allocatable,dimension(:,:,:) :: taucld,tauaer, &
              ssacld,asmcld,fsfcld,ssaaer,asmaer,ecaer
         ! heating rates and fluxes when not re-computing
-        real(kind=rb),allocatable,dimension(:,:)   :: sw_flux,lw_flux,zencos
+        real(kind=rb),allocatable,dimension(:,:)   :: sw_flux,lw_flux,zencos,rrtm_precip
         real(kind=rb),allocatable,dimension(:,:,:) :: tdt_rad,tdt_sw_rad,tdt_lw_rad,t_half
         real(kind=rb)      :: daypersec=1./86400,deg2rad
-        integer(kind=im)   :: dt_last
+        integer(kind=im)   :: dt_last,num_precip
 ! namelist values
         logical            :: include_secondary_gases=.false.
         logical            :: do_read_ozone=.false.
@@ -34,17 +34,19 @@
         real(kind=rb)      :: solr_cnst= 1368.22 ! solar constant [1368.22 W/m2]
         real(kind=rb)      :: solrad=1.0 ! distance Earth-Sun [AU]
         logical            :: use_dyofyr=.true. ! if true, use day of year for solrad calculation
-        real(kind=im)      :: solday=0.   ! if >0, do perpetual run corresponding to day of the year = solday
+        real(kind=rb)      :: solday=0.   ! if >0, do perpetual run corresponding to day of the year = solday
         logical            :: store_intermediate_rad =.true. !if true, keep rad constant over entire dt_rad, else only head radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true. !if true, average radiation over dt_rad
         integer(kind=im)   :: dt_rad=900,lonstep=1
+        logical            :: do_precip_albedo=.false.
+        real(kind=rb)      :: precip_albedo=0.8
 !
         integer(kind=im) :: icld=0,idrv=0, &
              inflglw=0,iceflglw=0,liqflglw=0, &
              iaer=0
 !-------------------- diagnostics fields -------------------------------
 
-        integer :: id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw
+        integer :: id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw,id_albedo
         character(len=14), parameter :: mod_name = 'rrtm_radiation'
         real :: missing_value = -999.
 
@@ -52,6 +54,7 @@
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
              &solr_cnst, solrad, use_dyofyr, solday, &
              &store_intermediate_rad, do_rad_time_avg, dt_rad, lonstep, &
+             &do_precip_albedo,precip_albedo,&
              &icld, idrv, inflglw, iceflglw, liqflglw, iaer
 
       end module rrtm_vars
@@ -129,6 +132,10 @@
         register_diag_field ( mod_name, 'flux_lw', axes(1:2), Time, &
                'LW surface flux', &
                'W/m2', missing_value=missing_value               )
+    id_albedo  = &
+        register_diag_field ( mod_name, 'rrtm_albedo', axes(1:2), Time, &
+               'Interactive albedo', &
+               'none', missing_value=missing_value               )
 ! 
 !------------ make sure namelist choices are consistent -------
           call get_time(Time,seconds)
@@ -185,6 +192,7 @@
           if(store_intermediate_rad .or. id_flux_lw > 0) &
                allocate(lw_flux(size(lonb,1)-1,size(latb,1)-1))
           if(id_coszen > 0)allocate(zencos (size(lonb,1)-1,size(latb,1)-1))
+          if(do_precip_albedo)allocate(rrtm_precip(size(lonb,1)-1,size(latb,1)-1))
           if(store_intermediate_rad .or. id_tdt_rad > 0)&
                allocate(tdt_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
           if(id_tdt_sw > 0)allocate(tdt_sw_rad(size(lonb,1)-1,size(latb,1)-1,nlay)) 
@@ -224,6 +232,11 @@
 
           if(do_read_ozone)then
              call interpolator_init (o3_interp, trim(ozone_file)//'.nc', lonb, latb, data_out_of_bounds=(/CONSTANT/))
+          endif
+
+          if(do_precip_albedo)then
+             rrtm_precip = 0.
+             num_precip  = 0
           endif
 
           rrtm_init=.true.
@@ -304,6 +317,7 @@
           real(kind=rb),dimension(ncols_rrt)   :: tsrf,cosz_rr,albedo_rr
           real(kind=rb) :: dlon,dlat,dj,di 
           type(time_type) :: Time_loc
+          real(kind=rb),dimension(size(q,1),size(q,2)) :: albedo_loc
 
           if(.not. rrtm_init)&
                call error_mesg('run_rrtm','module not initialized', FATAL)
@@ -362,8 +376,15 @@
           h2o   = reshape(q     (1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))
           if(do_read_ozone)o3 = reshape(o3f(1:si:lonstep,:,sk :1:-1),(/ si*sj/lonstep,sk  /))
           
+          !interactive albedo
+          albedo_loc = albedo
+          if(do_precip_albedo .and. num_precip>0)then
+             albedo_loc = albedo + (precip_albedo - albedo)*rrtm_precip/num_precip
+             rrtm_precip = 0.
+             num_precip  = 0
+          endif
           cosz_rr   = reshape(coszen    (1:si:lonstep,:),(/ si*sj/lonstep /))
-          albedo_rr = reshape(albedo    (1:si:lonstep,:),(/ si*sj/lonstep /))
+          albedo_rr = reshape(albedo_loc(1:si:lonstep,:),(/ si*sj/lonstep /))
           tsrf      = reshape(t_surf_rad(1:si:lonstep,:),(/ si*sj/lonstep /))
           
           swhr = 0.
@@ -492,18 +513,23 @@
              if(id_coszen  > 0)zencos  = coszen
           endif
           
-          call write_diag_rrtm(Time,is,js)
+          if(do_precip_albedo)then
+             call write_diag_rrtm(Time,is,js,albedo_loc)
+          else
+             call write_diag_rrtm(Time,is,js)
+          endif
         end subroutine run_rrtmg
 
 !*****************************************************************************************
-        subroutine write_diag_rrtm(Time,is,js)
+        subroutine write_diag_rrtm(Time,is,js,albedo_loc)
           use rrtm_vars,only: sw_flux,lw_flux,zencos,tdt_rad,tdt_sw_rad,tdt_lw_rad&
-               &,id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw
+               &,id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw,id_albedo
           use diag_manager_mod, only: register_diag_field, send_data
           use time_manager_mod,only: time_type
           implicit none
           type(time_type),intent(in) :: Time
           integer, intent(in)        :: is, js
+          real,dimension(:,:),intent(in),optional :: albedo_loc
           logical :: used
 
 !------- temperature tendency due to radiation ------------
@@ -529,6 +555,10 @@
 !------- Net LW surface flux                   ------------
           if ( id_flux_lw > 0 ) then
              used = send_data ( id_flux_lw, lw_flux, Time, is, js )
+          endif
+!------- Interactive albedo                    ------------
+          if ( present(albedo_loc)) then
+             used = send_data ( id_albedo, albedo_loc, Time, is, js )
           endif
         end subroutine write_diag_rrtm
 !*****************************************************************************************

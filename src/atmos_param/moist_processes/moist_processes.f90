@@ -71,6 +71,9 @@ use            fms_mod, only : mpp_clock_id, mpp_clock_begin, &
 !use    chem_interface, only : id_wet
 !use           mo_hook, only : moz_hook
 ! end chemistry modules
+!
+!------------------mj pass precipitation to rrtm for albedo-------------
+use rrtm_vars,only: do_precip_albedo,rrtm_precip,num_precip
 implicit none
 private
 
@@ -1602,6 +1605,15 @@ enddo
  endif  !end large-scale or strat diagnostics
   call mpp_clock_end ( largescale_clock )
  
+!-----------------------------------------------------------------------
+!------------------mj pass precipitation to rrtm for albedo-------------
+  if(do_precip_albedo)then
+     where(precip > 0.) rrtm_precip = rrtm_precip + 1.
+     num_precip = num_precip + 1
+  endif
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+
 !-----------------------------------------------------------------------
 !***********************************************************************
 !--------------------- GENERAL DIAGNOSTICS -----------------------------
