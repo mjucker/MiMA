@@ -133,10 +133,9 @@
 !------------ make sure namelist choices are consistent -------
           call get_time(Time,seconds)
           if(dt_rad .le. seconds .and. store_intermediate_rad)then
-             store_intermediate_rad =.false.
              call error_mesg ( 'rrtm_gases_init', &
-                  ' dt_rad <= dt_atmos, setting store_intermediate_rad=.false.', &
-                  NOTE)
+                  ' dt_rad <= dt_atmos, you probably want to set store_intermediate_rad=.false.', &
+                  WARNING)
           endif
           if(dt_rad .gt. seconds .and. .not.store_intermediate_rad)then
              call error_mesg( 'rrtm_gases_init', &
