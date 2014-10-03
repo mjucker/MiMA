@@ -12,6 +12,7 @@
           subroutine compute_zenith(Time, dt, lat, lon, cosz, dyofyr)
             use time_manager_mod,only: time_type,get_time,length_of_year
             use constants_mod, only: PI
+            use rrtm_vars, only: solday
             implicit none
 
             type(time_type),             intent(in) :: Time
@@ -43,6 +44,7 @@
 
             !get the time for origin
             call get_time(Time,seconds,days)
+            if(solday > 0.) seconds = floor(modulo(solday,1.)*86400) + seconds
             !convert into radians
             radsec = seconds*radpersec
             dt_pi  = dt*radpersec
@@ -56,6 +58,7 @@
             where(time_pi < -PI) time_pi = time_pi + twopi 
             !time_pi now contains local time at each grid point
             !get day of the year relative to equinox. We set equinox at 0.25,0.75*daysperyear
+            if(solday > 0.) days = floor(solday)
             days = days - int(0.25*daysperyear)
             dyofyr   = modulo(days,daysperyear) !NH winter solstice at day 0
             !convert into radians

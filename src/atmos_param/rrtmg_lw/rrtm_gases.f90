@@ -34,6 +34,7 @@
         real(kind=rb)      :: solr_cnst= 1368.22 ! solar constant [1368.22 W/m2]
         real(kind=rb)      :: solrad=1.0 ! distance Earth-Sun [AU]
         logical            :: use_dyofyr=.true. ! if true, use day of year for solrad calculation
+        real(kind=im)      :: solday=0.   ! if >0, do perpetual run corresponding to day of the year = solday
         logical            :: store_intermediate_rad =.true. !if true, keep rad constant over entire dt_rad, else only head radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true. !if true, average radiation over dt_rad
         integer(kind=im)   :: dt_rad=900,lonstep=1
@@ -48,7 +49,8 @@
         real :: missing_value = -999.
 
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
-             &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, solr_cnst, solrad, use_dyofyr, &
+             &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
+             &solr_cnst, solrad, use_dyofyr, solday, &
              &store_intermediate_rad, do_rad_time_avg, dt_rad, lonstep, &
              &icld, idrv, inflglw, iceflglw, liqflglw, iaer
 
@@ -71,8 +73,9 @@
                CONSTANT, INTERP_WEIGHTED_P
           use fms_mod, only: open_namelist_file, check_nml_error,  &
                                     mpp_pe, mpp_root_pe, close_file, &
-                                    write_version_number, stdlog
-          use time_manager_mod,only: time_type
+                                    write_version_number, stdlog, &
+                                    error_mesg, NOTE, WARNING
+          use time_manager_mod,only: time_type,get_time
           implicit none
           
           integer, intent(in), dimension(4) :: axes
@@ -80,7 +83,7 @@
           integer(kind=im),intent(in)       :: ncols,nlay
           real(kind=rb),dimension(:),intent(in),optional :: lonb,latb
 
-          integer :: i,k
+          integer :: i,k,seconds
 
           integer :: ierr, io, unit
 
@@ -127,6 +130,24 @@
                'LW surface flux', &
                'W/m2', missing_value=missing_value               )
 ! 
+!------------ make sure namelist choices are consistent -------
+          call get_time(Time,seconds)
+          if(dt_rad .le. seconds .and. store_intermediate_rad)then
+             store_intermediate_rad =.false.
+             call error_mesg ( 'rrtm_gases_init', &
+                  ' dt_rad <= dt_atmos, setting store_intermediate_rad=.false.', &
+                  NOTE)
+          endif
+          if(dt_rad .gt. seconds .and. .not.store_intermediate_rad)then
+             call error_mesg( 'rrtm_gases_init', &
+                  ' dt_rad > dt_atmos, but store_intermediate_rad=.false. might cause time steps with zero radiative forcing!', &
+                  WARNING)
+          endif
+          if(solday .gt. 0)then
+             call error_mesg( 'rrtm_gases_init', &
+                  ' running perpetual simulation', NOTE)
+          endif
+!------------ set some constants and parameters -------
 
           deg2rad = acos(0.)/90.
 
@@ -135,6 +156,7 @@
           ncols_rrt = ncols/lonstep
           nlay_rrt  = nlay
 
+!------------ allocate arrays to be used later  -------
           allocate(t_half(size(lonb,1)-1,size(latb)-1,nlay+1))
 
           allocate(h2o(ncols_rrt,nlay_rrt),o3(ncols_rrt,nlay_rrt), &
