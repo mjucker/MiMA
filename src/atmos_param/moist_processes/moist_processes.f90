@@ -1608,7 +1608,7 @@ enddo
 !-----------------------------------------------------------------------
 !------------------mj pass precipitation to rrtm for albedo-------------
   if(do_precip_albedo)then
-     where(precip > 0.) rrtm_precip = rrtm_precip + 1.
+     where(rain+snow > 0.) rrtm_precip = rrtm_precip + 1. !precip -> total precip, rain+snow -> lscale
      num_precip = num_precip + 1
   endif
 !-----------------------------------------------------------------------
