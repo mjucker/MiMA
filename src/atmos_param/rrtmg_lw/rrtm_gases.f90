@@ -78,7 +78,8 @@
                                     mpp_pe, mpp_root_pe, close_file, &
                                     write_version_number, stdlog, &
                                     error_mesg, NOTE, WARNING
-          use time_manager_mod,only: time_type,get_time
+          use time_manager_mod, only: time_type
+          use coupler_mod, only: dt_atmos
           implicit none
           
           integer, intent(in), dimension(4) :: axes
@@ -138,13 +139,13 @@
                'none', missing_value=missing_value               )
 ! 
 !------------ make sure namelist choices are consistent -------
-          call get_time(Time,seconds)
-          if(dt_rad .le. seconds .and. store_intermediate_rad)then
+          if(dt_rad .le. dt_atmos .and. store_intermediate_rad)then
              call error_mesg ( 'rrtm_gases_init', &
-                  ' dt_rad <= dt_atmos, you probably want to set store_intermediate_rad=.false.', &
+                  ' dt_rad <= dt_atmos, for conserving memory, I am setting store_intermediate_rad=.false.', &
                   WARNING)
+             store_intermediate_rad = .false.
           endif
-          if(dt_rad .gt. seconds .and. .not.store_intermediate_rad)then
+          if(dt_rad .gt. dt_atmos .and. .not.store_intermediate_rad)then
              call error_mesg( 'rrtm_gases_init', &
                   ' dt_rad > dt_atmos, but store_intermediate_rad=.false. might cause time steps with zero radiative forcing!', &
                   WARNING)

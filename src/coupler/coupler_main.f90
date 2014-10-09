@@ -1,6 +1,13 @@
 !
 !  coupler_main couples component models and controls the time integration
 !
+!mj add module to have time step available without any tricks throughout 
+!   the code
+module coupler_mod
+  integer :: dt_atmos=0
+end module coupler_mod
+!jm
+
 program coupler_main
 !-----------------------------------------------------------------------
 !                   GNU General Public License                        
@@ -195,6 +202,9 @@ program coupler_main
   use mpp_domains_mod, only: mpp_broadcast_domain
 
   use memutils_mod, only: print_memuse_stats
+  
+  use coupler_mod, only: dt_atmos
+
   implicit none
 
 !-----------------------------------------------------------------------
@@ -325,7 +335,8 @@ program coupler_main
   character(len=17) :: calendar = '                 '
   logical :: force_date_from_namelist = .false.  ! override restart values for date
   integer :: months=0, days=0, hours=0, minutes=0, seconds=0
-  integer :: dt_atmos = 0  ! fluxes passed between atmosphere & ice/land
+!mj exported dt_atmos into coupler_mod
+!  integer :: dt_atmos = 0  ! fluxes passed between atmosphere & ice/land
 ! integer :: dt_ocean = 0  ! ocean tracer timestep
 ! integer :: dt_cpld  = 0  ! fluxes passed between ice & ocean
   integer,dimension (3)           :: locmax, locmin
