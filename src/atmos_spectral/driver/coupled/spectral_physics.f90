@@ -23,7 +23,7 @@ use mcm_moist_processes_mod, only: mcm_moist_processes, mcm_moist_processes_init
 
 use tracer_type_mod,       only: tracer_type
 
-use  field_manager_mod,    only: MODEL_ATMOS
+use field_manager_mod,     only: MODEL_ATMOS
 
 use tracer_manager_mod,    only: get_number_tracers
 

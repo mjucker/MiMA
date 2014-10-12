@@ -23,5 +23,6 @@ git_message
 *.o
 *.mod
 *.tmp
+*.bkp
 *.e*
 *.o*

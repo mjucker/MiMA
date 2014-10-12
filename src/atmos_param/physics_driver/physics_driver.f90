@@ -129,13 +129,13 @@ use grey_radiation_mod, only: grey_radiation_init, grey_radiation, grey_radiatio
 !epg: for adding the Alexander and Dunkerton (1999) Non-orographic gravity wave parameterization
 use         cg_drag_mod,      only: cg_drag_calc, cg_drag_init, cg_drag_end, &
                                     cg_drag_time_vary, cg_drag_endts
-
-use rrtmg_lw_init !mj for rrtmg
-use rrtmg_lw_rad  !mj for rrtmg
+!mj: RRTM radiative scheme
+use rrtmg_lw_init
+use rrtmg_lw_rad
 use rrtmg_sw_init
 use rrtmg_sw_rad
-use rrtm_gases    !mj for rrtmg
-use rrtm_vars     !mj for rrtmg
+use rrtm_radiation
+use rrtm_vars     
 !-----------------------------------------------------------------
 
 implicit none
@@ -575,7 +575,7 @@ real, dimension(:,:,:),  intent(out),  optional  :: diffm, difft
       if(do_rrtm_radiation) then
          call rrtmg_lw_ini(cp_air)
          call rrtmg_sw_ini(cp_air)
-         call rrtm_gases_init(axes,Time,id*jd,kd,lonb,latb)
+         call rrtm_radiation_init(axes,Time,id*jd,kd,lonb,latb)
       endif
 
 !-----------------------------------------------------------------------
