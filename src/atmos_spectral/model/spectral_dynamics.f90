@@ -748,6 +748,8 @@ real, dimension(is:ie, js:je, num_levels, num_tracers) :: dt_tracers_tmp
 integer :: j, k, time_level, seconds, days, nsphum
 real    :: delta_t, temperature_correction
 real, dimension(num_tracers) :: dt_hadv, dt_vadv
+!mj error message
+integer :: locateM(3)
 
 ! < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < >
 
@@ -869,10 +871,13 @@ psg(:,:,future) = exp(ln_psg)
 if(minval(tg(:,:,:,future)) < valid_range_t(1) .or. maxval(tg(:,:,:,future)) > valid_range_t(2)) then
 !mj
    if(minval(tg(:,:,:,future)) < valid_range_t(1))then
-      print*,'minloc,min T: ',minloc(tg(:,:,:,future)),minval(tg(:,:,:,future))
+      locateM = minloc(tg(:,:,:,future))
    else
-      print*,'maxloc,max T: ',maxloc(tg(:,:,:,future)),maxval(tg(:,:,:,future))
+      locateM = maxloc(tg(:,:,:,future))
    endif
+   print*,'location, T(curr,future): ',locateM&
+        &,tg(locateM(1),locateM(2),locateM(3),current)&
+        &,tg(locateM(1),locateM(2),locateM(3),future)
 !jm
   call error_mesg('spectral_dynamics','temperatures out of valid range', FATAL)
 endif
