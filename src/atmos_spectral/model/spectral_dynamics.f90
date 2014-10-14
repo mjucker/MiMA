@@ -749,7 +749,8 @@ integer :: j, k, time_level, seconds, days, nsphum
 real    :: delta_t, temperature_correction
 real, dimension(num_tracers) :: dt_hadv, dt_vadv
 !mj error message
-integer :: locateM(3)
+real    :: extrtmp
+integer :: ii,jj,kk,i1,j1,k1
 
 ! < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < >
 
@@ -871,13 +872,26 @@ psg(:,:,future) = exp(ln_psg)
 if(minval(tg(:,:,:,future)) < valid_range_t(1) .or. maxval(tg(:,:,:,future)) > valid_range_t(2)) then
 !mj
    if(minval(tg(:,:,:,future)) < valid_range_t(1))then
-      locateM = minloc(tg(:,:,:,future))
+      extrtmp = minval(tg(:,:,:,future))
    else
-      locateM = maxloc(tg(:,:,:,future))
+      extrtmp = maxval(tg(:,:,:,future))
    endif
-   print*,'location, T(curr,future): ',locateM&
-        &,tg(locateM(1),locateM(2),locateM(3),current)&
-        &,tg(locateM(1),locateM(2),locateM(3),future)
+   do k1=1,size(tg,3)
+      do j1=1,size(tg,2)
+         do i1=1,size(tg,1)
+            if(tg(i1,j1,k1,future) .eq. extrtmp)then
+               ii=i1
+               jj=j1
+               kk=k1
+               exit
+            endif
+         enddo
+      enddo
+   enddo
+   write(*,'(a,i3,a,3i3,2f10.3)')'PE, location, Textr(curr,future): ',mpp_pe()&
+        &,': ',ii,jj,kk&
+        &,tg(ii,jj,kk,current)&
+        &,tg(ii,jj,kk,future)
 !jm
   call error_mesg('spectral_dynamics','temperatures out of valid range', FATAL)
 endif
