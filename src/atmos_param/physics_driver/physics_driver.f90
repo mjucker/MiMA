@@ -126,9 +126,6 @@ use damping_driver_mod,      only: damping_driver,      &
 
 use grey_radiation_mod, only: grey_radiation_init, grey_radiation, grey_radiation_end
 
-!epg: for adding the Alexander and Dunkerton (1999) Non-orographic gravity wave parameterization
-use         cg_drag_mod,      only: cg_drag_calc, cg_drag_init, cg_drag_end, &
-                                    cg_drag_time_vary, cg_drag_endts
 !mj: RRTM radiative scheme
 use rrtmg_lw_init
 use rrtmg_lw_rad
@@ -196,11 +193,6 @@ logical :: do_rrtm_radiation = .true.
 
 logical :: do_damping = .true.
 
-!epg: Use cg_drag.f90, GFDL's version of the Alexander and Dunkerton 1999 
-!     Non-orographic gravity wave parameterization, updated as for Cohen et al. 2013
-logical :: do_cg_drag = .false.
-
-
 real    :: diff_min = 1.e-3    ! minimum value of a diffusion 
                                ! coefficient beneath which the
                                ! coefficient is reset to zero
@@ -238,7 +230,7 @@ namelist / physics_driver_nml / do_netcdf_restart, do_radiation, &
                                 do_moist_processes, tau_diff,      &
                                 diff_min, diffusion_smooth, &
                                 do_grey_radiation, do_rrtm_radiation, &
-                                do_damping, do_cg_drag
+                                do_damping
 
 !---------------------------------------------------------------------
 !------- public data ------
@@ -1003,7 +995,7 @@ real,  dimension(:,:,:), intent(out)  ,optional :: diffm, difft
       real             ::    dt, alpha, dt2
       logical          ::    need_aerosols, need_clouds, need_gases,   &
                              need_basic
- 
+
 !---------------------------------------------------------------------
 !   local variables:
 !
@@ -1284,7 +1276,6 @@ real,  dimension(:,:,:), intent(out)  ,optional :: diffm, difft
       if(do_rrtm_radiation) then
          !need t at half grid
          call interp_temp(z_full,z_half,t)
-         !need emissivity of each band (set to 1.0 right now)!
          call run_rrtmg(is,js,Time,lat,lon,p_full,p_half,albedo,q,t,t_surf_rad,tdt,coszen,flux_sw,flux_lw)
       endif
 
@@ -1423,7 +1414,7 @@ real,  dimension(:,:,:), intent(out)  ,optional :: diffm, difft
       if (present(diffm)) then
         diffm = diff_m(is:ie,js:je,:)
       endif
-
+      
      call mpp_clock_end ( diff_down_clock )
 
  end subroutine physics_driver_down

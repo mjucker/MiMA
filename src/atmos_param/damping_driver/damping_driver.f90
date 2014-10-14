@@ -40,6 +40,8 @@ module damping_driver_mod
    real     :: trayfric = 0.
    integer  :: nlev_rayfric = 1
   logical  :: do_mg_drag = .false.
+!epg: Use cg_drag.f90, GFDL's version of the Alexander and Dunkerton 1999 
+!     Non-orographic gravity wave parameterization, updated as for Cohen et al. 2013
    logical  :: do_cg_drag = .false.
    logical  :: do_topo_drag = .false.
    logical  :: do_conserve_energy = .false.
