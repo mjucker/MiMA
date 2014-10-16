@@ -112,7 +112,7 @@
 !
 !-------------------- diagnostics fields -------------------------------
 
-        integer :: id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw,id_albedo
+        integer :: id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw,id_albedo,id_ozone
         character(len=14), parameter :: mod_name = 'rrtm_radiation'
         real :: missing_value = -999.
 
@@ -210,6 +210,10 @@
                register_diag_field ( mod_name, 'rrtm_albedo', axes(1:2), Time, &
                  'Interactive albedo', &
                  'none', missing_value=missing_value               )
+          id_ozone   = &
+               register_diag_field ( mod_name, 'ozone', axes(1:3), Time, &
+                 'Ozone', &
+                 'mmr', missing_value=missing_value               )
 ! 
 !------------ make sure namelist choices are consistent -------
 ! this does not work at the moment, as dt_atmos from coupler_mod induces a circular dependency at compilation
@@ -403,7 +407,7 @@
                                                                                ! need to have both or none!
 !---------------------------------------------------------------------------------------------------------------
 ! Local variables
-          integer k,j,i,ij,j1,i1,ij1,kend,dyofyr,seconds
+          integer k,j,i,ij,j1,i1,ij1,kend,dyofyr,seconds,days
           integer si,sj,sk,locmin(3)
           real(kind=rb),dimension(size(q,1),size(q,2),size(q,3)) :: o3f
           real(kind=rb),dimension(ncols_rrt,nlay_rrt) :: pfull,tfull,fracday&
@@ -424,7 +428,7 @@
                call error_mesg('run_rrtm','module not initialized', FATAL)
 
 !check if we really want to recompute radiation (alarm)
-          call get_time(Time,seconds)
+          call get_time(Time,seconds,days)
           if(seconds < dt_last) dt_last=dt_last-86400 !it's a new day
           if(seconds - dt_last .ge. dt_rad) then
              dt_last = seconds
@@ -483,6 +487,9 @@
           !reshape arrays
           pfull = reshape(p_full(1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))*0.01
           phalf = reshape(p_half(1:si:lonstep,:,sk+1:1:-1),(/ si*sj/lonstep,sk+1 /))*0.01
+          !for RRTM, we need the top level to be greater than 0
+          if(minval(phalf(:,sk+1)) .le. 0.) &
+               &phalf(:,sk+1) = pfull(:,sk)*0.5
           tfull = reshape(t     (1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))
           thalf = reshape(t_half(1:si:lonstep,:,sk+1:1:-1),(/ si*sj/lonstep,sk+1 /))
           h2o   = reshape(q     (1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))
@@ -622,15 +629,15 @@
           endif
           
           if(do_precip_albedo)then
-             call write_diag_rrtm(Time,is,js,albedo_loc)
+             call write_diag_rrtm(Time,is,js,o3f,albedo_loc)
           else
-             call write_diag_rrtm(Time,is,js)
+             call write_diag_rrtm(Time,is,js,o3f)
           endif
         end subroutine run_rrtmg
 
 !*****************************************************************************************
 !*****************************************************************************************
-        subroutine write_diag_rrtm(Time,is,js,albedo_loc)
+        subroutine write_diag_rrtm(Time,is,js,ozone,albedo_loc)
 !
 ! Martin Jucker
 ! 
@@ -639,14 +646,15 @@
 ! Modules
           use rrtm_vars,only:         sw_flux,lw_flux,zencos,tdt_rad,tdt_sw_rad,tdt_lw_rad,&
                                       &id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,&
-                                      &id_flux_sw,id_flux_lw,id_albedo
+                                      &id_flux_sw,id_flux_lw,id_albedo,id_ozone
           use diag_manager_mod, only: register_diag_field, send_data
           use time_manager_mod,only:  time_type
 ! Input variables
           implicit none
-          type(time_type),intent(in)              :: Time
-          integer, intent(in)                     :: is, js
-          real,dimension(:,:),intent(in),optional :: albedo_loc
+          type(time_type)               ,intent(in)          :: Time
+          integer                       ,intent(in)          :: is, js
+          real(kind=rb),dimension(:,:,:),intent(in),optional :: ozone
+          real(kind=rb),dimension(:,:  ),intent(in),optional :: albedo_loc
 ! Local variables
           logical :: used
 
@@ -677,6 +685,10 @@
 !------- Interactive albedo                    ------------
           if ( present(albedo_loc)) then
              used = send_data ( id_albedo, albedo_loc, Time, is, js )
+          endif
+!------- Ozone                                 ------------
+          if ( present(ozone) .and. id_ozone > 0 ) then
+             used = send_data ( id_ozone, ozone, Time, is, js, 1 )
           endif
         end subroutine write_diag_rrtm
 !*****************************************************************************************

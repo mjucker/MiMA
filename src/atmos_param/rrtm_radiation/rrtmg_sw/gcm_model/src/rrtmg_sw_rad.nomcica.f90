@@ -929,7 +929,7 @@
 !      real(kind=rb) :: earth_sun                        ! function for Earth/Sun distance adjustment
 
 ! Add one to nlayers here to include extra model layer at top of atmosphere
-      nlayers = nlay
+      nlayers = nlay + 1
 
 !  Initialize all molecular amounts to zero here, then pass input amounts
 !  into RRTM array WKL below.
@@ -989,7 +989,7 @@
 
       pz(0) = plev(iplon,1)
       tz(0) = tlev(iplon,1)
-      do l = 1, nlayers
+      do l = 1, nlayers-1
          pavel(l) = play(iplon,l)
          tavel(l) = tlay(iplon,l)
          pz(l) = plev(iplon,l+1)
@@ -1020,22 +1020,22 @@
 ! If this feature is utilized, increase nlayers by one above, limit the two
 ! loops above to (nlayers-1), and set the top most (nlayers) layer values here. 
 
-!      pavel(nlayers) = 0.5_rb * pz(nlayers-1)
-!      tavel(nlayers) = tavel(nlayers-1)
-!      pz(nlayers) = 1.e-4_rb
-!      tz(nlayers-1) = 0.5_rb * (tavel(nlayers)+tavel(nlayers-1))
-!      tz(nlayers) = tz(nlayers-1)
-!      pdp(nlayers) = pz(nlayers-1) - pz(nlayers)
-!      wkl(1,nlayers) = wkl(1,nlayers-1)
-!      wkl(2,nlayers) = wkl(2,nlayers-1)
-!      wkl(3,nlayers) = wkl(3,nlayers-1)
-!      wkl(4,nlayers) = wkl(4,nlayers-1)
-!      wkl(6,nlayers) = wkl(6,nlayers-1)
-!      wkl(7,nlayers) = wkl(7,nlayers-1)
-!      amm = (1._rb - wkl(1,nlayers-1)) * amd + wkl(1,nlayers-1) * amw
-!      coldry(nlayers) = (pz(nlayers-1)) * 1.e3_rb * avogad / &
-!                        (1.e2_rb * grav * amm * (1._rb + wkl(1,nlayers-1)))
-
+      pavel(nlayers) = 0.5_rb * pz(nlayers-1)
+      tavel(nlayers) = tavel(nlayers-1)
+      pz(nlayers) = 1.e-4_rb
+      tz(nlayers-1) = 0.5_rb * (tavel(nlayers)+tavel(nlayers-1))
+      tz(nlayers) = tz(nlayers-1)
+      pdp(nlayers) = pz(nlayers-1) - pz(nlayers)
+      wkl(1,nlayers) = wkl(1,nlayers-1)
+      wkl(2,nlayers) = wkl(2,nlayers-1)
+      wkl(3,nlayers) = wkl(3,nlayers-1)
+      wkl(4,nlayers) = wkl(4,nlayers-1)
+      wkl(6,nlayers) = wkl(6,nlayers-1)
+      wkl(7,nlayers) = wkl(7,nlayers-1)
+      amm = (1._rb - wkl(1,nlayers-1)) * amd + wkl(1,nlayers-1) * amw
+      coldry(nlayers) = (pz(nlayers-1)) * 1.e3_rb * avogad / &
+                        (1.e2_rb * grav * amm * (1._rb + wkl(1,nlayers-1)))
+      
 ! At this point all molecular amounts in wkl are in volume mixing ratio; 
 ! convert to molec/cm2 based on coldry for use in rrtm.  
 
@@ -1069,7 +1069,7 @@
 ! Move incoming GCM cloud arrays to RRTMG cloud arrays.
 ! For GCM input, incoming reice is defined based on selected ice parameterization (inflglw)
 
-         do l = 1, nlayers
+         do l = 1, nlayers-1
             cldfrac(l) = cldfr(iplon,l)
             ciwp(l) = cicewp(iplon,l)
             clwp(l) = cliqwp(iplon,l)
@@ -1085,15 +1085,15 @@
 
 ! If an extra layer is being used in RRTMG, set all cloud properties to zero in the extra layer.
 
-!         cldfrac(nlayers) = 0.0_rb
-!         tauc(:,nlayers) = 0.0_rb
-!         ssac(:,nlayers) = 1.0_rb
-!         asmc(:,nlayers) = 0.0_rb
-!         fsfc(:,nlayers) = 0.0_rb
-!         ciwp(nlayers) = 0.0_rb
-!         clwp(nlayers) = 0.0_rb
-!         rei(nlayers) = 0.0_rb
-!         rel(nlayers) = 0.0_rb
+         cldfrac(nlayers) = 0.0_rb
+         tauc(:,nlayers) = 0.0_rb
+         ssac(:,nlayers) = 1.0_rb
+         asmc(:,nlayers) = 0.0_rb
+         fsfc(:,nlayers) = 0.0_rb
+         ciwp(nlayers) = 0.0_rb
+         clwp(nlayers) = 0.0_rb
+         rei(nlayers) = 0.0_rb
+         rel(nlayers) = 0.0_rb
       
       endif
 
