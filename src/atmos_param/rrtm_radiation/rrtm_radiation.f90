@@ -473,9 +473,12 @@
              call interpolator( o3_interp, Time_loc, p_half, o3f, trim(ozone_file))
           endif
 
-          !interactive albedo
+          !interactive albedo: zonal mean of precipitation
           if(do_precip_albedo .and. num_precip>0)then
-             albedo_loc = albedo + (precip_albedo - albedo)*rrtm_precip/num_precip
+             do i=1,size(albedo,1)
+                albedo_loc(i,:) = albedo(i,:) + (precip_albedo - albedo(i,:))&
+                     &*sum(rrtm_precip,1)/size(rrtm_precip,1)/num_precip
+             enddo
              rrtm_precip = 0.
              num_precip  = 0
           else
