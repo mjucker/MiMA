@@ -13,6 +13,8 @@ module damping_driver_mod
 !   (3) Alexander-Dunkerton gravity wave drag may be called
 !
 !   (4) Garner topo_drag module may be called
+!mj
+!   (5) Time independent "gravity wave" drag may be called
 !
 !-----------------------------------------------------------------------
 
@@ -44,11 +46,14 @@ module damping_driver_mod
 !     Non-orographic gravity wave parameterization, updated as for Cohen et al. 2013
    logical  :: do_cg_drag = .false.
    logical  :: do_topo_drag = .false.
+   logical  :: do_const_drag = .false.
+   real     :: const_drag_amp = 3.e-04
    logical  :: do_conserve_energy = .false.
 
    namelist /damping_driver_nml/  trayfric,   nlev_rayfric,  &
                                   do_cg_drag, do_topo_drag, &
-                                  do_mg_drag, do_conserve_energy
+                                  do_mg_drag, do_conserve_energy, &
+                                  do_const_drag, const_drag_amp    !mj
 
 !
 !   trayfric = damping time in seconds for rayleigh damping momentum
@@ -67,7 +72,8 @@ module damping_driver_mod
 integer :: id_udt_rdamp,  id_vdt_rdamp,   &
            id_udt_gwd,    id_vdt_gwd,     &
                           id_sgsmtn,      &
-           id_udt_cgwd,   id_taus
+           id_udt_cgwd,   id_taus,        &
+           id_udt_cnstd  !mj
 
 integer :: id_tdt_diss_rdamp,  id_diss_heat_rdamp, &
            id_tdt_diss_gwd,    id_diss_heat_gwd
@@ -97,6 +103,8 @@ character(len=7) :: mod_name = 'damping'
 
 !mj cg_drag alarm
  integer :: Time_lastcall,dt_integer,days,seconds
+!mj constant drag TOA
+ real :: minp
 !-----------------------------------------------------------------------
 
 contains
@@ -248,6 +256,32 @@ contains
                           rmask=mask )
      endif
  
+   endif
+
+! constant drag, modelled on Alexander-Dunkerton time average
+   if (do_const_drag) then
+      utnd = 0.
+      vtnd = 0.
+      minp = log(minval(pfull*0.01)) - 1.
+      where( pfull*0.01 < exp(1.) )
+         ! vertical: linear in log(p[hPa])
+         utnd = -const_drag_amp*(log(pfull*0.01) - 1.)/minp
+      endwhere
+      ! latitudinal: 4th order polynomial
+      do k=1,size(utnd,3)
+         if( minval(utnd(:,:,k)) < 0. )then
+            utnd(:,:,k) = min( &
+                 0., utnd(:,:,k)*(-1.12*abs(lat)**4 +0.86*abs(lat)**3 +1.79*abs(lat)**2 -0.57*abs(lat) -0.06) )
+         endif
+      enddo     
+      udt = udt + utnd
+
+!----- diagnostics -----
+
+     if ( id_udt_cnstd > 0 ) then
+        used = send_data ( id_udt_cnstd, utnd, Time, is, js, 1, &
+                          rmask=mask )
+     endif
    endif
 
 !-----------------------------------------------------------------------
@@ -440,6 +474,14 @@ endif
     id_udt_cgwd = &
     register_diag_field ( mod_name, 'udt_cgwd', axes(1:3), Time,        &
                  'u wind tendency for cg gravity wave drag', 'm/s2', &
+                      missing_value=missing_value               )
+   endif
+
+   if (do_const_drag) then
+
+    id_udt_cnstd = &
+    register_diag_field ( mod_name, 'udt_cnstd', axes(1:3), Time,        &
+                 'u wind tendency for constant drag', 'm/s2', &
                       missing_value=missing_value               )
    endif
 
