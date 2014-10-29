@@ -229,7 +229,7 @@
 !                  WARNING)
 !          endif
           if(solday .gt. 0)then
-             call error_mesg( 'rrtm_gases_init', &
+             call error_mesg( mod_name, &
                   ' running perpetual simulation', NOTE)
           endif
 !------------ set some constants and parameters -------
@@ -422,6 +422,8 @@
           real(kind=rb) :: dlon,dlat,dj,di 
           type(time_type) :: Time_loc
           real(kind=rb),dimension(size(q,1),size(q,2)) :: albedo_loc
+! debug
+          integer :: indx2(2),indx(3),ii,ji,ki
 !---------------------------------------------------------------------------------------------------------------
 
           if(.not. rrtm_init)&
@@ -516,6 +518,11 @@
           thalf = min(thalf, temp_upper_limit)
 
           
+          !h2o=h2o_lower_limit
+          ! SW seems to have a problem with too small coszen values. 
+          ! anything lower than 0.01 (about 15min) is set to zero
+          where(cosz_rr < 1.e-2)cosz_rr=0.
+          
           if(include_secondary_gases)then
              call rrtmg_sw &
                   (ncols_rrt, nlay_rrt , icld     , iaer     , &
@@ -545,14 +552,13 @@
           ! make sure we don't have SW radiation at night
           ! there is some optimization possible here: only feed grid points to rrtm_sw where cosz_rr>0
           do i=1,size(swhr,2)
-             where( cosz_rr == 0. )
+             where( cosz_rr <= 0.)
                 swuflx(:,i) = 0.
                 swdflx(:,i) = 0.
                 swhr  (:,i) = 0.
              endwhere
           enddo
              
-
           swijk   = reshape(swhr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
 
           hr = 0.
