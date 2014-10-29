@@ -24,6 +24,8 @@ use  time_manager_mod, only: time_type
 use      constants_mod, only: rdgas, rvgas, cp_air, hlv, hlf
 
 use ocean_rough_mod, only: compute_ocean_roughness
+! mj know about surface topography
+use spectral_dynamics_mod,only: get_surf_geopotential
 
 
 implicit none
@@ -50,7 +52,8 @@ integer :: id_drag_moist,  id_drag_heat,  id_drag_mom,              &
            id_t_atm,  id_u_atm,  id_v_atm,  id_wind,                &
            id_t_ref,  id_rh_ref, id_u_ref,  id_v_ref,               &
            id_del_h,  id_del_m,  id_del_q, id_albedo, id_entrop_evap, &
-           id_entrop_shflx, id_entrop_lwflx
+           id_entrop_shflx, id_entrop_lwflx,                        &
+           id_heat !mj
 
 logical :: first_static = .true.
 logical :: do_init = .true.
@@ -60,6 +63,7 @@ logical :: do_init = .true.
 real ::  z_ref_heat      = 2.,       &
          z_ref_mom       = 10.,      &
           heat_capacity   = 1.e07,    &
+          land_capacity   = 1.e07,    & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.12,     &
 	  max_of          = 25.,      &
@@ -83,6 +87,7 @@ logical :: do_oflxmerid     = .false.
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
+                              land_capacity,                     & !mj
                               roughness_choice, const_roughness, &
                               albedo_choice, const_albedo, do_oflx, &
 			      max_of, lonmax_of, latmax_of, latwidth_of, &
@@ -306,6 +311,8 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 
  real    :: cp_inv
  logical :: used
+! mj know about topography
+ real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: zsurf,land_sea_heat_capacity
 
    flux_lw = Atm%flux_lw - flux_lw
    
@@ -336,11 +343,21 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    dedt_surf  =  dedt_surf     + dedq_atm * e_q_n   
    
 if(surface_choice == 1) then
-   
-  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
-          - (flux_t + hlv*flux_q) + flux_o)*dt/heat_capacity
 
-  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
+! mj heat capacity function of surface topography
+  call get_surf_geopotential(zsurf)
+  land_sea_heat_capacity = heat_capacity
+  where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
+
+  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
+          - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
+
+  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/land_sea_heat_capacity 
+!  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
+!          - (flux_t + hlv*flux_q) + flux_o)*dt/heat_capacity
+
+!  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
+! end mj
 
   dt_t_surf = flux/(1.0 -deriv)
   sst = sst + dt_t_surf
@@ -369,6 +386,7 @@ endif
    if ( id_r_flux > 0 ) used = send_data ( id_r_flux, flux_lw, Time )
    if ( id_q_flux > 0 ) used = send_data ( id_q_flux, flux_q, Time )
    if ( id_o_flux > 0 ) used = send_data ( id_o_flux, flux_o, Time )
+   if ( id_heat   > 0 ) used = send_data ( id_heat,land_sea_heat_capacity,Time )
    if ( id_entrop_evap > 0 ) then 
       entrop_evap = flux_q/sst
       used = send_data ( id_entrop_evap, entrop_evap, Time)
@@ -816,6 +834,9 @@ subroutine diag_field_init ( Time, atmos_axes )
    id_albedo      = &
    register_diag_field ( mod_name, 'albedo',      atmos_axes, Time,     &
                         'surface albedo','none' )
+   id_heat        = & !mj
+   register_diag_field ( mod_name, 'heat_capacity',atmos_axes, Time,     &
+                        'mixed layer heat capacity','none' )
    id_entrop_evap      = &
    register_diag_field ( mod_name, 'entrop_evap', atmos_axes, Time,     &
                         'entropy source from evap','kg/m2/s/K' )
