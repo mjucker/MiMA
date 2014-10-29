@@ -28,8 +28,8 @@ module damping_driver_mod
                               FATAL, close_file
  use diag_manager_mod, only:  register_diag_field,  &
                               register_static_field, send_data
- use time_manager_mod, only:  time_type
- use    constants_mod, only:  cp_air, grav
+ use time_manager_mod, only:  time_type,get_time,length_of_year !mj
+ use    constants_mod, only:  cp_air, grav, PI
 
  implicit none
  private
@@ -48,12 +48,13 @@ module damping_driver_mod
    logical  :: do_topo_drag = .false.
    logical  :: do_const_drag = .false.
    real     :: const_drag_amp = 3.e-04
+   real     :: const_drag_off = 0.
    logical  :: do_conserve_energy = .false.
 
    namelist /damping_driver_nml/  trayfric,   nlev_rayfric,  &
                                   do_cg_drag, do_topo_drag, &
                                   do_mg_drag, do_conserve_energy, &
-                                  do_const_drag, const_drag_amp    !mj
+                                  do_const_drag, const_drag_amp,const_drag_off    !mj
 
 !
 !   trayfric = damping time in seconds for rayleigh damping momentum
@@ -103,8 +104,6 @@ character(len=7) :: mod_name = 'damping'
 
 !mj cg_drag alarm
  integer :: Time_lastcall,dt_integer,days,seconds
-!mj constant drag TOA
- real :: minp
 !-----------------------------------------------------------------------
 
 contains
@@ -144,6 +143,10 @@ contains
                                                             t_pass
  integer :: k, j, i, locmax(3)
  real :: a,b
+!-----------------------------------------------------------------------
+!mj constant drag TOA
+ real :: minp,cosday
+ integer :: seconds,days,daysperyear
 !-----------------------------------------------------------------------
 
    if (.not.module_is_initialized) call error_mesg ('damping_driver',  &
@@ -248,7 +251,7 @@ contains
       call cg_drag_calc (is, js, lat, pfull, zfull, t, u, v, Time, delt, utnd, vtnd)
      udt =  udt + utnd
      vdt =  vdt + vtnd !mj
-     
+
 !----- diagnostics -----
 
      if ( id_udt_cgwd > 0 ) then
@@ -258,23 +261,26 @@ contains
  
    endif
 
-! constant drag, modelled on Alexander-Dunkerton time average
+! constant drag, modeled on Alexander-Dunkerton winter average
    if (do_const_drag) then
+      ! get time of the year for seasonal cycle
+      call get_time(length_of_year(),seconds,daysperyear)
+      call get_time(Time,seconds,days)
+      cosday = cos(2*PI*days/daysperyear)
       utnd = 0.
-      vtnd = 0.
       minp = log(minval(pfull*0.01)) - 1.
       where( pfull*0.01 < exp(1.) )
-         ! vertical: linear in log(p[hPa])
-         utnd = -const_drag_amp*(log(pfull*0.01) - 1.)/minp
+         ! vertical: linear in ln(p)
+         utnd = -const_drag_amp*((log(pfull*0.01) - 1.)/minp)**1.
       endwhere
-      ! latitudinal: 4th order polynomial
+      ! latitudinal: 3rd order polynomial, and cosine in time
       do k=1,size(utnd,3)
-         if( minval(utnd(:,:,k)) < 0. )then
-            utnd(:,:,k) = min( &
-                 0., utnd(:,:,k)*(-1.12*abs(lat)**4 +0.86*abs(lat)**3 +1.79*abs(lat)**2 -0.57*abs(lat) -0.06) )
-         endif
-      enddo     
-      udt = udt + utnd
+         where( pfull(:,:,k)*0.01 < exp(1.) )
+            utnd(:,:,k) = utnd(:,:,k)*sign(1.,lat)*cosday &
+                 *( -1.65*abs(lat)**3 +2.5*lat**2 +0.17*abs(lat) +const_drag_off )
+         end where
+      enddo
+      udt = udt + utnd 
 
 !----- diagnostics -----
 
