@@ -101,7 +101,8 @@
                                                               !  day of the year = solday
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
                                                               ! Else only heat radiatively at every dt_rad
-        logical            :: do_rad_time_avg =.true.         ! Average radiation over dt_rad?
+        logical            :: do_rad_time_avg =.true.         ! Average coszen for SW radiation over dt_rad?
+        integer(kind=im)      :: dt_rad_avg = -1                 ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
         integer(kind=im)   :: dt_rad=900                      ! Radiation time step
         integer(kind=im)   :: lonstep=1                       ! Subsample fields along longitude
                                                               !  for faster radiation calculation  
@@ -122,8 +123,8 @@
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
              &solr_cnst, solrad, use_dyofyr, solday, &
-             &store_intermediate_rad, do_rad_time_avg, dt_rad, lonstep, &
-             &do_precip_albedo,precip_albedo
+             &store_intermediate_rad, do_rad_time_avg, dt_rad, dt_rad_avg, &
+             &lonstep, do_precip_albedo,precip_albedo
 
       end module rrtm_vars
 !*****************************************************************************************
@@ -240,6 +241,8 @@
 
           ncols_rrt = ncols/lonstep
           nlay_rrt  = nlay
+
+          if(dt_rad_avg .le. 0) dt_rad_avg = dt_rad
 
 !------------ allocate arrays to be used later  -------
           allocate(t_half(size(lonb,1)-1,size(latb)-1,nlay+1))
@@ -459,7 +462,7 @@
           endif
 !compute zenith angle
           if(do_rad_time_avg) then
-             call compute_zenith(Time_loc,dt_rad,lat,lon,coszen,dyofyr)
+             call compute_zenith(Time_loc,dt_rad_avg,lat,lon,coszen,dyofyr)
           else
              call compute_zenith(Time_loc,0     ,lat,lon,coszen,dyofyr)
           end if
