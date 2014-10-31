@@ -102,9 +102,9 @@ real        :: Bt_nh=.001         ! additional momentum stress for NH [Pa]
 
 real        :: Bt_sh=-.001        ! additional momentum stress for SH [Pa]
 
-real        :: Bt_eq=.000         ! additional momentum stress at equator) 
+real        :: Bt_eq=.000         ! additional momentum stress at equator - CURRENTLY NOT USED! 
 
-real        :: Bt_eq_width=4.0    ! scaling for width of equtorial momentum flux  (equator) 
+real        :: Bt_eq_width=4.0    ! scaling for width of equtorial momentum flux  (equator) CURRENTLY NOT USED!
 
 real        :: phi0n = 30., phi0s = -30., dphin = 5., dphis = -5.
 
