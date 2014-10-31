@@ -84,6 +84,9 @@ integer :: roughness_choice = 1
 integer :: albedo_choice    = 1
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
+logical :: do_qflux         = .false.
+real    :: qflux_amp        = 50.
+real    :: qflux_width      = 16.
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
@@ -93,7 +96,8 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
 			      max_of, lonmax_of, latmax_of, latwidth_of, &
 			      lonwidth_of, higher_albedo, lat_glacier, &
 			      do_oflxmerid, maxofmerid, latmaxofmerid, Tm, &
-			      deltaT
+			      deltaT,                            &
+                              do_qflux,qflux_amp,qflux_width  !mj
 
 !-----------------------------------------------------------------------
 
@@ -673,7 +677,15 @@ if(do_oflxmerid) then
       end if
    enddo
 endif
-
+!mj q-flux as in Merlis et al (2013)
+if ( do_qflux ) then
+   do j=1, size(Atm%t_bot,2)
+      lat = 0.5*180./pi*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
+      flux_o(:,j) = flux_o(:,j) - qflux_amp*(1-2.*lat**2/qflux_width**2) * &
+           exp(- ((lat)**2/(qflux_width)**2))
+   enddo
+endif
+   
 
     do_init = .false.
 
