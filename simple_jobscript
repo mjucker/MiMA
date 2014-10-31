@@ -1,26 +1,36 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=16
-#PBS -l walltime=08:00:00
+#PBS -l walltime=05:00:00
 #PBS -l mem=8gb
 #PBS -N spectral_rrtm
 
 ulimit -s unlimited
 
 WKDR=/scratch/mj93/run/
+EXEC=fms.x
 CCOMB=/home/mj93/models/code/spectral_rrtm/bin/mppnccombine.nyu
+PLEV=/home/mj93/models/code/plevel_interpolation/scripts/plev.sh
 
 cd $WKDR
 
-mpiexec -n $PBS_NP ./fms.x > stdout
+mpiexec -n $PBS_NP ./$EXEC > stdout
 
-# combine netcdf files
+# combine netcdf files and interpolate
 for ncfile in $(/bin/ls *.nc.0000)
 do
+   # combine
    filename=$(basename $ncfile)
    filename=${filename%.*}
    rm $filename
    $CCOMB -r $filename ${filename}.????
-   ncpdq -O $filename $filename
+   # plevel interpolation
+   ncrename -v sphum,q $filename
+   sh $PLEV -a -i $filename -o ${filename}.plev
+   ncrename -v level,pfull -d level,pfull ${filename}.plev
+   # pack file
+   ncpdq -O $filename ${filename}.pfull
+   ncpdq -O ${filename}.plev $filename
+   rm ${filename}.plev
 done
 
 #mj
@@ -33,5 +43,4 @@ do
    $CCOMB -r $filename ${filename}.????
 done
 cd ../
-#jm    
 
