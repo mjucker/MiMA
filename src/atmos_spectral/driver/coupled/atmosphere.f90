@@ -256,14 +256,6 @@ real,                 intent(out), dimension(is:ie,js:je) :: lprec, fprec, gust
 
 real, dimension(is:ie,js:je,1:num_levels+1) :: ln_p_half
 real, dimension(is:ie,js:je,1:num_levels  ) :: ln_p_full
-!mj PK02 sponge
-logical :: do_sponge = .false.
-real :: sponge_min = 50., sponge_pbottom =-3, sponge_tau_days = 0.5, sponge_coeff
-real, dimension(is:ie,js:je) :: vfactr
-integer :: k
-character(len=1024) :: sponge_pressure
-logical :: message_sent = .false.
-!mj end PK02 sponge
 
 if(.not.module_is_initialized) then
   call error_mesg('atmosphere_up','atmosphere module has not been initialized.', FATAL)
@@ -279,25 +271,6 @@ if(previous == current) then
 else
   future = previous
 endif
-!mj PK02 sponge
-if(do_sponge)then
-   sponge_coeff = 1./sponge_tau_days/86400.
-   if( sponge_pbottom < 0. ) sponge_pbottom = max(sponge_min,maxval(p_full(:,:,int(abs(sponge_pbottom)))))
-   if(mpp_pe().eq.mpp_root_pe() .and. .not.message_sent .and. minval(p_full).lt.sponge_pbottom)then
-      write(sponge_pressure, '(a,f7.3,a)') 'using sponge above ',sponge_pbottom*0.01,' hPa'
-      call error_mesg('atmosphere_up',sponge_pressure, WARNING)
-      message_sent=.true.
-   endif
-   vfactr=0.
-   do k=1,num_levels
-      where (p_full(:,:,k) < sponge_pbottom)
-         vfactr(:,:) = -sponge_coeff*(sponge_pbottom-p_full(:,:,k))**2/(sponge_pbottom)**2
-         dt_ug(:,:,k) = dt_ug(:,:,k) + vfactr(:,:)*ug(:,:,k,future)
-         dt_vg(:,:,k) = dt_vg(:,:,k) + vfactr(:,:)*vg(:,:,k,future)
-      endwhere
-   enddo
-endif
-!mj end PK02 sponge
 
 call mpp_clock_begin(dynclock)
 call spectral_dynamics(Time, psg(:,:,future), ug(:,:,:,future), vg(:,:,:,future), &

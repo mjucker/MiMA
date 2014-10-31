@@ -40,10 +40,14 @@ module damping_driver_mod
 !---------------------- namelist ---------------------------------------
 
    real     :: trayfric = 0.
-   integer  :: nlev_rayfric = 1
+! mj pk02-like sponge   integer  :: nlev_rayfric = 1
+   integer  :: nlev_rayfric
+   real :: sponge_pbottom = 50. ! [Pa]
   logical  :: do_mg_drag = .false.
 !epg: Use cg_drag.f90, GFDL's version of the Alexander and Dunkerton 1999 
 !     Non-orographic gravity wave parameterization, updated as for Cohen et al. 2013
+! mj actively choose rayleigh friction
+   logical  :: do_rayleigh = .false.
    logical  :: do_cg_drag = .false.
    logical  :: do_topo_drag = .false.
    logical  :: do_const_drag = .false.
@@ -51,7 +55,8 @@ module damping_driver_mod
    real     :: const_drag_off = 0.
    logical  :: do_conserve_energy = .false.
 
-   namelist /damping_driver_nml/  trayfric,   nlev_rayfric,  &
+   namelist /damping_driver_nml/  trayfric,  &
+                                  do_rayleigh, sponge_pbottom,  & ! mj
                                   do_cg_drag, do_topo_drag, &
                                   do_mg_drag, do_conserve_energy, &
                                   do_const_drag, const_drag_amp,const_drag_off    !mj
@@ -74,7 +79,7 @@ integer :: id_udt_rdamp,  id_vdt_rdamp,   &
            id_udt_gwd,    id_vdt_gwd,     &
                           id_sgsmtn,      &
            id_udt_cgwd,   id_taus,        &
-           id_udt_cnstd  !mj
+           id_udt_cnstd                 !mj
 
 integer :: id_tdt_diss_rdamp,  id_diss_heat_rdamp, &
            id_tdt_diss_gwd,    id_diss_heat_gwd
@@ -88,8 +93,8 @@ real :: missing_value = -999.
 character(len=7) :: mod_name = 'damping'
 
 !-----------------------------------------------------------------------
-
- logical :: do_rayleigh
+!mj actively choose rayleigh - is now in namelist
+! logical :: do_rayleigh
 
  real, parameter ::  daypsec=1./86400.
  logical :: module_is_initialized =.false.
@@ -158,8 +163,9 @@ contains
 !-----------------------------------------------------------------------
    if (do_rayleigh) then
 
-       p2 = pfull * pfull
-       call rayleigh (delt, p2, u, v, utnd, vtnd, ttnd)
+! mj pk02-like sponge       p2 = pfull * pfull
+!       call rayleigh (delt, p2, u, v, utnd, vtnd, ttnd)
+       call rayleigh (delt, pfull, u, v, utnd, vtnd, ttnd)
        udt = udt + utnd
        vdt = vdt + vtnd
        tdt = tdt + ttnd
@@ -358,7 +364,8 @@ contains
 !-----------------------------------------------------------------------
  integer :: unit, ierr, io
  logical :: used
-
+!mj
+ integer :: raylev(1)
 !-----------------------------------------------------------------------
 !----------------- namelist (read & write) -----------------------------
 
@@ -379,18 +386,24 @@ contains
 !-----------------------------------------------------------------------
 !--------- rayleigh friction ----------
 
-   do_rayleigh=.false.
+!mj actively choose rayleigh friction
+!   do_rayleigh=.false.
 
-   if (abs(trayfric) > 0.0001 .and. nlev_rayfric > 0) then
+!   if (abs(trayfric) > 0.0001 .and. nlev_rayfric > 0) then
+   if ( do_rayleigh ) then
+! mj automatically determine nlev_rayfric
+      raylev = minloc(abs(pref(:)-2*sponge_pbottom))
+      nlev_rayfric = raylev(1)
       if (trayfric > 0.0) then
          rfactr=(1./trayfric)
       else
          rfactr=(1./abs(trayfric))*daypsec
       endif
-         do_rayleigh=.true.
-   else
-         rfactr=0.0
    endif
+!      do_rayleigh=.true.
+!   else
+!      rfactr=0.0
+!   endif
 
 !-----------------------------------------------------------------------
 !----- mountain gravity wave drag -----
@@ -490,6 +503,7 @@ endif
                  'u wind tendency for constant drag', 'm/s2', &
                       missing_value=missing_value               )
    endif
+      
 
 !-----------------------------------------------------------------------
 !----- topo wave drag -----
@@ -570,32 +584,36 @@ endif
 !-----------------------------------------------------------------------
 !--------------rayleigh damping of momentum (to zero)-------------------
 
+   udt = 0.
+   vdt = 0.
    do k = 1, nlev_rayfric
-     fact(:,:) = rfactr*(1.+(p2(:,:,1)-p2(:,:,k))/(p2(:,:,1)+p2(:,:,k)))
-     udt(:,:,k) = -u(:,:,k)*fact(:,:)
-     vdt(:,:,k) = -v(:,:,k)*fact(:,:)
+      where ( p2(:,:,k) < sponge_pbottom ) !mj note: p2==pfull now
+!         fact(:,:) = rfactr*(1.+(p2(:,:,1)-p2(:,:,k))/(p2(:,:,1)+p2(:,:,k)))
+         fact(:,:) = rfactr*(sponge_pbottom-p2(:,:,k))**2/(sponge_pbottom)**2
+         udt(:,:,k) = -u(:,:,k)*fact(:,:)
+         vdt(:,:,k) = -v(:,:,k)*fact(:,:)
+      endwhere
    enddo
-
-   do k = nlev_rayfric+1, size(u,3)
-     udt(:,:,k) = 0.0
-     vdt(:,:,k) = 0.0
-   enddo
+!   do k = nlev_rayfric+1, size(u,3)
+!     udt(:,:,k) = 0.0
+!     vdt(:,:,k) = 0.0
+!   enddo
 
 !  total energy conservation
 !  compute temperature change loss due to ke dissipation
 
+   tdt = 0. !mj
    if (do_conserve_energy) then
        do k = 1, nlev_rayfric
           tdt(:,:,k) = -((u(:,:,k)+.5*dt*udt(:,:,k))*udt(:,:,k) +  &
                          (v(:,:,k)+.5*dt*vdt(:,:,k))*vdt(:,:,k)) / cp_air
        enddo
-       do k = nlev_rayfric+1, size(u,3)
-          tdt(:,:,k) = 0.0
-       enddo
-   else
-       tdt = 0.0
+!       do k = nlev_rayfric+1, size(u,3)
+!          tdt(:,:,k) = 0.0
+!       enddo
+!   else
+!       tdt = 0.0
    endif
-
 !-----------------------------------------------------------------------
 
  end subroutine rayleigh
