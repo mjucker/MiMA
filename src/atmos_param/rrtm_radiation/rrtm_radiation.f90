@@ -147,7 +147,7 @@
           use parrrsw, only:          nbndsw
           use diag_manager_mod, only: register_diag_field, send_data
           use interpolator_mod, only: interpolate_type, interpolator_init, &
-                                      &CONSTANT, INTERP_WEIGHTED_P
+                                      &CONSTANT, ZERO,INTERP_WEIGHTED_P
           use fms_mod, only:          open_namelist_file, check_nml_error,  &
                                       &mpp_pe, mpp_root_pe, close_file, &
                                       &write_version_number, stdlog, &
@@ -314,7 +314,7 @@
           ecaer  = 0.
 
           if(do_read_ozone)then
-             call interpolator_init (o3_interp, trim(ozone_file)//'.nc', lonb, latb, data_out_of_bounds=(/CONSTANT/))
+             call interpolator_init (o3_interp, trim(ozone_file)//'.nc', lonb, latb, data_out_of_bounds=(/ZERO/))
           endif
 
           if(do_precip_albedo)then
