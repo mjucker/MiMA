@@ -892,6 +892,10 @@ if(minval(tg(:,:,:,future)) < valid_range_t(1) .or. maxval(tg(:,:,:,future)) > v
         &,': ',ii,jj,kk&
         &,tg(ii,jj,kk,current)&
         &,tg(ii,jj,kk,future)
+   write(*,'(a,i3,a,3i3,2f10.3)')'PE, location, Uextr(curr,future): ',mpp_pe()&
+        &,': ',ii,jj,kk&
+        &,ug(ii,jj,kk,current)&
+        &,ug(ii,jj,kk,future)
 !jm
   call error_mesg('spectral_dynamics','temperatures out of valid range', FATAL)
 endif
