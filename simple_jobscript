@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=16
+#PBS -l nodes=2:ppn=16
 #PBS -l walltime=05:00:00
 #PBS -l mem=8gb
 #PBS -N spectral_rrtm
@@ -10,6 +10,10 @@ WKDR=/scratch/mj93/run/
 EXEC=fms.x
 CCOMB=/home/mj93/models/code/spectral_rrtm/bin/mppnccombine.nyu
 PLEV=/home/mj93/models/code/plevel_interpolation/scripts/plev.sh
+
+#suffix=$(date +%Y%m%d_%H%M)
+suffix=$PBS_JOBID
+ARCHDIR=/archive/mj93/model_output/$suffix
 
 cd $WKDR
 
@@ -24,7 +28,7 @@ do
    rm $filename
    $CCOMB -r $filename ${filename}.????
    # plevel interpolation
-   ncrename -v sphum,q $filename
+#   ncrename -v sphum,q $filename
    sh $PLEV -a -i $filename -o ${filename}.plev
    ncrename -v level,pfull -d level,pfull ${filename}.plev
    # pack file
@@ -44,3 +48,6 @@ do
 done
 cd ../
 
+# archive the run
+mkdir $ARCHDIR
+rsync -aHv $WKDR/* $ARCHDIR/
