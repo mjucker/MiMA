@@ -87,6 +87,8 @@ logical :: do_oflxmerid     = .false.
 logical :: do_qflux         = .false.
 real    :: qflux_amp        = 50.
 real    :: qflux_width      = 16.
+logical :: do_read_sst      = .false.
+character(len=256) :: sst_file
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
@@ -97,7 +99,8 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
 			      lonwidth_of, higher_albedo, lat_glacier, &
 			      do_oflxmerid, maxofmerid, latmaxofmerid, Tm, &
 			      deltaT,                            &
-                              do_qflux,qflux_amp,qflux_width  !mj
+                              do_qflux,qflux_amp,qflux_width,    &  !mj
+                              do_read_sst,sst_file !mj
 
 !-----------------------------------------------------------------------
 
@@ -352,6 +355,7 @@ if(surface_choice == 1) then
   call get_surf_geopotential(zsurf)
   land_sea_heat_capacity = heat_capacity
   where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
+! mj end
 
   flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
           - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
@@ -423,6 +427,10 @@ endif
 !#######################################################################
 
  subroutine simple_surface_init ( Time, Atm)
+! mj read SSTs
+ use interpolator_mod, only: interpolate_type,interpolator_init&
+      &,CONSTANT,interpolator
+ type(interpolate_type),save :: sst_interp
 
  type       (time_type), intent(in)  :: Time
  type (atmos_data_type), intent(in)  :: Atm
@@ -477,7 +485,11 @@ else if(file_exist('INPUT/simple_surface.res')) then
   call read_data(unit, flux_v)
   
   call close_file(unit)
-else 
+!mj read fixed SSTs
+else if( do_read_sst ) then
+   call interpolator_init(sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
+   call interpolator( sst_interp, Time, sst, trim(sst_file) )
+else
   do j = 1, size(Atm%t_bot,2)
     lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
 !    xx = 1. - sin(1.5*lat)*sin(1.5*lat)
