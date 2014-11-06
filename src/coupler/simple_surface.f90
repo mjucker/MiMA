@@ -19,13 +19,16 @@ use           fms_mod, only: file_exist, open_namelist_file, check_nml_error, &
 use  diag_manager_mod, only: register_diag_field,  &
                              register_static_field, send_data
 
-use  time_manager_mod, only: time_type
+use  time_manager_mod, only: time_type,get_time
 
 use      constants_mod, only: rdgas, rvgas, cp_air, hlv, hlf
 
 use ocean_rough_mod, only: compute_ocean_roughness
 ! mj know about surface topography
 use spectral_dynamics_mod,only: get_surf_geopotential
+! mj read SSTs
+use interpolator_mod, only: interpolate_type,interpolator_init&
+     &,CONSTANT,interpolator
 
 
 implicit none
@@ -114,6 +117,8 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                                        flux_t, flux_q, flux_lw
 
   real, allocatable, dimension(:,:) :: sst, flux_u, flux_v, flux_o
+!mj read sst from input file
+  type(interpolate_type),save :: sst_interp
 
 contains
 
@@ -199,17 +204,28 @@ pi = 4.0*atan(1.)
    elseif(albedo_choice == 2) then
      do j = 1, size(Atm%t_bot,2)
        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
+       ! mj SH or NH only
+       if ( lat_glacier .ge. 0. ) then
+          if ( lat > lat_glacier ) then
 
-       if ( lat > lat_glacier ) then
+             albedo(:,j) = higher_albedo
 
-         albedo(:,j) = higher_albedo
+          else
 
+             albedo(:,j) = const_albedo
+
+          endif
        else
+          if ( lat < lat_glacier ) then
 
-         albedo(:,j) = const_albedo
+             albedo(:,j) = higher_albedo
 
+          else
+
+             albedo(:,j) = const_albedo
+
+          endif
        endif
-
      enddo
 !mj add symmetric higher_albedo
    elseif(albedo_choice == 3) then
@@ -320,6 +336,9 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  logical :: used
 ! mj know about topography
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: zsurf,land_sea_heat_capacity
+! mj input SST
+ real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: sst_new
+
 
    flux_lw = Atm%flux_lw - flux_lw
    
@@ -348,7 +367,12 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 
    flux_q     =  flux_q        + dedq_atm * f_q_delt_n 
    dedt_surf  =  dedt_surf     + dedq_atm * e_q_n   
-   
+
+if(do_read_sst) then
+   call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
+   dt_t_surf = sst_new - sst
+   sst = sst + dt_t_surf
+else   
 if(surface_choice == 1) then
 
 ! mj heat capacity function of surface topography
@@ -383,6 +407,7 @@ endif
   dt_t_atm   = f_t_delt_n  + dt_t_surf*e_t_n
   dt_q_atm   = f_q_delt_n  + dt_t_surf*e_q_n
 
+endif
  
 
 
@@ -427,10 +452,6 @@ endif
 !#######################################################################
 
  subroutine simple_surface_init ( Time, Atm)
-! mj read SSTs
- use interpolator_mod, only: interpolate_type,interpolator_init&
-      &,CONSTANT,interpolator
- type(interpolate_type),save :: sst_interp
 
  type       (time_type), intent(in)  :: Time
  type (atmos_data_type), intent(in)  :: Atm
