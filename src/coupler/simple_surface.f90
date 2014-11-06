@@ -91,6 +91,7 @@ logical :: do_qflux         = .false.
 real    :: qflux_amp        = 50.
 real    :: qflux_width      = 16.
 logical :: do_read_sst      = .false.
+logical :: do_sc_sst        = .false.
 character(len=256) :: sst_file
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
@@ -103,7 +104,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
 			      do_oflxmerid, maxofmerid, latmaxofmerid, Tm, &
 			      deltaT,                            &
                               do_qflux,qflux_amp,qflux_width,    &  !mj
-                              do_read_sst,sst_file !mj
+                              do_read_sst,do_sc_sst,sst_file !mj
 
 !-----------------------------------------------------------------------
 
@@ -368,37 +369,38 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    flux_q     =  flux_q        + dedq_atm * f_q_delt_n 
    dedt_surf  =  dedt_surf     + dedq_atm * e_q_n   
 
-if(do_read_sst) then
-   call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
-   dt_t_surf = sst_new - sst
-   sst = sst + dt_t_surf
-else   
-if(surface_choice == 1) then
+   if(surface_choice == 1) then
+      if(do_sc_sst) then
+         call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
+         dt_t_surf = sst_new - sst
+         sst = sst + dt_t_surf
+      else   
 
 ! mj heat capacity function of surface topography
-  call get_surf_geopotential(zsurf)
-  land_sea_heat_capacity = heat_capacity
-  where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
+         call get_surf_geopotential(zsurf)
+         land_sea_heat_capacity = heat_capacity
+         where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
 ! mj end
 
-  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
-          - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
+         flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
+              - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
+         
+         deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/land_sea_heat_capacity 
+      !  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
+      !          - (flux_t + hlv*flux_q) + flux_o)*dt/heat_capacity
+         
+         !  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
+      
+         dt_t_surf = flux/(1.0 -deriv)
+         sst = sst + dt_t_surf
+      endif
 
-  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/land_sea_heat_capacity 
-!  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
-!          - (flux_t + hlv*flux_q) + flux_o)*dt/heat_capacity
+   elseif(surface_choice == 2) then
+      
+      dt_t_surf  = 0.0
+      
+   endif
 
-!  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
-! end mj
-
-  dt_t_surf = flux/(1.0 -deriv)
-  sst = sst + dt_t_surf
-  
-elseif(surface_choice == 2) then
-
-  dt_t_surf  = 0.0
-  
-endif
 
 
   flux_t     = flux_t      + dt_t_surf*dhdt_surf
@@ -406,8 +408,6 @@ endif
   flux_lw    = flux_lw     - dt_t_surf*drdt_surf
   dt_t_atm   = f_t_delt_n  + dt_t_surf*e_t_n
   dt_q_atm   = f_q_delt_n  + dt_t_surf*e_q_n
-
-endif
  
 
 
@@ -476,6 +476,8 @@ endif
       enddo
  10   call close_file (unit)
    endif
+!mj make choices compatible
+   if(do_sc_sst) do_read_sst = .true.
 
 !--------- write version number and namelist ------------------
 
