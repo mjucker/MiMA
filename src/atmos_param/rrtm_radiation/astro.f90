@@ -19,7 +19,7 @@
 !--------------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------------
 ! parts of this are taken from GFDL's astronomy.f90      
-          subroutine compute_zenith(Time, dt, lat, lon, cosz, dyofyr)
+          subroutine compute_zenith(Time, equinox_day, dt, lat, lon, cosz, dyofyr)
 !
 ! Computes the zenith angle for RRTM SW radiation
 !
@@ -29,11 +29,12 @@
 ! Local variables
             implicit none
 ! Inputs
-            type(time_type),             intent(in) :: Time     ! time of year, according to calendar
-            integer(kind=im),            intent(in) :: dt       ! time step over which to average (if > 0)
-            real(kind=rb),dimension(:,:),intent(in) :: lat,lon  ! lon/lat grid
-            real(kind=rb),dimension(:,:),intent(out):: cosz     ! cosine of zenith angle
-            integer(kind=im)            ,intent(out):: dyofyr   ! day of the year to compute cosz at
+            type(time_type),             intent(in) :: Time        ! time of year, according to calendar
+            real(kind=rb),               intent(in) :: equinox_day ! fraction of year for March equinox
+            integer(kind=im),            intent(in) :: dt          ! time step over which to average (if > 0)
+            real(kind=rb),dimension(:,:),intent(in) :: lat,lon     ! lon/lat grid
+            real(kind=rb),dimension(:,:),intent(out):: cosz        ! cosine of zenith angle
+            integer(kind=im)            ,intent(out):: dyofyr      ! day of the year to compute cosz at
 ! Locals
             real(kind=rb),dimension(size(lat,1),size(lat,2)) :: h,cos_h, &
                  lat_h
@@ -71,8 +72,8 @@
             where(time_pi >= PI) time_pi = time_pi - twopi
             where(time_pi < -PI) time_pi = time_pi + twopi 
             !time_pi now contains local time at each grid point
-            !get day of the year relative to equinox. We set equinox at 0.25,0.75*daysperyear
-            days = days - int(0.25*daysperyear)
+            !get day of the year relative to equinox. We set equinox at (equinox_day,equinox_day+0.5)*daysperyear
+            days = days - int(equinox_day*daysperyear)
             dyofyr   = modulo(days,daysperyear) !NH winter solstice at day 0
             !convert into radians
             radday = dyofyr*radperday
