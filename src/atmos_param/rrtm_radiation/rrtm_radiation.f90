@@ -99,6 +99,8 @@
         real(kind=rb)      :: solrad=1.0                      ! distance Earth-Sun [AU] if use_dyofyr=.false.
         real(kind=rb)      :: solday=0.                       ! if >0, do perpetual run corresponding to 
                                                               !  day of the year = solday
+        real(kind=rb)      :: equinox_day=0.25                ! fraction of the year defining March equinox \in [0,1]
+        real(kind=rb)      :: slowdown_rad=1.                 ! factor do simulate slower seasonal cycle: >1 means slower, <1 faster
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
                                                               ! Else only heat radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true.         ! Average coszen for SW radiation over dt_rad?
@@ -122,7 +124,7 @@
 
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
-             &solr_cnst, solrad, use_dyofyr, solday, &
+             &solr_cnst, solrad, use_dyofyr, solday, equinox_day, slowdown_rad, &
              &store_intermediate_rad, do_rad_time_avg, dt_rad, dt_rad_avg, &
              &lonstep, do_precip_albedo,precip_albedo
 
@@ -458,13 +460,15 @@
           if(solday > 0.)then
              Time_loc = set_time(seconds,floor(solday))
           else
-             Time_loc = Time
+!             Time_loc = Time
+             seconds = days*86400 + seconds
+             Time_loc = set_time(int(seconds/slowdown_rad))
           endif
 !compute zenith angle
           if(do_rad_time_avg) then
-             call compute_zenith(Time_loc,dt_rad_avg,lat,lon,coszen,dyofyr)
+             call compute_zenith(Time_loc,equinox_day,dt_rad_avg,lat,lon,coszen,dyofyr)
           else
-             call compute_zenith(Time_loc,0     ,lat,lon,coszen,dyofyr)
+             call compute_zenith(Time_loc,equinox_day,0     ,lat,lon,coszen,dyofyr)
           end if
 
           si=size(tdt,1)
