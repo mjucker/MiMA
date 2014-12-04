@@ -67,6 +67,7 @@ real ::  z_ref_heat      = 2.,       &
          z_ref_mom       = 10.,      &
           heat_capacity   = 1.e07,    &
           land_capacity   = 1.e07,    & !mj
+          trop_capacity   = 1.e07,    & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.12,     &
 	  max_of          = 25.,      &
@@ -96,7 +97,7 @@ character(len=256) :: sst_file
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
-                              land_capacity,                     & !mj
+                              land_capacity,trop_capacity,       & !mj
                               roughness_choice, const_roughness, &
                               albedo_choice, const_albedo, do_oflx, &
 			      max_of, lonmax_of, latmax_of, latwidth_of, &
@@ -228,20 +229,22 @@ pi = 4.0*atan(1.)
           endif
        endif
      enddo
-!mj add symmetric higher_albedo
+!mj add symmetric higher_albedo - linear increase from equator to pole
    elseif(albedo_choice == 3) then
      do j = 1, size(Atm%t_bot,2)
        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
 
-       if ( abs(lat) > lat_glacier ) then
-
-         albedo(:,j) = higher_albedo
-
-       else
-
-         albedo(:,j) = const_albedo
-
-       endif
+!!$       if ( abs(lat) > lat_glacier ) then
+!!$
+!!$         albedo(:,j) = higher_albedo
+!!$
+!!$       else
+!!$
+!!$         albedo(:,j) = const_albedo
+!!$
+!!$       endif
+       lat = abs(lat)
+       albedo(:,j) = const_albedo*(90-lat)/90 + higher_albedo*lat/90
 
      enddo
 
@@ -339,7 +342,11 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: zsurf,land_sea_heat_capacity
 ! mj input SST
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: sst_new
+! mj shallower ocean in tropics
+ real :: lat,pi
+ integer :: j
 
+   pi = 4.*atan(1.)
 
    flux_lw = Atm%flux_lw - flux_lw
    
@@ -375,10 +382,16 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          dt_t_surf = sst_new - sst
          sst = sst + dt_t_surf
       else   
-
+         
+         land_sea_heat_capacity = heat_capacity
+         if ( trop_capacity .ne. heat_capacity ) then
+            do j=1,size(Atm%t_bot,2)
+               lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+               if ( abs(lat) < 20. ) land_sea_heat_capacity = trop_capacity*(1.-abs(lat)/20.) + abs(lat)/20.*heat_capacity
+            enddo
+         endif
 ! mj heat capacity function of surface topography
          call get_surf_geopotential(zsurf)
-         land_sea_heat_capacity = heat_capacity
          where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
 ! mj end
 
