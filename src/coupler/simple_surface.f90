@@ -94,6 +94,8 @@ real    :: qflux_width      = 16.
 logical :: do_read_sst      = .false.
 logical :: do_sc_sst        = .false.
 character(len=256) :: sst_file
+character(len=256) :: land_option = 'zsurf'
+real,dimension(10) :: slandlon=-1,slandlat=0,elandlon=-1,elandlat=0
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
@@ -105,7 +107,9 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
 			      do_oflxmerid, maxofmerid, latmaxofmerid, Tm, &
 			      deltaT,                            &
                               do_qflux,qflux_amp,qflux_width,    &  !mj
-                              do_read_sst,do_sc_sst,sst_file !mj
+                              do_read_sst,do_sc_sst,sst_file,    &  !mj
+                              land_option,slandlon,slandlat,     &  !mj
+                              elandlon,elandlat !mj
 
 !-----------------------------------------------------------------------
 
@@ -342,9 +346,9 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: zsurf,land_sea_heat_capacity
 ! mj input SST
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: sst_new
-! mj shallower ocean in tropics
- real :: lat,pi
- integer :: j
+! mj shallower ocean in tropics, land-sea contrast
+ real :: lon,lat,pi
+ integer :: i,j,k
 
    pi = 4.*atan(1.)
 
@@ -377,22 +381,43 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    dedt_surf  =  dedt_surf     + dedq_atm * e_q_n   
 
    if(surface_choice == 1) then
-      if(do_sc_sst) then
+      if(do_sc_sst) then !mj sst read from input file
          call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
          dt_t_surf = sst_new - sst
          sst = sst + dt_t_surf
-      else   
+      else   !mj ocean depth function of latitude
          
          land_sea_heat_capacity = heat_capacity
          if ( trop_capacity .ne. heat_capacity ) then
             do j=1,size(Atm%t_bot,2)
                lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
-               if ( abs(lat) < 20. ) land_sea_heat_capacity = trop_capacity*(1.-abs(lat)/20.) + abs(lat)/20.*heat_capacity
+               if ( abs(lat) < 15. ) then
+                  land_sea_heat_capacity = trop_capacity
+               elseif ( abs(lat) < 60. ) then
+                  land_sea_heat_capacity = trop_capacity*(1.-(abs(lat)-15.)/(60.-15.)) + (abs(lat)-15.)/(60.-15.)*heat_capacity
+               end if
             enddo
          endif
-! mj heat capacity function of surface topography
-         call get_surf_geopotential(zsurf)
-         where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
+! mj land heat capacity function of surface topography
+         if(trim(land_option) .eq. 'zsurf')then
+            call get_surf_geopotential(zsurf)
+            where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
+         endif
+! mj land heat capacity given through ?landlon, ?landlat
+         if(trim(land_option) .eq. 'lonlat')then
+            do j=1,size(Atm%t_bot,2)
+               lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+               do i=1,size(Atm%t_bot,1)
+                  lon = 0.5*180/pi*( Atm%lon_bnd(i+1) + Atm%lon_bnd(i) )
+                  do k=1,size(slandlat)
+                     if ( lon >= slandlon(k) .and. lon <= elandlon(k) &
+                          &.and. lat >= slandlat(k) .and. lat <= elandlat(k) )then
+                        land_sea_heat_capacity(i,j) = land_capacity
+                     endif
+                  enddo
+               enddo
+            enddo
+         endif
 ! mj end
 
          flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
@@ -473,12 +498,13 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  
  integer :: i, j, lati
  real :: xx, xx2, lat, lon, pi, y0
+ real :: coslat !mj
  real, dimension(100) :: oftabl
  real, dimension(32) :: ssttabl
 
  pi = 4.0*atan(1.)
 
-!-----------------------------------------------------------------------
+ !-----------------------------------------------------------------------
 !------ read namelist ------
 
    if ( file_exist('input.nml')) then
@@ -725,12 +751,14 @@ if(do_oflxmerid) then
       end if
    enddo
 endif
-!mj q-flux as in Merlis et al (2013)
+!mj q-flux as in Merlis et al (2013) [Part II] 
 if ( do_qflux ) then
    do j=1, size(Atm%t_bot,2)
-      lat = 0.5*180./pi*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
+      lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
+      coslat = cos(lat)
+      lat = lat*180./pi
       flux_o(:,j) = flux_o(:,j) - qflux_amp*(1-2.*lat**2/qflux_width**2) * &
-           exp(- ((lat)**2/(qflux_width)**2))
+           exp(- ((lat)**2/(qflux_width)**2))/coslat
    enddo
 endif
    
