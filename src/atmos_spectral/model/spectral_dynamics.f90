@@ -158,7 +158,8 @@ real    :: damping_coeff       = 1.15740741e-4, & ! (one tenth day)**-1
            exponent            = 2.5, &
          ocean_topog_smoothing = .93, &
            initial_sphum       = 0.0, &
-     reference_sea_level_press =  101325.
+     reference_sea_level_press =  101325. , &
+           water_correction_limit = 0.e2 !mj
 !===============================================================================================
 
 real, dimension(2) :: valid_range_t = (/ 100.,500./)
@@ -174,7 +175,8 @@ namelist /spectral_dynamics_nml/ use_virtual_temperature, damping_option,       
                                  topography_option, vert_coord_option, scale_heights, surf_res,      &
                                  p_press, p_sigma, exponent, ocean_topog_smoothing, initial_sphum,   &
                                  valid_range_t, eddy_sponge_coeff, zmu_sponge_coeff, zmv_sponge_coeff, &
-                                 print_interval, num_steps
+                                 print_interval, num_steps,                                          &
+                                 water_correction_limit                                                 !mj
                                  
 contains
 
@@ -901,8 +903,9 @@ if(minval(tg(:,:,:,future)) < valid_range_t(1) .or. maxval(tg(:,:,:,future)) > v
 endif
 
 call update_tracers(tracer_attributes, dt_tracers_tmp, wg, p_half, delta_t, dt_hadv, dt_vadv)
-
-call compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction)
+!mj add a vertical limit to water correction 
+!call compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction)
+call compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction, p_full)
 
 previous = current
 current  = future
@@ -1106,13 +1109,15 @@ return
 end subroutine compute_pressure_gradient 
 
 !===================================================================================
-
-subroutine compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction)
+!mj add a vertical limit to water correction 
+!subroutine compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction)
+subroutine compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction, p_full)
 
 real,              intent(in   )                   :: delta_t
 type(tracer_type), intent(inout), dimension(:)     :: tracer_attributes
 real,              intent(out  )                   :: temperature_correction
 real,              intent(out  ), dimension(:,:,:) :: water_correction
+real,              intent(in   ), dimension(:,:,:) :: p_full !mj
 
 real :: mass_correction_factor, water_correction_factor
 real :: mean_surf_press_tmp,    mean_energy_tmp,        mean_water_tmp
@@ -1143,11 +1148,18 @@ if(do_water_correction) then
     mean_water_tmp  = mass_weighted_global_integral(grid_tracers(:,:,:,future,nhum), psg(:,:,future))
     if(mean_water_tmp > 0.) then
       water_correction_factor = mean_water_previous/mean_water_tmp
-      water_correction = (water_correction_factor-1.)*grid_tracers(:,:,:,future,nhum)/delta_t
-      grid_tracers(:,:,:,future,nhum) = water_correction_factor*grid_tracers(:,:,:,future,nhum)
+!mj add water correction upper limit
+      water_correction = 0.
+      where ( p_full > water_correction_limit )
+         water_correction = (water_correction_factor-1.)*grid_tracers(:,:,:,future,nhum)/delta_t
+         grid_tracers(:,:,:,future,nhum) = water_correction_factor*grid_tracers(:,:,:,future,nhum)
+      endwhere
       if(tracer_attributes(nhum)%numerical_representation == 'spectral') then
-        spec_tracers(:,:,:,future,nhum) = water_correction_factor*spec_tracers(:,:,:,future,nhum)
+         where ( p_full > water_correction_limit )
+            spec_tracers(:,:,:,future,nhum) = water_correction_factor*spec_tracers(:,:,:,future,nhum)
+         endwhere
       endif
+!jm
     endif
   endif
 endif
