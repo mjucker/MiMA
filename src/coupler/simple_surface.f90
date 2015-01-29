@@ -391,10 +391,10 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          if ( trop_capacity .ne. heat_capacity ) then
             do j=1,size(Atm%t_bot,2)
                lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
-               if ( abs(lat) < 15. ) then
+               if ( abs(lat) < 10. ) then
                   land_sea_heat_capacity = trop_capacity
                elseif ( abs(lat) < 60. ) then
-                  land_sea_heat_capacity = trop_capacity*(1.-(abs(lat)-15.)/(60.-15.)) + (abs(lat)-15.)/(60.-15.)*heat_capacity
+                  land_sea_heat_capacity = trop_capacity*(1.-(abs(lat)-10.)/(60.-10.)) + (abs(lat)-10.)/(60.-10.)*heat_capacity
                end if
             enddo
          endif
