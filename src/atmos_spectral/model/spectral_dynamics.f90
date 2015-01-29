@@ -1121,6 +1121,9 @@ real,              intent(in   ), dimension(:,:,:) :: p_full !mj
 
 real :: mass_correction_factor, water_correction_factor
 real :: mean_surf_press_tmp,    mean_energy_tmp,        mean_water_tmp
+!mj selective water correction
+real :: corr_water_tmp, not_corr_water_tmp
+integer,dimension(size(water_correction,1),size(water_correction,2),size(water_correction,3)) :: water_mask
 
 if(do_mass_correction) then
   mean_surf_press_tmp = area_weighted_global_mean(psg(:,:,future))
@@ -1146,11 +1149,24 @@ if(do_water_correction) then
     call error_mesg('compute_corrections','do_water_correction must be .false. in a dry model (default is .true.)', FATAL)
   else
     mean_water_tmp  = mass_weighted_global_integral(grid_tracers(:,:,:,future,nhum), psg(:,:,future))
+!mj add water correction upper limit
+    water_mask = 0
+    where ( p_full >= water_correction_limit )
+       water_mask = 1
+    endwhere
+    corr_water_tmp    = mass_weighted_global_integral(grid_tracers(:,:,:,future,nhum)*water_mask, psg(:,:,future))
+    water_mask = 0
+    where ( p_full < water_correction_limit )
+       water_mask = 1
+    endwhere
+    not_corr_water_tmp= mass_weighted_global_integral(grid_tracers(:,:,:,future,nhum)*water_mask, psg(:,:,future))
+!
     if(mean_water_tmp > 0.) then
       water_correction_factor = mean_water_previous/mean_water_tmp
 !mj add water correction upper limit
+      water_correction_factor = water_correction_factor*(1.+not_corr_water_tmp/corr_water_tmp) - not_corr_water_tmp/corr_water_tmp
       water_correction = 0.
-      where ( p_full > water_correction_limit )
+      where ( p_full >= water_correction_limit )
          water_correction = (water_correction_factor-1.)*grid_tracers(:,:,:,future,nhum)/delta_t
          grid_tracers(:,:,:,future,nhum) = water_correction_factor*grid_tracers(:,:,:,future,nhum)
       endwhere
