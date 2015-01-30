@@ -517,6 +517,9 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    endif
 !mj make choices compatible
    if(do_sc_sst) do_read_sst = .true.
+   if(do_read_sst)then
+      call interpolator_init(sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
+   endif
 
 !--------- write version number and namelist ------------------
 
@@ -549,7 +552,6 @@ else if(file_exist('INPUT/simple_surface.res')) then
   call close_file(unit)
 !mj read fixed SSTs
 else if( do_read_sst ) then
-   call interpolator_init(sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
    call interpolator( sst_interp, Time, sst, trim(sst_file) )
 else
   do j = 1, size(Atm%t_bot,2)
