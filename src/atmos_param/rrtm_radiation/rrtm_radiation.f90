@@ -108,9 +108,13 @@
         integer(kind=im)   :: dt_rad=900                      ! Radiation time step
         integer(kind=im)   :: lonstep=1                       ! Subsample fields along longitude
                                                               !  for faster radiation calculation  
+        logical            :: do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
+                                                              !  at the moment, only sphum is averaged
+        logical            :: do_zm_rad=.false.               ! Only compute zonal mean radiation
         logical            :: do_precip_albedo=.false.        ! Modify albedo depending on large scale
                                                               !  precipitation (crude cloud parameterization)
         real(kind=rb)      :: precip_albedo=0.8               ! If so, what's the cloud albedo?
+        real(kind=rb)      :: precip_lat = 0.0                ! If so, poleward of which latitude should it be applied?
 !---------------------------------------------------------------------------------------------------------------
 !
 !-------------------- diagnostics fields -------------------------------
@@ -126,7 +130,8 @@
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
              &solr_cnst, solrad, use_dyofyr, solday, equinox_day, slowdown_rad, &
              &store_intermediate_rad, do_rad_time_avg, dt_rad, dt_rad_avg, &
-             &lonstep, do_precip_albedo,precip_albedo
+             &lonstep, do_zm_tracers, do_zm_rad, &
+             &do_precip_albedo, precip_albedo, precip_lat
 
       end module rrtm_vars
 !*****************************************************************************************
@@ -427,6 +432,7 @@
           real(kind=rb) :: dlon,dlat,dj,di 
           type(time_type) :: Time_loc
           real(kind=rb),dimension(size(q,1),size(q,2)) :: albedo_loc
+          real(kind=rb),dimension(size(q,1),size(q,2),size(q,3)) :: q_tmp
 ! debug
           integer :: indx2(2),indx(3),ii,ji,ki
 !---------------------------------------------------------------------------------------------------------------
@@ -484,6 +490,7 @@
 
           !interactive albedo: zonal mean of precipitation
           if(do_precip_albedo .and. num_precip>0)then
+             where ( abs(lat)> precip_lat*3.14159265/180. ) rrtm_precip = 0.
              do i=1,size(albedo,1)
                 albedo_loc(i,:) = albedo(i,:) + (precip_albedo - albedo(i,:))&
                      &*sum(rrtm_precip,1)/size(rrtm_precip,1)/num_precip
@@ -492,6 +499,15 @@
              num_precip  = 0
           else
              albedo_loc = albedo
+          endif
+!---------------------------------------------------------------------------------------------------------------
+          !Compute zonal means if that's what we want to feed to RRTM
+          if(do_zm_tracers)then
+             do i=1,size(q,1)
+                q_tmp(i,:,:) = sum(q,1)/size(q,1)
+             enddo
+          else
+             q_tmp = q
           endif
 !---------------------------------------------------------------------------------------------------------------
           !RRTM's first pressure level is at the surface - need to inverse order
@@ -504,7 +520,7 @@
                &phalf(:,sk+1) = pfull(:,sk)*0.5
           tfull = reshape(t     (1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))
           thalf = reshape(t_half(1:si:lonstep,:,sk+1:1:-1),(/ si*sj/lonstep,sk+1 /))
-          h2o   = reshape(q     (1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))
+          h2o   = reshape(q_tmp (1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))
           if(do_read_ozone)o3 = reshape(o3f(1:si:lonstep,:,sk :1:-1),(/ si*sj/lonstep,sk  /))
           
           cosz_rr   = reshape(coszen    (1:si:lonstep,:),(/ si*sj/lonstep /))
@@ -615,7 +631,7 @@
           tdt = tdt + tdt_rrtm
           ! store radiation between radiation time steps
           if(store_intermediate_rad .or. id_tdt_rad > 0) tdt_rad = tdt_rrtm
-         
+
           ! get the surface fluxes
           if(present(flux_sw).and.present(flux_lw))then
              !only surface fluxes are needed
@@ -643,7 +659,7 @@
              endif
              if(id_coszen  > 0)zencos  = coszen
           endif
-          
+
           if(do_precip_albedo)then
              call write_diag_rrtm(Time,is,js,o3f,albedo_loc)
           else
