@@ -621,9 +621,13 @@
              do ij=1,lonstep
                 di = (ij-1)*dlon
                 ij1 = (i-1)*lonstep + ij
-                tdt_rrtm(ij1,:,:) =  &
-                     +       di *(swijk(i1,:,:) + lwijk(i1,:,:)) &
-                     +   (1.-di)*(swijk(i ,:,:) + lwijk(i ,:,:))
+                if(do_zm_rad) then
+                   tdt_rrtm(ij1,:,:) = sum(swijk+lwijk,1)/max(1,size(swijk,1))
+                else
+                   tdt_rrtm(ij1,:,:) =  &
+                        +       di *(swijk(i1,:,:) + lwijk(i1,:,:)) &
+                        +   (1.-di)*(swijk(i ,:,:) + lwijk(i ,:,:))
+                endif
                 if(id_tdt_sw>0)tdt_sw_rad(ij1,:,:)=di*swijk(i1,:,:)+(1.-di)*swijk(i,:,:)
                 if(id_tdt_lw>0)tdt_lw_rad(ij1,:,:)=di*lwijk(i1,:,:)+(1.-di)*lwijk(i,:,:)
              enddo
@@ -645,8 +649,13 @@
                 do ij=1,lonstep
                    di = (ij-1)*dlon
                    ij1 = (i-1)*lonstep + ij
-                   flux_sw(ij1,:) = di*swflxijk(i1,:) + (1.-di)*swflxijk(i ,:)
-                   flux_lw(ij1,:) = di*lwflxijk(i1,:) + (1.-di)*lwflxijk(i ,:)
+                   if(do_zm_rad) then
+                      flux_sw(ij1,:) = sum(swflxijk,1)/max(1,size(swflxijk,1))
+                      flux_lw(ij1,:) = sum(lwflxijk,1)/max(1,size(lwflxijk,1))
+                   else
+                      flux_sw(ij1,:) = di*swflxijk(i1,:) + (1.-di)*swflxijk(i ,:)
+                      flux_lw(ij1,:) = di*lwflxijk(i1,:) + (1.-di)*lwflxijk(i ,:)
+                   endif
                 enddo
              enddo
              ! store between radiation steps
