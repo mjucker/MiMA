@@ -68,6 +68,8 @@ real ::  z_ref_heat      = 2.,       &
           heat_capacity   = 1.e07,    &
           land_capacity   = 1.e07,    & !mj
           trop_capacity   = 1.e07,    & !mj
+          trop_cap_limit  = 10.,      & !mj
+          heat_cap_limit  = 60.,      & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.12,     &
 	  max_of          = 25.,      &
@@ -100,6 +102,7 @@ real,dimension(10) :: slandlon=-1,slandlat=0,elandlon=-1,elandlat=0
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
                               land_capacity,trop_capacity,       & !mj
+                              trop_cap_limit, heat_cap_limit,    & !mj
                               roughness_choice, const_roughness, &
                               albedo_choice, const_albedo, do_oflx, &
 			      max_of, lonmax_of, latmax_of, latwidth_of, &
@@ -391,10 +394,10 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          if ( trop_capacity .ne. heat_capacity ) then
             do j=1,size(Atm%t_bot,2)
                lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
-               if ( abs(lat) < 10. ) then
+               if ( abs(lat) < trop_cap_limit ) then
                   land_sea_heat_capacity = trop_capacity
-               elseif ( abs(lat) < 60. ) then
-                  land_sea_heat_capacity = trop_capacity*(1.-(abs(lat)-10.)/(60.-10.)) + (abs(lat)-10.)/(60.-10.)*heat_capacity
+               elseif ( abs(lat) < heat_cap_limit ) then
+                  land_sea_heat_capacity = trop_capacity*(1.-(abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)) + (abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)*heat_capacity
                end if
             enddo
          endif
