@@ -96,8 +96,8 @@ real    :: qflux_width      = 16.
 logical :: do_read_sst      = .false.
 logical :: do_sc_sst        = .false.
 character(len=256) :: sst_file
-character(len=256) :: land_option = 'zsurf'
-real,dimension(10) :: slandlon=-1,slandlat=0,elandlon=-1,elandlat=0
+character(len=256) :: land_option = 'none'
+real,dimension(10) :: slandlon=0,slandlat=0,elandlon=-1,elandlat=-1
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
@@ -421,16 +421,16 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
                enddo
             enddo
          endif
-! mj end
 
          flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
               - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
          
          deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/land_sea_heat_capacity 
-      !  flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
-      !          - (flux_t + hlv*flux_q) + flux_o)*dt/heat_capacity
+        !flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
+        !        - (flux_t + hlv*flux_q) + flux_o)*dt/heat_capacity
          
-         !  deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
+        !   deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
+! mj end
       
          dt_t_surf = flux/(1.0 -deriv)
          sst = sst + dt_t_surf

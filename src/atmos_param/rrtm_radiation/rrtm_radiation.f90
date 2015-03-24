@@ -1,4 +1,5 @@
 
+
       module rrtm_vars
 !
 !   Martin Jucker, 2014.
@@ -95,7 +96,7 @@
         real(kind=rb)      :: temp_upper_limit = 370.         ! never go above this in radiative scheme
         real(kind=rb)      :: co2ppmv=300.                    ! CO2 ppmv concentration
         real(kind=rb)      :: solr_cnst= 1368.22              ! solar constant [W/m2]
-        logical            :: use_dyofyr=.true.               ! use day of year for solrad calculation?
+        logical            :: use_dyofyr=.false.              ! use day of year for solrad calculation?
         real(kind=rb)      :: solrad=1.0                      ! distance Earth-Sun [AU] if use_dyofyr=.false.
         real(kind=rb)      :: solday=0.                       ! if >0, do perpetual run corresponding to 
                                                               !  day of the year = solday
@@ -105,7 +106,7 @@
                                                               ! Else only heat radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true.         ! Average coszen for SW radiation over dt_rad?
         integer(kind=im)      :: dt_rad_avg = -1                 ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
-        integer(kind=im)   :: dt_rad=900                      ! Radiation time step
+        integer(kind=im)   :: dt_rad=0                        ! Radiation time step - every step if dt_rad<dt_atmos
         integer(kind=im)   :: lonstep=1                       ! Subsample fields along longitude
                                                               !  for faster radiation calculation  
         logical            :: do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
@@ -459,7 +460,6 @@
              call write_diag_rrtm(Time,is,js)
              return !not time yet
           endif
-!
 ! we know now that we want to run radiation
 !
 !make sure we run perpetual when solday > 0)
@@ -476,7 +476,7 @@
           else
              call compute_zenith(Time_loc,equinox_day,0     ,lat,lon,coszen,dyofyr)
           end if
-
+          
           si=size(tdt,1)
           sj=size(tdt,2)
           sk=size(tdt,3)
@@ -490,7 +490,7 @@
 
           !interactive albedo: zonal mean of precipitation
           if(do_precip_albedo .and. num_precip>0)then
-             where ( abs(lat)> precip_lat*3.14159265/180. ) rrtm_precip = 0.
+             where ( abs(lat) < precip_lat*3.14159265/180. ) rrtm_precip = 0.
              do i=1,size(albedo,1)
                 albedo_loc(i,:) = albedo(i,:) + (precip_albedo - albedo(i,:))&
                      &*sum(rrtm_precip,1)/size(rrtm_precip,1)/num_precip
