@@ -1,0 +1,7 @@
+
+figure.figsize: 12, 6.75
+grid.linestyle:   :       # dotted
+
+font.size: 16
+axes.labelsize: x-large #small, medium, large, x-large, xx-large, larger, smaller
+axes.titlesize: x-large

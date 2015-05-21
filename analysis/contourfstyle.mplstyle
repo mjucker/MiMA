@@ -1,0 +1,5 @@
+
+# whether or not the grid should always be below the data
+axes.axisbelow: False
+
+grid.color: white
