@@ -19,6 +19,7 @@
 
         logical                                    :: rrtm_init=.false.    ! has radiation been initialized?
         type(interpolate_type),save                :: o3_interp            ! use external file for ozone
+        type(interpolate_type),save                :: h2o_interp           ! use external file for water vapor
         integer(kind=im)                           :: ncols_rrt,nlay_rrt   ! RRTM field sizes
                                                                            ! ncols_rrt = (size(lon)/lonstep*
                                                                            !             size(lat)
@@ -91,6 +92,8 @@
         logical            :: include_secondary_gases=.false. ! non-zero values for above listed secondary gases?
         logical            :: do_read_ozone=.false.           ! read ozone from an external file?
         character(len=256) :: ozone_file='ozone_1990'         !  file name of ozone file to read
+        logical            :: do_read_h2o=.false.             ! read water vapor from an external file?
+        character(len=256) :: h2o_file='h2o'                  !  file name of h2o file to read
         real(kind=rb)      :: h2o_lower_limit = 2.e-7         ! never use smaller than this in radiative scheme
         real(kind=rb)      :: temp_lower_limit = 100.         ! never go below this in radiative scheme
         real(kind=rb)      :: temp_upper_limit = 370.         ! never go above this in radiative scheme
@@ -136,6 +139,7 @@
 !---------------------------------------------------------------------------------------------------------------
 
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
+             &do_read_h2o, h2o_file, &
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
              &do_fixed_water,fixed_water,fixed_water_pres,fixed_water_lat, &
              &solr_cnst, solrad, use_dyofyr, solday, equinox_day, slowdown_rad, &
@@ -154,7 +158,7 @@
 
 !*****************************************************************************************
         subroutine rrtm_radiation_init(axes,Time,ncols,nlay,lonb,latb)
-! Martin Jucker 2014
+! Martin Jucker 2015
 !
 ! Initialize diagnostics, allocate variables, set constants
 !
@@ -332,6 +336,10 @@
 
           if(do_read_ozone)then
              call interpolator_init (o3_interp, trim(ozone_file)//'.nc', lonb, latb, data_out_of_bounds=(/ZERO/))
+          endif
+
+          if(do_read_h2o)then
+             call interpolator_init (h2o_interp, trim(h2o_file)//'.nc', lonb, latb, data_out_of_bounds=(/ZERO/))
           endif
 
           if(do_precip_albedo)then
@@ -518,6 +526,13 @@
           else
              q_tmp = q
           endif
+!---------------------------------------------------------------------------------------------------------------  
+          !! water vapor stuff
+          ! read water vapor
+          if(do_read_h2o)then
+             call interpolator( h2o_interp, Time_loc, p_half, q_tmp, trim(h2o_file))
+          endif
+
           ! fixed water vapor
           if(do_fixed_water)then
              do j=1,size(lat,2)
