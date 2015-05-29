@@ -95,6 +95,10 @@
         real(kind=rb)      :: temp_lower_limit = 100.         ! never go below this in radiative scheme
         real(kind=rb)      :: temp_upper_limit = 370.         ! never go above this in radiative scheme
         real(kind=rb)      :: co2ppmv=300.                    ! CO2 ppmv concentration
+        logical            :: do_fixed_water = .false.        ! feed fixed value for water vapor to RRTM?
+        real(kind=rb)      :: fixed_water = 2.e-06            ! if so, what value? [kg/kg]
+        real(kind=rb)      :: fixed_water_pres = 100.e02      ! if so, above which pressure level? [hPa]
+        real(kind=rb)      :: fixed_water_lat  = 90.          ! if so, equatorward of which latitue? [deg]
         real(kind=rb)      :: solr_cnst= 1368.22              ! solar constant [W/m2]
         logical            :: use_dyofyr=.false.              ! use day of year for solrad calculation?
         real(kind=rb)      :: solrad=1.0                      ! distance Earth-Sun [AU] if use_dyofyr=.false.
@@ -105,17 +109,21 @@
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
                                                               ! Else only heat radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true.         ! Average coszen for SW radiation over dt_rad?
-        integer(kind=im)      :: dt_rad_avg = -1                 ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
+        integer(kind=im)   :: dt_rad_avg = -1                 ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
         integer(kind=im)   :: dt_rad=0                        ! Radiation time step - every step if dt_rad<dt_atmos
         integer(kind=im)   :: lonstep=1                       ! Subsample fields along longitude
                                                               !  for faster radiation calculation  
-        logical            :: do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
+        logical            ::  do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
                                                               !  at the moment, only sphum is averaged
         logical            :: do_zm_rad=.false.               ! Only compute zonal mean radiation
         logical            :: do_precip_albedo=.false.        ! Modify albedo depending on large scale
                                                               !  precipitation (crude cloud parameterization)
         real(kind=rb)      :: precip_albedo=0.8               ! If so, what's the cloud albedo?
         real(kind=rb)      :: precip_lat = 0.0                ! If so, poleward of which latitude should it be applied?
+        character(len=14)  :: precip_albedo_mode = 'full'     ! If so, use 
+                                                              !  full precipitation ('full')
+                                                              !  only large scale condensation ('lscale')
+                                                              !  only convection ('conv')
 !---------------------------------------------------------------------------------------------------------------
 !
 !-------------------- diagnostics fields -------------------------------
@@ -129,10 +137,11 @@
 
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
+             &do_fixed_water,fixed_water,fixed_water_pres,fixed_water_lat, &
              &solr_cnst, solrad, use_dyofyr, solday, equinox_day, slowdown_rad, &
              &store_intermediate_rad, do_rad_time_avg, dt_rad, dt_rad_avg, &
              &lonstep, do_zm_tracers, do_zm_rad, &
-             &do_precip_albedo, precip_albedo, precip_lat
+             &do_precip_albedo, precip_albedo_mode, precip_albedo, precip_lat
 
       end module rrtm_vars
 !*****************************************************************************************
@@ -508,6 +517,16 @@
              enddo
           else
              q_tmp = q
+          endif
+          ! fixed water vapor
+          if(do_fixed_water)then
+             do j=1,size(lat,2)
+                do i=1,size(lat,1)
+                   if( abs(lat(i,j)) <= fixed_water_lat )then
+                      where( p_full(i,j,:) <= fixed_water_pres ) q_tmp(i,j,:) = fixed_water
+                   endif
+                enddo
+             enddo
           endif
 !---------------------------------------------------------------------------------------------------------------
           !RRTM's first pressure level is at the surface - need to inverse order

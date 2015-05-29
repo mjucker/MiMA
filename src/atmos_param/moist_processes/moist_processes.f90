@@ -73,7 +73,8 @@ use            fms_mod, only : mpp_clock_id, mpp_clock_begin, &
 ! end chemistry modules
 !
 !------------------mj pass precipitation to rrtm for albedo-------------
-use rrtm_vars,only: do_precip_albedo,rrtm_precip,num_precip
+use rrtm_vars,only: do_precip_albedo,precip_albedo_mode, &
+                    rrtm_precip,num_precip
 implicit none
 private
 
@@ -1615,7 +1616,13 @@ enddo
 !-----------------------------------------------------------------------
 !------------------mj pass precipitation to rrtm for albedo-------------
   if(do_precip_albedo)then
-     where(rain+snow > 0.) rrtm_precip = rrtm_precip + 1. !precip -> total precip, rain+snow -> lscale
+     if( trim(precip_albedo_mode) .eq. 'full' )then                                 
+        where(precip > 0.) rrtm_precip = rrtm_precip + 1.
+     elseif( trim(precip_albedo_mode) .eq. 'lscale')then
+        where(rain+snow > 0.) rrtm_precip = rrtm_precip + 1. !precip -> total precip, rain+snow -> lscale
+     elseif( trim(precip_albedo_mode) .eq. 'conv') then
+        where(precip-rain-snow > 0.) rrtm_precip = rrtm_precip + 1.
+     endif
      num_precip = num_precip + 1
   endif
 !-----------------------------------------------------------------------
