@@ -519,6 +519,8 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  10   call close_file (unit)
    endif
 !mj make choices compatible
+   if(do_read_sst .or. do_sc_sst) call error_mesg ('simple_surface',  &
+                 'THERE IS A BUG WITH DO_READ_SST, SO I AM STOPPING', FATAL)
    if(do_sc_sst) do_read_sst = .true.
 
 !--------- write version number and namelist ------------------
