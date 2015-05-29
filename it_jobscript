@@ -1,23 +1,26 @@
 #!/bin/bash
 #PBS -l nodes=2:ppn=16
-#PBS -l walltime=10:00:00
-#PBS -l mem=8gb
-#PBS -N it_spectral_rrtm
+#PBS -l walltime=24:00:00
+#PBS -l mem=32gb
+#PBS -N it_spec_rrtm 
 
-days=(2520 2880 3600)
-#days=(3600)
-diags=(diag_table_clim diag_table_clim diag_table_clim)
-#diags=(diag_table_clim)
+days=(2520 2880 3240 3600)
+#days=(2880 3600 1800)
+#days=(2880 3600)
+diags=(diag_table_slim diag_table_slim diag_table_clim diag_table_clim)
+#diags=(diag_table_clim diag_table_clim diag_table_psi)
+#diags=(diag_table_slim diag_table_slim)
 
 ulimit -s unlimited
 
 WKDR=/scratch/mj93/run/
 EXEC=fms.x
 CCOMB=/home/mj93/models/code/spectral_rrtm/bin/mppnccombine.nyu
-PLEV=/home/mj93/models/code/plevel_interpolation/scripts/plev_def.sh
+PLEV=/home/mj93/models/code/plevel_interpolation/scripts/plev_ttl.sh
 
 #suffix=$(date +%Y%m%d_%H%M)
 suffix=$PBS_JOBID
+#suffix=2301574
 
 cd $WKDR
 rm RESTART/*
@@ -34,6 +37,7 @@ cp ${diags[${d}]} diag_table
 
 ARCHDIR=/work/mj93/${suffix}_$r
 
+rm *.nc*
 mpiexec -n $PBS_NP ./$EXEC > stdout
 
 # combine netcdf files and interpolate
@@ -48,22 +52,26 @@ do
 #   ncrename -v sphum,q $filename
    sh $PLEV -a -i $filename -o ${filename}.plev
 #   ncrename -v level,pfull -d level,pfull ${filename}.plev
+   # take sphum out before packing
+   ncks -O -v sphum $filename.plev ${filename}_sphum.nc
    # pack file
    ncpdq -O $filename ${filename}.pfull
    ncpdq -O ${filename}.plev $filename
    rm ${filename}.plev
 done
 
+~/nctools/make_quickplot_full.sh . daily.nc 
+
 #mj
-cd RESTART
-for ncfile in $(/bin/ls *.nc.0000)
-do
-   filename=$(basename "$ncfile")
-   filename="${filename%.*}"
-   rm $filename
-   $CCOMB -r $filename ${filename}.????
-done
-cd ../
+#cd RESTART
+#for ncfile in $(/bin/ls *.nc.0000)
+#do
+#   filename=$(basename "$ncfile")
+#   filename="${filename%.*}"
+#   rm $filename
+#   $CCOMB -r $filename ${filename}.????
+#done
+#cd ../
 
 # archive the run
 mkdir $ARCHDIR

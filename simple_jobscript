@@ -1,9 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=2:ppn=16
-#PBS -l walltime=08:00:00
-#PBS -l mem=8gb
-#PBS -m ae
-#PBS -M mjucker@nyu.edu
+#PBS -l walltime=10:00:00
+#PBS -l mem=32gb
 #PBS -N spectral_rrtm
 
 ulimit -s unlimited
@@ -12,9 +10,11 @@ WKDR=/scratch/mj93/run/
 EXEC=fms.x
 CCOMB=/home/mj93/models/code/spectral_rrtm/bin/mppnccombine.nyu
 PLEV=/home/mj93/models/code/plevel_interpolation/scripts/plev_def.sh
+PLEV=/home/mj93/models/code/plevel_interpolation/scripts/plev_ttl.sh
 
 #suffix=$(date +%Y%m%d_%H%M)
 suffix=$PBS_JOBID
+suffix=4527168_3601
 ARCHDIR=/work/mj93/$suffix
 
 cd $WKDR
@@ -33,6 +33,8 @@ do
 #   ncrename -v sphum,q $filename
    sh $PLEV -a -i $filename -o ${filename}.plev
 #   ncrename -v level,pfull -d level,pfull ${filename}.plev
+   # take sphum out before packing
+   ncks -O -v sphum $filename.plev ${filename}_sphum.nc
    # pack file
    ncpdq -O $filename ${filename}.pfull
    ncpdq -O ${filename}.plev $filename
@@ -49,6 +51,8 @@ do
    $CCOMB -r $filename ${filename}.????
 done
 cd ../
+
+sh ~/nctools/make_quickplot_full.sh . daily.nc
 
 # archive the run
 mkdir $ARCHDIR

@@ -6,7 +6,8 @@ FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byter
 #FFLAGS = ${DEBUG} -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -O0 -i4 -r8 -g -I${NETCDF_INC} -I${MVAPICH2_INC}
 OPT = -O2 -xSSE4.2 -axAVX
 OPT = -O2
-OPT = -O1 
+#OPT = -O1 
+#OPT = -O0
 
 FFLAGS += ${OPT}
 
