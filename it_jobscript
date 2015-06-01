@@ -7,7 +7,7 @@
 days=(2520 2880 3240 3600)
 #days=(2880 3600 1800)
 #days=(2880 3600)
-diags=(diag_table_slim diag_table_slim diag_table_clim diag_table_clim)
+diags=(diag_table_slim diag_table_slim diag_table_slim diag_table_clim)
 #diags=(diag_table_clim diag_table_clim diag_table_psi)
 #diags=(diag_table_slim diag_table_slim)
 
@@ -48,16 +48,19 @@ do
    filename=${filename%.*}
    rm $filename
    $CCOMB -r $filename ${filename}.????
+   if [[ $filename == *"daily"* ]]
+   then
    # plevel interpolation
 #   ncrename -v sphum,q $filename
-   sh $PLEV -a -i $filename -o ${filename}.plev
+   	sh $PLEV -a -i $filename -o ${filename}.plev
 #   ncrename -v level,pfull -d level,pfull ${filename}.plev
    # take sphum out before packing
-   ncks -O -v sphum $filename.plev ${filename}_sphum.nc
+   	ncks -O -v sphum $filename.plev ${filename}_sphum.nc
    # pack file
-   ncpdq -O $filename ${filename}.pfull
-   ncpdq -O ${filename}.plev $filename
-   rm ${filename}.plev
+   	ncpdq -O $filename ${filename}.pfull
+   	ncpdq -O ${filename}.plev $filename
+   	rm ${filename}.plev
+   fi
 done
 
 ~/nctools/make_quickplot_full.sh . daily.nc 
