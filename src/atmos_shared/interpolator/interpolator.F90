@@ -53,6 +53,7 @@ use time_manager_mod,  only : time_type,   &
                               get_date,    &
                               get_calendar_type, &
                               JULIAN, NOLEAP, &
+                              THIRTY_DAY_MONTHS, & !mj
                               get_date_julian, set_date_no_leap, &
                               set_date_julian, get_date_no_leap, &
                               print_date, &
@@ -442,7 +443,9 @@ do i = 1, ndim
         if ( (model_calendar == JULIAN .and.   &
               trim(file_calendar) == 'julian')  .or. &
               (model_calendar == NOLEAP .and.   &
-               trim(file_calendar) == 'noleap') )  then
+               trim(file_calendar) == 'noleap') .or. &
+              (model_calendar == THIRTY_DAY_MONTHS .and. & !mj
+               trim(file_calendar) == 'thirty_day_months'))  then
           call mpp_error (NOTE, 'interpolator_mod: Model and file&
                     & calendars are the same for file ' //   &
                     & trim(file_name) // '; no calendar conversion  &
@@ -485,7 +488,6 @@ do i = 1, ndim
         base_time = get_base_time ()
       endif
 
-
       ntime_in = 1
       if (ntime > 0) then
         allocate(time_in(ntime), clim_type%time_slice(ntime))
@@ -525,7 +527,7 @@ do i = 1, ndim
 !! year, not the displacement from a base_time.
             clim_type%time_slice(n) = set_time(0,INT(time_in(n))) 
           else
-
+            
 !--------------------------------------------------------------------
 !    if fileyr /= 0, then define the times associated with each time-
 !    slice. if calendar conversion between data file and model calendar
@@ -537,8 +539,10 @@ do i = 1, ndim
             if ( (model_calendar == JULIAN .and.   &
                   trim(file_calendar) == 'julian')  .or. &
                  (model_calendar == NOLEAP .and.   &
-                  trim(file_calendar) == 'noleap') )  then
-
+                  trim(file_calendar) == 'noleap')  .or. &
+                 (model_calendar == THIRTY_DAY_MONTHS .and. & !mj
+                  trim(file_calendar) == 'thirty_day_months') )  then
+               
 !---------------------------------------------------------------------
 !    no calendar conversion needed.
 !---------------------------------------------------------------------
@@ -565,7 +569,7 @@ do i = 1, ndim
                          str= 'for file ' // trim(file_name) // ', the &
                                &last time slice is mapped to:')
               endif
-  
+              
 
 !---------------------------------------------------------------------
 !    convert file times from julian to noleap.
@@ -586,14 +590,14 @@ do i = 1, ndim
                          str= 'for file ' // trim(file_name) // ', the &
                                &last time slice is mapped to:')
               endif
-
+              
 !---------------------------------------------------------------------
 !    any other calendar combinations would have caused a fatal error 
 !    above.
 !---------------------------------------------------------------------
             endif
           endif
-
+          
           m = (n-1)/12 +1 ; m1 = n- (m-1)*12
           clim_type%clim_times(m1,m) = clim_type%time_slice(n)
         enddo
@@ -1765,6 +1769,7 @@ subroutine interpolator_2D(clim_type, Time, interp_data, field_name, is, js, cli
 !   interp_data : The model field with the interpolated climatology data.
 !   clim_units  : The units of field_name
 !
+
 type(interpolate_type), intent(inout)  :: clim_type
 character(len=*)      , intent(in)     :: field_name
 type(time_type)       , intent(in)     :: Time
@@ -1800,7 +1805,7 @@ do i= 1,size(clim_type%field_name(:))
 !++lwh
   if ( field_name == clim_type%field_name(i) ) then
 !--lwh
-
+   
     found_field=.true.
 
     if(present(clim_units)) then
@@ -1810,7 +1815,7 @@ do i= 1,size(clim_type%field_name(:))
     if(size(clim_type%time_slice(:)).le. 12 ) then
       call time_interp(Time, clim_type%time_slice, tweight, taum, taup, modtime=YEAR )
     else
-       call time_interp(Time, clim_type%time_slice, tweight, taum, taup )
+      call time_interp(Time, clim_type%time_slice, tweight, taum, taup )
     endif
 
 ! If the climatology file has seasonal, a split time-line or has all the data 
