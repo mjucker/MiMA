@@ -519,8 +519,8 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  10   call close_file (unit)
    endif
 !mj make choices compatible
-   if(do_read_sst .or. do_sc_sst) call error_mesg ('simple_surface',  &
-                 'THERE IS A BUG WITH DO_READ_SST, SO I AM STOPPING', FATAL)
+   !if(do_read_sst .or. do_sc_sst) call error_mesg ('simple_surface',  &
+   !              'THERE IS A BUG WITH DO_READ_SST, SO I AM STOPPING', FATAL)
    if(do_sc_sst) do_read_sst = .true.
 
 !--------- write version number and namelist ------------------
@@ -537,7 +537,12 @@ allocate(sst   (size(Atm%t_bot,1),size(Atm%t_bot,2)))
 allocate(flux_u(size(Atm%t_bot,1),size(Atm%t_bot,2)))
 allocate(flux_v(size(Atm%t_bot,1),size(Atm%t_bot,2)))
 allocate(flux_o(size(Atm%t_bot,1),size(Atm%t_bot,2)))
-   
+
+!mj read fixed SSTs
+if( do_read_sst ) then
+   call interpolator_init( sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
+endif
+
 if(file_exist('INPUT/simple_surface.res.nc')) then
   call read_data('INPUT/simple_surface.res.nc', 'sst',    sst,    domain=Atm%domain)
   call read_data('INPUT/simple_surface.res.nc', 'flux_u', flux_u, domain=Atm%domain)
@@ -554,7 +559,7 @@ else if(file_exist('INPUT/simple_surface.res')) then
   call close_file(unit)
 !mj read fixed SSTs
 else if( do_read_sst ) then
-   call interpolator_init( sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
+   call interpolator( sst_interp, Time, sst, trim(sst_file) )
 else
   do j = 1, size(Atm%t_bot,2)
     lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
