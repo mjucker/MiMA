@@ -26,3 +26,4 @@ git_message
 *.bkp
 *.e*
 *.o*
+*~
