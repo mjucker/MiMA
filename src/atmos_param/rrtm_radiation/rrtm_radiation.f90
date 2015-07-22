@@ -20,6 +20,9 @@
         logical                                    :: rrtm_init=.false.    ! has radiation been initialized?
         type(interpolate_type),save                :: o3_interp            ! use external file for ozone
         type(interpolate_type),save                :: h2o_interp           ! use external file for water vapor
+        type(interpolate_type),save                :: rad_interp           ! use external file for radiation
+        type(interpolate_type),save                :: fsw_interp           ! use external file for SW fluxes
+        type(interpolate_type),save                :: flw_interp           ! use external file for SLW fluxes
         integer(kind=im)                           :: ncols_rrt,nlay_rrt   ! RRTM field sizes
                                                                            ! ncols_rrt = (size(lon)/lonstep*
                                                                            !             size(lat)
@@ -89,6 +92,16 @@
 !---------------------------------------------------------------------------------------------------------------
 !                                namelist values
 !---------------------------------------------------------------------------------------------------------------
+        logical            :: do_read_radiation=.false.       ! read SW and LW raditation in the atmosphere from
+                                                              !  external file? Surface fluxes are still computed
+        character(len=256) :: radiation_file='radiation'      !  file name to read radiation
+        real(kind=rb)      :: rad_missing_value=-1.e19        !   missing value in input files:
+                                                              !    if <0, replace everything below this value with 0
+                                                              !    if >0, replace everything above this value with 0
+        logical            :: do_read_sw_flux=.false.         ! read SW surface fluxes from external file?
+        character(len=256) :: sw_flux_file='sw_flux'          !  file name to read fluxes
+        logical            :: do_read_lw_flux=.false.         ! read LW surface fluxes from external file?
+        character(len=256) :: lw_flux_file='lw_flux'          !  file name to read fluxes
         logical            :: include_secondary_gases=.false. ! non-zero values for above listed secondary gases?
         logical            :: do_read_ozone=.false.           ! read ozone from an external file?
         character(len=256) :: ozone_file='ozone_1990'         !  file name of ozone file to read
@@ -139,7 +152,8 @@
 !---------------------------------------------------------------------------------------------------------------
 
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
-             &do_read_h2o, h2o_file, &
+             &do_read_h2o, h2o_file, do_read_radiation, radiation_file, rad_missing_value, &
+             &do_read_sw_flux, sw_flux_file, do_read_lw_flux, lw_flux_file,&
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
              &do_fixed_water,fixed_water,fixed_water_pres,fixed_water_lat, &
              &solr_cnst, solrad, use_dyofyr, solday, equinox_day, slowdown_rad, &
@@ -254,6 +268,19 @@
              call error_mesg( mod_name, &
                   ' running perpetual simulation', NOTE)
           endif
+
+          if(do_read_radiation .and. do_read_sw_flux .and. do_read_lw_flux) then
+             if(do_read_ozone) call error_mesg( 'rrtm_gases_init', &
+                  'SET DO_READ_OZONE TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', WARNING)
+             do_read_ozone = .false.
+             if(do_read_h2o) call error_mesg( 'rrtm_gases_init', &
+                  'SET DO_READ_H2O TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', WARNING)
+             do_read_h2o   = .false.
+             if(do_precip_albedo) call error_mesg( 'rrtm_gases_init', &
+                  'SET DO_PRECIP_ALBEDO TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', WARNING)
+             do_precip_albedo = .false.
+          endif
+
 !------------ set some constants and parameters -------
 
           deg2rad = acos(0.)/90.
@@ -267,72 +294,77 @@
 
 !------------ allocate arrays to be used later  -------
           allocate(t_half(size(lonb,1)-1,size(latb)-1,nlay+1))
-
-          allocate(h2o(ncols_rrt,nlay_rrt),o3(ncols_rrt,nlay_rrt), &
-               co2(ncols_rrt,nlay_rrt))
-          if(include_secondary_gases)then
-             allocate(ch4(ncols_rrt,nlay_rrt), &
-               n2o(ncols_rrt,nlay_rrt),o2(ncols_rrt,nlay_rrt), &
-               cfc11(ncols_rrt,nlay_rrt),cfc12(ncols_rrt,nlay_rrt), &
-               cfc22(ncols_rrt,nlay_rrt),cc14(ncols_rrt,nlay_rrt), &
-               reice(ncols_rrt,nlay_rrt),reliq(ncols_rrt,nlay_rrt))
-          else
-             allocate(zeros(ncols_rrt,nlay_rrt))
-          endif
-          allocate(emis(ncols_rrt,nbndlw))
-          allocate(cldfr(ncols_rrt,nlay_rrt),cicewp(ncols_rrt,nlay_rrt), &
-               cliqwp(ncols_rrt,nlay_rrt))
-          allocate(taucld(nbndlw,ncols_rrt,nlay_rrt),tauaer(ncols_rrt, &
-               nlay_rrt,nbndlw))
-          allocate(ssacld(nbndsw,ncols_rrt,nlay_rrt), &
-               asmcld(nbndsw,ncols_rrt,nlay_rrt), &
-               fsfcld(nbndsw,ncols_rrt,nlay_rrt), &
-               ssaaer(ncols_rrt,nlay_rrt,nbndsw), &
-               asmaer(ncols_rrt,nlay_rrt,nbndsw), &
-               ecaer(ncols_rrt,nlay_rrt,nbndsw))
-          if(store_intermediate_rad .or. id_flux_sw > 0) &
-               allocate(sw_flux(size(lonb,1)-1,size(latb,1)-1))
-          if(store_intermediate_rad .or. id_flux_lw > 0) &
-               allocate(lw_flux(size(lonb,1)-1,size(latb,1)-1))
-          if(id_coszen > 0)allocate(zencos (size(lonb,1)-1,size(latb,1)-1))
-          if(do_precip_albedo)allocate(rrtm_precip(size(lonb,1)-1,size(latb,1)-1))
-          if(store_intermediate_rad .or. id_tdt_rad > 0)&
-               allocate(tdt_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
-          if(id_tdt_sw > 0)allocate(tdt_sw_rad(size(lonb,1)-1,size(latb,1)-1,nlay)) 
-          if(id_tdt_lw > 0)allocate(tdt_lw_rad(size(lonb,1)-1,size(latb,1)-1,nlay)) 
-
-          h2o   = 0. !this will be set by the water vapor tracer
-          o3    = 0. !this will be set by an input file if do_read_ozone=.true.
-          co2   = co2ppmv*1.e-6
-          if(include_secondary_gases)then !change values here
-             ch4   = 0.
-             n2o   = 0.
-             o2    = 0.
-             cfc11 = 0.
-             cfc12 = 0.
-             cfc22 = 0.
-             cc14  = 0.
-          else
-             zeros = 0.
-          endif
-
-          emis  = 1. !black body: 1.0
-
-          cldfr  = 0.
-          cicewp = 0.
-          cliqwp = 0.
-          reice = 10.
-          reliq = 10.
           
-          taucld = 0.
-          tauaer = 0.
+          if(.not. do_read_radiation .or. .not. do_read_sw_flux .and. .not. do_read_lw_flux)then
+             allocate(h2o(ncols_rrt,nlay_rrt),o3(ncols_rrt,nlay_rrt), &
+                  co2(ncols_rrt,nlay_rrt))
+             if(include_secondary_gases)then
+                allocate(ch4(ncols_rrt,nlay_rrt), &
+                     n2o(ncols_rrt,nlay_rrt),o2(ncols_rrt,nlay_rrt), &
+                     cfc11(ncols_rrt,nlay_rrt),cfc12(ncols_rrt,nlay_rrt), &
+                     cfc22(ncols_rrt,nlay_rrt),cc14(ncols_rrt,nlay_rrt), &
+                     reice(ncols_rrt,nlay_rrt),reliq(ncols_rrt,nlay_rrt))
+             else
+                allocate(zeros(ncols_rrt,nlay_rrt))
+             endif
+             allocate(emis(ncols_rrt,nbndlw))
+             allocate(cldfr(ncols_rrt,nlay_rrt),cicewp(ncols_rrt,nlay_rrt), &
+                  cliqwp(ncols_rrt,nlay_rrt))
+             allocate(taucld(nbndlw,ncols_rrt,nlay_rrt),tauaer(ncols_rrt, &
+                  nlay_rrt,nbndlw))
+             allocate(ssacld(nbndsw,ncols_rrt,nlay_rrt), &
+                  asmcld(nbndsw,ncols_rrt,nlay_rrt), &
+                  fsfcld(nbndsw,ncols_rrt,nlay_rrt), &
+                  ssaaer(ncols_rrt,nlay_rrt,nbndsw), &
+                  asmaer(ncols_rrt,nlay_rrt,nbndsw), &
+                  ecaer(ncols_rrt,nlay_rrt,nbndsw))
+             if(id_coszen > 0)allocate(zencos (size(lonb,1)-1,size(latb,1)-1))
 
-          ssacld = 0.
-          asmcld = 0.
-          fsfcld = 0.
-          ssaaer = 0.
-          asmaer = 0.
-          ecaer  = 0.
+             h2o   = 0. !this will be set by the water vapor tracer
+             o3    = 0. !this will be set by an input file if do_read_ozone=.true.
+             co2   = co2ppmv*1.e-6
+             if(include_secondary_gases)then !change values here
+                ch4   = 0.
+                n2o   = 0.
+                o2    = 0.
+                cfc11 = 0.
+                cfc12 = 0.
+                cfc22 = 0.
+                cc14  = 0.
+             else
+                zeros = 0.
+             endif
+
+             emis  = 1. !black body: 1.0
+             
+             cldfr  = 0.
+             cicewp = 0.
+             cliqwp = 0.
+             reice = 10.
+             reliq = 10.
+             
+             taucld = 0.
+             tauaer = 0.
+             
+             ssacld = 0.
+             asmcld = 0.
+             fsfcld = 0.
+             ssaaer = 0.
+             asmaer = 0.
+             ecaer  = 0.
+          endif !run RRTM?
+
+          if(do_read_radiation)then
+             call interpolator_init (rad_interp, trim(radiation_file)//'.nc', lonb, latb, data_out_of_bounds=(/CONSTANT/))
+          endif
+
+          if(do_read_sw_flux)then
+             call interpolator_init (fsw_interp, trim(sw_flux_file)//'.nc'  , lonb, latb, data_out_of_bounds=(/CONSTANT/))
+          endif
+
+          if(do_read_lw_flux)then
+             call interpolator_init (flw_interp, trim(lw_flux_file)//'.nc'  , lonb, latb, data_out_of_bounds=(/CONSTANT/))
+          endif
 
           if(do_read_ozone)then
              call interpolator_init (o3_interp, trim(ozone_file)//'.nc', lonb, latb, data_out_of_bounds=(/ZERO/))
@@ -341,6 +373,16 @@
           if(do_read_h2o)then
              call interpolator_init (h2o_interp, trim(h2o_file)//'.nc', lonb, latb, data_out_of_bounds=(/ZERO/))
           endif
+
+          if(store_intermediate_rad .or. id_flux_sw > 0) &
+               allocate(sw_flux(size(lonb,1)-1,size(latb,1)-1))
+          if(store_intermediate_rad .or. id_flux_lw > 0) &
+               allocate(lw_flux(size(lonb,1)-1,size(latb,1)-1))
+          if(do_precip_albedo)allocate(rrtm_precip(size(lonb,1)-1,size(latb,1)-1))
+          if(store_intermediate_rad .or. id_tdt_rad > 0)&
+               allocate(tdt_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
+          if(id_tdt_sw > 0)allocate(tdt_sw_rad(size(lonb,1)-1,size(latb,1)-1,nlay)) 
+          if(id_tdt_lw > 0)allocate(tdt_lw_rad(size(lonb,1)-1,size(latb,1)-1,nlay)) 
 
           if(do_precip_albedo)then
              rrtm_precip = 0.
@@ -458,7 +500,8 @@
           if(.not. rrtm_init)&
                call error_mesg('run_rrtm','module not initialized', FATAL)
 
-!check if we really want to recompute radiation (alarm)
+!check if we really want to recompute radiation (alarm,input file(s))
+! alarm
           call get_time(Time,seconds,days)
           if(seconds < dt_last) dt_last=dt_last-86400 !it's a new day
           if(seconds - dt_last .ge. dt_rad) then
@@ -477,22 +520,44 @@
              call write_diag_rrtm(Time,is,js)
              return !not time yet
           endif
-! we know now that we want to run radiation
-!
 !make sure we run perpetual when solday > 0)
           if(solday > 0.)then
              Time_loc = set_time(seconds,floor(solday))
           else
-!             Time_loc = Time
-             seconds = days*86400 + seconds
-             Time_loc = set_time(int(seconds/slowdown_rad))
+             Time_loc = Time
+!             seconds = days*86400 + seconds
+!             Time_loc = set_time(int(seconds/slowdown_rad))
           endif
+!---------------------------------------------------------------------------------------------
+! we know now that we want to run radiation
+!
 !compute zenith angle
           if(do_rad_time_avg) then
              call compute_zenith(Time_loc,equinox_day,dt_rad_avg,lat,lon,coszen,dyofyr)
           else
              call compute_zenith(Time_loc,equinox_day,0     ,lat,lon,coszen,dyofyr)
           end if
+! input files
+          if(do_read_radiation .and. do_read_sw_flux .and. do_read_lw_flux) then
+             call interpolator( rad_interp, Time_loc, p_half, tdt_rrtm, trim(radiation_file))
+             call interpolator( fsw_interp, Time_loc, flux_sw, trim(sw_flux_file))
+             call interpolator( flw_interp, Time_loc, flux_lw, trim(lw_flux_file))
+             !if( rad_missing_value .lt. 0. )then
+             !   where( tdt_rrtm .lt. rad_missing_value ) tdt_rrtm = 0.
+             !   where( flux_sw  .lt. rad_missing_value ) flux_sw  = 0.
+             !   where( flux_lw  .lt. rad_missing_value ) flux_lw  = 0.
+             ! else
+             !   where( tdt_rrtm .gt. rad_missing_value ) tdt_rrtm = 0.
+             !   where( flux_sw  .gt. rad_missing_value ) flux_sw  = 0.
+             !   where( flux_lw  .gt. rad_missing_value ) flux_lw  = 0.
+             !endif
+             tdt = tdt + tdt_rrtm
+             tdt_rad = tdt_rrtm
+             sw_flux = flux_sw
+             lw_flux = flux_lw
+             call write_diag_rrtm(Time_loc,is,js)
+             return !we're done here
+          endif
           
           si=size(tdt,1)
           sj=size(tdt,2)
@@ -646,29 +711,35 @@
           lwijk   = reshape(hr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
 
 !---------------------------------------------------------------------------------------------------------------
+          ! get radiation
+          if( do_read_radiation ) then
+             call interpolator( rad_interp, Time_loc, p_half, tdt_rrtm, trim(radiation_file))
+          else
 ! interpolate back onto GCM grid (latitude is kept the same due to parallelisation)
-          dlon=1./lonstep
-          do i=1,size(swijk,1)
-             i1 = i+1
-             ! close toroidally
-             if(i1 > size(swijk,1)) i1=1
-             do ij=1,lonstep
-                di = (ij-1)*dlon
-                ij1 = (i-1)*lonstep + ij
-                if(do_zm_rad) then
-                   tdt_rrtm(ij1,:,:) = sum(swijk+lwijk,1)/max(1,size(swijk,1))
-                else
-                   tdt_rrtm(ij1,:,:) =  &
-                        +       di *(swijk(i1,:,:) + lwijk(i1,:,:)) &
-                        +   (1.-di)*(swijk(i ,:,:) + lwijk(i ,:,:))
-                endif
-                if(id_tdt_sw>0)tdt_sw_rad(ij1,:,:)=di*swijk(i1,:,:)+(1.-di)*swijk(i,:,:)
-                if(id_tdt_lw>0)tdt_lw_rad(ij1,:,:)=di*lwijk(i1,:,:)+(1.-di)*lwijk(i,:,:)
+             dlon=1./lonstep
+             do i=1,size(swijk,1)
+                i1 = i+1
+                ! close toroidally
+                if(i1 > size(swijk,1)) i1=1
+                do ij=1,lonstep
+                   di = (ij-1)*dlon
+                   ij1 = (i-1)*lonstep + ij
+                   if(do_zm_rad) then
+                      tdt_rrtm(ij1,:,:) = sum(swijk+lwijk,1)/max(1,size(swijk,1))
+                   else
+                      tdt_rrtm(ij1,:,:) =  &
+                           +       di *(swijk(i1,:,:) + lwijk(i1,:,:)) &
+                           +   (1.-di)*(swijk(i ,:,:) + lwijk(i ,:,:))
+                   endif
+                   if(id_tdt_sw>0)tdt_sw_rad(ij1,:,:)=di*swijk(i1,:,:)+(1.-di)*swijk(i,:,:)
+                   if(id_tdt_lw>0)tdt_lw_rad(ij1,:,:)=di*lwijk(i1,:,:)+(1.-di)*lwijk(i,:,:)
+                enddo
              enddo
-          enddo
+          endif
           tdt = tdt + tdt_rrtm
           ! store radiation between radiation time steps
           if(store_intermediate_rad .or. id_tdt_rad > 0) tdt_rad = tdt_rrtm
+
 
           ! get the surface fluxes
           if(present(flux_sw).and.present(flux_lw))then
@@ -692,6 +763,13 @@
                    endif
                 enddo
              enddo
+             if ( do_read_sw_flux )then
+                call interpolator( fsw_interp, Time_loc, flux_sw, trim(sw_flux_file))
+             endif
+             if ( do_read_lw_flux )then
+                call interpolator( flw_interp, Time_loc, flux_lw, trim(lw_flux_file))
+             endif
+                
              ! store between radiation steps
              if(store_intermediate_rad)then
                 sw_flux = flux_sw
