@@ -27,3 +27,5 @@ git_message
 *.e*
 *.o*
 *~
+it_jobscript*
+simple_jobscript*
