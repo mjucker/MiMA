@@ -2,7 +2,7 @@
 
       module rrtm_vars
 !
-!   Martin Jucker, 2014.
+!   Martin Jucker, 2015, https://github.com/mjucker/MiMA.
 !
 !   Contains all variables needed to 
 !   run the RRTM code, version for GCMs (hence the 'G'),
@@ -37,7 +37,8 @@
         real(kind=rb),allocatable,dimension(:,:)   :: co2                  ! CO2 [vmr]
                                                                            ! dimension (ncols_rrt x nlay_rrt)
         real(kind=rb),allocatable,dimension(:,:)   :: zeros                ! place holder for any species set
-                                                                           ! to zero
+                                                                           !  to zero
+        real(kind=rb),allocatable,dimension(:,:)   :: ones                 ! place holder for secondary species
         ! the following species are only set if use_secondary_gases=.true.
         real(kind=rb),allocatable,dimension(:,:)   :: ch4                  ! CH4 [vmr]
                                                                            ! dimension (ncols_rrt x nlay_rrt)
@@ -56,14 +57,9 @@
         real(kind=rb),allocatable,dimension(:,:)   :: emis                 ! surface LW emissivity per band
                                                                            ! dimension (ncols_rrt x nbndlw)
                                                                            ! =1 for black body
-        ! clouds stuff = set to zero
-        !mjdb CHECK IF I CAN ACTUALLY REPLACE THOSE WITH ZEROS
-        real(kind=rb),allocatable,dimension(:,:)   :: cldfr, cicewp, cliqwp, &
-             reice, reliq
-        ! cloud & aerosol optical depths, cloud and aerosol specific parameters
-        !mjdb AGAIN, CHECK IF CAN REPLACE WITH ZEROS
-        real(kind=rb),allocatable,dimension(:,:,:) :: taucld,tauaer, &
-             ssacld,asmcld,fsfcld,ssaaer,asmaer,ecaer
+        ! clouds stuff
+        !  cloud & aerosol optical depths, cloud and aerosol specific parameters. Set to zero
+        real(kind=rb),allocatable,dimension(:,:,:) :: taucld,tauaer, sw_zro, zro_sw
         ! heating rates and fluxes, zenith angle when in-between radiation time steps
         real(kind=rb),allocatable,dimension(:,:)   :: sw_flux,lw_flux,zencos! surface fluxes, cos(zenith angle) 
                                                                             ! dimension (lon x lat)
@@ -92,6 +88,9 @@
 !---------------------------------------------------------------------------------------------------------------
 !                                namelist values
 !---------------------------------------------------------------------------------------------------------------
+! input files: file names are always given without '.nc', which is always assumed
+!  the field to be read within the file needs to have the same name as the file
+! OBS! reading of radiation is still experimental at this point!
         logical            :: do_read_radiation=.false.       ! read SW and LW raditation in the atmosphere from
                                                               !  external file? Surface fluxes are still computed
         character(len=256) :: radiation_file='radiation'      !  file name to read radiation
@@ -102,39 +101,53 @@
         character(len=256) :: sw_flux_file='sw_flux'          !  file name to read fluxes
         logical            :: do_read_lw_flux=.false.         ! read LW surface fluxes from external file?
         character(len=256) :: lw_flux_file='lw_flux'          !  file name to read fluxes
-        logical            :: include_secondary_gases=.false. ! non-zero values for above listed secondary gases?
         logical            :: do_read_ozone=.false.           ! read ozone from an external file?
-        character(len=256) :: ozone_file='ozone_1990'         !  file name of ozone file to read
+                                                              !  this is the only way to get ozone into the model
+        character(len=256) :: ozone_file='ozone'              !  file name of ozone file to read
         logical            :: do_read_h2o=.false.             ! read water vapor from an external file?
         character(len=256) :: h2o_file='h2o'                  !  file name of h2o file to read
+! secondary gases (CH4,N2O,O2,CFC11,CFC12,CFC22,CC14)
+        logical            :: include_secondary_gases=.false. ! non-zero values for above listed secondary gases?
+        real(kind=rb)      :: ch4_val  = 0.                   !  if .true., value for CH4
+        real(kind=rb)      :: n2o_val  = 0.                   !                       N2O
+        real(kind=rb)      :: o2_val   = 0.                   !                       O2
+        real(kind=rb)      :: cfc11_val= 0.                   !                       CFC11
+        real(kind=rb)      :: cfc12_val= 0.                   !                       CFC12
+        real(kind=rb)      :: cfc22_val= 0.                   !                       CFC22
+        real(kind=rb)      :: cc14_val = 0.                   !                       CC14
+! some safety boundaries
         real(kind=rb)      :: h2o_lower_limit = 2.e-7         ! never use smaller than this in radiative scheme
         real(kind=rb)      :: temp_lower_limit = 100.         ! never go below this in radiative scheme
         real(kind=rb)      :: temp_upper_limit = 370.         ! never go above this in radiative scheme
+! primary gases: CO2 and H2O
         real(kind=rb)      :: co2ppmv=300.                    ! CO2 ppmv concentration
         logical            :: do_fixed_water = .false.        ! feed fixed value for water vapor to RRTM?
         real(kind=rb)      :: fixed_water = 2.e-06            ! if so, what value? [kg/kg]
         real(kind=rb)      :: fixed_water_pres = 100.e02      ! if so, above which pressure level? [hPa]
-        real(kind=rb)      :: fixed_water_lat  = 90.          ! if so, equatorward of which latitue? [deg]
+        real(kind=rb)      :: fixed_water_lat  = 90.          ! if so, equatorward of which latitude? [deg]
+        logical            :: do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
+                                                              !  at the moment, only sphum is averaged
+! astronomy
         real(kind=rb)      :: solr_cnst= 1368.22              ! solar constant [W/m2]
-        logical            :: use_dyofyr=.false.              ! use day of year for solrad calculation?
+        logical            :: use_dyofyr=.false.              ! use day of year for Earth-Sun distance calculation?
         real(kind=rb)      :: solrad=1.0                      ! distance Earth-Sun [AU] if use_dyofyr=.false.
-        real(kind=rb)      :: solday=0.                       ! if >0, do perpetual run corresponding to 
-                                                              !  day of the year = solday
+        integer(kind=im)   :: solday=0                        ! if >0, do perpetual run corresponding to 
+                                                              !  day of the year = solday \in [0,360]
         real(kind=rb)      :: equinox_day=0.25                ! fraction of the year defining March equinox \in [0,1]
-        real(kind=rb)      :: slowdown_rad=1.                 ! factor do simulate slower seasonal cycle: >1 means slower, <1 faster
+! radiation time stepping and spatial sampling
+        integer(kind=im)   :: dt_rad=0                        ! Radiation time step - every step if dt_rad<dt_atmos
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
                                                               ! Else only heat radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true.         ! Average coszen for SW radiation over dt_rad?
         integer(kind=im)   :: dt_rad_avg = -1                 ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
-        integer(kind=im)   :: dt_rad=0                        ! Radiation time step - every step if dt_rad<dt_atmos
         integer(kind=im)   :: lonstep=1                       ! Subsample fields along longitude
-                                                              !  for faster radiation calculation  
-        logical            ::  do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
-                                                              !  at the moment, only sphum is averaged
+                                                              !  for faster radiation calculation
+! some fancy radiation tweaks  
+        real(kind=rb)      :: slowdown_rad = 1.0              ! factor do simulate slower seasonal cycle: >1 means faster, <1 slower
         logical            :: do_zm_rad=.false.               ! Only compute zonal mean radiation
         logical            :: do_precip_albedo=.false.        ! Modify albedo depending on large scale
                                                               !  precipitation (crude cloud parameterization)
-        real(kind=rb)      :: precip_albedo=0.8               ! If so, what's the cloud albedo?
+        real(kind=rb)      :: precip_albedo=0.35              ! If so, what's the cloud albedo?
         real(kind=rb)      :: precip_lat = 0.0                ! If so, poleward of which latitude should it be applied?
         character(len=14)  :: precip_albedo_mode = 'full'     ! If so, use 
                                                               !  full precipitation ('full')
@@ -152,7 +165,8 @@
 !---------------------------------------------------------------------------------------------------------------
 
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
-             &do_read_h2o, h2o_file, do_read_radiation, radiation_file, rad_missing_value, &
+             &do_read_h2o, h2o_file, ch4_val, n2o_val, o2_val, cfc11_val, cfc12_val, cfc22_val, cc14_val, &
+             &do_read_radiation, radiation_file, rad_missing_value, &
              &do_read_sw_flux, sw_flux_file, do_read_lw_flux, lw_flux_file,&
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
              &do_fixed_water,fixed_water,fixed_water_pres,fixed_water_lat, &
@@ -172,7 +186,6 @@
 
 !*****************************************************************************************
         subroutine rrtm_radiation_init(axes,Time,ncols,nlay,lonb,latb)
-! Martin Jucker 2015
 !
 ! Initialize diagnostics, allocate variables, set constants
 !
@@ -271,13 +284,13 @@
 
           if(do_read_radiation .and. do_read_sw_flux .and. do_read_lw_flux) then
              if(do_read_ozone) call error_mesg( 'rrtm_gases_init', &
-                  'SET DO_READ_OZONE TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', WARNING)
+                  'SETTING DO_READ_OZONE TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', NOTE)
              do_read_ozone = .false.
              if(do_read_h2o) call error_mesg( 'rrtm_gases_init', &
-                  'SET DO_READ_H2O TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', WARNING)
+                  'SETTING DO_READ_H2O TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', NOTE)
              do_read_h2o   = .false.
              if(do_precip_albedo) call error_mesg( 'rrtm_gases_init', &
-                  'SET DO_PRECIP_ALBEDO TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', WARNING)
+                  'SETTING DO_PRECIP_ALBEDO TO FALSE AS DO_READ_RADIATION AND DO_READ_?W_FLUX ARE .TRUE.', NOTE)
              do_precip_albedo = .false.
           endif
 
@@ -285,7 +298,7 @@
 
           deg2rad = acos(0.)/90.
 
-          dt_last = -dt_rad
+          dt_last = -dt_rad !make sure we are computing radiation at the first time step
 
           ncols_rrt = ncols/lonstep
           nlay_rrt  = nlay
@@ -298,60 +311,30 @@
           if(.not. do_read_radiation .or. .not. do_read_sw_flux .and. .not. do_read_lw_flux)then
              allocate(h2o(ncols_rrt,nlay_rrt),o3(ncols_rrt,nlay_rrt), &
                   co2(ncols_rrt,nlay_rrt))
-             if(include_secondary_gases)then
-                allocate(ch4(ncols_rrt,nlay_rrt), &
-                     n2o(ncols_rrt,nlay_rrt),o2(ncols_rrt,nlay_rrt), &
-                     cfc11(ncols_rrt,nlay_rrt),cfc12(ncols_rrt,nlay_rrt), &
-                     cfc22(ncols_rrt,nlay_rrt),cc14(ncols_rrt,nlay_rrt), &
-                     reice(ncols_rrt,nlay_rrt),reliq(ncols_rrt,nlay_rrt))
-             else
-                allocate(zeros(ncols_rrt,nlay_rrt))
-             endif
+             allocate(ones(ncols_rrt,nlay_rrt), &
+                  zeros(ncols_rrt,nlay_rrt))
              allocate(emis(ncols_rrt,nbndlw))
-             allocate(cldfr(ncols_rrt,nlay_rrt),cicewp(ncols_rrt,nlay_rrt), &
-                  cliqwp(ncols_rrt,nlay_rrt))
-             allocate(taucld(nbndlw,ncols_rrt,nlay_rrt),tauaer(ncols_rrt, &
-                  nlay_rrt,nbndlw))
-             allocate(ssacld(nbndsw,ncols_rrt,nlay_rrt), &
-                  asmcld(nbndsw,ncols_rrt,nlay_rrt), &
-                  fsfcld(nbndsw,ncols_rrt,nlay_rrt), &
-                  ssaaer(ncols_rrt,nlay_rrt,nbndsw), &
-                  asmaer(ncols_rrt,nlay_rrt,nbndsw), &
-                  ecaer(ncols_rrt,nlay_rrt,nbndsw))
+             allocate(taucld(nbndlw,ncols_rrt,nlay_rrt), &
+                  tauaer(ncols_rrt,nlay_rrt,nbndlw))
+             allocate(sw_zro(nbndsw,ncols_rrt,nlay_rrt), &
+                  zro_sw(ncols_rrt,nlay_rrt,nbndsw))
              if(id_coszen > 0)allocate(zencos (size(lonb,1)-1,size(latb,1)-1))
-
+             
+             ! gases
              h2o   = 0. !this will be set by the water vapor tracer
              o3    = 0. !this will be set by an input file if do_read_ozone=.true.
-             co2   = co2ppmv*1.e-6
-             if(include_secondary_gases)then !change values here
-                ch4   = 0.
-                n2o   = 0.
-                o2    = 0.
-                cfc11 = 0.
-                cfc12 = 0.
-                cfc22 = 0.
-                cc14  = 0.
-             else
-                zeros = 0.
-             endif
+             co2   = co2ppmv*1.e-6 ! convert ppmv
+             zeros = 0. ! gases and clouds
+             ones  = 1. ! gases and clouds
 
              emis  = 1. !black body: 1.0
              
-             cldfr  = 0.
-             cicewp = 0.
-             cliqwp = 0.
-             reice = 10.
-             reliq = 10.
-             
+             ! absorption
              taucld = 0.
              tauaer = 0.
-             
-             ssacld = 0.
-             asmcld = 0.
-             fsfcld = 0.
-             ssaaer = 0.
-             asmaer = 0.
-             ecaer  = 0.
+             ! clouds
+             sw_zro = 0.
+             zro_sw = 0.
           endif !run RRTM?
 
           if(do_read_radiation)then
@@ -521,27 +504,30 @@
              return !not time yet
           endif
 !make sure we run perpetual when solday > 0)
-          if(solday > 0.)then
-             Time_loc = set_time(seconds,floor(solday))
+          if(solday > 0)then
+             Time_loc = set_time(seconds,solday)
+          elseif(slowdown_rad .ne. 1.0)then
+             seconds = days*86400 + seconds
+             Time_loc = set_time(int(seconds*slowdown_rad))
           else
              Time_loc = Time
-!             seconds = days*86400 + seconds
-!             Time_loc = set_time(int(seconds/slowdown_rad))
           endif
-!---------------------------------------------------------------------------------------------
-! we know now that we want to run radiation
 !
-!compute zenith angle
+! compute zenith angle
+!  this is also an output, so need to compute even if we read radiation from file
           if(do_rad_time_avg) then
              call compute_zenith(Time_loc,equinox_day,dt_rad_avg,lat,lon,coszen,dyofyr)
           else
              call compute_zenith(Time_loc,equinox_day,0     ,lat,lon,coszen,dyofyr)
           end if
-! input files
+! input files: only deal with case where we don't need to call radiation at all
           if(do_read_radiation .and. do_read_sw_flux .and. do_read_lw_flux) then
              call interpolator( rad_interp, Time_loc, p_half, tdt_rrtm, trim(radiation_file))
              call interpolator( fsw_interp, Time_loc, flux_sw, trim(sw_flux_file))
              call interpolator( flw_interp, Time_loc, flux_lw, trim(lw_flux_file))
+             ! there might be missing values due to surface topography, which would
+             !  put in weird values. This is still work in progress, and cannot be 
+             !  used safely!
              !if( rad_missing_value .lt. 0. )then
              !   where( tdt_rrtm .lt. rad_missing_value ) tdt_rrtm = 0.
              !   where( flux_sw  .lt. rad_missing_value ) flux_sw  = 0.
@@ -558,6 +544,8 @@
              call write_diag_rrtm(Time_loc,is,js)
              return !we're done here
           endif
+!---------------------------------------------------------------------------------------------
+! we know now that we want to run radiation
           
           si=size(tdt,1)
           sj=size(tdt,2)
@@ -647,15 +635,17 @@
           
           if(include_secondary_gases)then
              call rrtmg_sw &
-                  (ncols_rrt, nlay_rrt , icld     , iaer     , &
-                  pfull     , phalf    , tfull    , thalf    , tsrf , &
-                  h2o       , o3       , co2      , ch4      , n2o  , o2, &
+                  (ncols_rrt, nlay_rrt , icld     , iaer         , &
+                  pfull     , phalf    , tfull    , thalf        , tsrf         , &
+                  h2o       , o3       , co2      , ch4_val*ones , n2o_val*ones , o2_val*ones , &
                   albedo_rr , albedo_rr, albedo_rr, albedo_rr, &
                   cosz_rr   , solrad   , dyofyr   , solr_cnst, &
-                  inflglw   , iceflglw , liqflglw , cldfr    , &
-                  taucld    , ssacld   , asmcld   , fsfcld   , &
-                  cicewp    , cliqwp   , reice    , reliq    , &
-                  tauaer    , ssaaer   , asmaer   , ecaer    , &
+                  inflglw   , iceflglw , liqflglw , &
+                  ! cloud parameters
+                  zeros     , taucld   , sw_zro   , sw_zro   , sw_zro , &
+                  zeros     , zeros    , 10*ones  , 10*ones  , &
+                  tauaer    , zro_sw   , zro_sw   , zro_sw    , &
+                  ! output
                   swuflx    , swdflx   , swhr     , swuflxc  , swdflxc, swhrc)
           else
              call rrtmg_sw &
@@ -664,10 +654,12 @@
                   h2o       , o3       , co2      , zeros    , zeros, zeros, &
                   albedo_rr , albedo_rr, albedo_rr, albedo_rr, &
                   cosz_rr   , solrad   , dyofyr   , solr_cnst, &
-                  inflglw   , iceflglw , liqflglw , cldfr    , &
-                  taucld    , ssacld   , asmcld   , fsfcld   , &
-                  cicewp    , cliqwp   , reice    , reliq    , &
-                  tauaer    , ssaaer   , asmaer   , ecaer    , &
+                  inflglw   , iceflglw , liqflglw , &
+                  ! cloud parameters
+                  zeros     , taucld   , sw_zro   , sw_zro   , sw_zro , &
+                  zeros     , zeros    , 10*ones  , 10*ones  , &
+                  tauaer    , zro_sw   , zro_sw   , zro_sw   , &
+                  ! output
                   swuflx    , swdflx   , swhr     , swuflxc  , swdflxc, swhrc)
           endif
           
@@ -688,24 +680,32 @@
           uflx = 0.
           if(include_secondary_gases)then
              call rrtmg_lw &
-                  (ncols_rrt, nlay_rrt, icld    , idrv , &
-                  pfull     , phalf   , tfull   , thalf, tsrf , &
-                  h2o       , o3      , co2     , ch4  , n2o  , o2, &
-                  cfc11     , cfc12   , cfc22   , cc14 , emis , &
-                  inflglw   , iceflglw, liqflglw, cldfr,  &
-                  taucld    , cicewp  , cliqwp  , reice, reliq, &
-                  tauaer    , &
-                  uflx      , dflx    , hr      , uflxc, dflxc, hrc)
+                  (ncols_rrt     , nlay_rrt       , icld           , idrv , &
+                  pfull          , phalf          , tfull          , thalf, tsrf  , &
+                  h2o            , o3             , co2            , &
+                  ! secondary gases
+                  ch4_val*ones   , n2o_val*ones   , o2_val*ones    , &
+                  cfc11_val*ones , cfc12_val*ones , cfc22_val*ones , cc14_val*ones , &
+                  ! emissivity and cloud composition
+                  emis           , inflglw        , iceflglw       , liqflglw      ,  &
+                  ! cloud parameters
+                  zeros          , taucld         , zeros          , zeros         , 10*ones, 10*ones, &
+                  tauaer         , &
+                  ! output
+                  uflx           , dflx           , hr             , uflxc         , dflxc  , hrc)
           else
              call rrtmg_lw &
                   (ncols_rrt, nlay_rrt, icld    , idrv , &
                   pfull     , phalf   , tfull   , thalf, tsrf , &
                   h2o       , o3      , co2     , zeros, zeros, zeros, &
-                  zeros     , zeros   , zeros   , zeros, emis , &
-                  inflglw   , iceflglw, liqflglw, cldfr,  &
-                  taucld    , cicewp  , cliqwp  , reice, reliq, &
+                  zeros     , zeros   , zeros   , zeros, &
+                  ! emissivity and cloud composition
+                  emis      , inflglw , iceflglw, liqflglw, &
+                  ! cloud parameters
+                  zeros     , taucld  , zeros   , zeros, 10*ones, 10*ones, &
                   tauaer    , &
-                  uflx      , dflx    , hr      , uflxc, dflxc, hrc)
+                  ! output
+                  uflx      , dflx    , hr      , uflxc, dflxc  , hrc)
           endif
 
           lwijk   = reshape(hr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
@@ -781,6 +781,8 @@
              if(id_coszen  > 0)zencos  = coszen
           endif
 
+          ! check if we want surface albedo as a function of precipitation
+          !  call diagnostics accordingly
           if(do_precip_albedo)then
              call write_diag_rrtm(Time,is,js,o3f,albedo_loc)
           else
@@ -791,8 +793,6 @@
 !*****************************************************************************************
 !*****************************************************************************************
         subroutine write_diag_rrtm(Time,is,js,ozone,albedo_loc)
-!
-! Martin Jucker
 ! 
 ! write out diagnostics fields
 !
@@ -852,8 +852,8 @@
           implicit none
 
           if(do_read_ozone)call interpolator_end(o3_interp)
-        end subroutine rrtm_radiation_end
 
+        end subroutine rrtm_radiation_end
 
 !*****************************************************************************************
       end module rrtm_radiation
