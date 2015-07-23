@@ -1,5 +1,5 @@
 "MiMA"
-0 0 0 0 0 0
+0001 1 1 0 0 0
 #output files
 "atmos_daily",    24, "hours", 1, "days", "time",
 "atmos_avg",      -1, "hours", 1, "days", "time",
