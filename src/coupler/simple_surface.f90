@@ -72,6 +72,7 @@ real ::  z_ref_heat      = 2.,       &
           heat_cap_limit  = 60.,      & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.12,     &
+          albedo_exp      = 2.,       & !mj
 	  max_of          = 25.,      &
 	  lonmax_of       = 180.,     &
 	  latmax_of       = 0.,       &
@@ -87,7 +88,7 @@ real ::  z_ref_heat      = 2.,       &
 
 integer :: surface_choice   = 1
 integer :: roughness_choice = 1
-integer :: albedo_choice    = 1
+integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
 logical :: do_qflux         = .false.
@@ -112,7 +113,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               do_qflux,qflux_amp,qflux_width,    &  !mj
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
                               land_option,slandlon,slandlat,     &  !mj
-                              elandlon,elandlat !mj
+                              elandlon,elandlat,albedo_exp !mj
 
 !-----------------------------------------------------------------------
 
@@ -236,23 +237,27 @@ pi = 4.0*atan(1.)
           endif
        endif
      enddo
-!mj add symmetric higher_albedo - linear increase from equator to pole
-   elseif(albedo_choice == 3) then
+   elseif(albedo_choice == 3) then ! NH and SH albedo step
      do j = 1, size(Atm%t_bot,2)
        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
 
-!!$       if ( abs(lat) > lat_glacier ) then
-!!$
-!!$         albedo(:,j) = higher_albedo
-!!$
-!!$       else
-!!$
-!!$         albedo(:,j) = const_albedo
-!!$
-!!$       endif
-       lat = abs(lat)
-       albedo(:,j) = const_albedo*(90-lat)/90 + higher_albedo*lat/90
+       if ( abs(lat) > lat_glacier ) then
 
+         albedo(:,j) = higher_albedo
+
+       else
+
+         albedo(:,j) = const_albedo
+
+       endif
+
+     enddo
+!mj add symmetric higher_albedo - exponential increase from equator to pole
+   elseif(albedo_choice == 4) then
+     do j = 1, size(Atm%t_bot,2)
+       lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
+       lat = abs(lat)
+       albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*(lat/90.)**albedo_exp
      enddo
 
 
