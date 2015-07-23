@@ -1,23 +1,30 @@
-"Model results from the Held-Suarez benchmark"
+"MiMA"
 0 0 0 0 0 0
 #output files
 "atmos_daily",    24, "hours", 1, "days", "time",
-"atmos_average",  -1, "hours", 1, "days", "time",
-#diagnostic field entries.
- "dynamics",    "ps",             "ps",             "atmos_daily",    "all", .false., "none", 2,
- "dynamics",    "bk",             "bk",             "atmos_average",  "all", .false., "none", 2,
- "dynamics",    "pk",             "pk",             "atmos_average",  "all", .false., "none", 2,
- "dynamics",    "zsurf",          "zsurf",          "atmos_average",  "all", .false., "none", 2,
- "dynamics",    "ps",             "ps",             "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "ucomp",          "ucomp",          "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "vcomp",          "vcomp",          "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "temp",           "temp",           "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "omega",          "omega",          "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "div",            "div",            "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "vor",            "vor",            "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "tracer1",        "tracer1",        "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "tracer2",        "tracer2",        "atmos_average",  "all", .true.,  "none", 2,
-#"hs_forcing",  "teq",            "teq",            "atmos_average",  "all", .true.,  "none", 2,
+"atmos_avg",      -1, "hours", 1, "days", "time",
+#diagnostic field entries. 
+# quantities needed for plevel interpolation,
+ "dynamics",        "bk",         "bk",             "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "pk",         "pk",             "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "ps",         "ps",             "atmos_daily",    "all", .false., "none", 2,
+# dynamics variables
+ "dynamics",        "ucomp",      "ucomp",          "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "temp",       "temp",           "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "ucomp",      "ucomp",          "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "vcomp",      "vcomp",          "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "temp",       "temp",           "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "omega",      "omega",          "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "div",        "div",            "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "vor",        "vor",            "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "tracer1",    "tracer1",        "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "tracer2",    "tracer2",        "atmos_avg",      "all", .true.,  "none", 2,
+# surface variables
+ "simple_surface",  "t_surf",     "t_surf",         "atmos_daily",    "all", .false., "none", 2,
+# moisture variables
+  "moist",          "precip",     "precip",         "atmos_daily",    "all", .false., "none", 2,
+
+
 
 #=============================================================================================
 #
