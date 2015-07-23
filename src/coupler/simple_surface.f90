@@ -63,12 +63,12 @@ logical :: do_init = .true.
 
 !-----------------------------------------------------------------------
 
-real ::  z_ref_heat      = 2.,       &
-         z_ref_mom       = 10.,      &
+real ::   z_ref_heat      = 2.,       &
+          z_ref_mom       = 10.,      &
           heat_capacity   = 1.e07,    &
-          land_capacity   = 1.e07,    & !mj
-          trop_capacity   = 1.e07,    & !mj
-          trop_cap_limit  = 10.,      & !mj
+          land_capacity   = -1.,      & !mj
+          trop_capacity   = -1.,      & !mj
+          trop_cap_limit  = 15.,      & !mj
           heat_cap_limit  = 60.,      & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.12,     &
@@ -527,6 +527,8 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    !if(do_read_sst .or. do_sc_sst) call error_mesg ('simple_surface',  &
    !              'THERE IS A BUG WITH DO_READ_SST, SO I AM STOPPING', FATAL)
    if(do_sc_sst) do_read_sst = .true.
+   if(trop_capacity .le. 0.) trop_capacity = heat_capacity
+   if(land_capacity .le. 0.) land_capacity = heat_capacity
 
 !--------- write version number and namelist ------------------
 
