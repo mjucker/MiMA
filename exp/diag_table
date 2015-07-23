@@ -23,9 +23,10 @@
  "simple_surface",  "t_surf",     "t_surf",         "atmos_daily",    "all", .false., "none", 2,
 # moisture variables
   "moist",          "precip",     "precip",         "atmos_daily",    "all", .false., "none", 2,
-
-
-
+  "moist",          "rh",         "rh",             "atmos_daily",    "all", .false., "none", 2,
+# radiation variables
+  "rrtm_radiation", "tdt_rad",    "tdt_rad",        "atmos_daily",    "all", .false., "none", 2,
+  "rrtm_radiation", "flux_sw",    "flux_sw",        "atmos_daily",    "all", .false., "none", 2,
 #=============================================================================================
 #
 #  FORMATS FOR FILE ENTRIES (not all input values are used)
