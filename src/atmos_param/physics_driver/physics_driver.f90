@@ -187,7 +187,7 @@ logical :: do_radiation = .false.
                                ! calculating radiative fluxes and
                                ! heating rates?
 
-logical :: do_grey_radiation = .true.
+logical :: do_grey_radiation = .false.
 
 logical :: do_rrtm_radiation = .true.
 
@@ -488,6 +488,10 @@ real, dimension(:,:,:),  intent(out),  optional  :: diffm, difft
 
       if(do_radiation .and. do_grey_radiation) &
         call error_mesg('physics_driver_init','do_radiation and do_grey_radiation cannot both be .true.',FATAL)
+      if(do_radiation .and. do_rrtm_radiation) &
+        call error_mesg('physics_driver_init','do_radiation and do_rrtm_radiation cannot both be .true.',FATAL)
+      if(do_grey_radiation .and. do_rrtm_radiation) &
+        call error_mesg('physics_driver_init','do_grey_radiation and do_rrtm_radiation cannot both be .true.',FATAL)
 
       if(do_radiation) call rad_utilities_init
       call time_manager_init
