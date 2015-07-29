@@ -92,10 +92,10 @@ integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetri
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
 logical :: do_qflux         = .false.
-real    :: qflux_amp        = 50.
-real    :: qflux_width      = 16.
-logical :: do_read_sst      = .false.
-logical :: do_sc_sst        = .false.
+real    :: qflux_amp        = 50.     !mj
+real    :: qflux_width      = 16.     !mj
+logical :: do_read_sst      = .false. !mj
+logical :: do_sc_sst        = .false. !mj
 character(len=256) :: sst_file
 character(len=256) :: land_option = 'none'
 real,dimension(10) :: slandlon=0,slandlat=0,elandlon=-1,elandlat=-1
