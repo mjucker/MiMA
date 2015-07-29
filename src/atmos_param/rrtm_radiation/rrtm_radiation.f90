@@ -130,9 +130,10 @@
 ! astronomy
         real(kind=rb)      :: solr_cnst= 1368.22              ! solar constant [W/m2]
         logical            :: use_dyofyr=.false.              ! use day of year for Earth-Sun distance calculation?
+                                                              !  this is done within RRTM, and assumes a 365 day year
         real(kind=rb)      :: solrad=1.0                      ! distance Earth-Sun [AU] if use_dyofyr=.false.
         integer(kind=im)   :: solday=0                        ! if >0, do perpetual run corresponding to 
-                                                              !  day of the year = solday \in [0,360]
+                                                              !  day of the year = solday \in [0,days per year]
         real(kind=rb)      :: equinox_day=0.25                ! fraction of the year defining March equinox \in [0,1]
 ! radiation time stepping and spatial sampling
         integer(kind=im)   :: dt_rad=0                        ! Radiation time step - every step if dt_rad<dt_atmos

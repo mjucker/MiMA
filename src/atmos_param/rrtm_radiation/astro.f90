@@ -26,6 +26,8 @@
 ! Modules
             use time_manager_mod,only: time_type,get_time,length_of_year
             use constants_mod, only:   PI
+            use fms_mod, only:         error_mesg,FATAL
+            use rrtm_vars, only:       use_dyofyr
 ! Local variables
             implicit none
 ! Inputs
@@ -54,6 +56,12 @@
             twopi = 2*PI
 
             call get_time(length_of_year(),sec2,daysperyear)
+            if( daysperyear .ne. 365 .and. use_dyofyr ) then
+             print*,' number of days per year: ',daysperyear
+             call error_mesg ( 'astro', &
+                  ' use_dyofyr is TRUE but the calendar year does not have 365 days. STOPPING', &
+                  FATAL)
+            endif
 
             radpersec=2*PI/86400.
             radperday=2*PI/daysperyear
@@ -74,7 +82,7 @@
             !time_pi now contains local time at each grid point
             !get day of the year relative to equinox. We set equinox at (equinox_day,equinox_day+0.5)*daysperyear
             days = days - int(equinox_day*daysperyear)
-            dyofyr   = modulo(days,daysperyear) !NH winter solstice at day 0
+            dyofyr   = modulo(days,daysperyear) 
             !convert into radians
             radday = dyofyr*radperday
             !get declination
