@@ -52,7 +52,7 @@
                                                                            ! dimension (ncols_rrt x nlay_rrt)
         real(kind=rb),allocatable,dimension(:,:)   :: cfc22                ! CFC22 [vmr]
                                                                            ! dimension (ncols_rrt x nlay_rrt)
-        real(kind=rb),allocatable,dimension(:,:)   :: cc14                 ! CC14 [vmr]
+        real(kind=rb),allocatable,dimension(:,:)   :: ccl4                 ! CCL4 [vmr]
                                                                            ! dimension (ncols_rrt x nlay_rrt)
         real(kind=rb),allocatable,dimension(:,:)   :: emis                 ! surface LW emissivity per band
                                                                            ! dimension (ncols_rrt x nbndlw)
@@ -106,7 +106,7 @@
         character(len=256) :: ozone_file='ozone'              !  file name of ozone file to read
         logical            :: do_read_h2o=.false.             ! read water vapor from an external file?
         character(len=256) :: h2o_file='h2o'                  !  file name of h2o file to read
-! secondary gases (CH4,N2O,O2,CFC11,CFC12,CFC22,CC14)
+! secondary gases (CH4,N2O,O2,CFC11,CFC12,CFC22,CCL4)
         logical            :: include_secondary_gases=.false. ! non-zero values for above listed secondary gases?
         real(kind=rb)      :: ch4_val  = 0.                   !  if .true., value for CH4
         real(kind=rb)      :: n2o_val  = 0.                   !                       N2O
@@ -114,7 +114,7 @@
         real(kind=rb)      :: cfc11_val= 0.                   !                       CFC11
         real(kind=rb)      :: cfc12_val= 0.                   !                       CFC12
         real(kind=rb)      :: cfc22_val= 0.                   !                       CFC22
-        real(kind=rb)      :: cc14_val = 0.                   !                       CC14
+        real(kind=rb)      :: ccl4_val = 0.                   !                       CCL4
 ! some safety boundaries
         real(kind=rb)      :: h2o_lower_limit = 2.e-7         ! never use smaller than this in radiative scheme
         real(kind=rb)      :: temp_lower_limit = 100.         ! never go below this in radiative scheme
@@ -166,7 +166,7 @@
 !---------------------------------------------------------------------------------------------------------------
 
         namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, &
-             &do_read_h2o, h2o_file, ch4_val, n2o_val, o2_val, cfc11_val, cfc12_val, cfc22_val, cc14_val, &
+             &do_read_h2o, h2o_file, ch4_val, n2o_val, o2_val, cfc11_val, cfc12_val, cfc22_val, ccl4_val, &
              &do_read_radiation, radiation_file, rad_missing_value, &
              &do_read_sw_flux, sw_flux_file, do_read_lw_flux, lw_flux_file,&
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
@@ -686,7 +686,7 @@
                   h2o            , o3             , co2            , &
                   ! secondary gases
                   ch4_val*ones   , n2o_val*ones   , o2_val*ones    , &
-                  cfc11_val*ones , cfc12_val*ones , cfc22_val*ones , cc14_val*ones , &
+                  cfc11_val*ones , cfc12_val*ones , cfc22_val*ones , ccl4_val*ones , &
                   ! emissivity and cloud composition
                   emis           , inflglw        , iceflglw       , liqflglw      ,  &
                   ! cloud parameters
