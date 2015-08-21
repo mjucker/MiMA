@@ -42,16 +42,6 @@
 
 ---------- physics namelists --------------
 
-
- &simple_surface_nml
-     do_qflux         = .true.,
-     qflux_amp        = 30.,
-     surface_choice   = 1,
-     Tm               = 285.,
-     heat_capacity    = 4.e08,
-     albedo_choice    = 1,
-     const_albedo     = 0.27 /
-
  &rrtm_radiation_nml
      h2o_lower_limit        = 2.e-07,
      co2ppmv                = 300.,
@@ -60,6 +50,17 @@
      solr_cnst              = 1360.,
      dt_rad                 =  4500,
      lonstep                = 4 /
+
+ &simple_surface_nml
+     do_qflux         = .true.,
+     surface_choice   = 1,
+     Tm               = 285.,
+     heat_capacity    = 4.e08,
+     albedo_choice    = 1,
+     const_albedo     = 0.27 /
+
+&qflux_nml
+     qflux_amp        = 30. /
 
  &damping_driver_nml
      do_rayleigh   = .true.,

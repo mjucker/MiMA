@@ -9,14 +9,41 @@
 !
 ! Modules
         use parkind, only : im => kind_im, rb => kind_rb
+        use fms_mod, only : file_exist, open_namelist_file, check_nml_error, &
+                            error_mesg, FATAL, close_file
 ! Variables
         implicit none
 !to be included in namelist
 !
-        real(kind=rb)    :: obliq=23.439
+        real(kind=rb)    :: obliq      = 23.439
+        logical          :: use_dyofyr = .false.
+        
+        logical          :: astro_initialized = .false.
+
+        namelist /astro_nml/ obliq,use_dyofyr
+
 
         contains
 !--------------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------
+          subroutine astro_init
+            implicit none
+            integer :: unit, ierr, io
+
+            if ( file_exist('intput.nml') )then
+               unit = open_namelist_file()
+               ierr=1; 
+               do while (ierr /= 0)
+                  read( unit, nml=astro_nml, iostat=io, end=10 )
+                  ierr = check_nml_error(io,'astro_nml')
+               enddo
+10             call close_file(unit)
+            endif
+    
+            astro_initialized = .true.
+            
+            
+          end subroutine astro_init
 !--------------------------------------------------------------------------------------
 ! parts of this are taken from GFDL's astronomy.f90      
           subroutine compute_zenith(Time, equinox_day, dt, lat, lon, cosz, dyofyr)
@@ -27,7 +54,6 @@
             use time_manager_mod,only: time_type,get_time,length_of_year
             use constants_mod, only:   PI
             use fms_mod, only:         error_mesg,FATAL
-            use rrtm_vars, only:       use_dyofyr
 ! Local variables
             implicit none
 ! Inputs
@@ -54,6 +80,10 @@
 !--------------------------------------------------------------------------------------
             deg2rad = PI/180.
             twopi = 2*PI
+
+            if ( .not. astro_initialized ) then
+               call error_mesg('astro','astro_mod not initialized',FATAL)
+            endif
 
             call get_time(length_of_year(),sec2,daysperyear)
             if( daysperyear .ne. 365 .and. use_dyofyr ) then
