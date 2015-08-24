@@ -126,13 +126,7 @@
         real(kind=rb)      :: fixed_water_pres = 100.e02      ! if so, above which pressure level? [hPa]
         real(kind=rb)      :: fixed_water_lat  = 90.          ! if so, equatorward of which latitude? [deg]
         logical            :: do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
-                                                              !  at the moment, only sphum is averaged
-! astronomy
-        real(kind=rb)      :: solr_cnst= 1368.22              ! solar constant [W/m2]
-        real(kind=rb)      :: solrad=1.0                      ! distance Earth-Sun [AU] if use_dyofyr=.false. in astro_mod
-        integer(kind=im)   :: solday=0                        ! if >0, do perpetual run corresponding to 
-                                                              !  day of the year = solday \in [0,days per year]
-        real(kind=rb)      :: equinox_day=0.25                ! fraction of the year defining March equinox \in [0,1]
+            
 ! radiation time stepping and spatial sampling
         integer(kind=im)   :: dt_rad=0                        ! Radiation time step - every step if dt_rad<dt_atmos
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
@@ -169,7 +163,7 @@
              &do_read_sw_flux, sw_flux_file, do_read_lw_flux, lw_flux_file,&
              &h2o_lower_limit,temp_lower_limit,temp_upper_limit,co2ppmv, &
              &do_fixed_water,fixed_water,fixed_water_pres,fixed_water_lat, &
-             &solr_cnst, solrad, solday, equinox_day, slowdown_rad, &
+             &slowdown_rad, &
              &store_intermediate_rad, do_rad_time_avg, dt_rad, dt_rad_avg, &
              &lonstep, do_zm_tracers, do_zm_rad, &
              &do_precip_albedo, precip_albedo_mode, precip_albedo, precip_lat
@@ -190,7 +184,7 @@
 !
 ! Modules
           use rrtm_vars
-          use rrtm_astro, only:       astro_init
+          use rrtm_astro, only:       astro_init,solday
           use parrrtm, only:          nbndlw
           use parrrsw, only:          nbndsw
           use diag_manager_mod, only: register_diag_field, send_data
@@ -431,7 +425,8 @@
           use mpp_mod, only:         mpp_pe,mpp_root_pe
           use rrtmg_lw_rad, only:    rrtmg_lw
           use rrtmg_sw_rad, only:    rrtmg_sw
-          use rrtm_astro, only:      compute_zenith,use_dyofyr
+          use rrtm_astro, only:      compute_zenith,use_dyofyr,solr_cnst,&
+                                     solrad,solday,equinox_day
           use rrtm_vars
           use time_manager_mod,only: time_type,get_time,set_time
           use interpolator_mod,only: interpolator

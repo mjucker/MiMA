@@ -13,14 +13,22 @@
                             error_mesg, FATAL, close_file
 ! Variables
         implicit none
-!to be included in namelist
-!
-        real(kind=rb)    :: obliq      = 23.439
-        logical          :: use_dyofyr = .false.
-        
         logical          :: astro_initialized = .false.
+!
+!---------------------------------------------------------------------------------------------------------------
+!                                namelist values
+!---------------------------------------------------------------------------------------------------------------
+        real(kind=rb)      :: obliq      = 23.439             ! Earth's obliquity
+        logical            :: use_dyofyr = .false.            ! use day of the year to compute Earth-Sun distance?
+                                                              !  this is done within RRTM, and assumes 365days/year!
+        real(kind=rb)      :: solr_cnst= 1368.22              ! solar constant [W/m2]
+        real(kind=rb)      :: solrad=1.0                      ! distance Earth-Sun [AU] if use_dyofyr=.false.
+        integer(kind=im)   :: solday=0                        ! if >0, do perpetual run corresponding to 
+                                                              !  day of the year = solday \in [0,days per year]
+        real(kind=rb)      :: equinox_day=0.25                ! fraction of the year defining March equinox \in [0,1]
+        
 
-        namelist /astro_nml/ obliq,use_dyofyr
+        namelist /astro_nml/ obliq,use_dyofyr,solr_cnst,solrad,solday,equinox_day
 
 
         contains
