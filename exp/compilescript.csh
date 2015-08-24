@@ -4,7 +4,7 @@ set echo
 #--------------------------------------------------------------------------------------------------------
 # define variables
 set platform  = nyu                                     # A unique identifier for your platform
-set npes      = 2                                        # number of processors
+set npes      = 16                                       # number of processors
 set template  = $cwd/../bin/mkmf.template.$platform   # path to template for your platform
 set mkmf      = $cwd/../bin/mkmf                      # path to executable mkmf
 set sourcedir = $cwd/../src                           # path to directory containing model source code
@@ -33,7 +33,7 @@ if ( ! -d $execdir ) mkdir $execdir
 # compile the model code and create executable
 cd $execdir
 $mkmf -p fms.x -t $template -c "-Duse_libMPI -Duse_netCDF" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
-make -f Makefile
+make -f Makefile -j $npes
 #cd $workdir
 #--------------------------------------------------------------------------------------------------------
 
