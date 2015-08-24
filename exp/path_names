@@ -1,4 +1,5 @@
 atmos_coupled/atmos_model.f90
+atmos_param/qflux/qflux.f90
 atmos_param/rrtm_radiation/rrtmg_lw/gcm_model/modules/parkind.f90
 atmos_param/rrtm_radiation/rrtmg_lw/gcm_model/modules/parrrtm.f90
 atmos_param/rrtm_radiation/rrtmg_lw/gcm_model/modules/rrlw_cld.f90

@@ -29,7 +29,8 @@ use spectral_dynamics_mod,only: get_surf_geopotential
 ! mj read SSTs
 use interpolator_mod, only: interpolate_type,interpolator_init&
      &,CONSTANT,interpolator
-
+!mj q-flux
+use qflux_mod, only: qflux_init,qflux,warmpool
 
 implicit none
 private
@@ -91,9 +92,8 @@ integer :: roughness_choice = 1
 integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
-logical :: do_qflux         = .false.
-real    :: qflux_amp        = 50.     !mj
-real    :: qflux_width      = 16.     !mj
+logical :: do_qflux         = .false. !mj
+logical :: do_warmpool      = .false. !mj
 logical :: do_read_sst      = .false. !mj
 logical :: do_sc_sst        = .false. !mj
 character(len=256) :: sst_file
@@ -110,7 +110,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
 			      lonwidth_of, higher_albedo, lat_glacier, &
 			      do_oflxmerid, maxofmerid, latmaxofmerid, Tm, &
 			      deltaT,                            &
-                              do_qflux,qflux_amp,qflux_width,    &  !mj
+                              do_qflux,do_warmpool,              &  !mj
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
                               land_option,slandlon,slandlat,     &  !mj
                               elandlon,elandlat,albedo_exp !mj
@@ -767,15 +767,13 @@ if(do_oflxmerid) then
       end if
    enddo
 endif
+
+if ( do_qflux .or. do_warmpool) then
+   call qflux_init
 !mj q-flux as in Merlis et al (2013) [Part II] 
-if ( do_qflux ) then
-   do j=1, size(Atm%t_bot,2)
-      lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
-      coslat = cos(lat)
-      lat = lat*180./pi
-      flux_o(:,j) = flux_o(:,j) - qflux_amp*(1-2.*lat**2/qflux_width**2) * &
-           exp(- ((lat)**2/(qflux_width)**2))/coslat
-   enddo
+   if ( do_qflux ) call qflux(Atm%lat_bnd,flux_o)
+!mj q-flux to create a tropical temperature perturbation
+   if ( do_warmpool) call warmpool(Atm%lon_bnd,Atm%lat_bnd,flux_o)
 endif
    
 

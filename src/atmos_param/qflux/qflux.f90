@@ -7,17 +7,19 @@ module qflux_mod
 
 implicit none
 
-real ::    qflux_amp    = 30.,  &
-           qflux_width  = 16.,  &
-           warmpool_amp =  5.,  &
-           warmpool_lim = 20.  
-integer :: warmpool_k   = 1
+real ::    qflux_amp      = 30.,  &
+           qflux_width    = 16.,  &
+           warmpool_amp   =  5.,  &
+           warmpool_width = 20.  
+integer :: warmpool_k     = 1
 
 logical :: qflux_initialized = .false.
 
 
 namelist /qflux_nml/ qflux_amp,qflux_width,&
-                     warmpool_amp,warmpool_lim,warmpool_k
+                     warmpool_amp,warmpool_width,warmpool_k
+
+private 
 
 public :: qflux_init,qflux,warmpool
 
@@ -77,12 +79,13 @@ contains
     real lon,lat
 
     do j=1,size(latb)-1
-       lat = 0.5*(latb(j+1) + latb(j))
-       lat = lat*180./pi
-       if( abs(lat) .le. warmpool_lim ) then
+       lat = 0.5*(latb(j+1) + latb(j))*180./pi
+       lat = lat/warmpool_width
+       if( abs(lat) .le. 1.0 ) then
           do i=1,size(lonb)-1
              lon = 0.5*(lonb(i+1) + lonb(i))
-             flux(i,j) = flux(i,j) + warmpool_amp*cos(warmpool_k*lon)
+             flux(i,j) = flux(i,j) &
+                  &+ (1.-lat**2.)*warmpool_amp*cos(warmpool_k*lon)
           enddo
        endif
     enddo
