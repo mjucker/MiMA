@@ -66,13 +66,13 @@ logical :: do_init = .true.
 
 real ::   z_ref_heat      = 2.,       &
           z_ref_mom       = 10.,      &
-          heat_capacity   = 1.e07,    &
+          heat_capacity   = 4.e08,    &
           land_capacity   = -1.,      & !mj
           trop_capacity   = -1.,      & !mj
           trop_cap_limit  = 15.,      & !mj
           heat_cap_limit  = 60.,      & !mj
           const_roughness = 3.21e-05, &
-          const_albedo    = 0.12,     &
+          const_albedo    = 0.30,     &
           albedo_exp      = 2.,       & !mj
 	  max_of          = 25.,      &
 	  lonmax_of       = 180.,     &
@@ -84,7 +84,9 @@ real ::   z_ref_heat      = 2.,       &
 	  maxofmerid       = .5,      &
 	  latmaxofmerid    = 25.,     &
 	  Tm               = 305.,    &
-	  deltaT           = 40.
+	  deltaT           = 40.,     &
+          qflux_amp        = 30.,     & !mj
+          qflux_width      = 16.        !mj
           
 
 integer :: surface_choice   = 1
