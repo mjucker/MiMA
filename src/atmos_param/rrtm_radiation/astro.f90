@@ -1,11 +1,13 @@
-      module rrtm_astro
+module rrtm_astro
 !
-! Martin Jucker
+!   Martin Jucker, 2015, https://github.com/mjucker/MiMA.
 !
-! Computes zenigth angle necessary for SW radiation
+!   Contains all variables needed to
+!   run the RRTM code, version for GCMs (hence the 'G'),
+!   related to astronomy, i.e. all variables needed
+!   for radiation that are not within rrtm_radiation.f90
 !
-! Most of this code is taken from FMS's astronomy.f90
-!  thank you for that
+!   Computes zenith angle necessary for SW radiation
 !
 ! Modules
         use parkind, only : im => kind_im, rb => kind_rb

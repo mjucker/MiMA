@@ -6,8 +6,8 @@
 !
 !   Contains all variables needed to 
 !   run the RRTM code, version for GCMs (hence the 'G'),
-!   i.e. all variables needed for radiation that are not
-!   within the spectral_physics module otherwise
+!   other than astronomy, i.e. all variables needed
+!   for radiation that are not within astro.f90
 ! 
 !   external modules
         use parkind, only         : im => kind_im, rb => kind_rb
@@ -413,8 +413,6 @@
 !*****************************************************************************************
 !*****************************************************************************************
         subroutine run_rrtmg(is,js,Time,lat,lon,p_full,p_half,albedo,q,t,t_surf_rad,tdt,coszen,flux_sw,flux_lw)
-!
-! Martin Jucker 2014
 !
 ! Driver for RRTMG radiation scheme.
 ! Prepares all inputs, calls SW and LW radiation schemes, 
