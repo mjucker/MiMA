@@ -30,7 +30,7 @@ contains
     implicit none
     integer :: unit, ierr, io
 
-    if ( file_exist('intput.nml') )then
+    if ( file_exist('input.nml') )then
        unit = open_namelist_file()
        ierr=1; 
        do while (ierr /= 0)
@@ -39,7 +39,7 @@ contains
        enddo
 10     call close_file(unit)
     endif
-    
+
     qflux_initialized = .true.
     
   end subroutine qflux_init
