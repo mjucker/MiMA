@@ -8,7 +8,7 @@ and the American Meteorological Society's Conference on Atmospheric and Oceanic 
 
 ## License
 
-MiMA is distributed under a GNU GPLv3 license. That means you have permission to use, modify, and distribute the code, even for commercial use. However, you must make your code publicly available under the same license. See LICENSE for more details.
+MiMA is distributed under a GNU GPLv3 license. That means you have permission to use, modify, and distribute the code, even for commercial use. However, you must make your code publicly available under the same license. See LICENSE.txt for more details.
 
 RRTM/RRTMG: Copyright © 2002-2010, Atmospheric and Environmental Research, Inc. (AER, Inc.). This software
 may be used, copied, or redistributed as long as it is not sold and this copyright notice is reproduced
