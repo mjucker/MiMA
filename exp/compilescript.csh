@@ -32,7 +32,7 @@ if ( ! -d $execdir ) mkdir $execdir
 #--------------------------------------------------------------------------------------------------------
 # compile the model code and create executable
 cd $execdir
-$mkmf -p fms.x -t $template -c "-Duse_libMPI -Duse_netCDF" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
+$mkmf -p mima.x -t $template -c "-Duse_libMPI -Duse_netCDF" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
 make -f Makefile -j $npes
 #cd $workdir
 #--------------------------------------------------------------------------------------------------------
