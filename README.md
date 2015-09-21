@@ -35,7 +35,7 @@ MiMA will automatically look for input.nml, so it is run without any explicit in
 The test run will be one 360-day year with the following parameters:
 * no surface topography
 * ozone from the file input/ozone_1990.nc
-* 300pbb CO2
+* 300ppm CO2
 * solar constant of 1360W/m2
 * circular Earth-Sun orbit with 1UA radius
 * NH solstice on December 30 (day 360)
@@ -56,17 +56,17 @@ The test run will be one 360-day year with the following parameters:
 
 ### Gray radiation model
 
-[Frierson, Held, Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1)
-[Frierson, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3935.1)
-[Frierson, Held, Zurita-Gotor, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3913.1)
+* [Frierson, Held, Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1)
+* [Frierson, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3935.1)
+* [Frierson, Held, Zurita-Gotor, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3913.1)
 
 
 ### RRTM
 
-[Mlawer et al., JGR (1997)](http://doi.wiley.com/10.1029/97JD00237)
-[Iacono et al., JGR (2000)](http://doi.wiley.com/10.1029/2000JD900091)
-[Iacono et al., JGR (2008)](http://onlinelibrary.wiley.com/doi/10.1029/2008JD009944/abstract)
-[Clough et al., JQSRT (2005)](http://www.sciencedirect.com/science/article/pii/S0022407304002158)
+* [Mlawer et al., JGR (1997)](http://doi.wiley.com/10.1029/97JD00237)
+* [Iacono et al., JGR (2000)](http://doi.wiley.com/10.1029/2000JD900091)
+* [Iacono et al., JGR (2008)](http://onlinelibrary.wiley.com/doi/10.1029/2008JD009944/abstract)
+* [Clough et al., JQSRT (2005)](http://www.sciencedirect.com/science/article/pii/S0022407304002158)
 
 
 ## License
