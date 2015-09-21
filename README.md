@@ -51,7 +51,7 @@ The test run will be one 360-day year with the following parameters:
 
 ### MiMA
 
-* v1.0
+* v1.0: TBD
 
 
 ### Gray radiation model
