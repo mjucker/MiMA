@@ -13,14 +13,11 @@ In fact, it even includes that exact model with a namelist switch flag. The majo
   * Being parallel, MPI needs to be there too.
   * The flags need to be adjusted in the bin/mkmf.template.* file of choice.
 
-* Compilation flags
-The relevant flags are defined in bin/mkmf.template.*, and might or might not use environment variables. For instance, netCDF libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate mkmf.template.something, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
+* Compilation flags: The relevant flags are defined in bin/mkmf.template.*, and might or might not use environment variables. For instance, netCDF libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate mkmf.template.something, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
 
-* Compile script
-A compilescript is provided in exp/compilescript.csh. Make sure to set the first variable, platform, to whatever name you gave the mkmf template in the previous step. In our example, set it to something. The output executable will be in exp/exec.platform/mima.x
+* Compile script: A compilescript is provided in exp/compilescript.csh. Make sure to set the first variable, platform, to whatever name you gave the mkmf template in the previous step. In our example, set it to something. The output executable will be in exp/exec.platform/mima.x
 
-* Adding files
-If you work on your own version of MiMA, make sure every extension is in a new file, so as to not disturb the main branch and any other fork that might exist. When adding a source file, add the path to the file in exp/path_names, and it will be compiled the next time you run ./compilescript.csh.
+* Adding files: If you work on your own version of MiMA, make sure every extension is in a new file, so as to not disturb the main branch and any other fork that might exist. When adding a source file, add the path to the file in exp/path_names, and it will be compiled the next time you run ./compilescript.csh.
 
 
 
