@@ -8,12 +8,13 @@ In fact, it even includes that exact model with a namelist switch flag. The majo
 ## Compiling
 
 * Dependencies
-** The code has only been tested with Intel ifort and icc compilers. There is no reason why it should not compile with any other Fortran and C compiler, but the compiler flags will have to be adjusted. This description will assume ifort and icc are available.
-** MiMA reads and writes to netCDF, so netcdf needs to be installed on the system.
-** Being parallel, MPI needs to be there too
+  * The code has only been tested with Intel ifort and icc compilers. There is no reason why it should not compile with any other Fortran and C compiler, but the compiler flags will have to be adjusted. This description will assume ifort and icc are available.
+  * MiMA reads and writes to netCDF, so netcdf needs to be installed on the system.
+  * Being parallel, MPI needs to be there too.
+  * The flags need to be adjusted in the bin/mkmf.template.* file of choice.
 
 * Compilation flags
-The relevant flags are defined in bin/mkmf.template*, and might or might not use environment variables. For instance, netCDF libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate mkmf.template.something, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
+The relevant flags are defined in bin/mkmf.template.*, and might or might not use environment variables. For instance, netCDF libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate mkmf.template.something, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
 
 * Compile script
 A compilescript is provided in exp/compilescript.csh. Make sure to set the first variable, platform, to whatever name you gave the mkmf template in the previous step. In our example, set it to something. The output executable will be in exp/exec.platform/mima.x
