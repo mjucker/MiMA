@@ -44,6 +44,11 @@ The test run will be one 360-day year with the following parameters:
 * Betts-Miller convection and large scale condensation
 * RRTM radiation scheme
 
+## Radiation options
+
+MiMA includes the gray radiation scheme developed by Dargan Frierson ([Frierson, Held, Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1) ). To switch between the radiation schemes, the flags do_grey_radiation, and do_rrtm_radiation in the namelist physics_driver_nml can be set accordingly (only one of them should be .true. of course). 
+
+Theoretically, there is also the possibility of running the full AM2 radiation scheme, with the flag do_radiation in physics_driver_nml. However, this option will need a lot of input files for tracer concentration, which are not part of the MiMA repository. This option, although all the relevant files are present and being compiled, has never been tested, and should only be used with great caution.
 
 ## References
 
@@ -70,6 +75,8 @@ The test run will be one 360-day year with the following parameters:
 ## License
 
 MiMA is distributed under a GNU GPLv3 license. That means you have permission to use, modify, and distribute the code, even for commercial use. However, you must make your code publicly available under the same license. See LICENSE.txt for more details.
+
+AM2 is distributed under a GNU GPLv2 license. That means you have permission to use, modify, and distribute the code, even for commercial use. However, you must make your code publicly available under the same license.
 
 RRTM/RRTMG: Copyright © 2002-2010, Atmospheric and Environmental Research, Inc. (AER, Inc.). This software
 may be used, copied, or redistributed as long as it is not sold and this copyright notice is reproduced
