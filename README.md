@@ -52,24 +52,23 @@ Theoretically, there is also the possibility of running the full AM2 radiation s
 
 ## References
 
-### MiMA
+* MiMA
 
-* v1.0: TBD
-
-
-### Gray radiation model
-
-* [Frierson, Held, Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1)
-* [Frierson, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3935.1)
-* [Frierson, Held, Zurita-Gotor, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3913.1)
+ * v1.0: TBD
 
 
-### RRTM
+* Gray radiation model
 
-* [Mlawer et al., JGR (1997)](http://doi.wiley.com/10.1029/97JD00237)
-* [Iacono et al., JGR (2000)](http://doi.wiley.com/10.1029/2000JD900091)
-* [Iacono et al., JGR (2008)](http://onlinelibrary.wiley.com/doi/10.1029/2008JD009944/abstract)
-* [Clough et al., JQSRT (2005)](http://www.sciencedirect.com/science/article/pii/S0022407304002158)
+ * [Frierson, Held, Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1)
+ * [Frierson, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3935.1)
+ * [Frierson, Held, Zurita-Gotor, JAS (2007)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3913.1)
+
+* RRTM
+
+ * [Mlawer et al., JGR (1997)](http://doi.wiley.com/10.1029/97JD00237)
+ * [Iacono et al., JGR (2000)](http://doi.wiley.com/10.1029/2000JD900091)
+ * [Iacono et al., JGR (2008)](http://onlinelibrary.wiley.com/doi/10.1029/2008JD009944/abstract)
+ * [Clough et al., JQSRT (2005)](http://www.sciencedirect.com/science/article/pii/S0022407304002158)
 
 
 ## License
