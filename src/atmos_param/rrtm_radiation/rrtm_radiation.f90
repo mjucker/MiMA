@@ -288,10 +288,6 @@
 !                  ' dt_rad > dt_atmos, but store_intermediate_rad=.false. might cause time steps with zero radiative forcing!', &
 !                  WARNING)
 !          endif
-          if(solday .gt. 0)then
-             call error_mesg( mod_name, &
-                  ' running perpetual simulation', NOTE)
-          endif
 
           if(do_read_radiation .and. do_read_sw_flux .and. do_read_lw_flux) then
              if(do_read_ozone) call error_mesg( 'rrtm_gases_init', &
@@ -384,6 +380,11 @@
           endif
 
           call astro_init
+
+          if(solday .gt. 0)then
+             call error_mesg( mod_name, &
+                  ' running perpetual simulation', NOTE)
+          endif
 
           rrtm_init=.true.
 

@@ -40,7 +40,7 @@ module rrtm_astro
             implicit none
             integer :: unit, ierr, io
 
-            if ( file_exist('intput.nml') )then
+            if ( file_exist('input.nml') )then
                unit = open_namelist_file()
                ierr=1; 
                do while (ierr /= 0)
