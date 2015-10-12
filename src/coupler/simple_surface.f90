@@ -71,6 +71,7 @@ real ::   z_ref_heat      = 2.,       &
           trop_capacity   = -1.,      & !mj
           trop_cap_limit  = 15.,      & !mj
           heat_cap_limit  = 60.,      & !mj
+          np_cap_factor   =  1.,      & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.30,     &
           albedo_exp      = 2.,       & !mj
@@ -106,6 +107,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
                               land_capacity,trop_capacity,       & !mj
                               trop_cap_limit, heat_cap_limit,    & !mj
+                              np_cap_factor,                     & !mj
                               roughness_choice, const_roughness, &
                               albedo_choice, const_albedo, do_oflx, &
 			      max_of, lonmax_of, latmax_of, latwidth_of, &
@@ -357,7 +359,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 ! mj input SST
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: sst_new
 ! mj shallower ocean in tropics, land-sea contrast
- real :: lon,lat,pi
+ real :: lon,lat,pi,loc_cap
  integer :: i,j,k
 
    pi = 4.*atan(1.)
@@ -398,13 +400,20 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
       else   !mj ocean depth function of latitude
          
          land_sea_heat_capacity = heat_capacity
-         if ( trop_capacity .ne. heat_capacity ) then
+         if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
             do j=1,size(Atm%t_bot,2)
                lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+               if ( lat > 0. ) then
+                  loc_cap = heat_capacity*np_cap_factor
+               else
+                  loc_cap = heat_capacity
+               endif
                if ( abs(lat) < trop_cap_limit ) then
                   land_sea_heat_capacity(:,j) = trop_capacity
                elseif ( abs(lat) < heat_cap_limit ) then
-                  land_sea_heat_capacity(:,j) = trop_capacity*(1.-(abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)) + (abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)*heat_capacity
+                  land_sea_heat_capacity(:,j) = trop_capacity*(1.-(abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)) + (abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)*loc_cap
+               elseif ( lat > heat_cap_limit ) then
+                  land_sea_heat_capacity(:,j) = loc_cap
                end if
             enddo
          endif
