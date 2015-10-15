@@ -11,14 +11,14 @@
 # dynamics variables
  "dynamics",        "ucomp",      "ucomp",          "atmos_daily",    "all", .false., "none", 2,
  "dynamics",        "temp",       "temp",           "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "sphum",      "sphum",          "atmos_daily",    "all", .false.,  "none", 2,
  "dynamics",        "ucomp",      "ucomp",          "atmos_avg",      "all", .true.,  "none", 2,
  "dynamics",        "vcomp",      "vcomp",          "atmos_avg",      "all", .true.,  "none", 2,
  "dynamics",        "temp",       "temp",           "atmos_avg",      "all", .true.,  "none", 2,
  "dynamics",        "omega",      "omega",          "atmos_avg",      "all", .true.,  "none", 2,
  "dynamics",        "div",        "div",            "atmos_avg",      "all", .true.,  "none", 2,
  "dynamics",        "vor",        "vor",            "atmos_avg",      "all", .true.,  "none", 2,
- "dynamics",        "tracer1",    "tracer1",        "atmos_avg",      "all", .true.,  "none", 2,
- "dynamics",        "tracer2",    "tracer2",        "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "sphum",      "sphum",          "atmos_avg",      "all", .true.,  "none", 2,
 # surface variables
  "simple_surface",  "t_surf",     "t_surf",         "atmos_daily",    "all", .false., "none", 2,
 # moisture variables
