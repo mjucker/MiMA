@@ -24,39 +24,12 @@ endif
 #--------------------------------------------------------------------------------------------------------
 # setup directory structure
 if ( ! -d $execdir ) mkdir $execdir
-#if ( -e $workdir ) then
-#  echo "ERROR: Existing workdir may contaminate run.  Move or remove $workdir and try again."
-#  exit 1
-#endif
-#mkdir $workdir $workdir/INPUT $workdir/RESTART
+if ( -e $workdir ) then
+  echo "ERROR: Existing workdir may contaminate run.  Move or remove $workdir and try again."
+  exit 1
+endif
 #--------------------------------------------------------------------------------------------------------
 # compile the model code and create executable
 cd $execdir
 $mkmf -p mima.x -t $template -c "-Duse_libMPI -Duse_netCDF" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
 make -f Makefile -j $npes
-#cd $workdir
-#--------------------------------------------------------------------------------------------------------
-
-# epg: I'll comment out the rest of the script, as we only want to compile the code
-
-# set run length and time step, get input data and executable
-#cat > input.nml <<EOF
-# &main_nml
-#     days   = 1,
-#     dt_atmos = 1800 /
-#EOF
-#cat $namelist >> input.nml
-#cp $diagtable diag_table
-#cp $fieldtable field_table
-#cp $execdir/fms.x fms.x
-#--------------------------------------------------------------------------------------------------------
-# run the model with mpirun
-#mpirun -np $npes fms.x
-#--------------------------------------------------------------------------------------------------------
-# combine netcdf files
-#if ( $npes > 1 ) then
-#  foreach ncfile (`/bin/ls *.nc.0000`)
-#    $mppnccombine $ncfile:r
-#    if ($status == 0) rm -f $ncfile:r.????
-#  end
-#endif
