@@ -31,5 +31,6 @@ endif
 #--------------------------------------------------------------------------------------------------------
 # compile the model code and create executable
 cd $execdir
-$mkmf -p mima.x -t $template -c "-Duse_libMPI -Duse_netCDF" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
+set cppDefs = "-Duse_libMPI -Duse_netCDF"
+$mkmf -p mima.x -t $template -c "$cppDefs" -a $sourcedir $pathnames /usr/local/include $NETCDF_INC $sourcedir/shared/mpp/include $sourcedir/shared/include
 make -f Makefile -j $npes
