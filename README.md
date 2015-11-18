@@ -8,31 +8,31 @@ In fact, it even includes that exact model with a namelist switch flag. The majo
 ## Compiling
 
 * Dependencies
-  * The code has only been tested with Intel ifort and icc compilers. There is no reason why it should not compile with any other Fortran and C compiler, but the compiler flags will have to be adjusted. This description will assume ifort and icc are available.
+  * The code in its present form will only compile with Intel ifort and icc compilers. This description will assume ifort and icc are available.
   * MiMA reads and writes to netCDF, so netcdf needs to be installed on the system.
   * Being parallel, MPI needs to be there too.
-  * The flags need to be adjusted in the bin/mkmf.template.* file of choice.
+  * The flags need to be adjusted in the `bin/mkmf.template.$PLATFORM` file of choice. Typically, `$PLATFORM` will be slightly different on each machine, as libraries may not be found at the same location.
 
-* Compilation flags: The relevant flags are defined in bin/mkmf.template.*, and might or might not use environment variables. For instance, netCDF libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate mkmf.template.something, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
+* Compilation flags: The relevant flags are defined in `bin/mkmf.template.$PLATFORM`, and might or might not use environment variables. For instance, netCDF libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate `mkmf.template.something`, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
 
-* Compile script: A compilescript is provided in exp/compilescript.csh. Make sure to set the first variable, platform, to whatever name you gave the mkmf template in the previous step. In our example, set it to something. The output executable will be in exp/exec.platform/mima.x
+* Compile script: A compilescript is provided in `exp/compilescript.csh`. Make sure to set the first variable, `platform`, to whatever name you gave the mkmf template in the previous step. In our example, set it to `something`. The output executable will be in `exp/exec.$PLATFORM/mima.x`
 
-* Adding files: If you work on your own version of MiMA, make sure every extension is in a new file, so as to not disturb the main branch and any other fork that might exist. When adding a source file, add the path to the file in exp/path_names, and it will be compiled the next time you run ./compilescript.csh.
+* Adding files: If you work on your own version of MiMA, make sure every extension is in a new file, so as to not disturb the main branch and any other fork that might exist. When adding a source file, add the path to the file in `exp/path_names`, and it will be compiled the next time you run `./compilescript.csh`.
 
 
 
 ## Test run
 
-A small test run is defined in the exp/ directory.
-* input.nml: This is the most important file, where all the input parameters within the various namelists of MiMA can be set. If a variable is not present in input.nml, it will be set to the (hard coded) default value. This file completely defines the simulation you are running.
-* diag_table: A list of diagnostic outputs you would like to have in your output files. This does not change the simulation you are running, but simply lets you decide which variables you'd like to have in the output, how frequently you'd like the output, and whether the output should be averaged or instantaneous.
-* field_table: A list of passive tracers you'd like to advect during the simulation. There are two types: grid or spectral tracers. To get the temporal evolution of the tracers (or the time average), add the name of the tracer as diagnostic output to diag_table.
+A small test run is defined in the input/ directory.
+* `input.nml`: This is the most important file, where all the input parameters within the various namelists of MiMA can be set. If a variable is not present in `input.nml`, it will be set to the (hard coded) default value. This file completely defines the simulation you are running.
+* `diag_table`: A list of diagnostic outputs you would like to have in your output files. This does not change the simulation you are running, but simply lets you decide which variables you'd like to have in the output, how frequently you'd like the output, and whether the output should be averaged or instantaneous.
+* `field_table`: A list of passive tracers you'd like to advect during the simulation. There are two types: grid or spectral tracers. To get the temporal evolution of the tracers (or the time average), add the name of the tracer as diagnostic output to diag_table.
 
-MiMA will automatically look for input.nml, so it is run without any explicit input (i.e. ./mima.x is fine - don't try ./mima.x < input.nml).
+MiMA will automatically look for `input.nml`, so it is run without any explicit input (i.e. ``./mima.x`` is fine - don't try ``./mima.x < input.nml``).
 
 The test run will be one 360-day year with the following parameters:
 * no surface topography
-* ozone from the file input/ozone_1990.nc
+* ozone from the file `INPUT/ozone_1990.nc` (which is also in the input/ directory)
 * 300ppm CO2
 * solar constant of 1360W/m2
 * circular Earth-Sun orbit with 1UA radius
@@ -43,6 +43,20 @@ The test run will be one 360-day year with the following parameters:
 * sponge layer Rayleigh friction above 50Pa
 * Betts-Miller convection and large scale condensation
 * RRTM radiation scheme
+
+To run the test simulation, do the following:
+```
+EXECDIR=/PATH/TO/RUN/DIRECTORY
+cp -r input/* $EXECDIR/
+cp exp/exec.$PLATFORM/mima.x $EXECDIR/
+cd $EXECDIR
+mkdir RESTART
+mpiexec -n $N_PROCS ./mima.x
+CCOMP=/PATH/TO/MiMA/REPOSITORY/bin/mppnccombine.$PLATFORM
+$CCOMB -r atmos_daily.nc atmos_daily.nc.*
+$CCOMB -r atmos_avg.nc atmos_avg.nc.*
+```
+The last three lines make sure the indiviudal diagnostics files from each CPU are combined into one daily and one average file.
 
 ## Radiation options
 
