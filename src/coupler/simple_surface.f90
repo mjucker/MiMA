@@ -75,6 +75,8 @@ real ::   z_ref_heat      = 2.,       &
           const_roughness = 3.21e-05, &
           const_albedo    = 0.30,     &
           albedo_exp      = 2.,       & !mj
+          albedo_cntr     = 45.,      & !mj
+          albedo_wdth     = 10.,      & !mj
 	  max_of          = 25.,      &
 	  lonmax_of       = 180.,     &
 	  latmax_of       = 0.,       &
@@ -92,7 +94,7 @@ real ::   z_ref_heat      = 2.,       &
 
 integer :: surface_choice   = 1
 integer :: roughness_choice = 1
-integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp
+integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp, 5->tanh with albedo_cntr,albedo_wdth
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
 logical :: do_qflux         = .false. !mj
@@ -117,7 +119,8 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               do_qflux,do_warmpool,              &  !mj
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
                               land_option,slandlon,slandlat,     &  !mj
-                              elandlon,elandlat,albedo_exp !mj
+                              elandlon,elandlat,                 & 
+                              albedo_exp,albedo_cntr,albedo_wdth    !mj
 
 !-----------------------------------------------------------------------
 
@@ -257,13 +260,21 @@ pi = 4.0*atan(1.)
 
      enddo
 !mj add symmetric higher_albedo - exponential increase from equator to pole
-   elseif(albedo_choice == 4) then
+  elseif(albedo_choice == 4) then
      do j = 1, size(Atm%t_bot,2)
-       lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
-       lat = abs(lat)
-       albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*(lat/90.)**albedo_exp
+        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
+        lat = abs(lat)
+        albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*(lat/90.)**albedo_exp
      enddo
-
+!mj add symmetric higher_albedo - tanh increase around albedo_cntr with width
+! albedo_wdth
+  elseif(albedo_choice .eq. 5) then
+     do j = 1, size(Atm%t_bot,2)
+        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
+        lat = abs(lat)
+        albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
+             0.5*(1+tanh((lat-albedo_cntr)/albedo_wdth))
+     enddo
 
    endif
    
