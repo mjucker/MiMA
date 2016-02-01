@@ -447,7 +447,7 @@ do i = 1, ndim
               (model_calendar == THIRTY_DAY_MONTHS .and. & !mj
                trim(file_calendar) == 'thirty_day_months'))  then
           call mpp_error (NOTE, 'interpolator_mod: Model and file&
-                    & calendars are the same for file ' //   &
+                    & calendars are the same ( ' // trim(file_calendar) // ' ) for file ' //   &
                     & trim(file_name) // '; no calendar conversion  &
                     &needed')
           base_time = set_date (fileyr, filemon, fileday, filehr, &
