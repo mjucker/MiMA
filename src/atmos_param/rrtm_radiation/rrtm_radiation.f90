@@ -122,6 +122,7 @@
                                                               !  this is the only way to get ozone into the model
         character(len=256) :: ozone_file='ozone'              !  file name of ozone file to read
         real(kind=rb)      :: scale_ozone = 1.0               ! scale the ozone values in the file by this factor
+        real(kind=rb)      :: o3_val = 0.0                    ! if do_read_ozone = .false., give ozone this constant value
         logical            :: do_read_h2o=.false.             ! read water vapor from an external file?
         character(len=256) :: h2o_file='h2o'                  !  file name of h2o file to read
 ! secondary gases (CH4,N2O,O2,CFC11,CFC12,CFC22,CCL4)
@@ -168,14 +169,14 @@
 !
 !-------------------- diagnostics fields -------------------------------
 
-        integer :: id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw,id_albedo,id_ozone
+        integer :: id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw,id_albedo,id_ozone,id_thalf
         character(len=14), parameter :: mod_name = 'rrtm_radiation'
         real :: missing_value = -999.
 
 !---------------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------------
 
-        namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, scale_ozone, &
+        namelist/rrtm_radiation_nml/ include_secondary_gases, do_read_ozone, ozone_file, scale_ozone, o3_val, &
              &do_read_h2o, h2o_file, ch4_val, n2o_val, o2_val, cfc11_val, cfc12_val, cfc22_val, ccl4_val, &
              &do_read_radiation, radiation_file, rad_missing_value, &
              &do_read_sw_flux, sw_flux_file, do_read_lw_flux, lw_flux_file,&
@@ -275,6 +276,10 @@
                register_diag_field ( mod_name, 'ozone', axes(1:3), Time, &
                  'Ozone', &
                  'mmr', missing_value=missing_value               )
+          id_thalf   = &
+               register_diag_field ( mod_name, 'thalf', axes(1:3), Time, &
+                 'half grid points temperature', &
+                 'K', missing_value=missing_value               )
 ! 
 !------------ make sure namelist choices are consistent -------
 ! this does not work at the moment, as dt_atmos from coupler_mod induces a circular dependency at compilation
@@ -329,8 +334,8 @@
              if(id_coszen > 0)allocate(zencos (size(lonb,1)-1,size(latb,1)-1))
              
              ! gases
-             h2o   = 0. !this will be set by the water vapor tracer
-             o3    = 0. !this will be set by an input file if do_read_ozone=.true.
+             h2o   = 0.     !this will be set by the water vapor tracer
+             o3    = o3_val !this will be set by an input file if do_read_ozone=.true.
              co2   = co2ppmv*1.e-6 ! convert ppmv
              zeros = 0. ! gases and clouds
              ones  = 1. ! gases and clouds
@@ -391,16 +396,16 @@
 
         end subroutine rrtm_radiation_init
 !*****************************************************************************************
-        subroutine interp_temp(z_full,z_half,t)
+        subroutine interp_temp(z_full,z_half,t_surf_rad,t)
           use rrtm_vars
           implicit none
 
           real(kind=rb),dimension(:,:,:),intent(in)  :: z_full,z_half,t
+          real(kind=rb),dimension(:,:)  ,intent(in)  :: t_surf_rad
 
           integer i,j,k,kend
           real dzk,dzk1,dzk2
 
-! note: z_full(kend) = z_half(kend), so there's something fishy
 ! also, for some reason, z_half(k=1)=0. so we need to deal with k=1 separately
           kend=size(z_full,3)
           do k=2,kend
@@ -420,10 +425,12 @@
                 !top: use full points, and distance is 1.5 from k=2
                 t_half(i,j,1) = 0.5*(3*t(i,j,1)-t(i,j,2))
                 !bottom: z=0 => distance is -z_full(kend-1)/(z_full(kend)-z_full(kend-1))
-                t_half(i,j,kend+1) = t(i,j,kend-1) &
-                     + (z_half(i,j,kend+1) - z_full(i,j,kend-1))&
-                     * (t     (i,j,kend  ) - t     (i,j,kend-1))&
-                     / (z_full(i,j,kend  ) - z_full(i,j,kend-1))
+!!$                t_half(i,j,kend+1) = t(i,j,kend-1) &
+!!$                     + (z_half(i,j,kend+1) - z_full(i,j,kend-1))&
+!!$                     * (t     (i,j,kend  ) - t     (i,j,kend-1))&
+!!$                     / (z_full(i,j,kend  ) - z_full(i,j,kend-1))
+                !bottom: t_half = t_surf
+                t_half(i,j,kend+1) = t_surf_rad(i,j)
              enddo
           enddo
           
@@ -799,29 +806,30 @@
           ! check if we want surface albedo as a function of precipitation
           !  call diagnostics accordingly
           if(do_precip_albedo)then
-             call write_diag_rrtm(Time,is,js,o3f,albedo_loc)
+             call write_diag_rrtm(Time,is,js,o3f,t_half,albedo_loc)
           else
-             call write_diag_rrtm(Time,is,js,o3f)
+             call write_diag_rrtm(Time,is,js,o3f,t_half)
           endif
         end subroutine run_rrtmg
 
 !*****************************************************************************************
 !*****************************************************************************************
-        subroutine write_diag_rrtm(Time,is,js,ozone,albedo_loc)
+        subroutine write_diag_rrtm(Time,is,js,ozone,thalf,albedo_loc)
 ! 
 ! write out diagnostics fields
 !
 ! Modules
           use rrtm_vars,only:         sw_flux,lw_flux,zencos,tdt_rad,tdt_sw_rad,tdt_lw_rad,&
                                       &id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,&
-                                      &id_flux_sw,id_flux_lw,id_albedo,id_ozone
+                                      &id_flux_sw,id_flux_lw,id_albedo,id_ozone,&
+                                      &id_thalf
           use diag_manager_mod, only: register_diag_field, send_data
           use time_manager_mod,only:  time_type
 ! Input variables
           implicit none
           type(time_type)               ,intent(in)          :: Time
           integer                       ,intent(in)          :: is, js
-          real(kind=rb),dimension(:,:,:),intent(in),optional :: ozone
+          real(kind=rb),dimension(:,:,:),intent(in),optional :: ozone,thalf
           real(kind=rb),dimension(:,:  ),intent(in),optional :: albedo_loc
 ! Local variables
           logical :: used
@@ -857,6 +865,10 @@
 !------- Ozone                                 ------------
           if ( present(ozone) .and. id_ozone > 0 ) then
              used = send_data ( id_ozone, ozone, Time, is, js, 1 )
+          endif
+!------- Half grid point temperature                                ------------
+          if ( present(thalf) .and. id_thalf > 0 ) then
+             used = send_data ( id_thalf, thalf(:,:,2:size(thalf,3)), Time, is, js, 1 )
           endif
         end subroutine write_diag_rrtm
 !*****************************************************************************************

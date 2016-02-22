@@ -1279,7 +1279,7 @@ real,  dimension(:,:,:), intent(out)  ,optional :: diffm, difft
       endif
       if(do_rrtm_radiation) then
          !need t at half grid
-         call interp_temp(z_full,z_half,t)
+         call interp_temp(z_full,z_half,t_surf_rad,t)
          call run_rrtmg(is,js,Time,lat,lon,p_full,p_half,albedo,q,t,t_surf_rad,tdt,coszen,flux_sw,flux_lw)
       endif
 
