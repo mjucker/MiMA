@@ -612,8 +612,8 @@
           if(do_fixed_water)then
              do j=1,size(lat,2)
                 do i=1,size(lat,1)
-                   if( abs(lat(i,j)) <= fixed_water_lat )then
-                      where( p_full(i,j,:) <= fixed_water_pres ) q_tmp(i,j,:) = fixed_water
+                   if( abs(lat(i,j)) .le. fixed_water_lat )then
+                      where( p_full(i,j,:) .le. fixed_water_pres*100. ) q_tmp(i,j,:) = fixed_water
                    endif
                 enddo
              enddo
@@ -698,8 +698,11 @@
           swijk   = reshape(swhr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
 
           hr = 0.
+          hrc= 0.
           dflx = 0.
+          dflxc= 0.
           uflx = 0.
+          uflxc= 0.
           if(include_secondary_gases)then
              call rrtmg_lw &
                   (ncols_rrt     , nlay_rrt       , icld           , idrv , &
