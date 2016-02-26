@@ -505,7 +505,7 @@ real, dimension(size(t,1),size(t,2)) :: convprc
 !---compute mass in each layer if needed by any of the diagnostics ----- 
 
       alpha = any (id_tracerdt_conv_col > 0)
-      alphb = any (id_tracerdt_mcadon_col > 0)
+      if ( do_donner_deep) alphb = any (id_tracerdt_mcadon_col > 0)
       alphc = any (id_conv_tracer_col > 0)
 
       if ( id_q_conv_col  > 0 .or. id_t_conv_col  > 0 .or. &
@@ -515,7 +515,7 @@ real, dimension(size(t,1),size(t,2)) :: convprc
            id_qi_ls_col   > 0 .or. id_qa_ls_col   > 0 .or. &
            id_WVP         > 0 .or. id_LWP         > 0 .or. &
            id_IWP         > 0 .or. id_AWP         > 0  .or. &
-           alpha .or. alphb .or. alphc) then
+           alpha .or. (do_donner_deep .and. alphb) .or. alphc) then
         do k=1,kx
           pmass(:,:,k) = (phalf(:,:,k+1)-phalf(:,:,k))/GRAV
         end do
@@ -1977,7 +1977,6 @@ character(len=80)  :: scheme
   
  
 !----- initialize quantities for diagnostics output -----
- 
       call diag_field_init ( axes, Time )
  
 
