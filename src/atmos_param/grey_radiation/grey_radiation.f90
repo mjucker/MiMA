@@ -91,6 +91,8 @@ namelist/grey_radiation_nml/ solar_constant, del_sol, &
 
 integer :: id_olr, id_swdn_sfc, id_swdn_toa, id_lwdn_sfc, id_lwup_sfc, &
            id_tdt_rad, id_flux_rad, id_flux_lw, id_flux_sw, id_entrop_rad
+!mj debug
+integer :: id_phalf,id_tau,id_tau_rad
 
 character(len=14), parameter :: mod_name = 'grey_radiation'
 
@@ -187,7 +189,20 @@ initialized = .true.
     id_entrop_rad = &
             register_diag_field ( mod_name, 'entrop_rad', axes(1:3), Time, &
                'Entropy production by radiation', &
-               '1/s', missing_value=missing_value               )
+               '1/s', missing_value=missing_value               ) 
+!mj debug
+    id_phalf = &
+        register_diag_field ( mod_name, 'phalf_rad', axes(half), Time, &
+               'Half grid pressure', &
+               'Pa', missing_value=missing_value               )
+    id_tau = &
+        register_diag_field ( mod_name, 'tau', axes(half), Time, &
+               'Half grid attenuation', &
+               '?', missing_value=missing_value               )
+    id_tau_rad = &
+        register_diag_field ( mod_name, 'tau_rad', axes(half), Time, &
+               'Half grid attenuation', &
+               '?', missing_value=missing_value               )
 
 
 
@@ -213,8 +228,7 @@ real, dimension(size(t,2)) :: ss, ss2, ss4, ss6, ss8, solar, tau_0, solar_tau_0,
 real, dimension(size(t,1), size(t,2))              :: b_surf
 real, dimension(size(t,1), size(t,2), size(t,3))   :: b, tdt_rad, entrop_rad
 real, dimension(size(t,1), size(t,2), size(t,3)+1) :: up, down, net, solar_down, flux_rad, flux_sw
-real, dimension(size(t,2), size(t,3)  )   :: dtrans
-real, dimension(size(t,2), size(t,3)+1)   :: tau, solar_tau
+real, dimension(size(t,1),size(t,2), size(t,3)+1)   :: tau, solar_tau, dtrans
 real, dimension(size(t,1), size(t,2))   :: long_forcing, olr, swin
 
 real, dimension(size(t,1), size(t,2))              :: walker_forcing, wave_forc
@@ -270,46 +284,56 @@ do k = 1, n+1
 !  tau(:,k)       = tau_0(:) * (linear_tau * p_half(1,:,k)/p00 + (1.0 - linear_tau) &
 !       * (p_half(1,:,k)/p00)**2)
 ! modif df 1-23-04: changing profile of IR absorber
-   tau(:,k)       = tau_0(:) * (linear_tau * p_half(1,:,k)/p00 + (1.0 - linear_tau) &
-       * (p_half(1,:,k)/p00)**4)
-
-  solar_tau(:,k) = solar_tau_0(:)*(p_half(1,:,k)/p_half(1,:,n+1))**4
+  do i = 1,size(t,1)
+     tau(i,:,k)       = tau_0(:) * (linear_tau * p_half(i,:,k)/p00 + (1.0 - linear_tau) &
+       * (p_half(i,:,k)/p00)**4)
+!     solar_tau(i,:,k) = solar_tau_0(:)*(p_half(i,:,k)/p_half(i,:,n+1))**4
+     solar_tau(i,:,k) = solar_tau_0(:)*(p_half(i,:,k)/p00)**4
+  enddo
 end do
 
 do k = 1, n
-  dtrans(:,k) = exp(-(tau(:,k+1)-tau(:,k)))
+   do i = 1,size(t,1)
+      dtrans(i,:,k) = exp(-(tau(i,:,k+1)-tau(i,:,k)))
+   end do
 end do
 
 up(:,:,n+1) = b_surf
 do k = n,1,-1
   do j = 1, size(t,2)
-    up(:,j,k) = up(:,j,k+1)*dtrans(j,k) + b(:,j,k)*(1.0 - dtrans(j,k))
+     do i =1, size(t,1)
+        up(i,j,k) = up(i,j,k+1)*dtrans(i,j,k) + b(i,j,k)*(1.0 - dtrans(i,j,k))
+     end do
   end do
 end do
 
 down(:,:,1) = 0.0
 do k = 1,n
   do j =1, size(t,2)
-    down(:,j,k+1) = down(:,j,k)*dtrans(j,k) + b(:,j,k)*(1.0 - dtrans(j,k))
+     do i =1, size(t,1)
+        down(i,j,k+1) = down(i,j,k)*dtrans(i,j,k) + b(i,j,k)*(1.0 - dtrans(i,j,k))
+     end do
   end do
 end do
 
-do i = 1, size(t,1)
-do j = 1, size(t,2)
-  do k = 1,n+1
+do k = 1,n+1
+   do j = 1, size(t,2)
+      do i = 1, size(t,1)
 !    solar_down(i,j,k) = (solar(j)+long_forcing(i,j))*exp(-solar_tau(j,k))
 !         solar_down(i,j,k) = (walker_forcing(i,j)+wave_forc(i,j)  &
 !              + solar(j))*exp(-solar_tau(j,k))
          solar_down(i,j,k) = (walker_forcing(i,j)+long_forcing(i,j)  &
-               + solar(j))*exp(-solar_tau(j,k))
-  end do
-end do
+               + solar(j))*exp(-solar_tau(i,j,k))
+      end do
+   end do
 end do
 
 do k = 1,n+1
-  net(:,:,k) = up(:,:,k)-down(:,:,k)
-  flux_sw(:,:,k) = albedo(:,:)*solar_down(:,:,n+1) - solar_down(:,:,k)
-  flux_rad(:,:,k) = net(:,:,k) + flux_sw(:,:,k)
+ do i = 1,size(t,1)
+  net(i,:,k) = up(i,:,k)-down(i,:,k)
+  flux_sw(i,:,k) = albedo(i,:)*solar_down(i,:,n+1) - solar_down(i,:,k)
+  flux_rad(i,:,k) = net(i,:,k) + flux_sw(i,:,k)
+ end do
 end do
 
 do k = 1,n
@@ -368,6 +392,16 @@ swin = solar_down(:,:,1)
             entrop_rad(:,:,k) =tdt_rad(:,:,k)/t(:,:,k)*p_half(:,:,n+1)/1.e5
          end do
          used = send_data ( id_entrop_rad, entrop_rad, Time_diag, is, js, 1 )
+      endif
+!mj debug
+      if ( id_phalf > 0 ) then 
+         used = send_data ( id_phalf, p_half, Time_diag, is, js, 1 )
+      endif
+      if ( id_tau > 0 ) then 
+         used = send_data ( id_tau, tau, Time_diag, is, js, 1 )
+      endif
+      if ( id_tau_rad > 0 ) then 
+         used = send_data ( id_tau_rad, solar_tau, Time_diag, is, js, 1 )
       endif
 
 return
