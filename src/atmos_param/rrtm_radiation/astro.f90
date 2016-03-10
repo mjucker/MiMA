@@ -213,7 +213,7 @@ module rrtm_astro
 !    this is daily average.
 !mj-----------------------------------------------------------------
                where( h < time_pi .and. h + twopi < tt .and. h /= 0. )
-                  cosz = aa + bb*(sh + sh) / (h + h)
+                  cosz = aa + bb*(sh) / (h + h)
                end where
     
 !----------------------------------------------------------------------
