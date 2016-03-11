@@ -151,7 +151,9 @@
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
                                                               ! Else only heat radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true.         ! Average coszen for SW radiation over dt_rad?
-        integer(kind=im)   :: dt_rad_avg = -1                 ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
+        integer(kind=im)   :: dt_rad_avg = 86400.                 ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
+                                                                 ! Default is to average over the whole day, i.e. remove diurnal cycle.
+                                                                 ! This seems safest as the diurnal cycle creates problems with topography.
         integer(kind=im)   :: lonstep=1                       ! Subsample fields along longitude
                                                               !  for faster radiation calculation
 ! some fancy radiation tweaks  
@@ -653,7 +655,7 @@
           !h2o=h2o_lower_limit
           ! SW seems to have a problem with too small coszen values. 
           ! anything lower than 0.01 (about 15min) is set to zero
-          where(cosz_rr < 1.e-2)cosz_rr=0.
+          !where(cosz_rr < 1.e-2)cosz_rr=0.
           
           if(include_secondary_gases)then
              call rrtmg_sw &
@@ -684,25 +686,12 @@
                   ! output
                   swuflx    , swdflx   , swhr     , swuflxc  , swdflxc, swhrc)
           endif
-          
-          ! make sure we don't have SW radiation at night
-          ! there is some optimization possible here: only feed grid points to rrtm_sw where cosz_rr>0
-          do i=1,size(swhr,2)
-             where( cosz_rr <= 0.)
-                swuflx(:,i) = 0.
-                swdflx(:,i) = 0.
-                swhr  (:,i) = 0.
-             endwhere
-          enddo
              
           swijk   = reshape(swhr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
 
           hr = 0.
-          hrc= 0.
           dflx = 0.
-          dflxc= 0.
           uflx = 0.
-          uflxc= 0.
           if(include_secondary_gases)then
              call rrtmg_lw &
                   (ncols_rrt     , nlay_rrt       , icld           , idrv , &

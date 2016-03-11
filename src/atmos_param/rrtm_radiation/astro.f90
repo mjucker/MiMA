@@ -147,7 +147,7 @@ module rrtm_astro
             bb = cos(lat)*dec_cos
 
             !finally, compute the zenith angle
-            if(dt > 0)then !average over some given time interal dt
+            if( dt > 0 .and. dt < 86400. )then !average over some given time interal dt
                tt  = time_pi + dt_pi
                st  = sin(time_pi)
                stt = sin(tt)
@@ -207,15 +207,12 @@ module rrtm_astro
                where(  h <  time_pi .and. twopi - h < tt  ) &
                   cosz = aa + bb*(stt + sh) / (tt + h - twopi)
 
-!mj-----------------------------------------------------------------
-!    case 9: averaging period begins after sunset and ends after the
-!    next day's sunset but before the day after's sunrise. Typically,
-!    this is daily average.
-!mj-----------------------------------------------------------------
-               where( h < time_pi .and. h + twopi < tt .and. h /= 0. )
-                  cosz = aa + bb*(sh) / (h + h)
-               end where
-    
+!-------------------------------------------------------------------
+!    daily mean
+!-------------------------------------------------------------------
+            else if ( dt .ge. 86400. ) then
+                  cosz = aa + bb / PI
+
 !----------------------------------------------------------------------
 !    if instantaneous values are desired, define cosz at time t.
 !----------------------------------------------------------------------
