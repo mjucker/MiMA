@@ -8,7 +8,7 @@
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
-!    the Free Software Foundation, either version 3 of the License, or 
+!    the Free Software Foundation, either version 3 of the License, or
 !    any later version.
 !
 !    This program is distributed in the hope that it will be useful,
@@ -21,11 +21,11 @@
 !
 !
 !   RRTM_VARS:
-!   Contains all variables needed to 
+!   Contains all variables needed to
 !   run the RRTM code, version for GCMs (hence the 'G'),
 !   other than astronomy, i.e. all variables needed
 !   for radiation that are not within astro.f90
-! 
+!
 !   external modules
         use parkind, only         : im => kind_im, rb => kind_rb
         use interpolator_mod, only: interpolate_type
@@ -78,7 +78,7 @@
         !  cloud & aerosol optical depths, cloud and aerosol specific parameters. Set to zero
         real(kind=rb),allocatable,dimension(:,:,:) :: taucld,tauaer, sw_zro, zro_sw
         ! heating rates and fluxes, zenith angle when in-between radiation time steps
-        real(kind=rb),allocatable,dimension(:,:)   :: sw_flux,lw_flux,zencos! surface fluxes, cos(zenith angle) 
+        real(kind=rb),allocatable,dimension(:,:)   :: sw_flux,lw_flux,zencos! surface fluxes, cos(zenith angle)
                                                                             ! dimension (lon x lat)
         real(kind=rb),allocatable,dimension(:,:,:) :: tdt_rad               ! heating rate [K/s]
                                                                             ! dimension (lon x lat x pfull)
@@ -145,7 +145,7 @@
         real(kind=rb)      :: fixed_water_pres = 100.e02      ! if so, above which pressure level? [hPa]
         real(kind=rb)      :: fixed_water_lat  = 90.          ! if so, equatorward of which latitude? [deg]
         logical            :: do_zm_tracers=.false.           ! Feed only the zonal mean of tracers to radiation
-            
+
 ! radiation time stepping and spatial sampling
         integer(kind=im)   :: dt_rad=0                        ! Radiation time step - every step if dt_rad<dt_atmos
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
@@ -156,14 +156,14 @@
                                                                  ! This seems safest as the diurnal cycle creates problems with topography.
         integer(kind=im)   :: lonstep=1                       ! Subsample fields along longitude
                                                               !  for faster radiation calculation
-! some fancy radiation tweaks  
+! some fancy radiation tweaks
         real(kind=rb)      :: slowdown_rad = 1.0              ! factor do simulate slower seasonal cycle: >1 means faster, <1 slower
         logical            :: do_zm_rad=.false.               ! Only compute zonal mean radiation
         logical            :: do_precip_albedo=.false.        ! Modify albedo depending on large scale
                                                               !  precipitation (crude cloud parameterization)
         real(kind=rb)      :: precip_albedo=0.35              ! If so, what's the cloud albedo?
         real(kind=rb)      :: precip_lat = 0.0                ! If so, poleward of which latitude should it be applied?
-        character(len=14)  :: precip_albedo_mode = 'full'     ! If so, use 
+        character(len=14)  :: precip_albedo_mode = 'full'     ! If so, use
                                                               !  full precipitation ('full')
                                                               !  only large scale condensation ('lscale')
                                                               !  only convection ('conv')
@@ -195,7 +195,7 @@
       module rrtm_radiation
         use parkind, only : im => kind_im, rb => kind_rb
         implicit none
-    
+
       contains
 
 !*****************************************************************************************
@@ -218,7 +218,7 @@
           use time_manager_mod, only: time_type
 ! Local variables
           implicit none
-          
+
           integer, intent(in), dimension(4) :: axes
           type(time_type), intent(in)       :: Time
           integer(kind=im),intent(in)       :: ncols,nlay
@@ -237,7 +237,7 @@
              ierr = check_nml_error (io, 'rrtm_radiation_nml')
           enddo
 10        call close_file (unit)
-          
+
           !call write_version_number ( version, tagname )
           if ( mpp_pe() == mpp_root_pe() ) then
              write (stdlog(), nml=rrtm_radiation_nml)
@@ -282,7 +282,7 @@
                register_diag_field ( mod_name, 'thalf', axes(1:3), Time, &
                  'half grid points temperature', &
                  'K', missing_value=missing_value               )
-! 
+!
 !------------ make sure namelist choices are consistent -------
 ! this does not work at the moment, as dt_atmos from coupler_mod induces a circular dependency at compilation
 !          if(dt_rad .le. dt_atmos .and. store_intermediate_rad)then
@@ -322,7 +322,7 @@
 
 !------------ allocate arrays to be used later  -------
           allocate(t_half(size(lonb,1)-1,size(latb)-1,nlay+1))
-          
+
           if(.not. do_read_radiation .or. .not. do_read_sw_flux .and. .not. do_read_lw_flux)then
              allocate(h2o(ncols_rrt,nlay_rrt),o3(ncols_rrt,nlay_rrt), &
                   co2(ncols_rrt,nlay_rrt))
@@ -334,7 +334,7 @@
              allocate(sw_zro(nbndsw,ncols_rrt,nlay_rrt), &
                   zro_sw(ncols_rrt,nlay_rrt,nbndsw))
              if(id_coszen > 0)allocate(zencos (size(lonb,1)-1,size(latb,1)-1))
-             
+
              ! gases
              h2o   = 0.     !this will be set by the water vapor tracer
              o3    = o3_val !this will be set by an input file if do_read_ozone=.true.
@@ -343,7 +343,7 @@
              ones  = 1. ! gases and clouds
 
              emis  = 1. !black body: 1.0
-             
+
              ! absorption
              taucld = 0.
              tauaer = 0.
@@ -379,8 +379,8 @@
           if(do_precip_albedo)allocate(rrtm_precip(size(lonb,1)-1,size(latb,1)-1))
           if(store_intermediate_rad .or. id_tdt_rad > 0)&
                allocate(tdt_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
-          if(id_tdt_sw > 0)allocate(tdt_sw_rad(size(lonb,1)-1,size(latb,1)-1,nlay)) 
-          if(id_tdt_lw > 0)allocate(tdt_lw_rad(size(lonb,1)-1,size(latb,1)-1,nlay)) 
+          if(id_tdt_sw > 0)allocate(tdt_sw_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
+          if(id_tdt_lw > 0)allocate(tdt_lw_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
 
           if(do_precip_albedo)then
              rrtm_precip = 0.
@@ -415,7 +415,7 @@
                 do i=1,size(t,1)
                    dzk2 = 1./( z_full(i,j,k-1)   - z_full(i,j,k) )
                    dzk  = ( z_half(i,j,k  )   - z_full(i,j,k) )*dzk2
-                   dzk1 = ( z_full(i,j,k-1)   - z_half(i,j,k) )*dzk2 
+                   dzk1 = ( z_full(i,j,k-1)   - z_half(i,j,k) )*dzk2
                    t_half(i,j,k) = t(i,j,k)*dzk1 + t(i,j,k-1)*dzk
                 enddo
              enddo
@@ -435,7 +435,7 @@
                 t_half(i,j,kend+1) = t_surf_rad(i,j)
              enddo
           enddo
-          
+
 
         end subroutine interp_temp
 !*****************************************************************************************
@@ -443,7 +443,7 @@
         subroutine run_rrtmg(is,js,Time,lat,lon,p_full,p_half,albedo,q,t,t_surf_rad,tdt,coszen,flux_sw,flux_lw)
 !
 ! Driver for RRTMG radiation scheme.
-! Prepares all inputs, calls SW and LW radiation schemes, 
+! Prepares all inputs, calls SW and LW radiation schemes,
 !  transforms outputs back into FMS form
 !
 ! Modules
@@ -495,7 +495,7 @@
           real(kind=rb),dimension(size(q,1)/lonstep,size(q,2)) :: swflxijk,lwflxijk
           real(kind=rb),dimension(ncols_rrt,nlay_rrt+1):: phalf,thalf
           real(kind=rb),dimension(ncols_rrt)   :: tsrf,cosz_rr,albedo_rr
-          real(kind=rb) :: dlon,dlat,dj,di 
+          real(kind=rb) :: dlon,dlat,dj,di
           type(time_type) :: Time_loc
           real(kind=rb),dimension(size(q,1),size(q,2)) :: albedo_loc
           real(kind=rb),dimension(size(q,1),size(q,2),size(q,3)) :: q_tmp
@@ -549,7 +549,7 @@
              call interpolator( fsw_interp, Time_loc, flux_sw, trim(sw_flux_file))
              call interpolator( flw_interp, Time_loc, flux_lw, trim(lw_flux_file))
              ! there might be missing values due to surface topography, which would
-             !  put in weird values. This is still work in progress, and cannot be 
+             !  put in weird values. This is still work in progress, and cannot be
              !  used safely!
              !if( rad_missing_value .lt. 0. )then
              !   where( tdt_rrtm .lt. rad_missing_value ) tdt_rrtm = 0.
@@ -569,14 +569,14 @@
           endif
 !---------------------------------------------------------------------------------------------
 ! we know now that we want to run radiation
-          
+
           si=size(tdt,1)
           sj=size(tdt,2)
           sk=size(tdt,3)
 
           if(.not. use_dyofyr) dyofyr=0 !use solrad instead of day of year
 
-          !get ozone 
+          !get ozone
           if(do_read_ozone)then
              call interpolator( o3_interp, Time_loc, p_half, o3f, trim(ozone_file))
              o3f = o3f*scale_ozone
@@ -603,7 +603,7 @@
           else
              q_tmp = q
           endif
-!---------------------------------------------------------------------------------------------------------------  
+!---------------------------------------------------------------------------------------------------------------
           !! water vapor stuff
           ! read water vapor
           if(do_read_h2o)then
@@ -633,11 +633,11 @@
           thalf = reshape(t_half(1:si:lonstep,:,sk+1:1:-1),(/ si*sj/lonstep,sk+1 /))
           h2o   = reshape(q_tmp (1:si:lonstep,:,sk  :1:-1),(/ si*sj/lonstep,sk   /))
           if(do_read_ozone)o3 = reshape(o3f(1:si:lonstep,:,sk :1:-1),(/ si*sj/lonstep,sk  /))
-          
+
           cosz_rr   = reshape(coszen    (1:si:lonstep,:),(/ si*sj/lonstep /))
           albedo_rr = reshape(albedo_loc(1:si:lonstep,:),(/ si*sj/lonstep /))
           tsrf      = reshape(t_surf_rad(1:si:lonstep,:),(/ si*sj/lonstep /))
-          
+
 !---------------------------------------------------------------------------------------------------------------
 ! now actually run RRTM
 !
@@ -651,12 +651,12 @@
           thalf = max(thalf, temp_lower_limit)
           thalf = min(thalf, temp_upper_limit)
 
-          
+
           !h2o=h2o_lower_limit
-          ! SW seems to have a problem with too small coszen values. 
+          ! SW seems to have a problem with too small coszen values.
           ! anything lower than 0.01 (about 15min) is set to zero
           !where(cosz_rr < 1.e-2)cosz_rr=0.
-          
+
           if(include_secondary_gases)then
              call rrtmg_sw &
                   (ncols_rrt, nlay_rrt , icld     , iaer         , &
@@ -686,7 +686,7 @@
                   ! output
                   swuflx    , swdflx   , swhr     , swuflxc  , swdflxc, swhrc)
           endif
-             
+          
           swijk   = reshape(swhr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
 
           hr = 0.
@@ -783,7 +783,7 @@
              if ( do_read_lw_flux )then
                 call interpolator( flw_interp, Time_loc, flux_lw, trim(lw_flux_file))
              endif
-                
+
              ! store between radiation steps
              if(store_intermediate_rad)then
                 sw_flux = flux_sw
@@ -807,7 +807,7 @@
 !*****************************************************************************************
 !*****************************************************************************************
         subroutine write_diag_rrtm(Time,is,js,ozone,thalf,albedo_loc)
-! 
+!
 ! write out diagnostics fields
 !
 ! Modules
@@ -876,7 +876,3 @@
 
 !*****************************************************************************************
       end module rrtm_radiation
-       
-
-
-        

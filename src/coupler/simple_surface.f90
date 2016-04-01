@@ -90,7 +90,7 @@ real ::   z_ref_heat      = 2.,       &
 	  deltaT           = 40.,     &
           qflux_amp        = 30.,     & !mj
           qflux_width      = 16.        !mj
-          
+
 
 integer :: surface_choice   = 1
 integer :: roughness_choice = 1
@@ -119,7 +119,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               do_qflux,do_warmpool,              &  !mj
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
                               land_option,slandlon,slandlat,     &  !mj
-                              elandlon,elandlat,                 & 
+                              elandlon,elandlat,                 &
                               albedo_exp,albedo_cntr,albedo_wdth    !mj
 
 !-----------------------------------------------------------------------
@@ -127,7 +127,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
 !---- allocatable module storage ------
 
   real, allocatable, dimension(:,:) :: e_t_n, f_t_delt_n, &
-                                       e_q_n, f_q_delt_n   
+                                       e_q_n, f_q_delt_n
 
   real, allocatable, dimension(:,:) :: dhdt_surf, dedt_surf, dedq_surf, &
                                        drdt_surf, dhdt_atm, dedq_atm, &
@@ -155,12 +155,12 @@ contains
                                         u_star, b_star
 
 real, dimension(:,:),   intent(out) :: t_surf_atm
-       
+
 real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
        u_surf, v_surf, rough_heat, rough_moist,          &
        stomatal, snow, water, max_water,                 &
        q_star, q_surf, cd_q, cd_t, cd_m, wind, dtaudu_atm
-       
+
 logical, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
        mask, glacier, seawater
 
@@ -194,18 +194,18 @@ pi = 4.0*atan(1.)
              flux_t     (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
              flux_q     (size(Atm%t_bot,1), size(Atm%t_bot,2)), &
              flux_lw    (size(Atm%t_bot,1), size(Atm%t_bot,2))  )
-   
+
    u_surf     = 0.0
    v_surf     = 0.0
    stomatal   = 0.0
    snow       = 0.0
    water      = 1.0
    max_water  = 1.0
-   
+
    mask    = .true.
    glacier = .false.
-   seawater= .false. 
-   
+   seawater= .false.
+
    if(roughness_choice == 1) then
      rough_mom   = const_roughness
      rough_heat  = const_roughness
@@ -215,7 +215,7 @@ pi = 4.0*atan(1.)
      call compute_ocean_roughness (mask, u_star, &           ! Inchon and beyond. Changes answers.
                          rough_mom, rough_heat, rough_moist)
    endif
-   
+
    if(albedo_choice == 1) then
      albedo = const_albedo
    elseif(albedo_choice == 2) then
@@ -277,8 +277,8 @@ pi = 4.0*atan(1.)
      enddo
 
    endif
-   
-   
+
+
    cd_t = 0.0
    cd_m = 0.0
    cd_q = 0.0
@@ -324,7 +324,7 @@ pi = 4.0*atan(1.)
    flux_v_atm = flux_v
 
    land_frac = 0.0
-   
+
 !=======================================================================
 !-------------------- diagnostics section ------------------------------
 
@@ -354,14 +354,14 @@ subroutine update_simple_surface (dt, Time, Atm, dt_t_atm, dt_q_atm  )
 real, intent(in) :: dt
 type       (time_type), intent(in)  :: Time
 type (atmos_data_type), intent(in)  :: Atm
- 
+
 real, dimension(:,:),   intent(out) :: dt_t_atm, dt_q_atm
-   
+
 real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
                      gamma, dtmass, delta_t, delta_q, dflux_t, dflux_q, &
                      flux, deriv, dt_t_surf, &
                      entrop_evap, entrop_shflx, entrop_lwflx
- 
+
 
  real    :: cp_inv
  logical :: used
@@ -376,32 +376,32 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    pi = 4.*atan(1.)
 
    flux_lw = Atm%flux_lw - flux_lw
-   
+
    dtmass  = Atm%Surf_Diff%dtmass
    delta_t = Atm%Surf_Diff%delta_t
    delta_q = Atm%Surf_Diff%delta_q
    dflux_t = Atm%Surf_Diff%dflux_t
    dflux_q = Atm%Surf_Diff%dflux_q
-   
+
  cp_inv = 1.0/cp_air
- 
+
  ! temperature
 
    gamma      =  1./ (1.0 - dtmass*(dflux_t + dhdt_atm*cp_inv))
    e_t_n      =  dtmass*dhdt_surf*cp_inv*gamma
-   f_t_delt_n = (delta_t + dtmass * flux_t*cp_inv) * gamma    
+   f_t_delt_n = (delta_t + dtmass * flux_t*cp_inv) * gamma
 
-   flux_t     =  flux_t        + dhdt_atm * f_t_delt_n 
-   dhdt_surf  =  dhdt_surf     + dhdt_atm * e_t_n   
+   flux_t     =  flux_t        + dhdt_atm * f_t_delt_n
+   dhdt_surf  =  dhdt_surf     + dhdt_atm * e_t_n
 
 ! moisture
 
    gamma      =  1./ (1.0 - dtmass*(dflux_q + dedq_atm))
    e_q_n      =  dtmass*dedt_surf*gamma
-   f_q_delt_n = (delta_q  + dtmass * flux_q) * gamma    
+   f_q_delt_n = (delta_q  + dtmass * flux_q) * gamma
 
-   flux_q     =  flux_q        + dedq_atm * f_q_delt_n 
-   dedt_surf  =  dedt_surf     + dedq_atm * e_q_n   
+   flux_q     =  flux_q        + dedq_atm * f_q_delt_n
+   dedt_surf  =  dedt_surf     + dedq_atm * e_q_n
 
    if(surface_choice == 1) then
       if(do_sc_sst) then !mj sst read from input file
@@ -409,7 +409,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          dt_t_surf = sst_new - sst
          sst = sst + dt_t_surf
       else   !mj ocean depth function of latitude
-         
+
          land_sea_heat_capacity = heat_capacity
          if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
             do j=1,size(Atm%t_bot,2)
@@ -451,22 +451,22 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 
          flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
               - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
-         
-         deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/land_sea_heat_capacity 
+
+         deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/land_sea_heat_capacity
         !flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
         !        - (flux_t + hlv*flux_q) + flux_o)*dt/heat_capacity
-         
-        !   deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity 
+
+        !   deriv   = - (dhdt_surf + hlv*dedt_surf + drdt_surf)*dt/heat_capacity
 ! mj end
-      
+
          dt_t_surf = flux/(1.0 -deriv)
          sst = sst + dt_t_surf
       endif
 
    elseif(surface_choice == 2) then
-      
+
       dt_t_surf  = 0.0
-      
+
    endif
 
 
@@ -476,7 +476,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
   flux_lw    = flux_lw     - dt_t_surf*drdt_surf
   dt_t_atm   = f_t_delt_n  + dt_t_surf*e_t_n
   dt_q_atm   = f_q_delt_n  + dt_t_surf*e_q_n
- 
+
 
 
 !=======================================================================
@@ -488,7 +488,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    if ( id_q_flux > 0 ) used = send_data ( id_q_flux, flux_q, Time )
    if ( id_o_flux > 0 ) used = send_data ( id_o_flux, flux_o, Time )
    if ( id_heat   > 0 ) used = send_data ( id_heat,land_sea_heat_capacity,Time )
-   if ( id_entrop_evap > 0 ) then 
+   if ( id_entrop_evap > 0 ) then
       entrop_evap = flux_q/sst
       used = send_data ( id_entrop_evap, entrop_evap, Time)
    endif
@@ -509,7 +509,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 
    deallocate (f_t_delt_n, f_q_delt_n, e_t_n, e_q_n)
    deallocate(dhdt_surf, dedt_surf, dedq_surf, drdt_surf, dhdt_atm, dedq_atm, &
-              flux_t, flux_q, flux_lw)  
+              flux_t, flux_q, flux_lw)
 
 
 
@@ -525,7 +525,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  type (atmos_data_type), intent(in)  :: Atm
 
  integer :: unit, ierr, io
- 
+
  integer :: i, j, lati
  real :: xx, xx2, lat, lon, pi, y0
  real :: coslat !mj
@@ -561,7 +561,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 
    call diag_integral_field_init ('evap', 'f6.3')
    call diag_field_init ( Time, Atm%axes(1:2) )
-   
+
 allocate(sst   (size(Atm%t_bot,1),size(Atm%t_bot,2)))
 allocate(flux_u(size(Atm%t_bot,1),size(Atm%t_bot,2)))
 allocate(flux_v(size(Atm%t_bot,1),size(Atm%t_bot,2)))
@@ -580,11 +580,11 @@ else if(file_exist('INPUT/simple_surface.res')) then
   unit = open_file(file='INPUT/simple_surface.res',form='unformatted',&
                    action='read')
   call set_domain(Atm%domain)
-  
+
   call read_data(unit, sst)
   call read_data(unit, flux_u)
   call read_data(unit, flux_v)
-  
+
   call close_file(unit)
 !mj read fixed SSTs
 else if( do_read_sst ) then
@@ -612,7 +612,7 @@ else
      if (abs(lat).ge.pi/3.) sst(:,j) = 273.15
    end if
 ! APE "control" experiment
-    if (Tm.ge.499.) then 
+    if (Tm.ge.499.) then
       sst(:,j) = 273.15+27.0*(1.0 - sin(1.5*lat)*sin(1.5*lat))
       if (abs(lat).ge.pi/3.) sst(:,j) = 273.15
     endif
@@ -642,7 +642,7 @@ else
       sst(:,j) = sst(:,j) + 2.*(1.-sin(3.* max(min((abs(lat)-y0),pi/6.),0.))**4)
     end if
   end do
-  if (Tm.ge.800.) then 
+  if (Tm.ge.800.) then
     data ssttabl / 244.2464, 244.9859, 246.1535, 247.7335, 249.7301, 252.0308, 254.5561,&
        257.2648, 260.1125, 263.0303, 265.9484, 268.7581, 271.4256, 273.9761,&
        276.4128, 278.7544, 281.0249, 283.2028, 285.2909, 287.3179, 289.2411,&
@@ -749,7 +749,7 @@ else
   flux_u = 0.0
   flux_v = 0.0
 endif
-   
+
 if (do_oflx) then
   do i=1, size(Atm%t_bot,1)
     do j=1, size(Atm%t_bot,2)
@@ -792,12 +792,12 @@ endif
 
 if ( do_qflux .or. do_warmpool) then
    call qflux_init
-!mj q-flux as in Merlis et al (2013) [Part II] 
+!mj q-flux as in Merlis et al (2013) [Part II]
    if ( do_qflux ) call qflux(Atm%lat_bnd,flux_o)
 !mj q-flux to create a tropical temperature perturbation
    if ( do_warmpool) call warmpool(Atm%lon_bnd,Atm%lat_bnd,flux_o)
 endif
-   
+
 
     do_init = .false.
 
@@ -845,7 +845,7 @@ subroutine diag_field_init ( Time, atmos_axes )
 105 format (i2,' m',2x)
 110 format (f4.1,' m')
 
- 
+
    id_wind = &
    register_diag_field ( mod_name, 'wind', atmos_axes, Time, &
                         'wind speed for flux calculations', 'm/s', &
@@ -878,7 +878,7 @@ subroutine diag_field_init ( Time, atmos_axes )
    id_u_star     = &
    register_diag_field ( mod_name, 'u_star',     atmos_axes, Time, &
                         'friction velocity',   'm/s'   )
-      
+
    id_b_star     = &
    register_diag_field ( mod_name, 'b_star',     atmos_axes, Time, &
                         'buoyancy scale',      'm/s2'   )
@@ -1007,4 +1007,3 @@ end subroutine simple_surface_end
 !#######################################################################
 
 end module simple_surface_mod
-
