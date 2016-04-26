@@ -39,7 +39,7 @@ integer :: id_wf, id_z, id_drystaten, id_moiststaten, id_uv, id_vq, id_vdse, id_
     id_entrop_dampuv, id_entrop_dampt, id_tdt_dampuv, id_tdt_tempcor, id_qdt_watercor, &
     id_entrop_tempcor, id_kegen, id_kegenq, id_kegenqtinv
 !mj
-integer :: id_upvp, id_upwp, id_vpTp, id_psi_star
+integer :: id_upvp, id_upwp, id_vpTp, id_psi_star, id_psi_dwc
 !mj
 
 integer, allocatable, dimension(:) :: id_tr, id_dt_hadv, id_dt_vadv
@@ -55,8 +55,7 @@ real, allocatable, dimension(:,:,:)   :: two_dt_u, two_dt_v, two_dt_t
 real, allocatable, dimension(:,:,:,:) :: two_dt_tr
 
 !mj moved from every_step_diagnostics_init for use in every_step_diagnostics as well
-real, dimension(lon_max) :: lon
-real, dimension(lat_max) :: lat
+real, allocatable, dimension(:) :: lon, lat
 !jm
 
 integer :: is, ie, js, je
@@ -87,9 +86,11 @@ real, dimension(num_levels_in)   :: p_full, ln_p_full
 real, dimension(num_levels_in+1) :: p_half, ln_p_half
 
 call write_version_number(version, tagname)
-
+!mj
+allocate(lon(lon_max),lat(lat_max))
 call get_deg_lon(lon)
 call get_deg_lat(lat)
+!jm
 id_lon = diag_axis_init('lon_every', lon, 'degrees_E', 'x', 'longitude', set_name=mod_name, Domain2=grid_domain)
 id_lat = diag_axis_init('lat_every', lat, 'degrees_N', 'y', 'latitude',  set_name=mod_name, Domain2=grid_domain)
 call pressure_variables(p_half, ln_p_half, p_full, ln_p_full, reference_sea_level_press)
@@ -428,7 +429,7 @@ if(id_psi_dwc > 0) then
   tempdiag_3d(:,:,num_levels) = ( u_grid(:,:,num_levels)-u_grid(:,:,num_levels-1) )/dp
   ! zonal means of v'Theta'/d_pTheta and d_pu
   vpthp = sum(vThta,1)/max(1,size(vThta,1))
-  dp_u  = sum(tempdiag_3d,1)/max(size(tempdiag_3d,1))
+  dp_u  = sum(tempdiag_3d,1)/max(1,size(tempdiag_3d,1))
   ! Thta becomes now fhat
   do j=js,je
     coslat = cos(lat(j)/RADIAN)
@@ -454,15 +455,15 @@ if(id_psi_dwc > 0) then
   enddo
   upvp = sum(tempdiag_3d,1)/max(1,size(tempdiag_3d,1))
   ! d_xF1
-  dphi = (lat(1) - lat(2))/RADIANS
+  dphi = (lat(1) - lat(2))/RADIAN
   tempdiag_zm(1,:) = (-(upvp(1,:)-upvp(2,:)) + &
                       (dp_u(1,:)*vpthp(1,:)-dp_u(2,:)*vpthp(2,:))) / dphi
   do j=js+1,je-1
-    dphi = (lat(j+1)-lat(j-1))/RADIANS
-    tempdiag_zm(j,:) = (-(upvp(j+1)-upvp(j-1)) + &
+    dphi = (lat(j+1)-lat(j-1))/RADIAN
+    tempdiag_zm(j,:) = (-(upvp(j+1,:)-upvp(j-1,:)) + &
                       (dp_u(j+1,:)*vpthp(j+1,:)-dp_u(j-1,:)*vpthp(j-1,:))) / dphi
   enddo
-  dphi = (lat(je) - lat(je-1))/RADIANS
+  dphi = (lat(je) - lat(je-1))/RADIAN
   tempdiag_zm(je,:) = (-(upvp(je,:)-upvp(je-1,:)) + &
                       (dp_u(je,:)*vpthp(je,:)-dp_u(je-1,:)*vpthp(je-1,:))) / dphi
   tempdiag_zm = tempdiag_zm / RADIUS
@@ -476,7 +477,7 @@ if(id_psi_dwc > 0) then
   dpzm = sum(p_full(:,:,1) - p_full(:,:,2),1)/max(1,size(p_full,1))
   tempdiag_zm(:,1) = tempdiag_zm(:,1) + &
                         (fhat(:,1)*vpthp(:,1)-fhat(:,2)*vpthp(:,2) - &
-                        (upwp(:,1)-upwp(:,2))) / dp
+                        (upwp(:,1)-upwp(:,2))) / dpzm
   do k=2,num_levels-1
     dpzm = sum(p_full(:,:,k+1)-p_full(:,:,k-1),1)/max(1,size(p_half,1))
     tempdiag_zm(:,k) = tempdiag_zm(:,k) + &
@@ -512,7 +513,7 @@ if(id_upwp > 0) then
   do k=1,num_levels
     do i=is,ie
       tempdiag_3d(i,:,k) = (u_grid(i,:,k) - sum(u_grid(:,:,k),1)/max(1,size(u_grid,1)))* &
-                           (wg_full(i,:,k)- sum(wp_full(:,:,k),1)/max(1,size(wp_full,1)))
+                           (wg_full(i,:,k)- sum(wg_full(:,:,k),1)/max(1,size(wg_full,1)))
     enddo
   enddo
   used = send_data(id_upwp, tempdiag_3d, Time)
