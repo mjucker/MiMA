@@ -77,6 +77,7 @@ integer, intent(in) :: lon_max, lat_max, num_levels_in
 real, intent(in) :: reference_sea_level_press
 
 integer, dimension(2) :: axes_2d
+integer, dimension(2) :: axes_zm !mj
 integer, dimension(3) :: axes_3d
 integer :: id_lon, id_lat, id_pfull, ntr
 real, dimension(2) :: vrange,trange
@@ -101,6 +102,7 @@ vrange = (/ -400., 400. /)
 trange = (/  100., 400. /)
 axes_2d = (/ id_lon, id_lat /)
 axes_3d = (/ id_lon, id_lat, id_pfull /)
+axes_zm = (/ id_lat, id_pfull /) !mj
 
 id_ps = register_diag_field(mod_name, 'ps_every', axes_2d, Time, 'surface pressure', 'pascals')
 id_u  = register_diag_field(mod_name, 'u_every',  axes_3d, Time, 'zonal wind component', 'm/sec', range=vrange)
@@ -149,8 +151,8 @@ id_entrop_tempcor =  register_diag_field(mod_name, 'entrop_tempcor',  &
 id_upvp     = register_diag_field(mod_name, 'upvp'    , axes_3d, time, 'meridional eddy momentum flux', 'm^2/s^2')
 id_upwp     = register_diag_field(mod_name, 'upwp'    , axes_3d, time, 'vertical eddy momentum flux'  , 'm/s Pa/s')
 id_vpTp     = register_diag_field(mod_name, 'vpTp'    , axes_3d, time, 'meridional eddy heat flux'    , 'm/s K')
-id_psi_dwc  = register_diag_field(mod_name, 'psi_dwc' , axes_3d(2:3), time, 'residual mean streamfunction' , 'm/s Pa')
-id_psi_star = register_diag_field(mod_name, 'psi_star', axes_3d(2:3), time, 'residual mean streamfunction' , 'm/s Pa')
+id_psi_dwc  = register_diag_field(mod_name, 'psi_dwc' , axes_zm, time, 'residual mean streamfunction' , 'm/s Pa')
+id_psi_star = register_diag_field(mod_name, 'psi_star', axes_zm, time, 'residual mean streamfunction' , 'm/s Pa')
 !jm
 
 call get_number_tracers(MODEL_ATMOS, num_prog=num_tracers)
