@@ -14,7 +14,8 @@ use press_and_geopot_mod, only: pressure_variables
 
 use       transforms_mod, only: grid_domain, get_deg_lon, get_deg_lat, get_grid_domain
 
-use        constants_mod, only: hlv, cp_air, grav, kappa, rvgas, rdgas
+use        constants_mod, only: hlv, cp_air, grav, kappa, rvgas, rdgas, &
+                                RADIUS, RADIAN, OMEGA !mj
 
 !===============================================================================================
 implicit none
@@ -37,6 +38,9 @@ integer :: id_wf, id_z, id_drystaten, id_moiststaten, id_uv, id_vq, id_vdse, id_
     id_wsubt, id_wsubtv, id_vqint, id_udt_damp, id_vdt_damp, id_tdt_damp,              &
     id_entrop_dampuv, id_entrop_dampt, id_tdt_dampuv, id_tdt_tempcor, id_qdt_watercor, &
     id_entrop_tempcor, id_kegen, id_kegenq, id_kegenqtinv
+!mj
+integer :: id_upvp, id_upwp, id_vpTp, id_psi_star
+!mj
 
 integer, allocatable, dimension(:) :: id_tr, id_dt_hadv, id_dt_vadv
 
@@ -49,6 +53,11 @@ integer :: iwt, num_time_steps
 real, allocatable, dimension(:,:)     :: two_dt_ps
 real, allocatable, dimension(:,:,:)   :: two_dt_u, two_dt_v, two_dt_t
 real, allocatable, dimension(:,:,:,:) :: two_dt_tr
+
+!mj moved from every_step_diagnostics_init for use in every_step_diagnostics as well
+real, dimension(lon_max) :: lon
+real, dimension(lat_max) :: lat
+!jm
 
 integer :: is, ie, js, je
 integer :: nsphum=NO_TRACER ! tracer index of specific humidity. Initialized to NO_TRACER, then set in subroutine every_step_diagnostics_init.
@@ -74,8 +83,6 @@ integer :: id_lon, id_lat, id_pfull, ntr
 real, dimension(2) :: vrange,trange
 character(len=128) :: tname, longname, units
 character(len=16) :: mod_name = 'dynamics_every'
-real, dimension(lon_max) :: lon
-real, dimension(lat_max) :: lat
 real, dimension(num_levels_in)   :: p_full, ln_p_full
 real, dimension(num_levels_in+1) :: p_half, ln_p_half
 
@@ -136,6 +143,14 @@ id_qdt_watercor =  register_diag_field(mod_name, 'qdt_watercor',  &
    axes_3d, time, 'Humidity tend due to dynamics water correction',  '1/s')
 id_entrop_tempcor =  register_diag_field(mod_name, 'entrop_tempcor',  &
    axes_3d, time, 'Entropy tend due to hor diff temp corr',  '1/s')
+
+!mj
+id_upvp     = register_diag_field(mod_name, 'upvp'    , axes_3d, time, 'meridional eddy momentum flux', 'm^2/s^2')
+id_upwp     = register_diag_field(mod_name, 'upwp'    , axes_3d, time, 'vertical eddy momentum flux'  , 'm/s Pa/s')
+id_vpTp     = register_diag_field(mod_name, 'vpTp'    , axes_3d, time, 'meridional eddy heat flux'    , 'm/s K')
+id_psi_dwc  = register_diag_field(mod_name, 'psi_dwc' , axes_3d(2:3), time, 'residual mean streamfunction' , 'm/s Pa')
+id_psi_star = register_diag_field(mod_name, 'psi_star', axes_3d(2:3), time, 'residual mean streamfunction' , 'm/s Pa')
+!jm
 
 call get_number_tracers(MODEL_ATMOS, num_prog=num_tracers)
 allocate(id_tr(num_tracers), id_dt_hadv(num_tracers), id_dt_vadv(num_tracers))
@@ -203,6 +218,15 @@ logical :: used
 integer :: i, j, k, ntr
 character(len=8) :: err_msg_1, err_msg_2
 
+!mj
+real, dimension(is:ie, js:je) :: dp
+real, dimension(is:ie, js:je, num_levels) :: Thta,vThta
+real, dimension(js:je, num_levels) :: tempdiag_zm,dp_u,vpthp,upvp,upwp,fhat
+real, dimension(num_levels) :: dphi
+real, dimension(js:je) :: dpzm
+real :: coslat
+!jm
+
 if(.not.module_is_initialized) then
   call error_mesg('every_step_diagnostics','module is not initialized', FATAL)
 endif
@@ -222,11 +246,11 @@ q_grid = tr_grid(:,:,:,nsphum)
 
 if(id_drystaten > 0) then
    used = send_data(id_drystaten, dse, Time)
-endif 
+endif
 if(id_moiststaten > 0) then
    tempdiag_3d = dse + hlv*q_grid ! Moist static energy
    used = send_data(id_moiststaten, tempdiag_3d, Time)
-endif 
+endif
 if(id_uv > 0) then
   do k=1,num_levels
      tempdiag_3d(:,:,k) = u_grid(:,:,k)*v_grid(:,:,k)*p_surf/p00
@@ -375,6 +399,162 @@ if(id_entrop_tempcor > 0 ) then
    enddo
    used = send_data(id_entrop_tempcor, tempdiag_3d, Time)
 endif
+!mj
+if(id_psi_dwc > 0) then
+  !! F1 = -u'v' + d_puv'Th'/d_pTh
+  !! F2 = fhat*v'Th'/d_pTh - u'w'
+  ! Thta = Theta_bar
+  Thta = t_grid*(p00/p_full)**kappa
+  do i=is,ie
+    ! vThta = v'Theta' [m/s K]
+    vThta(i,:,:) = (v_grid(i,:,:) - sum(v_grid,1)/max(1,size(v_grid,1)))* &
+                    (Thta(i,:,:) - sum(Thta,1)/max(1,size(Thta,1)))
+
+  enddo
+  ! vThta = v'Theta'/d_pTheta
+  ! tempdiag_3d = d_pu
+  vThta(:,:,1) = vThta(:,:,1) * &
+                (p_full(:,:,1) - p_full(:,:,2))/(Thta(:,:,1) - Thta(:,:,2))
+  tempdiag_3d(:,:,1) = ( u_grid(:,:,1)-u_grid(:,:,2) )/( p_full(:,:,1)-p_full(:,:,2))
+  do k=2,num_levels-1
+    dp = p_full(:,:,k+1) - p_full(:,:,k-1)
+    vThta(:,:,k) = vThta(:,:,k) * &
+                    *dp/(Thta(:,:,k+1) - Thta(:,:,k-1))
+    tempdiag_3d(:,:,k) = ( u_grid(:,:,k+1)-u_grid(:,:,k-1) )/dp
+  enddo
+  dp = p_full(:,:,num_levels) - p_full(:,:,num_levels-1)
+  vThta(:,:,num_levels) = vThta(:,:,num_levels) * &
+                dp/(Thta(:,:,num_levels) - Thta(:,:,num_levels-1))
+  tempdiag_3d(:,:,num_levels) = ( u_grid(:,:,num_levels)-u_grid(:,:,num_levels-1) )/dp
+  ! zonal means of v'Theta'/d_pTheta and d_pu
+  vpthp = sum(vThta,1)/max(1,size(vThta,1))
+  dp_u  = sum(tempdiag_3d,1)/max(size(tempdiag_3d,1))
+  ! Thta becomes now fhat
+  do j=js,je
+    coslat = cos(lat(j)/RADIAN)
+    if ( j .eq. 1 ) then
+      Thta(:,j,:) = (u_grid(:,j+1,:)*cos(lat(j+1)/RADIAN) - u_grid(:,j,:)*coslat) / &
+                      ((lat(j+1)-lat(j))/RADIAN)
+    elseif ( j .eq. je ) then
+      Thta(:,j,:) = (u_grid(:,j,:)*coslat - u_grid(:,j-1,:)*cos(lat(j-1)/RADIAN)) / &
+                      ((lat(j)-lat(j-1))/RADIAN)
+    else
+      Thta(:,j,:) = (u_grid(:,j+1,:)*cos(lat(j+1)/RADIAN) - u_grid(:,j-1,:)*cos(lat(j-1)/RADIAN)) / &
+                      ((lat(j+1) - lat(j-1))/RADIAN)
+    endif
+    Thta(:,j,:) = -Thta(:,j,:)/RADIUS/coslat + 2*OMEGA*sin(lat(j)/RADIAN)
+  enddo
+  ! zonal mean
+  fhat = sum(Thta,1)/max(1,size(Thta,1))
+  ! Now put things together for tempdiag_zm = v_star_downward_control
+  ! u'v'
+  do i=is,ie
+    tempdiag_3d(i,:,:) = (u_grid(i,:,:) - sum(u_grid,1)/max(1,size(u_grid,1)))*&
+                            (v_grid(i,:,:) - sum(v_grid,1)/max(1,size(v_grid,1)))
+  enddo
+  upvp = sum(tempdiag_3d,1)/max(1,size(tempdiag_3d,1))
+  ! d_xF1
+  dphi = (lat(1) - lat(2))/RADIANS
+  tempdiag_zm(1,:) = (-(upvp(1,:)-upvp(2,:)) + &
+                      (dp_u(1,:)*vpthp(1,:)-dp_u(2,:)*vpthp(2,:))) / dphi
+  do j=js+1,je-1
+    dphi = (lat(j+1)-lat(j-1))/RADIANS
+    tempdiag_zm(j,:) = (-(upvp(j+1)-upvp(j-1)) + &
+                      (dp_u(j+1,:)*vpthp(j+1,:)-dp_u(j-1,:)*vpthp(j-1,:))) / dphi
+  enddo
+  dphi = (lat(je) - lat(je-1))/RADIANS
+  tempdiag_zm(je,:) = (-(upvp(je,:)-upvp(je-1,:)) + &
+                      (dp_u(je,:)*vpthp(je,:)-dp_u(je-1,:)*vpthp(je-1,:))) / dphi
+  tempdiag_zm = tempdiag_zm / RADIUS
+  ! d_pF2
+  ! u'w'
+  do i=is,ie
+    tempdiag_3d(i,:,:) = (u_grid(i,:,:) - sum(u_grid,1)/max(1,size(u_grid,1)))*&
+                            (wg_full(i,:,:) - sum(wg_full,1)/max(1,size(wg_full,1)))
+  enddo
+  upwp = sum(tempdiag_3d,1)/max(1,size(tempdiag_3d,1))
+  dpzm = sum(p_full(:,:,1) - p_full(:,:,2),1)/max(1,size(p_full,1))
+  tempdiag_zm(:,1) = tempdiag_zm(:,1) + &
+                        (fhat(:,1)*vpthp(:,1)-fhat(:,2)*vpthp(:,2) - &
+                        (upwp(:,1)-upwp(:,2))) / dp
+  do k=2,num_levels-1
+    dpzm = sum(p_full(:,:,k+1)-p_full(:,:,k-1),1)/max(1,size(p_half,1))
+    tempdiag_zm(:,k) = tempdiag_zm(:,k) + &
+                          (fhat(:,k+1)*vpthp(:,k+1)-fhat(:,k-1)*vpthp(:,k-1) - &
+                          (upwp(:,k+1)-upwp(:,k-1))) / dpzm
+  enddo
+  dpzm = sum(p_full(:,:,num_levels)-p_full(:,:,num_levels-1),1)/max(1,size(p_full,1))
+  tempdiag_zm(:,num_levels) = tempdiag_zm(:,num_levels) + &
+                                (fhat(:,num_levels)*vpthp(:,num_levels)-fhat(:,num_levels-1)*vpthp(:,num_levels-1) - &
+                                (upwp(:,num_levels)-upwp(:,num_levels-1))) / dpzm
+  ! v_star_downward_control = 1/fhat*(-diff(F))
+  tempdiag_zm = -tempdiag_zm / fhat
+  !now compute psi_star_dwc using the trapezoidal rule
+  !temporarily, upvp = v_star_downward_control
+  upvp = tempdiag_zm
+  tempdiag_zm = 0.
+  do k=2,num_levels
+    dpzm = sum(p_full(:,:,k) - p_full(:,:,k-1),1)/max(1,size(p_full,1))
+    tempdiag_zm(:,k) = tempdiag_zm(:,k-1) + 0.5*dpzm*(upvp(:,k)+upvp(:,k-1))
+  enddo
+  used = send_data(id_psi_dwc, tempdiag_zm, Time)
+endif
+if(id_upvp > 0) then
+  do k=1,num_levels
+    do i=is,ie
+      tempdiag_3d(i,:,k) = (u_grid(i,:,k) - sum(u_grid(:,:,k),1)/max(1,size(u_grid,1)))* &
+                           (v_grid(i,:,k) - sum(v_grid(:,:,k),1)/max(1,size(v_grid,1)))
+    enddo
+  enddo
+  used = send_data(id_upvp, tempdiag_3d, Time)
+endif
+if(id_upwp > 0) then
+  do k=1,num_levels
+    do i=is,ie
+      tempdiag_3d(i,:,k) = (u_grid(i,:,k) - sum(u_grid(:,:,k),1)/max(1,size(u_grid,1)))* &
+                           (wg_full(i,:,k)- sum(wp_full(:,:,k),1)/max(1,size(wp_full,1)))
+    enddo
+  enddo
+  used = send_data(id_upwp, tempdiag_3d, Time)
+endif
+if(id_vpTp > 0) then
+  do k=1,num_levels
+    do i=is,ie
+      tempdiag_3d(i,:,k) = (v_grid(i,:,k) - sum(v_grid(:,:,k),1)/max(1,size(v_grid,1)))* &
+                           (t_grid(i,:,k) - sum(t_grid(:,:,k),1)/max(1,size(t_grid,1)))
+    enddo
+  enddo
+  used = send_data(id_vpTp, tempdiag_3d, Time)
+endif
+if(id_psi_star > 0) then
+  do i=is,ie
+    !tempdiag_3d = v'Theta' [m/s K]
+    Thta(i,:,:) = (t_grid(i,:,:) - sum(t_grid,1)/max(1,size(t_grid,1)))* &
+                  (p00/p_full(i,:,:))**kappa
+    tempdiag_3d(i,:,:) = (v_grid(i,:,:) - sum(v_grid,1)/max(1,size(v_grid,1)))* &
+                  Thta(i,:,:)
+  enddo
+  !now, tempdiag_3d = v'Theta'/dpTheta [m/s Pa]
+  tempdiag_3d(:,:,1) = (Thta(:,:,2) - Thta(:,:,1))/(p_full(:,:,2)-p_full(:,:,1))
+  do k=2,num_levels-1
+    dp = p_full(:,:,k+1) - p_full(:,:,k-1)
+    tempdiag_3d(:,:,k) = tempdiag_3d(:,:,k)*dp/(Thta(:,:,k+1)-Thta(:,:,k-1))
+  enddo
+  tempdiag_3d(:,:,num_levels) = (Thta(:,:,num_levels) - Thta(:,:,num_levels-1))/&
+                                (p_full(:,:,num_levels) - p_full(:,:,num_levels-1))
+  !store this in the 2D variable
+  tempdiag_zm = sum(tempdiag_3d,3)/max(1,size(tempdiag_3d,3))
+  !now compute psi using the trapezoidal rule
+  tempdiag_3d(:,:,1) = 0.
+  do k=2,num_levels
+    dp = p_full(:,:,k) - p_full(:,:,k-1)
+    tempdiag_3d(:,:,k) = tempdiag_3d(:,:,k-1) + 0.5*dp*(v_grid(:,:,k)+v_grid(:,:,k-1))
+  enddo
+  !now put it all together
+  tempdiag_zm = sum(tempdiag_3d,1)/max(1,size(tempdiag_3d,1)) - tempdiag_zm
+  used = send_data(id_psi_star, tempdiag_zm, Time)
+endif
+!jm
 
 !--------------------
 !if(id_pt > 0) then
