@@ -419,7 +419,7 @@ if(id_psi_dwc > 0) then
   do k=2,num_levels-1
     dp = p_full(:,:,k+1) - p_full(:,:,k-1)
     vThta(:,:,k) = vThta(:,:,k) * &
-                    *dp/(Thta(:,:,k+1) - Thta(:,:,k-1))
+                    dp/(Thta(:,:,k+1) - Thta(:,:,k-1))
     tempdiag_3d(:,:,k) = ( u_grid(:,:,k+1)-u_grid(:,:,k-1) )/dp
   enddo
   dp = p_full(:,:,num_levels) - p_full(:,:,num_levels-1)
