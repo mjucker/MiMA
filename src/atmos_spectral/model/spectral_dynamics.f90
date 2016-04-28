@@ -73,6 +73,9 @@ character(len=128), parameter :: tagname = '$Name:  $'
 integer :: id_ps, id_u, id_v, id_t, id_vor, id_div, id_omega, id_wspd, id_slp, id_div9
 integer :: id_pres_full, id_pres_half, id_zfull, id_zhalf
 integer :: id_uu, id_vv, id_tt, id_omega_omega, id_uv, id_omega_t
+!mj
+integer :: id_psi_star, id_psi_dwc
+!jm
 integer, allocatable, dimension(:) :: id_tr
 real :: gamma, expf, expf_inverse
 character(len=8) :: mod_name = 'dynamics'
@@ -1537,6 +1540,13 @@ id_zhalf   = register_diag_field(mod_name, &
 
 id_slp = register_diag_field(mod_name, &
       'slp',(/id_lon,id_lat/),       Time, 'sea level pressure',           'pascals')
+!mj
+id_psi_star   = register_diag_field(mod_name, &
+      'psi_star',  (/id_lat,id_pfull/),       Time, 'residual mean streamfunction','kg/s')
+id_psi_dwc   = register_diag_field(mod_name, &
+      'psi_dwc',  (/id_lat,id_pfull/),       Time, 'residual mean streamfunction','kg/s')
+!jm
+
 
 if(id_slp > 0) then
   gamma = 0.006
@@ -1553,16 +1563,19 @@ enddo
 return
 end subroutine spectral_diagnostics_init
 !===================================================================================
-subroutine spectral_diagnostics(Time, p_surf, u_grid, v_grid, t_grid, wg_full, tr_grid)
+subroutine spectral_diagnostics(Time, p_surf, u_grid, v_grid, t_grid, wg_full, tr_grid, dt_ug)
 
 type(time_type), intent(in) :: Time
 real, intent(in), dimension(is:ie, js:je)                          :: p_surf
-real, intent(in), dimension(is:ie, js:je, num_levels)              :: u_grid, v_grid, t_grid, wg_full
+real, intent(in), dimension(is:ie, js:je, num_levels)              :: u_grid, v_grid, t_grid, wg_full, dt_ug
 real, intent(in), dimension(is:ie, js:je, num_levels, num_tracers) :: tr_grid
 
 real, dimension(is:ie, js:je, num_levels)   :: ln_p_full, p_full, z_full, work
 real, dimension(is:ie, js:je, num_levels+1) :: ln_p_half, p_half, z_half
 real, dimension(is:ie, js:je)               :: t_low, slp
+!mj
+real, dimension(js:je, num_levels) :: workzm
+!jm
 logical :: used
 integer :: ntr, i, j, k, seconds, days
 character(len=8) :: err_msg_1, err_msg_2
@@ -1576,7 +1589,7 @@ if(id_div > 0)    used = send_data(id_div, divg, Time)
 if(id_omega > 0)  used = send_data(id_omega, wg_full, Time)
 if(num_levels > 8 .and. id_div9 > 0) used = send_data(id_div9, divg(:,:,9), Time)
 
-if(id_zfull > 0 .or. id_zhalf > 0) then
+if(id_zfull > 0 .or. id_zhalf > 0 .or. id_psi_star > 0 .or. id_psi_dwc > 0) then
   call compute_pressures_and_heights(t_grid, p_surf, z_full, z_half, p_full, p_half)
 else if(id_pres_half > 0 .or. id_pres_full > 0 .or. id_slp > 0) then
   call pressure_variables(p_half, ln_p_half, p_full, ln_p_full, p_surf)
@@ -1644,6 +1657,17 @@ if(interval_alarm(Time, Time_step, Alarm_time, Alarm_interval)) then
   call global_integrals(Time, p_surf, u_grid, v_grid, t_grid, wg_full, tr_grid)
 endif
 
+!mj
+if(id_psi_star > 0) then
+   call compute_psi_star(p_full,v_grid,t_grid,workzm)
+   used = send_data(id_psi_star, workzm, Time)
+endif
+if(id_psi_dwc > 0) then
+   call compute_psi_dwc(p_full,u_grid,v_grid,wg_full,t_grid,dt_ug,workzm)
+   used = send_data(id_psi_dwc, workzm, Time)
+endif
+!jm
+
 return
 end subroutine spectral_diagnostics
 !===================================================================================
@@ -1690,5 +1714,160 @@ deallocate(id_tr)
 return
 end subroutine spectral_diagnostics_end
 !===================================================================================
+subroutine compute_psi_star(p_full,v,T,psi_star)
+  use constants_mod, only: RADIAN,PI,RADIUS,grav,kappa
+  real,dimension(is:ie, js:je, num_levels), intent(in)  :: p_full,v,T
+  real,dimension(js:je, num_levels),        intent(out) :: psi_star
+  integer :: i,j,k
+  real,dimension(js:je) :: lat
+  real,dimension(is:ie,js:je,num_levels) :: temp3d,thta
+  real,dimension(is:ie,js:je) :: dp
+  real, parameter :: p00=1.e5
 
+  call get_deg_lat(lat)
+  lat = lat/RADIAN
+ 
+  do i=is,ie
+    !temp3d = v'Theta' [m/s K]
+    thta(i,:,:) = (T(i,:,:) - sum(T,1)/max(1,size(T,1)))* &
+                  (p00/p_full(i,:,:))**kappa
+    temp3d(i,:,:) = (v(i,:,:) - sum(v,1)/max(1,size(v,1)))* &
+                  thta(i,:,:)
+  enddo
+  !now, temp3d = v'Theta'/dpTheta [m/s Pa]
+  temp3d(:,:,1) = (thta(:,:,2) - thta(:,:,1))/(p_full(:,:,2)-p_full(:,:,1))
+  do k=2,num_levels-1
+    dp = p_full(:,:,k+1) - p_full(:,:,k-1)
+    temp3d(:,:,k) = temp3d(:,:,k)*dp/(thta(:,:,k+1)-thta(:,:,k-1))
+  enddo
+  temp3d(:,:,num_levels) = (thta(:,:,num_levels) - thta(:,:,num_levels-1))/&
+                                (p_full(:,:,num_levels) - p_full(:,:,num_levels-1))
+  !store this in the 2D variable
+  psi_star = sum(temp3d,1)/max(1,size(temp3d,1))
+  !now compute psi using the trapezoidal rule
+  temp3d(:,:,1) = 0.
+  do k=2,num_levels
+    dp = p_full(:,:,k) - p_full(:,:,k-1)
+    temp3d(:,:,k) = temp3d(:,:,k-1) + 0.5*dp*(v(:,:,k)+v(:,:,k-1))
+  enddo
+  !now put it all together
+  psi_star = sum(temp3d,1)/max(1,size(temp3d,1)) - psi_star
+  
+  psi_star = 2*PI*psi_star*grav/RADIUS
+
+end subroutine compute_psi_star
+!===================================================================================
+subroutine compute_psi_dwc(p_full,u,v,w,T,dt_u,psi_dwc)
+  use constants_mod, only: RADIAN,PI,RADIUS,grav,kappa,OMEGA
+  real,dimension(is:ie, js:je, num_levels), intent(in)  :: p_full,u,v,w,T,dt_u
+  real,dimension(js:je, num_levels),        intent(out) :: psi_dwc
+  integer :: i,j,k
+  real,dimension(js:je) :: lat
+  real,dimension(is:ie,js:je,num_levels) :: temp3d,thta,vThta
+  real,dimension(is:ie,js:je) :: dp
+  real,dimension(js:je,num_levels) :: dpzm,tempzm,vpthp,dp_u,fhat,upvp
+  real, parameter :: p00=1.e5
+
+  call get_deg_lat(lat)
+  lat = lat/RADIAN
+
+  
+  !! F1 = -u'v' + d_puv'Th'/d_pTh
+  !! F2 = fhat*v'Th'/d_pTh - u'w'
+  ! thta = theta
+  thta = T*(p00/p_full)**kappa
+  do i=is,ie
+    ! vThta = v'Theta' [m/s K]
+     vThta(i,:,:) = (v(i,:,:) - sum(v,1)/max(1,size(v,1)))* &
+                    (thta(i,:,:) - sum(thta,1)/max(1,size(thta,1)))
+
+  enddo
+  ! vThta = v'Theta'/d_pTheta
+  ! temp3d = d_pu
+  vThta(:,:,1) = vThta(:,:,1) * &
+                (p_full(:,:,1) - p_full(:,:,2))/(thta(:,:,1) - thta(:,:,2))
+  temp3d(:,:,1) = ( u(:,:,1)-u(:,:,2) )/( p_full(:,:,1)-p_full(:,:,2))
+  do k=2,num_levels-1
+    dp = p_full(:,:,k+1) - p_full(:,:,k-1)
+    vThta(:,:,k) = vThta(:,:,k) * &
+                    dp/(thta(:,:,k+1) - thta(:,:,k-1))
+    temp3d(:,:,k) = ( u(:,:,k+1) - u(:,:,k-1) )/dp
+  enddo
+  dp = p_full(:,:,num_levels) - p_full(:,:,num_levels-1)
+  vThta(:,:,num_levels) = vThta(:,:,num_levels) * &
+                dp/(thta(:,:,num_levels) - thta(:,:,num_levels-1))
+  temp3d(:,:,num_levels) = ( u(:,:,num_levels) - u(:,:,num_levels-1) )/dp
+  ! zonal means of v'Theta'/d_pTheta and d_pu
+  vpthp = sum(vThta,1)/max(1,size(vThta,1))
+  dp_u  = sum(temp3d,1)/max(1,size(temp3d,1))
+  ! Thta becomes now fhat
+  do j=js,je
+    coslat = cos(lat(j))
+    if ( j .eq. 1 ) then
+      thta(:,j,:) = (u(:,j+1,:)*cos(lat(j+1)) - u(:,j,:)*coslat) / &
+                      (lat(j+1)-lat(j))
+    elseif ( j .eq. je ) then
+      thta(:,j,:) = (u(:,j,:)*coslat - u(:,j-1,:)*cos(lat(j-1))) / &
+                      (lat(j)-lat(j-1))
+    else
+      thta(:,j,:) = (u(:,j+1,:)*cos(lat(j+1)) - u(:,j-1,:)*cos(lat(j-1))) / &
+                      (lat(j+1) - lat(j-1))
+    endif
+    thta(:,j,:) = -thta(:,j,:)/RADIUS/coslat + 2*OMEGA*sin(lat(j))
+  enddo
+  ! zonal mean
+  fhat = sum(thta,1)/max(1,size(thta,1))
+  ! Now put things together for psi_dwc = v_star_downward_control
+  ! u'v'
+  do i=is,ie
+    temp3d(i,:,:) = (u(i,:,:) - sum(u,1)/max(1,size(u,1)))*&
+                            (v(i,:,:) - sum(v,1)/max(1,size(v,1)))
+  enddo
+  upvp = sum(temp3d,1)/max(1,size(temp3d,1))
+  ! tempzm = d_xF1
+  dphi = lat(1) - lat(2)
+  tempzm(1,:) = (-(upvp(1,:)-upvp(2,:)) + &
+                      (dp_u(1,:)*vpthp(1,:)-dp_u(2,:)*vpthp(2,:))) / dphi
+  do j=js+1,je-1
+    dphi = (lat(j+1)-lat(j-1))/RADIAN
+    tempdiag_zm(j,:) = (-(upvp(j+1,:)-upvp(j-1,:)) + &
+                      (dp_u(j+1,:)*vpthp(j+1,:)-dp_u(j-1,:)*vpthp(j-1,:))) / dphi
+  enddo
+  dphi = lat(je) - lat(je-1)
+  tempzm(je,:) = (-(upvp(je,:)-upvp(je-1,:)) + &
+                      (dp_u(je,:)*vpthp(je,:)-dp_u(je-1,:)*vpthp(je-1,:))) / dphi
+  tempzm = tempzm / RADIUS
+  ! d_pF2
+  ! upvp = u'w'
+  do i=is,ie
+    temp3d(i,:,:) = (u(i,:,:) - sum(u,1)/max(1,size(u,1)))*&
+                            (w(i,:,:) - sum(w,1)/max(1,size(w,1)))
+  enddo
+  upvp = sum(temp3d,1)/max(1,size(temp3d,1))
+  ! tempzm = dxF1 + dpF2
+  dpzm = sum(p_full(:,:,1) - p_full(:,:,2),1)/max(1,size(p_full,1))
+  tempzm(:,1) = tempzm(:,1) + &
+                        (fhat(:,1)*vpthp(:,1)-fhat(:,2)*vpthp(:,2) - &
+                        (upvp(:,1)-upvp(:,2))) / dpzm
+  do k=2,num_levels-1
+    dpzm = sum(p_full(:,:,k+1)-p_full(:,:,k-1),1)/max(1,size(p_half,1))
+    tempzm(:,k) = tempzm(:,k) + &
+                          (fhat(:,k+1)*vpthp(:,k+1)-fhat(:,k-1)*vpthp(:,k-1) - &
+                          (upvp(:,k+1)-upvp(:,k-1))) / dpzm
+  enddo
+  dpzm = sum(p_full(:,:,num_levels)-p_full(:,:,num_levels-1),1)/max(1,size(p_full,1))
+  tempzm(:,num_levels) = tempzm(:,num_levels) + &
+                                (fhat(:,num_levels)*vpthp(:,num_levels)-fhat(:,num_levels-1)*vpthp(:,num_levels-1) - &
+                                (upwp(:,num_levels)-upwp(:,num_levels-1))) / dpzm
+  ! tempzm = v_star_downward_control = 1/fhat*(dt_u - diff(F)/acosphi)
+  tempzm = ( dt_u - tempzm) / fhat
+  !now compute psi_star_dwc using the trapezoidal rule
+  psi_dwc = 0.
+  do k=2,num_levels
+    dpzm = sum(p_full(:,:,k) - p_full(:,:,k-1),1)/max(1,size(p_full,1))
+    psi_dwc(:,k) = psi_dwc(:,k-1) + 0.5*dpzm*(tempzm(:,k)+tempzm(:,k-1))
+  enddo
+
+end subroutine compute_psi_dwc
+!===================================================================================
 end module spectral_dynamics_mod

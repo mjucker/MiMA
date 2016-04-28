@@ -294,7 +294,7 @@ endif
 call complete_robert_filter(tracer_attributes)
 
 call spectral_diagnostics(Time_next, psg(:,:,future), ug(:,:,:,future), vg(:,:,:,future), &
-                          tg(:,:,:,future), wg_full, grid_tracers(:,:,:,future,:))
+                          tg(:,:,:,future), wg_full, grid_tracers(:,:,:,future,:), dt_ug)
 
 previous = current
 current  = future

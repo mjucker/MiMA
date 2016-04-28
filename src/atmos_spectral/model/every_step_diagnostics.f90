@@ -555,7 +555,6 @@ if(id_psi_star > 0) then
   enddo
   !now put it all together
   tempdiag_zm = sum(tempdiag_3d,1)/max(1,size(tempdiag_3d,1)) - tempdiag_zm
-  print*,'tempdiag_zm',size(tempdiag_zm,1),size(tempdiag_zm,2),axes_zm
   used = send_data(id_psi_star, tempdiag_zm, Time)
 endif
 !jm
