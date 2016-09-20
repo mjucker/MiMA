@@ -1440,6 +1440,10 @@ real, dimension(lat_max+1) :: latb
 real, dimension(num_levels)   :: p_full, ln_p_full
 real, dimension(num_levels+1) :: p_half, ln_p_half
 integer, dimension(3) :: axes_3d_half, axes_3d_full
+!mj
+integer, dimension(2) :: axes_zm_full
+integer :: id_lat1
+!jm
 integer :: id_lonb, id_latb, id_phalf, id_lon, id_lat, id_pfull
 integer :: id_pk, id_bk, id_zsurf, ntr, k
 real :: rad_to_deg
@@ -1459,6 +1463,9 @@ id_lonb=diag_axis_init('lonb', rad_to_deg*lonb, 'degrees_E', 'x', 'longitude edg
 id_latb=diag_axis_init('latb', rad_to_deg*latb, 'degrees_N', 'y', 'latitude edges',  set_name=mod_name, Domain2=grid_domain)
 id_lon =diag_axis_init('lon', lon, 'degrees_E', 'x', 'longitude', set_name=mod_name, Domain2=grid_domain, edges=id_lonb)
 id_lat =diag_axis_init('lat', lat, 'degrees_N', 'y', 'latitude',  set_name=mod_name, Domain2=grid_domain, edges=id_latb)
+!mj zonal mean data
+id_lat1=diag_axis_init('lat1',lat, 'degrees_N', 'x', 'latitude',  set_name=mod_name)!, Domain2=grid_domain)
+!jm
 
 call pressure_variables(p_half, ln_p_half, p_full, ln_p_full, reference_sea_level_press)
 p_half = .01*p_half
@@ -1468,6 +1475,9 @@ id_pfull = diag_axis_init('pfull',p_full,'hPa','z','approx full pressure level',
 
 axes_3d_half = (/ id_lon, id_lat, id_phalf /)
 axes_3d_full = (/ id_lon, id_lat, id_pfull /)
+!mj somehow it seems impossible to not have lon as first 
+axes_zm_full = (/ id_lat1, id_pfull /)
+!jm
 axis_id(1) = id_lon
 axis_id(2) = id_lat
 axis_id(3) = id_pfull
@@ -1542,9 +1552,9 @@ id_slp = register_diag_field(mod_name, &
       'slp',(/id_lon,id_lat/),       Time, 'sea level pressure',           'pascals')
 !mj
 id_psi_star   = register_diag_field(mod_name, &
-      'psi_star',  (/id_lat,id_pfull/),       Time, 'residual mean streamfunction','kg/s')
+      'psi_star',  axes_3d_full,       Time, 'residual mean streamfunction','kg/s')
 id_psi_dwc   = register_diag_field(mod_name, &
-      'psi_dwc',  (/id_lat,id_pfull/),       Time, 'residual mean streamfunction','kg/s')
+      'psi_dwc',  axes_3d_full,       Time, 'residual mean streamfunction','kg/s')
 !jm
 
 
@@ -1659,12 +1669,20 @@ endif
 
 !mj
 if(id_psi_star > 0) then
-   call compute_psi_star(p_full,v_grid,t_grid,workzm)
-   used = send_data(id_psi_star, workzm, Time)
+   work = 0.
+   call compute_psi_star(p_full,v_grid,t_grid,work(1,:,:))
+   do i=2,size(work,1)
+      work(i,:,:) = work(1,:,:)
+   enddo
+   used = send_data(id_psi_star, work, Time)
 endif
 if(id_psi_dwc > 0) then
-   call compute_psi_dwc(p_full,u_grid,v_grid,wg_full,t_grid,dt_ug,workzm)
-   used = send_data(id_psi_dwc, workzm, Time)
+   work = 0.
+   call compute_psi_dwc(p_full,u_grid,v_grid,wg_full,t_grid,dt_ug,work(1,:,:))
+   do i=2,size(work,1)
+      work(i,:,:) = work(1,:,:)
+   enddo
+   used = send_data(id_psi_dwc, work, Time)
 endif
 !jm
 
@@ -1726,7 +1744,7 @@ subroutine compute_psi_star(p_full,v,T,psi_star)
 
   call get_deg_lat(lat)
   lat = lat/RADIAN
- 
+
   do i=is,ie
     !temp3d = v'Theta' [m/s K]
     thta(i,:,:) = (T(i,:,:) - sum(T,1)/max(1,size(T,1)))* &
@@ -1762,10 +1780,11 @@ subroutine compute_psi_dwc(p_full,u,v,w,T,dt_u,psi_dwc)
   real,dimension(is:ie, js:je, num_levels), intent(in)  :: p_full,u,v,w,T,dt_u
   real,dimension(js:je, num_levels),        intent(out) :: psi_dwc
   integer :: i,j,k
-  real,dimension(js:je) :: lat
+  real,dimension(js:je) :: lat,dpzm
   real,dimension(is:ie,js:je,num_levels) :: temp3d,thta,vThta
   real,dimension(is:ie,js:je) :: dp
-  real,dimension(js:je,num_levels) :: dpzm,tempzm,vpthp,dp_u,fhat,upvp
+  real,dimension(js:je,num_levels) :: tempzm,vpthp,dp_u,fhat,upvp
+  real :: coslat,dphi
   real, parameter :: p00=1.e5
 
   call get_deg_lat(lat)
@@ -1830,7 +1849,7 @@ subroutine compute_psi_dwc(p_full,u,v,w,T,dt_u,psi_dwc)
                       (dp_u(1,:)*vpthp(1,:)-dp_u(2,:)*vpthp(2,:))) / dphi
   do j=js+1,je-1
     dphi = (lat(j+1)-lat(j-1))/RADIAN
-    tempdiag_zm(j,:) = (-(upvp(j+1,:)-upvp(j-1,:)) + &
+    tempzm(j,:) = (-(upvp(j+1,:)-upvp(j-1,:)) + &
                       (dp_u(j+1,:)*vpthp(j+1,:)-dp_u(j-1,:)*vpthp(j-1,:))) / dphi
   enddo
   dphi = lat(je) - lat(je-1)
@@ -1850,7 +1869,7 @@ subroutine compute_psi_dwc(p_full,u,v,w,T,dt_u,psi_dwc)
                         (fhat(:,1)*vpthp(:,1)-fhat(:,2)*vpthp(:,2) - &
                         (upvp(:,1)-upvp(:,2))) / dpzm
   do k=2,num_levels-1
-    dpzm = sum(p_full(:,:,k+1)-p_full(:,:,k-1),1)/max(1,size(p_half,1))
+    dpzm = sum(p_full(:,:,k+1)-p_full(:,:,k-1),1)/max(1,size(p_full,1))
     tempzm(:,k) = tempzm(:,k) + &
                           (fhat(:,k+1)*vpthp(:,k+1)-fhat(:,k-1)*vpthp(:,k-1) - &
                           (upvp(:,k+1)-upvp(:,k-1))) / dpzm
@@ -1858,9 +1877,9 @@ subroutine compute_psi_dwc(p_full,u,v,w,T,dt_u,psi_dwc)
   dpzm = sum(p_full(:,:,num_levels)-p_full(:,:,num_levels-1),1)/max(1,size(p_full,1))
   tempzm(:,num_levels) = tempzm(:,num_levels) + &
                                 (fhat(:,num_levels)*vpthp(:,num_levels)-fhat(:,num_levels-1)*vpthp(:,num_levels-1) - &
-                                (upwp(:,num_levels)-upwp(:,num_levels-1))) / dpzm
+                                (upvp(:,num_levels)-upvp(:,num_levels-1))) / dpzm
   ! tempzm = v_star_downward_control = 1/fhat*(dt_u - diff(F)/acosphi)
-  tempzm = ( dt_u - tempzm) / fhat
+  tempzm = ( sum(dt_u,1)/max(1,size(dt_u,1)) - tempzm) / fhat
   !now compute psi_star_dwc using the trapezoidal rule
   psi_dwc = 0.
   do k=2,num_levels
