@@ -7,17 +7,20 @@ module qflux_mod
 
 implicit none
 
-real ::    qflux_amp      = 30.,  &
-           qflux_width    = 16.,  &
-           warmpool_amp   =  5.,  &
-           warmpool_width = 20.  
-integer :: warmpool_k     = 1
+real ::    qflux_amp      = 30.,  & ! amplitude of meridional Q-flux [W/m2]
+           qflux_width    = 16.,  & ! half-width of Q-flux [deg lat]
+           warmpool_amp   =  5.,  & ! amplitude of warmpool [W/m2]
+           warmpool_width = 20.,  & ! half width of warmpool [deg lat]
+           warmpool_centr =  0.,  & ! center of warmpool [deg lat]
+           warmpool_phase = 0.0     ! phase of warmpool [deg lon]
+integer :: warmpool_k     = 1       ! wave number of warmpool []
 
 logical :: qflux_initialized = .false.
 
 
 namelist /qflux_nml/ qflux_amp,qflux_width,&
-                     warmpool_amp,warmpool_width,warmpool_k
+                     warmpool_amp,warmpool_width,warmpool_centr,&
+                     warmpool_k,warmpool_phase
 
 private 
 
@@ -76,16 +79,17 @@ contains
     real,dimension(:,:),intent(inout):: flux       !total ocean heat flux
 !
     integer i,j
-    real lon,lat
+    real lon,lat,piphase
 
+    piphase = warmpool_phase/pi
     do j=1,size(latb)-1
        lat = 0.5*(latb(j+1) + latb(j))*180./pi
-       lat = lat/warmpool_width
+       lat = (lat-warmpool_centr)/warmpool_width
        if( abs(lat) .le. 1.0 ) then
           do i=1,size(lonb)-1
              lon = 0.5*(lonb(i+1) + lonb(i))
              flux(i,j) = flux(i,j) &
-                  &+ (1.-lat**2.)*warmpool_amp*cos(warmpool_k*lon)
+                  &+ (1.-lat**2.)*warmpool_amp*cos(warmpool_k*lon+piphase)
           enddo
        endif
     enddo
