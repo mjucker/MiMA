@@ -94,7 +94,7 @@ real ::   z_ref_heat      = 2.,       &
 
 integer :: surface_choice   = 1
 integer :: roughness_choice = 1
-integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp, 5->tanh with albedo_cntr,albedo_wdth
+integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp, 5->tanh with albedo_cntr,albedo_wdth, 6->sin2\phi between const_albedo and higher_albedo
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
 logical :: do_qflux         = .false. !mj
@@ -275,7 +275,13 @@ pi = 4.0*atan(1.)
         albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
              0.5*(1+tanh((lat-albedo_cntr)/albedo_wdth))
      enddo
-
+!mj add symmetric higher albedo - sin2 increase from equator to pole
+   elseif(albedo_choice .eq. 6) then
+      do j = 1, size(Atm%t_bot,2)
+         lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
+         albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
+              sin(lat)**2
+      enddo
    endif
 
 
