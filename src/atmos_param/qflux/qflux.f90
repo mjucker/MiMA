@@ -10,7 +10,7 @@ implicit none
 real ::    qflux_amp      = 30.,  & ! amplitude of meridional Q-flux [W/m2]
            qflux_width    = 16.,  & ! half-width of Q-flux [deg lat]
            warmpool_amp   =  5.,  & ! amplitude of warmpool [W/m2]
-           warmpool_width = 20.,  & ! half width of warmpool [deg lat]
+           warmpool_width = 20.,  & ! width of warmpool (square profile) [deg lat]
            warmpool_centr =  0.,  & ! center of warmpool [deg lat]
            warmpool_phase = 0.0     ! phase of warmpool [deg lon]
 integer :: warmpool_k     = 1       ! wave number of warmpool []
