@@ -1,6 +1,8 @@
 # MiMA
 Model of an idealized Moist Atmosphere
 
+For general information, head to [General Information](GeneralInformation.md).
+
 MiMA is an intermediate-complexity General Circulation Model with interactive water vapor and full radiation.
 
 This model is based on the gray radiation model of [Frierson, Held, and Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1).
