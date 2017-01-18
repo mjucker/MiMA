@@ -4,19 +4,19 @@ This model is based on the gray radiation model of [Frierson, Held, and Zurita-G
 In fact, it even includes that exact model with a namelist switch flag. The major development step of MiMA is the replacement of the gray radiation scheme with a full radiative transfer code. For maximum portability and generality, that radiative transfer code is the Rapid Radiative Transfer Model [RRTM](http://rtweb.aer.com/rrtm_frame.html), developed by AER, and described in the references below.
 
 ## Downloading source
-You can download MiMA for free. However, we ask that you cite [all relevant references](https://mjucker.github.io/MiMA/Readme.md#References) with any publications that might result from its use.
+You can download MiMA for free. However, we ask that you cite all relevant references given on the [front page](https://mjucker.github.com/MiMA/) with any publications that might result from its use.
 
 Get the latest version from [GitHub](https://github.com/mjucker/MiMA/releases/latest).
 
 ## Compiling
 
 * Dependencies
-  * The code in its present form will only compile with Intel ifort and icc compilers. This description will assume ifort and icc are available.
-  * MiMA reads and writes to netCDF, so netcdf needs to be installed on the system.
-  * Being parallel, MPI needs to be there too.
+  * The code in its present form will only compile with Intel `ifort` and `icc` compilers. This description will assume `ifort` and `icc` are available.
+  * MiMA reads and writes to `netCDF`, so `netCDF` needs to be installed on the system.
+  * Being parallel, `MPI` needs to be there too.
   * The flags need to be adjusted in the `bin/mkmf.template.$PLATFORM` file of choice. Typically, `$PLATFORM` will be slightly different on each machine, as libraries may not be found at the same location.
 
-* Compilation flags: The relevant flags are defined in `bin/mkmf.template.$PLATFORM`, and might or might not use environment variables. For instance, netCDF libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate `mkmf.template.something`, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
+* Compilation flags: The relevant flags are defined in `bin/mkmf.template.$PLATFORM`, and might or might not use environment variables. For instance, `netCDF` libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate `mkmf.template.something`, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
 
 * Compile script: A compilescript is provided in `exp/compilescript.csh`. Make sure to set the first variable, `platform`, to whatever name you gave the mkmf template in the previous step. In our example, set it to `something`. The output executable will be in `exp/exec.$PLATFORM/mima.x`
 
@@ -61,6 +61,8 @@ $CCOMB -r atmos_avg.nc atmos_avg.nc.*
 The last three lines make sure the indiviudal diagnostics files from each CPU are combined into one daily and one average file.
 
 ## Radiation options
+
+By default, MiMA uses the RRTM radiation code. This is set by `do_rrtm_radiation = .true.` (default). There are, however, two more options for radiation, described below.
 
 MiMA includes the gray radiation scheme developed by Dargan Frierson ([Frierson, Held, Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1) ). To switch between the radiation schemes, the flags `do_grey_radiation`, and `do_rrtm_radiation` in the namelist `physics_driver_nml` can be set accordingly (only one of them should be `.true.` of course). 
 
