@@ -1,164 +1,43 @@
 # Parameter settings
 
-MiMA is designed with the idea of including as much detail and
-sophistication as needed, but no more. This definition for the
-complexity of the model depends on the exact experiment one wants to
-undertake. To add more flexibility, a few somewhat more sophisticated
-options are included in the model, which are not used for the here
-presented studies of the cold point.
+This section shows (hopefully) all parameters and their default values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper.
 
-Mixed layer depth
------------------
+General
+-------
 
-Instead of having a constant heat capacity $C_O$ in Equation
-(\[mixedLayer\]) everywhere, we introduced the possibility to have a
-different heat capacity in the tropics than in the extratropics, with a
-linear interpolation in-between. This is motivated by the fact that the
-real ocean mixed layer is shallower in the tropics than higher latitudes
-\[SOME REFERENCE HERE?\], and the heat capacity is the only quantity in
-the surface parametrization that is directly connected to mixed layer
-depth. Mathematically, the ocean heat capacity is evaluated as follows:
-$$\label{heatCapacitySea}
-    C_O^s(\phi) =
-        \begin{cases}   C_{t} & ,|\phi| < \phi_{t} \\
-                        C_{t} + \Delta(\phi)(C_{p}-C_{t}) &,\phi_{t}\leq |\phi| \leq \phi_{p} \\
-                        C_{p} & ,|\phi| > \phi_{p},
-        \end{cases}$$ where
-$\Delta(\phi) = (\phi-\phi_{t})/(\phi_{p}-\phi_{t})$. Typically,
-$\phi_{t}=15^\circ$ and $\phi_{p}=60^\circ$. One of the effects of a
-variable tropical mixed layer is that the tropical precipitation maximum
-(i.e. the Intertropical Convergence Zone ITCZ) has a more (shallow
-tropics) or less (deep tropics) pronounced seasonal cycle in terms of
-meridional position.
+Most general parameters are set in `coupler/coupler_main.f90` and `coupler_nml`.
 
-A second variation to the heat capacity setup described in the main text
-concerns the definition of the ‘land’ sections at the surface. Instead
-of defining rectangular patches of land, it is possible to link the heat
-capacity of the mixed layer to the geopotential height of the surface,
-if there is surface topography. With this choice, all regions of the
-surface where the geopotential is larger than 10m$^2$/s$^2$ will take
-the value for the heat capacity defined for ‘land’.
-
-Meridional albedo profile
--------------------------
-
-Instead of using a constant surface albedo, in some situations it might
-be helpful to define an albedo which varies with latitude. The most
-obvious example is the positioning and strength of the eddy-driven jet,
-which can be displaced and/or strengthened by changing the meridional
-temperature gradients though the albedo effect. Several basic options
-are present in MiMA:
-
--   Discontinuous step: The albedo can change abruptly between two
-    different values at a given latitude. This can either be done
-    symmetrically in both hemispheres or only in one hemisphere
-
--   Continuous profile: Vary the albedo according to the form
-    $$\alpha(\phi) = \alpha_0 + (\alpha_1-\alpha_0)\left(|\phi|/90\right)^p,$$
-    with the input albedos $\alpha_0 and \alpha_1$, the order $p$, and
-    the latitude $\phi$ in degrees.
-
--   Continuous step: For ‘best of both worlds’, there is an option to
-    set the profile according to
-    $$\alpha(\phi) = \alpha_0 + (\alpha_1-\alpha_0)*0.5*[1+\tanh\left((\phi-\phi_0)/\Delta\phi\right)],$$
-    with the input albedos $\alpha_0$ and $\alpha_1$, the center
-    latitude $\phi_0$, and the width $\Delta\phi$ .
-
-‘Cloud’ albedo
---------------
-
-As mentioned by [@Merlis2013], in the real world the meridional
-structure of cloud properties plays some part in setting up the
-meridional temperature gradient through radiative effects. But rather
-than prescribing a fixed cloud fraction and liquid water content as
-these authors, we implemented a scheme where the surface albedo can be
-linked to precipitation.
-
-The scheme first counts the number of time steps when precipitation was
-non-zero in each horizontal grid box, either total precipitation, large
-scale condensation, or precipitation due to convection. Whenever the
-radiative scheme is called, this number is divided by the total number
-of time steps since the last radiation call. This gives the ratio of
-precipitating time steps for each grid box at the surface,
-$r_p(\lambda,\phi) \in [0,1]$. To avoid the risk of instabilities, the
-albedo is changed symmetrically in the zonal direction, i.e. only the
-zonal mean $\overline{r}_p(\phi)$ is used to compute the surface albedo
-$\alpha(\phi)$ as $$\label{albedo}
-    \alpha(\phi) = \alpha_c + (\alpha_p - \alpha_c)\overline{r}_p(\phi),$$
-where $\alpha_c$ is the constant part of the albedo, related to the
-absence of precipitation, and $\alpha_p$ is the maximum albedo linked to
-precipitation (the ‘cloud’ albedo). Typically, $\alpha_c=0.1$ and
-$\alpha_p=0.35$.
-
-This way of including one of the most basic effects of clouds can have
-an impact on the dynamics of the model, in particular in the tropics and
-around the midlatitude jet streams. It also allows for a more dynamic
-positioning of this cloud albedo effect, as compared to a fixed
-meridional profile.
-
-Radiative transfer
-------------------
-
-#### Perpetual simulations
-
-Whereas all simulations presented in this work are based on full
-seasonal cycle simulations, it is possible to run MiMA in perpetual
-simulation mode. The optional input variable `solday` can be set to the
-day of the year of the perpetual simulation, and it forces the zenith
-angle of the sun to always correspond to that day of the year. We note
-that this option has not been rigorously tested by the authors, and it
-is possible that for some choices of perpetual simulations the
-temperatures reach unphysical values, for instance in the polar night
-due to constant cooling.
-
-#### Time stepping
-
-In addition to setting the radiative time step, it is possible to use an
-average instead of an instantaneous zenith angle for the short wave
-radiative forcing. By default, the zenith angle averaged over the
-radiation time step is used, but the averaging time can be adjusted
-independently, or turned off completely. If the radiation time step is
-longer than the dynamics time step (usually the case), the radiative
-forcing is kept constant over the intermediate dynamics time steps. This
-can be turned off and radiative forcing is only added at every radiation
-time step.
-
-#### Spatial resolution
-
-The radiative transfer calculations take a considerable amount of time.
-In order to speed up simulations, it is possible to compute the
-radiation only at every $n$th longitudinal grid point. The radiative
-forcing is then interpolated linearly back onto the full longitudinal
-grid. By default, this variable, `lonstep`, is set to 4, i.e. only every
-fourth longitudinal grid point is used to compute the radiative
-transfer. There is no such possibility for latitude, as the
-parallelization of the code is done in meridional direction, and
-typically only two meridional grid points are present in each compute
-node.
-
-\[modelparamsapp\]
-
-All input files used for the here presented simulations are available
-for download \[DATA REFERENCE\]. As described in the main text, the
-surface drag, fluxes, mixed layer, and water vapor (thermo)dynamics are
-as described in FHZ06 and [@Frierson2007a]. We will restrict ourselves
-here to a description of the general setup, and give exact values for
-important newly introduced variables.
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ current_date | 0001,1,1,0,0,0 | Start from year 1
+ calendar | 'thirty_day' | Use 12 30-day months
 
 Dynamics
 --------
 
-In the dynamical core, we use eighth order numerical diffusion, mass,
-energy, and water correction schemes. The latter is only applied for
-pressure surfaces below 200hPa, i.e. in the troposphere. Vertical
-advection uses a second order centered scheme, and implicit time
-stepping is used with $\alpha=0.5$ and a Robertson coefficient of 0.03.
-The vertical coordinates default to an uneven sigma coordinate, spanning
-11 scale heights, but in this work we used an input profile with highly
-increased resolution between 90 and 130hPa. Spinup is achieved starting
-from an isothermal atmosphere at 264K and at rest. Time stepping is
-10min here (T42 resolution), but can be relaxed to 15min for more
-regular vertical grids.
+The dynamical core is set up in `atmos_spectral/model/spectral_dynamics.f90` and the namelist `spectral_dynamics_nml`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+   damping_order           | 4 | 8<sup>th</sup> order numerical diffusion
+   do_water_correction     | .true. | make sure water mass is conserved in the advection step
+   water_correction_limit  | 200.e2 | correct water mass only below 200hPa. removes stratospheric sink
+   vert_advect_uv          | 'second_centered' | second order vertical advection scheme
+   vert_advect_t           | 'second_centered' | second order vertical advection scheme
+   robert_coeff            | .03 | Robertson coefficient for implicit time stepping
+   lon_max                 | 128 | T42 resolution
+   lat_max                 | 64  | T42 resolution
+   num_fourier             | 42  | T42 resolution
+   num_spherical           | 43  | T42 resolution
+   fourier_inc             | 1   | T42 resolution
+   initial_sphum           | 2.e-6 | constant specific humidity initial condition
+
+Initial conditions are set in `atmos_spectral/init/spectral_init_cond.f90` and the namelist `spectral_init_nml`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ initial_temperature | 264 | Initial temperature of isothermal atmosphere in [K]
+
 
 Mixed layer
 -----------
@@ -168,42 +47,84 @@ in the main text. Table \[Surface\_default\] gives the default values
 for all newly introduced input parameters, and those that might have
 slightly changed meaning.
 
-  Variable           Default
-  ------------------ ------------------------------
-  `heat_capacity`    4e-8
-  `land_capacity`    -1 \[i.e. `=heat_capacity`\]
-  `trop_capacity`    -1 \[i.e. `=heat_capacity`\]
-  `trop_cap_limit`   15
-  `heat_cap_limit`   60
-  `albedo_choice`    1 \[i.e. constant\]
-  `const_albedo`     0.30
-  `albedo_exp`       2
-  `do_qflux`         .false.
-  `qflux_width`      16
-  `qflux_amp`        30
-  `do_warmpool`      .false.
-  `warmpool_amp`     30
-  `warmpool_phase`   0
-  `warmpool_centr`   0
-  `warmpool_k`       1
-  `land_option`      ’none’
-  `slandlon`         (0,0,0,0,0,0,0,0,0,0)
-  `elandlon`         -(1,1,1,1,1,1,1,1,1,1)
-  `slandlat`         (0,0,0,0,0,0,0,0,0,0)
-  `elandlat`         -(1,1,1,1,1,1,1,1,1,1)
+These parameters are set in `coupler/simple_surface.f90`.
 
-  : Default values for surface mixed layer. Only quantities that have
-  been added or changed meaning compared to FHZ06 are included.<span
-  data-label="Surface_default"></span>
+  Variable           | Default Value | Meaning
+  :--- | :---: | :---
+  heat_capacity   | 4e-8 | 100m mixed layer depth
+  land_capacity   | -1 | same as `heat_capacity`
+  trop_capacity   | -1 | same as `heat_capacity`
+  trop_cap_limit  | 15 | Poleward boundary for `trop_capacity`
+  heat_cap_limit  | 60 | Equatorward boundary for `heat_capacity`
+  albedo_choice   | 1  | Single value globally
+  const_albedo    | 0.30 | Value of surface albedo
+  albedo_exp      | 2  | Exponent for meridional albedo profile if `albedo_choice = 4`
+  do_qflux        | .false. | Add meridional heat flux to surface?
+  qflux_width     | 16 | if so, half-width in [degrees lat]
+  qflux_amp       | 30 | if so, amplitude in [W/m<sup>2</sup>]
+  do_warmpool     | .false. | Add zonally asymmetric heat flux?
+  warmpool_amp     | 30 | if so, amplitude in [W/m<sup>2</sup>]
+  warmpool_phase   | 0  | if so, phase in zonal direction in degrees longitude
+  warmpool_centr  | 0  | if so, center of heatflux in degrees latitude
+  warmpool_k      | 1  | if so, wave number of heatflux
+  land_option     | ’none’ | Add land-sea contrast?
+  slandlon        | (0,0,0,0,0,0,0,0,0,0) | if so, give land patches start longitude
+  elandlon        | -(1,1,1,1,1,1,1,1,1,1)| if so, give land patches end longitude
+  slandlat        | (0,0,0,0,0,0,0,0,0,0) | if so, give land patches start latitude
+  elandlat        | -(1,1,1,1,1,1,1,1,1,1)| if so, gie land patches end longitude
+ 
 
 Moist processes
 ---------------
 
-We use large scale condensation and a simple Betts-Miller convection
+In contrast to the initial *Frierson et al (2007)* setup, we turn off moist convective adjustment by default, and turn on Betts-Miller convection and use the alternative definition of specific humidity.
+
+The moist processes parameters are set in `atmos_param/moist_processes/moist_processes.f90` and the namelist `moist_processes_nml`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ do_mca | .false. | Do moist convective adjustment
+ do_lsc | .true. | Do large scale condensation
+ do_bm  | .true. | Do Betts-Miller convetion
+ do_df_stuff | .true. | When true, specific humidity = (rdgas/rvgas)*esat/pressure
+ 
+Betts-Miller
+------------
+
+We use a simple Betts-Miller convection
 scheme ($\tau_\mathrm{SBM} = $2hrs, RH$_\mathrm{SBM}=0.7$) with the
 ‘shallower’ shallow convection as described by [@Frierson2007a].
 Precipitation only falls out if all layers below the condensation level
 are saturated, otherwise, the condensate is re-evaporated.
+
+The Betts-Miller parameters are set in `atmos_param/betts_miller/betts_miller.f90` and the namelist `betts_miller_nml`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ tau_bm | 7200 | relaxation time scale in [s]
+ rhbm   | 0.7  | relative humidity to relax to
+ do_sim | .false. | don't adjust time scales to make precipitation always continuous
+ do_shallower | .true. | use shallower convection scheme
+ 
+Moist convection
+----------------
+
+Moist convection parameters are in `atmos_param/moist_conv/moist_conv.f90` and the namelist `moist_conv_nml`. This is only touched to make sure moisture handling is consistent accross namelists.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ use_df_stuff | .true. | Make everything consistent with above `do_df_stuff`
+
+Large Scale Condensation
+------------------------
+
+We want to re-evaporate outfalling precipitation if any of the layers below are sub-saturated. Parameters are described in `atmos_param/lscale_cond/lscale_cond.f90` and the namelist `lscale_cond_nml`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ do_evap | .true. | re-evaporate in below sub-saturated layers (if any)
+ use_df_stuff | .true. | Make everything consistent
+
 
 Boundary conditions
 -------------------
