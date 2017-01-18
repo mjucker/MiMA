@@ -1,4 +1,4 @@
-
+x
 module betts_miller_mod
 
 !----------------------------------------------------------------------
@@ -39,10 +39,10 @@ private
 !   --- namelist ----
 
 real    :: tau_bm=7200.
-real    :: rhbm = .8
-logical :: do_simp = .true.
+real    :: rhbm = .7
+logical :: do_simp = .false.
 !logical :: do_enadjusttemp = .false.
-logical :: do_shallower = .false.
+logical :: do_shallower = .true.
 logical :: do_changeqref = .false.
 logical :: do_envsat = .false.
 logical :: do_taucape = .false.
@@ -63,34 +63,34 @@ namelist /betts_miller_nml/  tau_bm, rhbm, do_simp, &
 !
 !  rhbm      = relative humidity that you're relaxing towards
 !
-!  do_simp = do the simple method where you adjust timescales to make 
+!  do_simp = do the simple method where you adjust timescales to make
 !            precip continuous always
 !
 !  do_enadjusttemp = do the betts-miller (1986) way of conserving energy:
-!                    adjust the reference temperature by a fixed amount w/ 
-!                    height.  
+!                    adjust the reference temperature by a fixed amount w/
+!                    height.
 
-! ***   if neither of the two above are true, then we instead adjust the 
-!       humidity profile so its precipitation is increased to balance the 
-!       precip_t change, and hence dries more than the 
-! 
+! ***   if neither of the two above are true, then we instead adjust the
+!       humidity profile so its precipitation is increased to balance the
+!       precip_t change, and hence dries more than the
+!
 !  do_shallower = do the shallow convection scheme where it chooses a smaller
 !                 depth such that precipitation is zero
-! 
-!  do_changeqref = do the shallow convection scheme where if changes the 
+!
+!  do_changeqref = do the shallow convection scheme where if changes the
 !                  profile of both q and T in order make precip zero
-! 
-!  do_envsat = reference profile is rhbm times saturated wrt environment 
+!
+!  do_envsat = reference profile is rhbm times saturated wrt environment
 !              (if false, it's rhbm times parcel)
-!  
+!
 !  do_taucape = scheme where taubm is proportional to CAPE**-1/2
 !
-!  capetaubm = for the above scheme, the value of CAPE for which 
+!  capetaubm = for the above scheme, the value of CAPE for which
 !              tau = tau_bm
-!  
+!
 !  tau_min   = minimum relaxation time allowed for the above scheme
 !
-!  
+!
 !
 !-----------------------------------------------------------------------
 
@@ -117,7 +117,7 @@ contains
 !           phalf    pressure at half (interface) model levels
 !           coldT    should precipitation be snow at this point?
 !   optional:
-!           mask     optional mask (0 or 1.) 
+!           mask     optional mask (0 or 1.)
 !           conv     logical flag; if true then no betts-miller
 !                       adjustment is performed at that grid-point or
 !                       model level
@@ -129,8 +129,8 @@ contains
 !                      full model levels
 !           bmflag   flag for which routines you're calling
 !           klzbs    stored klzb values
-!           cape     convectively available potential energy 
-!           cin      convective inhibition (this and the above are before the 
+!           cape     convectively available potential energy
+!           cin      convective inhibition (this and the above are before the
 !                    adjustment)
 !           invtau_bm_t temperature relaxation timescale
 !           invtau_bm_q humidity relaxation timescale
@@ -159,7 +159,7 @@ logical :: avgbl
    real,dimension(size(tin,3))                         :: eref, rpc, tpc, &
                                                           tpc1, rpc1
 
-   real                                                ::  & 
+   real                                                ::  &
        cape1, cin1, tot, deltak, deltaq, qrefint, deltaqfrac, deltaqfrac2, &
        ptopfrac, es, capeflag1, plzb, plcl, cape2, small
 integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
@@ -191,7 +191,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
              bmflag(i,j) = 0.
              tpc = tin(i,j,:)
              rpc = rin(i,j,:)
-! calculate cape, cin, level of zero buoyancy, and parcel properties 
+! calculate cape, cin, level of zero buoyancy, and parcel properties
 ! new code (second order in delta ln p and exact LCL calculation)
              call capecalcnew( kx,  pfull(i,j,:),  phalf(i,j,:),&
                             cp_air, rdgas, rvgas, hlv, kappa, tin(i,j,:), &
@@ -203,30 +203,30 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
              cape(i,j) = cape1
              cin(i,j) = cin1
              klzbs(i,j) = klzb
-             if(cape1.gt.0.) then 
-!             if((tot.gt.0.).and.(cape1.gt.0.)) then 
+             if(cape1.gt.0.) then
+!             if((tot.gt.0.).and.(cape1.gt.0.)) then
                 bmflag(i,j) = 1.
 ! reference temperature is just that of the parcel all the way up
                 t_ref(i,j,:) = tpc
                 do k=klzb,kx
-! sets reference spec hum to a certain relative hum (change to vapor pressure, 
+! sets reference spec hum to a certain relative hum (change to vapor pressure,
 ! multiply by rhbm, then back to spec humid)
-                   if(do_envsat) then 
+                   if(do_envsat) then
 !                      call establ2(es,tin(i,j,k))
                       call escomp(tin(i,j,k),es)
                       es = es*rhbm
 !                      rpc(k) = d622*es/(pfull(i,j,k) - d378*es)
                       rpc(k) = rdgas/rvgas*es/pfull(i,j,k)
                       q_ref(i,j,k) = rpc(k)/(1 + rpc(k))
-                   else 
+                   else
                       rpc(k) = rhbm*rpc(k)
 !                      eref(k) = rhbm*pfull(i,j,k)*rpc(k)/(d622 + d378*rpc(k))
 !                      rpc(k) = d622*eref(k)/(pfull(i,j,k) - d378*eref(k))
                       q_ref(i,j,k) = rpc(k)/(1 + rpc(k))
-                   endif 
+                   endif
                 end do
 ! set the tendencies to zero where you don't adjust
-! set the reference profiles to be the original profiles (for diagnostic 
+! set the reference profiles to be the original profiles (for diagnostic
 ! purposes only --  you can think of this as what you're relaxing to in
 ! areas above the actual convection
                 do k=1,max(klzb-1,1)
@@ -238,25 +238,25 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 ! initialize p to zero for the loop
                 precip(i,j) = 0.
                 precip_t(i,j) = 0.
-! makes t_bm prop to (CAPE)**-.5.  Gives a relaxation time of tau_bm when 
+! makes t_bm prop to (CAPE)**-.5.  Gives a relaxation time of tau_bm when
 ! CAPE = sqrt(capetaubm)
                 if(do_taucape) then
                    tau_bm = sqrt(capetaubm)*tau_bm/sqrt(cape1)
                    if(tau_bm.lt.tau_min) tau_bm = tau_min
-                endif 
+                endif
                 do k=klzb, kx
 ! relax to reference profiles
                    tdel(i,j,k) = - (tin(i,j,k) - t_ref(i,j,k))/tau_bm*dt
                    qdel(i,j,k) = - (qin(i,j,k) - q_ref(i,j,k))/tau_bm*dt
-! Precipitation can be calculated already, based on the change in q on the 
-! way up (this isn't altered in the energy conservation scheme).  
+! Precipitation can be calculated already, based on the change in q on the
+! way up (this isn't altered in the energy conservation scheme).
                    precip(i,j) = precip(i,j) - qdel(i,j,k)*(phalf(i,j,k+1)- &
                                  phalf(i,j,k))/grav
                    precip_t(i,j)= precip_t(i,j) + cp_air/(hlv+small)*tdel(i,j,k)* &
                                  (phalf(i,j,k+1)-phalf(i,j,k))/grav
                 end do
-                if ((precip(i,j).gt.0.).and.(precip_t(i,j).gt.0.)) then 
-! If precip > 0, then correct energy. 
+                if ((precip(i,j).gt.0.).and.(precip_t(i,j).gt.0.)) then
+! If precip > 0, then correct energy.
                    bmflag(i,j) = 2.
                    if(precip(i,j).gt.precip_t(i,j)) then
 ! if the q precip is greater, then lengthen the relaxation timescale on q to
@@ -289,7 +289,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                          end do
 ! Divide by total pressure.
                          deltak = deltak/(phalf(i,j,kx+1) - phalf(i,j,klzb))
-! Adjust the reference profile (uniformly with height), and correspondingly 
+! Adjust the reference profile (uniformly with height), and correspondingly
 ! the temperature change.
                          t_ref(i,j,klzb:kx) = t_ref(i,j,klzb:kx)+ &
                               deltak*tau_bm/dt
@@ -299,9 +299,9 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                 else if(precip_t(i,j).gt.0.) then
 ! If precip < 0, then do the shallow conv routine.
 ! First option: do_shallower = true
-! This chooses the depth of convection based on choosing the height that 
-! it can make precip zero, i.e., subtract off heights until that precip 
-! becomes positive.  
+! This chooses the depth of convection based on choosing the height that
+! it can make precip zero, i.e., subtract off heights until that precip
+! becomes positive.
                    if (do_shallower) then
 ! ktop is the new top of convection.  set this initially to klzb.
                       ktop = klzb
@@ -311,11 +311,11 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                                   (phalf(i,j,ktop) - phalf(i,j,ktop+1))/grav
                          ktop = ktop + 1
                       end do
-! since there will be an overshoot (precip is going to be greater than zero 
+! since there will be an overshoot (precip is going to be greater than zero
 ! once we finish this), the actual new top of convection is somewhere between
 ! the current ktop, and one level above this.  set ktop to the level above.
                       ktop = ktop - 1
-! Adjust the tendencies in the places above back to zero, and the reference 
+! Adjust the tendencies in the places above back to zero, and the reference
 ! profiles back to the original t,q.
                       if (ktop.gt.klzb) then
                          qdel(i,j,klzb:ktop-1) = 0.
@@ -323,18 +323,18 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                          tdel(i,j,klzb:ktop-1) = 0.
                          t_ref(i,j,klzb:ktop-1) = tin(i,j,klzb:ktop-1)
                       end if
-! Then make the change only a fraction of the new top layer so the precip is 
+! Then make the change only a fraction of the new top layer so the precip is
 ! identically zero.
-! Calculate the fractional penetration of convection through that top layer.  
-! This is the amount necessary to make precip identically zero.  
-                      if (precip(i,j).gt.0.) then 
+! Calculate the fractional penetration of convection through that top layer.
+! This is the amount necessary to make precip identically zero.
+                      if (precip(i,j).gt.0.) then
                          ptopfrac = precip(i,j)/(qdel(i,j,ktop)* &
                             (phalf(i,j,ktop+1) - phalf(i,j,ktop)))*grav
-! Reduce qdel in the top layer by this fraction. 
+! Reduce qdel in the top layer by this fraction.
                          qdel(i,j,ktop) = ptopfrac*qdel(i,j,ktop)
 ! Set precip to zero
                          precip(i,j) = 0.
-! Now change the reference temperature in such a way to make the net 
+! Now change the reference temperature in such a way to make the net
 ! heating zero.
 !! Reduce tdel in the top layer
                          tdel(i,j,ktop) = ptopfrac*tdel(i,j,ktop)
@@ -347,7 +347,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                             end do
 ! Normalize by the pressure difference.
                             deltak = deltak/(phalf(i,j,kx+1) - phalf(i,j,ktop))
-! Subtract this value uniformly from tdel, and make the according change to 
+! Subtract this value uniformly from tdel, and make the according change to
 ! t_ref.
                             do k=ktop,kx
                                tdel(i,j,k) = tdel(i,j,k) + deltak
@@ -364,20 +364,20 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                          invtau_bm_q(i,j) = 0.
                       end if
                    else if(do_changeqref) then
-! Change the reference profile of q by a certain fraction so that precip is 
+! Change the reference profile of q by a certain fraction so that precip is
 ! zero.  This involves calculating the total integrated q_ref dp (this is the
-! quantity intqref), as well as the necessary change in q_ref (this is the 
-! quantity deltaq).  Then the fractional change in q_ref at each level (the 
-! quantity deltaqfrac) is 1-deltaq/intqref.  (have to multiply q_ref by 
-! 1-deltaq/intqref at every level)  Then the change in qdel is 
+! quantity intqref), as well as the necessary change in q_ref (this is the
+! quantity deltaq).  Then the fractional change in q_ref at each level (the
+! quantity deltaqfrac) is 1-deltaq/intqref.  (have to multiply q_ref by
+! 1-deltaq/intqref at every level)  Then the change in qdel is
 ! -deltaq/intqref*q_ref*dt/tau_bm.
 ! Change the reference profile of T by a uniform amount so that precip is zero.
                       deltak = 0.
                       deltaq = 0.
                       qrefint = 0.
                       do k=klzb,kx
-! deltaq = a positive quantity (since int qdel is positive).  It's how 
-! much q_ref must be changed by, in an integrated sense.  The requisite 
+! deltaq = a positive quantity (since int qdel is positive).  It's how
+! much q_ref must be changed by, in an integrated sense.  The requisite
 ! change in qdel is this without the factors of tau_bm and dt.
                          deltaq = deltaq - qdel(i,j,k)*tau_bm/dt* &
                                    (phalf(i,j,k) - phalf(i,j,k+1))
@@ -419,7 +419,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                    invtau_bm_q(i,j) = 0.
                 end if
 ! if no CAPE, set tendencies to zero.
-             else 
+             else
                 tdel(i,j,:) = 0.0
                 qdel(i,j,:) = 0.0
                 precip(i,j) = 0.0
@@ -433,7 +433,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 
        rain = precip
        snow = 0.
-   
+
 
    end subroutine betts_miller
 
@@ -452,7 +452,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 !    phalf       pressure at half levels
 !    cp_air      specific heat of dry air
 !    rdgas       gas constant for dry air
-!    rvgas       gas constant for water vapor (used in Clausius-Clapeyron, 
+!    rvgas       gas constant for water vapor (used in Clausius-Clapeyron,
 !                not for virtual temperature effects, which are not considered)
 !    hlv         latent heat of vaporization
 !    kappa       the constant kappa
@@ -462,23 +462,23 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 !
 !    Output:
 !    cape        Convective available potential energy
-!    cin         Convective inhibition (if there's no LFC, then this is set 
+!    cin         Convective inhibition (if there's no LFC, then this is set
 !                to zero)
-!    tp          Parcel temperature (set to the environmental temperature 
+!    tp          Parcel temperature (set to the environmental temperature
 !                where no adjustment)
-!    rp          Parcel specific humidity (set to the environmental humidity 
-!                where no adjustment, and set to the saturation humidity at 
+!    rp          Parcel specific humidity (set to the environmental humidity
+!                where no adjustment, and set to the saturation humidity at
 !                the parcel temperature below the LCL)
 !    klzb        Level of zero buoyancy
 !
-!    Algorithm: 
-!    Start with surface parcel. 
-!    Calculate the lifting condensation level (uses an analytic formula and a 
-!       lookup table).  
+!    Algorithm:
+!    Start with surface parcel.
+!    Calculate the lifting condensation level (uses an analytic formula and a
+!       lookup table).
 !    Average under the LCL if desired, if this is done, then a new LCL must
-!       be calculated.  
+!       be calculated.
 !    Calculate parcel ascent up to LZB.
-!    Calculate CAPE and CIN.  
+!    Calculate CAPE and CIN.
       implicit none
       integer, intent(in)                    :: kx
       logical, intent(in)                    :: avgbl
@@ -514,13 +514,13 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
       t0 = tin(kx) + buoyancy_kick
       r0 = rin(kx)
 ! calculate the lifting condensation level by the following:
-! are you saturated to begin with?  
+! are you saturated to begin with?
       call escomp(t0,es)
       rs = rdgas/rvgas*es/p(kx)
       if (r0.ge.rs) then
-! if you¹re already saturated, set lcl to be the surface value.
+! if youï¿½re already saturated, set lcl to be the surface value.
          plcl = p(kx)
-! the first level where you¹re completely saturated.
+! the first level where youï¿½re completely saturated.
          klcl = kx
 ! saturate out to get the parcel temp and humidity at this level
 ! first order (in delta T) accurate expression for change in temp
@@ -528,15 +528,15 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
          call escomp(tp(kx),es)
          rp(kx) = rdgas/rvgas*es/p(kx)
       else
-! if not saturated to begin with, use the analytic expression to calculate the 
-! exact pressure and temperature where you¹re saturated.  
+! if not saturated to begin with, use the analytic expression to calculate the
+! exact pressure and temperature where youï¿½re saturated.
          theta0 = t0*(pstar/p(kx))**kappa
-! the expression that we utilize is 
+! the expression that we utilize is
 ! log(r/theta**(1/kappa)*pstar*rvgas/rdgas/es00) = log(es/T**(1/kappa))
 ! (the division by es00 is necessary because the RHS values are tabulated
 ! for control moisture content)
-! The right hand side of this is only a function of temperature, therefore 
-! this is put into a lookup table to solve for temperature.  
+! The right hand side of this is only a function of temperature, therefore
+! this is put into a lookup table to solve for temperature.
          if (r0.gt.0.) then
             value = log(theta0**(-1/kappa)*r0*pstar*rvgas/rdgas/es0)
             call lcltabl(value,tlcl)
@@ -561,7 +561,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
             end do
             go to 11
          end if
-! calculate the parcel temperature (adiabatic ascent) below the LCL.  
+! calculate the parcel temperature (adiabatic ascent) below the LCL.
 ! the mixing ratio stays the same
          do while (p(k).gt.plcl)
             tp(k) = theta0*(p(k)/pstar)**kappa
@@ -574,9 +574,9 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 ! first level where you're saturated at the level
          klcl = k
 	 if (klcl.eq.1) klcl = 2
-! do a saturated ascent to get the parcel temp at the LCL.  
-! use your 2nd order equation up to the pressure above.  
-! moist adaibat derivatives: (use the lcl values for temp, humid, and 
+! do a saturated ascent to get the parcel temp at the LCL.
+! use your 2nd order equation up to the pressure above.
+! moist adaibat derivatives: (use the lcl values for temp, humid, and
 ! pressure)
          a = kappa*tlcl + hlv/cp_air*r0
          b = hlv**2.*r0/cp_air/rvgas/tlcl**2.
@@ -584,7 +584,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 ! first order in p
 !         tp(klcl) = tlcl + dtdlnp*log(p(klcl)/plcl)
 ! second order in p (RK2)
-! first get temp halfway up 
+! first get temp halfway up
          tp(klcl) = tlcl + dtdlnp*log(p(klcl)/plcl)/2.
          if ((tp(klcl).lt.173.16).and.nocape) go to 11
          call escomp(tp(klcl),es)
@@ -606,22 +606,22 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 !         write (*,*) 'tp, rp klcl:kx, new', tp(klcl:kx), rp(klcl:kx)
 ! CAPE/CIN stuff
          if ((tp(klcl).lt.tin(klcl)).and.nocape) then
-! if you¹re not yet buoyant, then add to the CIN and continue
+! if youï¿½re not yet buoyant, then add to the CIN and continue
             cin = cin + rdgas*(tin(klcl) - &
                  tp(klcl))*log(phalf(klcl+1)/phalf(klcl))
          else
-! if you¹re buoyant, then add to cape
+! if youï¿½re buoyant, then add to cape
             cape = cape + rdgas*(tp(klcl) - &
                   tin(klcl))*log(phalf(klcl+1)/phalf(klcl))
-! if it¹s the first time buoyant, then set the level of free convection to k
+! if itï¿½s the first time buoyant, then set the level of free convection to k
             if (nocape) then
                nocape = .false.
                klfc = klcl
             endif
          end if
       end if
-! then average the properties over the boundary layer if so desired.  to give 
-! a new "parcel".  this may not be saturated at the LCL, so make sure you get 
+! then average the properties over the boundary layer if so desired.  to give
+! a new "parcel".  this may not be saturated at the LCL, so make sure you get
 ! to a level where it is before moist adiabatic ascent!
 !!!! take out all the below (between the exclamation points) if no avgbl !!!!
       if (avgbl) then
@@ -640,16 +640,16 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
          rs = rdgas/rvgas*es/p(klcl)
 ! if you're not saturated, get a new LCL
          if (rm.lt.rs) then
-! reset CIN to zero.  
+! reset CIN to zero.
             cin = 0.
-! again, use the analytic expression to calculate the exact pressure and 
-! temperature where you¹re saturated.  
-! the expression that we utilize is 
+! again, use the analytic expression to calculate the exact pressure and
+! temperature where youï¿½re saturated.
+! the expression that we utilize is
 ! log(r/theta**(1/kappa)*pstar*rvgas/rdgas/es00)= log(es/T**(1/kappa))
 ! (the division by es00 is necessary because the RHS values are tabulated
 ! for control moisture content)
-! The right hand side of this is only a function of temperature, therefore 
-! this is put into a lookup table to solve for temperature.  
+! The right hand side of this is only a function of temperature, therefore
+! this is put into a lookup table to solve for temperature.
             value = log(thetam**(-1/kappa)*rm*pstar*rvgas/rdgas/es0)
             call lcltabl(value,tlcl2)
             plcl2 = pstar*(tlcl2/thetam)**(1/kappa)
@@ -658,9 +658,9 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                plcl2 = p(1)
             end if
             k = kx
-! calculate the parcel temperature (adiabatic ascent) below the LCL.  
+! calculate the parcel temperature (adiabatic ascent) below the LCL.
 ! the mixing ratio stays the same
-            do while (p(k).gt.plcl2) 
+            do while (p(k).gt.plcl2)
                tp(k) = thetam*(p(k)/pstar)**kappa
                call escomp(tp(k),es)
                rp(k) = rdgas/rvgas*es/p(k)
@@ -668,12 +668,12 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
                cin = cin + rdgas*(tin(k) - tp(k))*log(phalf(k+1)/phalf(k))
                k = k-1
             end do
-! first level where you¹re saturated at the level
+! first level where youï¿½re saturated at the level
             klcl2 = k
 	    if (klcl2.eq.1) klcl2 = 2
-! do a saturated ascent to get the parcel temp at the LCL.  
-! use your 2nd order equation up to the pressure above.  
-! moist adaibat derivatives: (use the lcl values for temp, humid, and 
+! do a saturated ascent to get the parcel temp at the LCL.
+! use your 2nd order equation up to the pressure above.
+! moist adaibat derivatives: (use the lcl values for temp, humid, and
 ! pressure)
             a = kappa*tlcl2 + hlv/cp_air*rm
             b = hlv**2.*rm/cp_air/rvgas/tlcl2**2.
@@ -681,7 +681,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 ! first order in p
 !            tp(klcl2) = tlcl2 + dtdlnp*log(p(klcl2)/plcl2)
 ! second order in p (RK2)
-! first get temp halfway up 
+! first get temp halfway up
          tp(klcl2) = tlcl2 + dtdlnp*log(p(klcl2)/plcl2)/2.
          if ((tp(klcl2).lt.173.16).and.nocape) go to 11
          call escomp(tp(klcl2),es)
@@ -701,14 +701,14 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
             rp(klcl2) = rdgas/rvgas*es/p(klcl2)
 ! CAPE/CIN stuff
             if ((tp(klcl2).lt.tin(klcl2)).and.nocape) then
-! if you¹re not yet buoyant, then add to the CIN and continue
+! if youï¿½re not yet buoyant, then add to the CIN and continue
                cin = cin + rdgas*(tin(klcl2) - &
                     tp(klcl2))*log(phalf(klcl2+1)/phalf(klcl2))
             else
-! if you¹re buoyant, then add to cape
+! if youï¿½re buoyant, then add to cape
                cape = cape + rdgas*(tp(klcl) - &
                      tin(klcl))*log(phalf(klcl+1)/phalf(klcl))
-! if it¹s the first time buoyant, then set the level of free convection to k
+! if itï¿½s the first time buoyant, then set the level of free convection to k
                if (nocape) then
                   nocape = .false.
                   klfc = klcl2
@@ -717,7 +717,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
          end if
       end if
 !!!! take out all of the above (within the exclamations) if no avgbl !!!!
-! then, start at the LCL, and do moist adiabatic ascent by the first order 
+! then, start at the LCL, and do moist adiabatic ascent by the first order
 ! scheme -- 2nd order as well
       do k=klcl-1,1,-1
          a = kappa*tp(k+1) + hlv/cp_air*rp(k+1)
@@ -726,7 +726,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 ! first order in p
 !         tp(k) = tp(k+1) + dtdlnp*log(p(k)/p(k+1))
 ! second order in p (RK2)
-! first get temp halfway up 
+! first get temp halfway up
          tp(k) = tp(k+1) + dtdlnp*log(p(k)/p(k+1))/2.
          if ((tp(k).lt.173.16).and.nocape) go to 11
          call escomp(tp(k),es)
@@ -736,35 +736,35 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
          dtdlnp = a/(1. + b)
 ! second half of RK2
          tp(k) = tp(k+1) + dtdlnp*log(p(k)/p(k+1))
-!         d2tdlnp2 = (kappa + b - 1. - b/tp(k+1)*(hlv/rvgas/tp(k+1) - & 
+!         d2tdlnp2 = (kappa + b - 1. - b/tp(k+1)*(hlv/rvgas/tp(k+1) - &
 !               2.)*dtdlnp)/(1. + b)*dtdlnp - hlv/cp_air*rp(k+1)/(1. + b)
 ! second order in p
 !         tp(k) = tp(k+1) + dtdlnp*log(p(k)/p(k+1)) + .5*d2tdlnp2*(log( &
 !             p(k)/p(k+1)))**2.
-! if you're below the lookup table value, just presume that there's no way 
+! if you're below the lookup table value, just presume that there's no way
 ! you could have cape and call it quits
          if ((tp(k).lt.173.16).and.nocape) go to 11
          call escomp(tp(k),es)
          rp(k) = rdgas/rvgas*es/p(k)
          if ((tp(k).lt.tin(k)).and.nocape) then
-! if you¹re not yet buoyant, then add to the CIN and continue
+! if youï¿½re not yet buoyant, then add to the CIN and continue
             cin = cin + rdgas*(tin(k) - tp(k))*log(phalf(k+1)/phalf(k))
          elseif((tp(k).lt.tin(k)).and.(.not.nocape)) then
-! if you have CAPE, and it¹s your first time being negatively buoyant, 
+! if you have CAPE, and itï¿½s your first time being negatively buoyant,
 ! then set the level of zero buoyancy to k+1, and stop the moist ascent
             klzb = k+1
             go to 11
          else
-! if you¹re buoyant, then add to cape
+! if youï¿½re buoyant, then add to cape
             cape = cape + rdgas*(tp(k) - tin(k))*log(phalf(k+1)/phalf(k))
-! if it¹s the first time buoyant, then set the level of free convection to k
+! if itï¿½s the first time buoyant, then set the level of free convection to k
             if (nocape) then
                nocape = .false.
                klfc = k
             endif
          end if
       end do
- 11   if(nocape) then 
+ 11   if(nocape) then
 ! this is if you made it through without having a LZB
 ! set LZB to be the top level.
          plzb = p(1)
@@ -777,7 +777,7 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 !      write (*,*) 'plcl, klcl, tlcl, r0 new', plcl, klcl, tlcl, r0
 !      write (*,*) 'tp, rp new', tp, rp
 !       write (*,*) 'tp, new', tp
-!       write (*,*) 'tin new', tin 
+!       write (*,*) 'tin new', tin
 !       write (*,*) 'klcl, klfc, klzb new', klcl, klfc, klzb
       end subroutine capecalcnew
 
@@ -785,18 +785,18 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
       subroutine lcltabl(value,tlcl)
 !
 ! Table of values used to compute the temperature of the lifting condensation
-! level.  
-! 
-! the expression that we utilize is 
-! log(r/theta**(1/kappa)*pstar*rvgas/rdgas/es00) = log(es/T**(1/kappa))
-! the RHS is tabulated for control moisture content, hence the division 
-! by es00 on the LHS
-! 
-! Gives the values of the temperature for the following range: 
-!   starts with -23, is uniformly distributed up to -10.4.  There are a 
-! total of 127 values, and the increment is .1.  
+! level.
 !
-      implicit none 
+! the expression that we utilize is
+! log(r/theta**(1/kappa)*pstar*rvgas/rdgas/es00) = log(es/T**(1/kappa))
+! the RHS is tabulated for control moisture content, hence the division
+! by es00 on the LHS
+!
+! Gives the values of the temperature for the following range:
+!   starts with -23, is uniformly distributed up to -10.4.  There are a
+! total of 127 values, and the increment is .1.
+!
+      implicit none
       real, intent(in)     :: value
       real, intent(out)    :: tlcl
 
@@ -885,4 +885,3 @@ integer  i, j, k, ix, jx, kx, klzb, ktop, klzb2
 !#######################################################################
 
 end module betts_miller_mod
-
