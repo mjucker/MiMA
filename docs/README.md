@@ -5,8 +5,8 @@ MiMA is an intermediate-complexity General Circulation Model with interactive wa
 
 * [Getting started](GettingStarted.md): Downloading, compiling, test run
 * [Parameter settings](Parameters.md): Default values and settings
-* [References](#References): Required and relevant references
-* [License](#License): License information
+* [References](#references): Required and relevant references
+* [License](#license): License information
 
 
 ## News

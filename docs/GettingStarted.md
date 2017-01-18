@@ -4,7 +4,7 @@ This model is based on the gray radiation model of [Frierson, Held, and Zurita-G
 In fact, it even includes that exact model with a namelist switch flag. The major development step of MiMA is the replacement of the gray radiation scheme with a full radiative transfer code. For maximum portability and generality, that radiative transfer code is the Rapid Radiative Transfer Model [RRTM](http://rtweb.aer.com/rrtm_frame.html), developed by AER, and described in the references below.
 
 ## Downloading source
-You can download MiMA for free. However, we ask that you cite [all relevant references](README.md#References) with any publications that might result from its use.
+You can download MiMA for free. However, we ask that you cite [all relevant references](https://mjucker.github.io/MiMA/Readme.md#References) with any publications that might result from its use.
 
 Get the latest version from [GitHub](https://github.com/mjucker/MiMA/releases/latest).
 
