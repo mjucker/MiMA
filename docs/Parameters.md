@@ -21,7 +21,7 @@ The dynamical core is set up in `atmos_spectral/model/spectral_dynamics.f90` and
  :--- | :---: | :---
    damping_order           | 4 | 8<sup>th</sup> order numerical diffusion
    do_water_correction     | .true. | make sure water mass is conserved in the advection step
-   water_correction_limit  | 200.e2 | correct water mass only below 200hPa. removes stratospheric sink
+   water_correction_limit  | 0. | correct water mass only below this level [Pa]. Removes stratospheric sink
    vert_advect_uv          | 'second_centered' | second order vertical advection scheme
    vert_advect_t           | 'second_centered' | second order vertical advection scheme
    robert_coeff            | .03 | Robertson coefficient for implicit time stepping
