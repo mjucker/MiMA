@@ -30,7 +30,6 @@ The dynamical core is set up in `atmos_spectral/model/spectral_dynamics.f90` and
    num_fourier             | 42  | T42 resolution
    num_spherical           | 43  | T42 resolution
    fourier_inc             | 1   | T42 resolution
-   initial_sphum           | 2.e-6 | constant specific humidity initial condition
 
 Initial conditions are set in `atmos_spectral/init/spectral_init_cond.f90` and the namelist `spectral_init_nml`.
 
