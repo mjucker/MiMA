@@ -1,5 +1,7 @@
 # MiMA
-Model of an idealized Moist Atmosphere: Intermediate-complexity General Circulation Model with interactive water vapor and full radiation.
+Model of an idealized Moist Atmosphere
+
+MiMA is an intermediate-complexity General Circulation Model with interactive water vapor and full radiation.
 
 This model is based on the gray radiation model of [Frierson, Held, and Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1).
 In fact, it even includes that exact model with a namelist switch flag. The major development step of MiMA is the replacement of the gray radiation scheme with a full radiative transfer code. For maximum portability and generality, that radiative transfer code is the Rapid Radiative Transfer Model [RRTM](http://rtweb.aer.com/rrtm_frame.html), developed by AER, and described in the references below.
