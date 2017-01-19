@@ -1,9 +1,70 @@
 # Parameter settings
 
-This section shows (hopefully) all parameters and their default values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper.
+This section shows most of the parameters and their default and/or recommended values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper.
 
-General
--------
+## Recommended values
+
+### General
+
+Namelist `coupler_nml`
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ dt_atmos | 600 | integration time step in [s]
+ 
+ ### Dynamics
+ 
+ Namelist `spectral_dynamics_nml`
+ 
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ water_correction_limit | 200.e2 | [Pa] turn off water correction in stratosphere to avoid systematic sink
+ initial_sphum | 2.e6 | [kg/kg] Start with some water vapor as the stratosphere takes very long to fill up dynamically
+ num_levels | >= 40 | Number of vertical levels
+ vert_coord_option | 'uneven_sigma' | use hybrid sigma/pressure coordinates
+ surf_res   | 0.4 | parameter 1 to define vertical level distribution
+ scale_heights | 11.0 | parameter 2 to define vertical level distribution
+ topography_option | 'gaussian' | if orographic forcing required
+ 
+ Namelist `gaussian_topog_nml`, example for 3km wave-two in midlatitudes
+ 
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+   height   | 3000., 3000., 
+   olat     |   45.,   45.,
+   olon     |   90.,  270.,
+   wlat     |   20.,   20.,
+   wlon     |   20.,   20.,
+   rlat     |    0.,    0.,
+   rlon     |    0.,    0., /
+
+### Mixed layer
+
+Namelist `simple_surface_nml`
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ Tm   | 285 | [K] some meridional profile already in initial conditions
+ do_qflux | .true. | export tropical heat into extratropics. Mimic ocean circulation
+ do_warmpool | .true. | mimic tropical warmpool wave-one forcing
+ const_albedo | 0.22 | global SSTs reasonable
+ [land_option | 'lonlat' | if some land-sea contrast desired ]
+ [slandlon    |   0, | [deg] don't forget the ',' ]
+ [elandlon    | 360, | [deg] zonally symmetric land]
+ [slandlat    |  40, | [deg] way outside the tropics ]
+ [elandlat    |  50, | [deg] midlats only]
+ 
+Namelist `qflux_nml`
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ qflux_amp | 30 | [W/m<sup>2</sup>] gives a good compromise between too strong jets and double ITCZ 
+ warmpool_amp | 30 | [W/m<sup>2</sup> gives realistic warmpool anomaly and good cold point
+
+
+## Default values
+
+### General
 
 Most general parameters are set in `coupler/coupler_main.f90` and `coupler_nml`.
 
@@ -12,8 +73,7 @@ Most general parameters are set in `coupler/coupler_main.f90` and `coupler_nml`.
  current_date | 0001,1,1,0,0,0 | Start from year 1
  calendar | 'thirty_day' | Use 12 30-day months
 
-Dynamics
---------
+### Dynamics
 
 The dynamical core is set up in `atmos_spectral/model/spectral_dynamics.f90` and the namelist `spectral_dynamics_nml`.
 
@@ -21,7 +81,7 @@ The dynamical core is set up in `atmos_spectral/model/spectral_dynamics.f90` and
  :--- | :---: | :---
    damping_order           | 4 | 8<sup>th</sup> order numerical diffusion
    do_water_correction     | .true. | make sure water mass is conserved in the advection step
-   water_correction_limit  | 0. | correct water mass only below this level [Pa]. Removes stratospheric sink
+   water_correction_limit  | 200.e2 | correct water mass only below this level [Pa]. Introduces artificial sink in stratosphere if corrected there. 
    vert_advect_uv          | 'second_centered' | second order vertical advection scheme
    vert_advect_t           | 'second_centered' | second order vertical advection scheme
    robert_coeff            | .03 | Robertson coefficient for implicit time stepping
@@ -38,8 +98,7 @@ Initial conditions are set in `atmos_spectral/init/spectral_init_cond.f90` and t
  initial_temperature | 264 | Initial temperature of isothermal atmosphere in [K]
 
 
-Mixed layer
------------
+### Mixed layer
 
 All changes to the mixed layer ocean as compared to FHZ06 are discussed
 in the main text. Table \[Surface\_default\] gives the default values
@@ -50,11 +109,12 @@ These parameters are set in `coupler/simple_surface.f90`.
 
   Variable           | Default Value | Meaning
   :--- | :---: | :---
-  heat_capacity   | 4e-8 | 100m mixed layer depth
+  Tm              | 265 | Initial surface temperature [K]. 1K warmer than isothermal atmosphere seems reasonable to get convection going right away.
+  heat_capacity   | 4e-8 | [J/K/m<sup>2</sup>] 100m mixed layer depth
   land_capacity   | -1 | same as `heat_capacity`
   trop_capacity   | -1 | same as `heat_capacity`
-  trop_cap_limit  | 15 | Poleward boundary for `trop_capacity`
-  heat_cap_limit  | 60 | Equatorward boundary for `heat_capacity`
+  trop_cap_limit  | 15 | [deg] Poleward boundary for `trop_capacity`
+  heat_cap_limit  | 60 | [deg] Equatorward boundary for `heat_capacity`
   albedo_choice   | 1  | Single value globally
   const_albedo    | 0.30 | Value of surface albedo
   albedo_exp      | 2  | Exponent for meridional albedo profile if `albedo_choice = 4`
@@ -67,14 +127,13 @@ These parameters are set in `coupler/simple_surface.f90`.
   warmpool_centr  | 0  | if so, center of heatflux in degrees latitude
   warmpool_k      | 1  | if so, wave number of heatflux
   land_option     | ’none’ | Add land-sea contrast?
-  slandlon        | (0,0,0,0,0,0,0,0,0,0) | if so, give land patches start longitude
-  elandlon        | -(1,1,1,1,1,1,1,1,1,1)| if so, give land patches end longitude
-  slandlat        | (0,0,0,0,0,0,0,0,0,0) | if so, give land patches start latitude
-  elandlat        | -(1,1,1,1,1,1,1,1,1,1)| if so, gie land patches end longitude
+  slandlon        | (0,0,0,0,0,0,0,0,0,0) | if so, give land patches start longitude [deg]
+  elandlon        | -(1,1,1,1,1,1,1,1,1,1)| if so, give land patches end longitude [deg]
+  slandlat        | (0,0,0,0,0,0,0,0,0,0) | if so, give land patches start latitude [deg]
+  elandlat        | -(1,1,1,1,1,1,1,1,1,1)| if so, gie land patches end longitude [deg]
  
 
-Moist processes
----------------
+### Moist processes
 
 In contrast to the initial *Frierson et al (2007)* setup, we turn off moist convective adjustment by default, and turn on Betts-Miller convection and use the alternative definition of specific humidity.
 
@@ -87,8 +146,7 @@ The moist processes parameters are set in `atmos_param/moist_processes/moist_pro
  do_bm  | .true. | Do Betts-Miller convetion
  do_df_stuff | .true. | When true, specific humidity = (rdgas/rvgas)*esat/pressure
  
-Betts-Miller
-------------
+### Betts-Miller
 
 We use a simple Betts-Miller convection
 scheme ($\tau_\mathrm{SBM} = $2hrs, RH$_\mathrm{SBM}=0.7$) with the
@@ -105,8 +163,7 @@ The Betts-Miller parameters are set in `atmos_param/betts_miller/betts_miller.f9
  do_sim | .false. | don't adjust time scales to make precipitation always continuous
  do_shallower | .true. | use shallower convection scheme
  
-Moist convection
-----------------
+### Moist convection
 
 Moist convection parameters are in `atmos_param/moist_conv/moist_conv.f90` and the namelist `moist_conv_nml`. This is only touched to make sure moisture handling is consistent accross namelists.
 
@@ -114,8 +171,7 @@ Moist convection parameters are in `atmos_param/moist_conv/moist_conv.f90` and t
  :--- | :---: | :---
  use_df_stuff | .true. | Make everything consistent with above `do_df_stuff`
 
-Large Scale Condensation
-------------------------
+### Large Scale Condensation
 
 We want to re-evaporate outfalling precipitation if any of the layers below are sub-saturated. Parameters are described in `atmos_param/lscale_cond/lscale_cond.f90` and the namelist `lscale_cond_nml`.
 
@@ -125,8 +181,7 @@ We want to re-evaporate outfalling precipitation if any of the layers below are 
  use_df_stuff | .true. | Make everything consistent
 
 
-Boundary conditions
--------------------
+### Boundary conditions
 
 The lower boundary conditions are unchanged with respect to FHZ06, i.e.
 the same Monin-Obukhov theory is applied for determining surface drag,
@@ -142,8 +197,7 @@ The possibility to use a more accurate gravity wave drag scheme is
 already implemented, but has not been thoroughly tested. This will be
 subject of future code development.
 
-Radiation
----------
+### Radiation
 
 The new radiative transfer routine, which eventually calls the RRTM
 short and long wave modules, has a few parameters that do not affect
