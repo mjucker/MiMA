@@ -97,7 +97,20 @@ Namelist `lscale_cond_nml`: We want to re-evaporate outfalling precipitation if 
  :--- | :---: | :---
  do_evap | .true. | re-evaporate in below sub-saturated layers (if any)
  use_df_stuff | .true. | Make everything consistent
+ 
+ 
+### Radiation
 
+Namelist `rrtm_radiation_nml`
+
+ Variable | Recommended Value | Meaning
+ :--- | :---: | :---
+  do_read_ozone         |    .true.      |  Read ozone from file (only way to have non-zero ozone)
+  ozone_file            |    ’ozone_1990’     | If so, filename without ’.nc’ extension - this file is in the repository
+  o2_val                |    300.           |  If so, set value for O<sub>2</sub>
+  dt_rad                |    7200           |  Radiation time step [s]. Every time step if < `dt_atmos`
+  
+  
 ### Boundary conditions
 
 Namelist `damping_driver_nml`.
@@ -414,6 +427,8 @@ do_entrain          | .true.
 use_df_stuff        | .false.
 
 ### vert_turb_driver
+
+
 
 ### ocean_rough
 
