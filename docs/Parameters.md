@@ -1,3 +1,5 @@
+[back to top](https://mjucker.github.io/MiMA)
+
 # Parameter settings
 
 This section shows most of the parameters and their default and/or recommended values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper and comments in the source code.
