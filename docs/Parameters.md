@@ -8,6 +8,7 @@ Go directly to [default values](#default-values).
 
 Some of the default values are "safe choices", designed to have the least impact if the user is not aware of them.
 But these values are not necessarily the best ones, so this section gives some ballpark values which have been working well so far.
+A sample input file with all recommended values resides in the repository [here](../input/input.nml).
 
 ### General
 
