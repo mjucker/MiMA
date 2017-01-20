@@ -109,6 +109,20 @@ Namelist `damping_driver_nml`.
  sponge_bottom | 50 | Rayleigh friction above 0.5hPa
  do_conserve_energy | .true. | account for heat release due to momentum loss
  
+Namelist `surface_flux_nml`
+
+Variable | Recommended Value | Meaning
+ :--- | :---: | :---
+ use_virtual_temp | .false. | for consistency with df_stuff
+ old_dtaudv       | .true. | use alternative d(stress)/d(wind component)
+ use_df_stuff     | .true. | for consistency with df_stuff
+
+Namelist `diffusivity_nml`
+
+Variable | Recommended Value | Meaning
+ :--- | :---: | :---
+do_entrain          | .false. | don't account for entrainment (which is off anyway)
+use_df_stuff        | .true. | for consistency with df_stuff
 
 
 ## Default values
@@ -262,21 +276,46 @@ Parameters are described in `atmos_param/damping_driver/damping_driver.f90` and 
  do_const_drag | .false. | constant "gravity wave" scheme (not tested!)
  do_conserve_energy | .false. | account for heat release due to momentum loss?
 
+The lower boundary condition is set by the Monin-Obukhov boundary layer. It is used for atmospheric diffusivities in `atmos_param/diffusivity/diffusivity.f90` and surface fluxes in `coupler/surface_flux.f90`.  We didn't change anything in this part as compared to *Frierson et al (2006)*, and only report the default values here. Refer to [recommended values](#recommended-values) for the appropriate settings in MiMA.
 
+Namelist `surface_flux_nml`
 
-The lower boundary conditions are unchanged with respect to FHZ06, i.e.
-the same Monin-Obukhov theory is applied for determining surface drag,
-setting surface fluxes and boundary layer height. The top of the
-atmosphere, however, needed to be updated due to fully resolved
-stratosphere, and in particular the polar vortex. For simplicity, a
-simple Rayleigh drag is included as a sponge layer to parameterize
-gravity wave drag. This is the exact same sponge layer as in the
-Newtonian cooling codes of
-[@Polvani2002; @Kushner2004; @Gerber2009; @Jucker2013; @Jucker2014], and
-is applied above 0.5hPa with a time scale of 0.5day at the top layer.
-The possibility to use a more accurate gravity wave drag scheme is
-already implemented, but has not been thoroughly tested. This will be
-subject of future code development.
+Variable | Default Value 
+ :--- | :---: 
+ no_neg_q | .false.  
+ use_virtual_temp | .true. 
+ alt_gustiness    | .false. 
+ old_dtaudv       | .false.
+ use_mixing_ratio | .false. 
+ use_df_stuff     | .false. 
+ gust_const       |  1.0 
+ ncar_ocean_flux  | .false. 
+ raoult_sat_vap   | .false. 
+
+Namelist `diffusivity_nml`
+
+Variable | Default Value
+ :--- | :---: 
+fixed_depth | .false. 
+depth_0     | 5000.0 
+frac_inner  | 0.1 
+rich_crit_pbl | 1.0 
+entr_ratio    |  0.2 
+parcel_buoy         |  2.0 
+znom                |  1000.0 
+free_atm_diff       | .false. 
+free_atm_skyhi_diff | .false. 
+pbl_mcm             | .false. 
+rich_crit_diff      |  0.25 
+mix_len             | 30. 
+rich_prandtl        |  1.00 
+background_m        |  0.0 
+background_t        |  0.0 
+ampns               | .false. 
+ampns_max           | 1.0E20  
+do_entrain          | .true.
+use_df_stuff        | .false.
+
 
 ### Radiation
 
