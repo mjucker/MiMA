@@ -109,8 +109,15 @@ Namelist `rrtm_radiation_nml`
   ozone_file            |    ’ozone_1990’     | If so, filename without ’.nc’ extension - this file is in the repository
   o2_val                |    300.           |  If so, set value for O<sub>2</sub>
   dt_rad                |    7200           |  Radiation time step [s]. Every time step if < `dt_atmos`
-  
-  
+
+Namelist `astro_nml`.
+
+Variable | Recommended Value | Meaning
+ :--- | :---: | :---
+        solr_cnst  | 1360           | solar constant [W/m2]
+        [ solday     | 90           | if perpetual equinox desired and calendar='thirt_day' ]
+
+
 ### Boundary conditions
 
 Namelist `damping_driver_nml`.
@@ -272,6 +279,8 @@ We want to re-evaporate outfalling precipitation if any of the layers below are 
 
 ### Radiation
 
+#### RRTM
+
 The new radiative transfer routine, which eventually calls the RRTM
 short and long wave modules, has a few parameters that do not affect
 RRTM directly. Those parameters are given in the first table and can be found in `atmos_param/rrtm_radiation/rrtm_radiation.f90` and namelist `rrtm_radiation_nml`.
@@ -302,8 +311,6 @@ RRTM directly. Those parameters are given in the first table and can be found in
   fixed_water_lat       |    90          |  If so, equatorward of which latitude?
   do_zm_tracers         |    .false.     |  Feed only the zonal mean of all absorbers to the radiative transfer
   do_zm_rad             |    .false.     |  Only pass zonal mean radiative forcing to dynamics
-  solday                |    0           |  Sets day of the year to run perpetual simulations. Seasonal cycle if =0
-  equinox_day           |    0.25        |  Fraction of the year defining ‘March’ equinox
   dt_rad                |    0           |  Radiation time step [s]. Every time step if < `dt_atmos`
   store_intermediate_rad |   .true.      |  Keep radiative forcing constant or set to zero between radiative time steps?
   do_rad_time_avg       |    .true.      |  Compute zenith angle average over radiative time step or use instantaneous?
@@ -366,7 +373,19 @@ each radiation time step before calling RRTM.
   asmaer    | fixed        | 0
   acaer     | fixed        | 0
 
+#### Astronomy
 
+All things which define Earth versus other planets/planetary systems are set in `atmos_param/rrtm_radiation/astro.f90` and `astro_nml`.
+
+Variable | Default Value | Meaning
+ :--- | :---: | :---
+        obliq      | 23.439             | Earth's obliquity in [degrees latitude]
+        use_dyofyr | .false.            | use day of the year to compute Earth-Sun distance? Note that this is done internally in RRTM, and assumes 365days/year.
+        solrad     | 1.0                | distance Earth-Sun [AU] if use_dyofyr=.false.
+        solr_cnst  | 1368.22            | solar constant [W/m2]
+        solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
+        equinox_day | 0.25              | fraction of the year defining March equinox.
+        
 
 ### Boundary conditions
 
