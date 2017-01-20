@@ -24,6 +24,7 @@ Namelist `coupler_nml`
  
  Variable | Recommended Value | Meaning
  :--- | :---: | :---
+ damping_order | 4 | 8<sup>th</sup> order numerical diffusion
  water_correction_limit | 200.e2 | [Pa] turn off water correction in stratosphere to avoid systematic sink
  initial_sphum | 2.e6 | [kg/kg] Start with some water vapor as the stratosphere takes very long to fill up dynamically
  num_levels | >= 40 | Number of vertical levels
@@ -179,7 +180,7 @@ The dynamical core is set up in `atmos_spectral/model/spectral_dynamics.f90` and
 
  Variable | Default Value | Meaning
  :--- | :---: | :---
-   damping_order           | 4 | 8<sup>th</sup> order numerical diffusion
+   damping_order           | 2 | 8<sup>th</sup> order numerical diffusion
    do_water_correction     | .true. | make sure water mass is conserved in the advection step
    water_correction_limit  | 200.e2 | correct water mass only below this level [Pa]. Introduces artificial sink in stratosphere if corrected there. 
    vert_advect_uv          | 'second_centered' | second order vertical advection scheme
