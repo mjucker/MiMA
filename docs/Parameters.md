@@ -43,6 +43,7 @@ Namelist `coupler_nml`
    rlat     |    0.,    0.,
    rlon     |    0.,    0., /
 
+ 
 ### Mixed layer
 
 Namelist `simple_surface_nml`
@@ -195,6 +196,21 @@ Initial conditions are set in `atmos_spectral/init/spectral_init_cond.f90` and t
  :--- | :---: | :---
  initial_temperature | 264 | Initial temperature of isothermal atmosphere in [K]
 
+### Physics 
+
+The namelist `physics_driver_nml` steers which physics components are used. It resides in `atmos_param/physics_driver/physics_driver.f90`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ do_moist_processes | .true. | call moist_processes routines
+ tau_diff | 3600.    | time scale for smoothing diffusion coefficients
+ do_radiation | .false. | calculating radiative fluxes and heating rates with AM2 radiation?
+ do_grey_radiation | .false. | rather do grey radiation?
+ do_rrtm_radiation | .true. | or RRTM radiation?
+ do_damping | .true. | do any of the damping schemes?
+ diff_min | 1.e-3    | minimum value of a diffusion coefficient beneath which the coefficient is reset to zero
+ diffusion_smooth | .true. | diffusion coefficients should be smoothed in time?
+ do_netcdf_restart | .true. | make restart files netCDF format?
 
 ### Mixed layer
 
@@ -479,9 +495,3 @@ gust_scheme  | 'constant'
 constant_gust | 1.0
 gust_factor   | 1.0
 use_df_stuff  | .false.
- 
-
-
-### ocean_rough
-
-### physics_driver|
