@@ -103,13 +103,13 @@ private
 !-------------------- namelist data (private) --------------------------
 
 
-   logical :: do_mca=.true., do_lsc=.true., do_ras=.false.,  &
+   logical :: do_mca=.false., do_lsc=.true., do_ras=.false.,  &
               do_strat=.false., do_dryadj=.false., &
               do_rh_clouds=.false., do_diag_clouds=.false., &
               do_donner_deep=.false., do_cmt=.false., &
               use_tau=.false., do_gust_cv = .false., &
-              do_bm=.false., do_bmmass=.false., do_bmomp=.false., &
-              use_df_stuff=.false.
+              do_bm=.true., do_bmmass=.false., do_bmomp=.false., &
+              use_df_stuff=.true.
 !mj correct numerical sphum sink
    logical :: do_correct_q=.false.
    real :: qsrc = 0.0 ! moisture source per second
@@ -124,7 +124,7 @@ private
 !---------------- namelist variable definitions ------------------------
 !
 !   do_mca   = switch to turn on/off moist convective adjustment;
-!                [logical, default: do_mca=true ]
+!                [logical, default: do_mca=false ]
 !   do_lsc   = switch to turn on/off large scale condensation
 !                [logical, default: do_lsc=true ]
 !   do_ras   = switch to turn on/off relaxed arakawa shubert
@@ -157,7 +157,7 @@ private
 !               matter for convective gustiness (kg/m2/sec)
 !
 !   do_bm    = switch to turn on/off betts-miller scheme
-!                [logical, default: do_bm=false ]
+!                [logical, default: do_bm=true ]
 !   do_bmmass  = switch to turn on/off betts-miller massflux scheme
 !                [logical, default: do_bmmass=false ]
 !   do_bmomp  = switch to turn on/off olivier's version of the betts-miller
@@ -165,6 +165,7 @@ private
 !                [logical, default: do_bmomp=false ]
 !   use_df_stuff = switch to turn on alternative definition of specific humidity.
 !               When true, specific humidity = (rdgas/rvgas)*esat/pressure
+!               [logical, default: do_df_stuff=true]
 !
 !   notes: 1) do_lsc and do_strat cannot both be true
 !          2) pdepth and tfreeze are used to determine liquid vs. solid

@@ -38,7 +38,7 @@ public :: moist_conv, moist_conv_Init, moist_conv_end
  real :: beta = 0.0
  real :: TOLmin=.02, TOLmax=.10
  integer :: ITSMOD=30
- logical :: use_df_stuff=.false.
+ logical :: use_df_stuff=.true.
 
 !----- note beta is the fraction of convective condensation that is
 !----- detrained into a stratiform cloud
@@ -127,7 +127,7 @@ CONTAINS
 !-----------------------------------------------------------------------
 !----------------------PUBLIC INTERFACE ARRAYS--------------------------
     real, intent(INOUT), dimension(:,:,:)           :: Tin, Qin
-    real, intent(IN) ,   dimension(:,:,:)           :: Pfull, Phalf 
+    real, intent(IN) ,   dimension(:,:,:)           :: Pfull, Phalf
  logical, intent(IN) ,   dimension(:,:)             :: coldT
     real, intent(OUT),   dimension(:,:,:)           :: Tdel, Qdel
     real, intent(OUT),   dimension(:,:)             :: Rain, Snow
@@ -135,14 +135,14 @@ CONTAINS
  logical, intent(OUT),   dimension(:,:,:), optional :: Conv
  logical, intent(in)                                :: do_strat
     real, intent(IN)                                :: dtinv
- integer, intent(IN)                                :: is, js     
+ integer, intent(IN)                                :: is, js
     real, intent(INOUT), dimension(:,:,:) :: ql, qi, cf
     real, dimension(:,:,:,:), intent(in), optional :: tracers
     real, dimension(:,:,:,:), intent(out), optional :: qtrmca
     real, intent(INOUT), dimension(:,:,:) :: qldel, qidel, cfdel
 type(time_type), intent(in)                         :: Time
    real, intent(in) ,    dimension(:,:,:), optional :: mask
-         
+
 !-----------------------------------------------------------------------
 !----------------------PRIVATE (LOCAL) ARRAYS---------------------------
 ! logical, dimension(size(Tin,1),size(Tin,2),size(Tin,3)) :: DO_ADJUST
@@ -178,7 +178,7 @@ integer  :: tr
       if (.not. module_is_initialized) call ERROR_MESG( 'MCA',  &
                                  'moist_conv_init has not been called', FATAL )
                                  !moist_conv_init ( )
-      
+
       cf_Present = .FALSE.
       if ( do_strat ) then
         cf_Present = .TRUE.
@@ -186,7 +186,7 @@ integer  :: tr
 !       cfdel => tracertnd(:,:,:,nqa)
 !       qldel => tracertnd(:,:,:,nql)
 !       qidel => tracertnd(:,:,:,nqi)
-      endif  
+      endif
 
         do k=1,size(Phalf,3)
           pmass(:,:,k) = (Phalf(:,:,k+1)-Phalf(:,:,k))/GRAV
@@ -492,9 +492,9 @@ integer  :: tr
           cfdel = 0.
           qldel = 0.
           qidel = 0.
-     
+
           CALL CONV_DETR(Qmix,Qin,Phalf,Temp,cf,coldT,cfdel,qldel,qidel)
-          
+
      endif
 
 !----- compute adjustments to temp and spec hum ----
@@ -516,7 +516,7 @@ integer  :: tr
                                 qldel(:,:,k)*grav_inv
        endif
      else
-       WHERE(coldT(:,:)) 
+       WHERE(coldT(:,:))
          Snow(:,:)=Snow(:,:)+(Phalf(:,:,k)-Phalf(:,:,k+1))*  &
                                Qdel(:,:,k)*grav_inv
        ELSEWHERE
@@ -527,13 +527,13 @@ integer  :: tr
 !      subtract off detrained condensate from surface precip
 !      if (present(cf)) then
        if (cf_Present) then
-         WHERE(coldT(:,:)) 
+         WHERE(coldT(:,:))
            Snow(:,:)=Snow(:,:)+(Phalf(:,:,k)-Phalf(:,:,k+1))*  &
                                 qidel(:,:,k)*grav_inv
          ELSEWHERE
            Rain(:,:)=Rain(:,:)+(Phalf(:,:,k)-Phalf(:,:,k+1))*  &
                                 qldel(:,:,k)*grav_inv
-         END WHERE      
+         END WHERE
        end if
      endif
 
@@ -552,9 +552,9 @@ integer  :: tr
 
 
 !------- update input values and compute tendency -------
-                    
+
       Tin=Tin+Tdel;    Qin=Qin+Qdel
-      
+
       Tdel=Tdel*dtinv; Qdel=Qdel*dtinv
       Rain=Rain*dtinv; Snow=Snow*dtinv
 !------- update input values , compute and add on tendency -----------
@@ -564,20 +564,20 @@ integer  :: tr
          ql    (:,:,:    )=ql    (:,:,:    )+qldel    (:,:,:    )
          qi    (:,:,:    )=qi    (:,:,:    )+qidel    (:,:,:    )
          cf    (:,:,:    )=cf    (:,:,:    )+cfdel    (:,:,:    )
- 
+
          qldel    (:,:,:)=qldel    (:,:,:)*dtinv
          qidel    (:,:,:)=qidel    (:,:,:)*dtinv
          cfdel    (:,:,:)=cfdel    (:,:,:)*dtinv
-      endif   
-      
+      endif
+
 !---------------------------------------------------------------------
-!   define the effect of moist convective adjustment on the tracer 
+!   define the effect of moist convective adjustment on the tracer
 !   fields. code to do so does not currently exist.
 !---------------------------------------------------------------------
       if (present(qtrmca)) then
         qtrmca = 0.
       endif
- 
+
 
 !------- diagnostics for dt/dt_ras -------
       if ( id_tdt_conv > 0 ) then
@@ -606,7 +606,7 @@ integer  :: tr
         end do
         used = send_data ( id_q_conv_col, tempdiag, Time, is, js )
       end if
-   
+
 !------- diagnostics for dry static energy tendency ---------
       if ( id_t_conv_col > 0 ) then
         tempdiag(:,:)=0.
@@ -615,7 +615,7 @@ integer  :: tr
         end do
         used = send_data ( id_t_conv_col, tempdiag, Time, is, js )
       end if
-   
+
    !------- stratiform cloud tendencies from cumulus convection ------------
    if ( do_strat ) then
 
@@ -624,13 +624,13 @@ integer  :: tr
         used = send_data ( id_qldt_conv, qldel(:,:,:), Time, is, js, 1, &
                            rmask=mask )
       endif
-      
+
       !------- diagnostics for dqi/dt from RAS or donner -------
       if ( id_qidt_conv > 0 ) then
         used = send_data ( id_qidt_conv, qidel(:,:,:), Time, is, js, 1, &
                            rmask=mask )
       endif
-      
+
       !------- diagnostics for dqa/dt from RAS or donner -------
       if ( id_qadt_conv > 0 ) then
         used = send_data ( id_qadt_conv, cfdel(:,:,:), Time, is, js, 1, &
@@ -645,7 +645,7 @@ integer  :: tr
         end do
         used = send_data ( id_ql_conv_col, tempdiag, Time, is, js )
       end if
-      
+
       !------- diagnostics for ice water path tendency ---------
       if ( id_qi_conv_col > 0 ) then
         tempdiag(:,:)=0.
@@ -654,7 +654,7 @@ integer  :: tr
         end do
         used = send_data ( id_qi_conv_col, tempdiag, Time, is, js )
       end if
-      
+
       !---- diagnostics for column integrated cloud mass tendency ---
       if ( id_qa_conv_col > 0 ) then
         tempdiag(:,:)=0.
@@ -663,7 +663,7 @@ integer  :: tr
         end do
         used = send_data ( id_qa_conv_col, tempdiag, Time, is, js )
       end if
-         
+
    end if !end do strat if
 
    do tr = 1, num_mca_tracers
@@ -672,7 +672,7 @@ integer  :: tr
        used = send_data ( id_tracer_conv(tr), qtrmca(:,:,:,tr), Time, is, js, 1, &
                           rmask=mask )
      endif
- 
+
 !------- diagnostics for column tracer path tendency -----
      if ( id_tracer_conv_col(tr) > 0 ) then
        tempdiag(:,:)=0.
@@ -682,7 +682,7 @@ integer  :: tr
        used = send_data ( id_tracer_conv_col(tr), tempdiag, Time, is, js )
      end if
 
- 
+
    enddo
 
  end subroutine moist_conv
@@ -789,7 +789,7 @@ REAL                                     :: precipsource
 
                  !if convective event is over compute detrainment
                  IF ( (accum) .and. (qvout(i,j,k) .eq. qvin(i,j,k)) &
-                      .and. (precipsource .gt. 0.)) THEN                      
+                      .and. (precipsource .gt. 0.)) THEN
                       if (coldT(i,j)) then
                       qidel(i,j,ktop) = beta * precipsource / &
                                     (phalf(i,j,ktop+1)-phalf(i,j,ktop))
@@ -836,7 +836,7 @@ subroutine moist_conv_init (axes, Time, tracers_in_mca)
  logical, dimension(:), intent(in), optional :: tracers_in_mca
 
 !-----------------------------------------------------------------------
-      
+
  integer :: unit, io, ierr
  integer :: nn, tr
  character(len=128) :: diagname, diaglname, tendunits, name, units
@@ -881,14 +881,14 @@ subroutine moist_conv_init (axes, Time, tracers_in_mca)
    id_q_conv_col = register_diag_field ( mod_name, &
      'q_conv_col', axes(1:2), Time, &
     'Water vapor path tendency from moist conv adj','kg/m2/s' )
-   
+
    id_t_conv_col = register_diag_field ( mod_name, &
      't_conv_col', axes(1:2), Time, &
     'Column static energy tendency from moist conv adj','W/m2' )
 
 
 !---------------------------------------------------------------------
-! --- Find the tracer indices 
+! --- Find the tracer indices
 !---------------------------------------------------------------------
   call get_number_tracers(MODEL_ATMOS,num_tracers)
   if ( num_tracers .gt. 0 ) then
@@ -901,7 +901,7 @@ subroutine moist_conv_init (axes, Time, tracers_in_mca)
       nqi = get_tracer_index ( MODEL_ATMOS, 'ice_wat' )
       nqa = get_tracer_index ( MODEL_ATMOS, 'cld_amt' )
 
-     
+
 !----------------------------------------------------------------------
 !    determine how many tracers are to be transported by moist_conv_mod.
 !----------------------------------------------------------------------
@@ -913,7 +913,7 @@ subroutine moist_conv_init (axes, Time, tracers_in_mca)
       endif
 
 !---------------------------------------------------------------------
-!    allocate the arrays to hold the diagnostics for the moist_conv 
+!    allocate the arrays to hold the diagnostics for the moist_conv
 !    tracers.
 !---------------------------------------------------------------------
       allocate(id_tracer_conv    (num_mca_tracers)) ; id_tracer_conv = 0
@@ -922,10 +922,10 @@ subroutine moist_conv_init (axes, Time, tracers_in_mca)
       do tr = 1,num_tracers
         if (tracers_in_mca(tr)) then
           call get_tracer_names(MODEL_ATMOS, tr, name=name, units=units)
- 
+
 !----------------------------------------------------------------------
-!    for the column tendencies, the name for the diagnostic will be 
-!    the name of the tracer followed by 'dt_MCA'. the longname will be 
+!    for the column tendencies, the name for the diagnostic will be
+!    the name of the tracer followed by 'dt_MCA'. the longname will be
 !    the name of the tracer followed by ' tendency from MCA'. units are
 !    the supplied units of the tracer divided by seconds.
 !----------------------------------------------------------------------
@@ -938,9 +938,9 @@ subroutine moist_conv_init (axes, Time, tracers_in_mca)
                              missing_value=missing_value        )
 
 !----------------------------------------------------------------------
-!    for the column integral  tendencies, the name for the diagnostic 
+!    for the column integral  tendencies, the name for the diagnostic
 !    will be the name of the tracer followed by 'dt_MCA_col'. the long-
-!    name will be the name of the tracer followed by ' path tendency 
+!    name will be the name of the tracer followed by ' path tendency
 !    from MCA'. units are the supplied units of the tracer multiplied
 !    by m**2 /kg divided by seconds.
 !----------------------------------------------------------------------
@@ -982,4 +982,3 @@ end subroutine moist_conv_end
 !#######################################################################
 
 end module moist_conv_mod
-

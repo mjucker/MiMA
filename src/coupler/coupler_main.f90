@@ -1,7 +1,7 @@
 !
 !  coupler_main couples component models and controls the time integration
 !
-!mj add module to have time step available without any tricks throughout 
+!mj add module to have time step available without any tricks throughout
 !   the code
 module coupler_mod
   integer :: dt_atmos=0
@@ -10,22 +10,22 @@ end module coupler_mod
 
 program coupler_main
 !-----------------------------------------------------------------------
-!                   GNU General Public License                        
-!                                                                      
-! This program is free software; you can redistribute it and/or modify it and  
-! are expected to follow the terms of the GNU General Public License  
-! as published by the Free Software Foundation; either version 2 of   
-! the License, or (at your option) any later version.                 
-!                                                                      
-! MOM is distributed in the hope that it will be useful, but WITHOUT    
-! ANY WARRANTY; without even the implied warranty of MERCHANTABILITY  
-! or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public    
-! License for more details.                                           
-!                                                                      
-! For the full text of the GNU General Public License,                
-! write to: Free Software Foundation, Inc.,                           
-!           675 Mass Ave, Cambridge, MA 02139, USA.                   
-! or see:   http://www.gnu.org/licenses/gpl.html                      
+!                   GNU General Public License
+!
+! This program is free software; you can redistribute it and/or modify it and
+! are expected to follow the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2 of
+! the License, or (at your option) any later version.
+!
+! MOM is distributed in the hope that it will be useful, but WITHOUT
+! ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+! or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+! License for more details.
+!
+! For the full text of the GNU General Public License,
+! write to: Free Software Foundation, Inc.,
+!           675 Mass Ave, Cambridge, MA 02139, USA.
+! or see:   http://www.gnu.org/licenses/gpl.html
 !-----------------------------------------------------------------------
 ! <CONTACT EMAIL="Bruce.Wyman@noaa.gov"> Bruce Wyman </CONTACT>
 ! <CONTACT EMAIL="V.Balaji@noaa.gov"> V. Balaji </CONTACT>
@@ -33,29 +33,29 @@ program coupler_main
 ! <HISTORY SRC="http://www.gfdl.noaa.gov/fms-cgi-bin/cvsweb.cgi/FMS/"/>
 
 ! <OVERVIEW>
-!  A main program that couples component models for atmosphere, ocean, land, 
-!  and sea ice on independent grids. 
+!  A main program that couples component models for atmosphere, ocean, land,
+!  and sea ice on independent grids.
 ! </OVERVIEW>
 
 ! <DESCRIPTION>
-!  This version couples model components representing atmosphere, ocean, land 
-!  and sea ice on independent grids. Each model component is represented by a 
+!  This version couples model components representing atmosphere, ocean, land
+!  and sea ice on independent grids. Each model component is represented by a
 !  data type giving the instantaneous model state.
 !
-!  The component models are coupled to allow implicit vertical diffusion of 
-!  heat and moisture at the interfaces of the atmosphere, land, and ice models. 
-!  As a result, the atmosphere, land, and ice models all use the same time step. 
-!  The atmospheric model has been separated into down and up calls that 
+!  The component models are coupled to allow implicit vertical diffusion of
+!  heat and moisture at the interfaces of the atmosphere, land, and ice models.
+!  As a result, the atmosphere, land, and ice models all use the same time step.
+!  The atmospheric model has been separated into down and up calls that
 !  correspond to the down and up sweeps of the standard tridiagonal elimination.
 !
 !  The ocean interface uses explicit mixing. Fluxes to and from the ocean must
-!  be passed through the ice model. This includes atmospheric fluxes as well as 
+!  be passed through the ice model. This includes atmospheric fluxes as well as
 !  fluxes from the land to the ocean (runoff).
 !
-!  This program contains the model's main time loop. Each iteration of the 
-!  main time loop is one coupled (slow) time step. Within this slow time step 
+!  This program contains the model's main time loop. Each iteration of the
+!  main time loop is one coupled (slow) time step. Within this slow time step
 !  loop is a fast time step loop, using the atmospheric time step, where the
-!  tridiagonal vertical diffusion equations are solved. Exchange between sea 
+!  tridiagonal vertical diffusion equations are solved. Exchange between sea
 !  ice and ocean occurs once every slow timestep.
 !
 ! <PRE>
@@ -100,36 +100,36 @@ program coupler_main
 ! <INFO>
 !   <NOTE>
 !     <PRE>
-!   1.If no value is set for current_date, start_date, or calendar (or default value 
-!     specified) then the value from restart file "INPUT/coupler.res" will be used. 
-!     If neither a namelist value or restart file value exist the program will fail. 
-!   2.The actual run length will be the sum of months, days, hours, minutes, and 
-!     seconds. A run length of zero is not a valid option. 
-!   3.The run length must be an intergal multiple of the coupling timestep dt_cpld. 
+!   1.If no value is set for current_date, start_date, or calendar (or default value
+!     specified) then the value from restart file "INPUT/coupler.res" will be used.
+!     If neither a namelist value or restart file value exist the program will fail.
+!   2.The actual run length will be the sum of months, days, hours, minutes, and
+!     seconds. A run length of zero is not a valid option.
+!   3.The run length must be an intergal multiple of the coupling timestep dt_cpld.
 !     </PRE>
 !   </NOTE>
 
 !   <ERROR MSG="no namelist value for current_date " STATUS="FATAL">
 !     A namelist value for current_date must be given if no restart file for
-!     coupler_main (INPUT/coupler.res) is found. 
+!     coupler_main (INPUT/coupler.res) is found.
 !   </ERROR>
 !   <ERROR MSG="invalid namelist value for calendar" STATUS="FATAL">
-!     The value of calendar must be 'julian', 'noleap', or 'thirty_day'. 
-!     See the namelist documentation. 
+!     The value of calendar must be 'julian', 'noleap', or 'thirty_day'.
+!     See the namelist documentation.
 !   </ERROR>
 !   <ERROR MSG="no namelist value for calendar" STATUS="FATAL">
-!     If no restart file is present, then a namelist value for calendar 
-!     must be specified. 
+!     If no restart file is present, then a namelist value for calendar
+!     must be specified.
 !   </ERROR>
 !   <ERROR MSG="initial time is greater than current time" STATUS="FATAL">
-!     If a restart file is present, then the namelist value for either 
-!     current_date or start_date was incorrectly set. 
+!     If a restart file is present, then the namelist value for either
+!     current_date or start_date was incorrectly set.
 !   </ERROR>
 !   <ERROR MSG="run length must be multiple of ocean time step " STATUS="FATAL">
-!     There must be an even number of ocean time steps for the requested run length. 
+!     There must be an even number of ocean time steps for the requested run length.
 !   </ERROR>
 !   <ERROR MSG="final time does not match expected ending time " STATUS="WARNING">
-!     This error should probably not occur because of checks done at initialization time. 
+!     This error should probably not occur because of checks done at initialization time.
 !   </ERROR>
 
 ! </INFO>
@@ -202,7 +202,7 @@ program coupler_main
   use mpp_domains_mod, only: mpp_broadcast_domain
 
   use memutils_mod, only: print_memuse_stats
-  
+
   use coupler_mod, only: dt_atmos
 
   implicit none
@@ -248,44 +248,44 @@ program coupler_main
 
 ! <NAMELIST NAME="coupler_nml">
 !   <DATA NAME="current_date"  TYPE="integer, dimension(6)"  DEFAULT="0">
-!     The date that the current integration starts with. 
+!     The date that the current integration starts with.
 !   </DATA>
 !   <DATA NAME="force_date_from_namelist"  TYPE="logical"  DEFAULT=".false.">
-!     Flag that determines whether the namelist variable current_date should 
-!     override the date in the restart file INPUT/coupler.res. If the restart 
-!     file does not exist then force_date_from_namelist has not effect, the value of current_date 
+!     Flag that determines whether the namelist variable current_date should
+!     override the date in the restart file INPUT/coupler.res. If the restart
+!     file does not exist then force_date_from_namelist has not effect, the value of current_date
 !     will be used.
 !   </DATA>
 !   <DATA NAME="calendar"  TYPE="character(maxlen=17)"  DEFAULT="''">
-!     The calendar type used by the current integration. Valid values are consistent 
-!     with the time_manager module: 'julian', 'noleap', or 'thirty_day'. The value 
-!     'no_calendar' can not be used because the time_manager's date  function are used. 
+!     The calendar type used by the current integration. Valid values are consistent
+!     with the time_manager module: 'julian', 'noleap', or 'thirty_day'. The value
+!     'no_calendar' can not be used because the time_manager's date  function are used.
 !     All values must be lowercase.
 !   </DATA>
 !   <DATA NAME="months "  TYPE="integer"  DEFAULT="0">
-!     The number of months that the current integration will be run for. 
+!     The number of months that the current integration will be run for.
 !   </DATA>
 !   <DATA NAME="days "  TYPE="integer"  DEFAULT="0">
-!     The number of days that the current integration will be run for. 
+!     The number of days that the current integration will be run for.
 !   </DATA>
 !   <DATA NAME="hours"  TYPE="integer"  DEFAULT="0">
-!     The number of hours that the current integration will be run for. 
+!     The number of hours that the current integration will be run for.
 !   </DATA>
 !   <DATA NAME="minutes "  TYPE="integer"  DEFAULT="0">
-!     The number of minutes that the current integration will be run for. 
+!     The number of minutes that the current integration will be run for.
 !   </DATA>
 !   <DATA NAME="seconds"  TYPE="integer"  DEFAULT="0">
-!     The number of seconds that the current integration will be run for. 
+!     The number of seconds that the current integration will be run for.
 !   </DATA>
 !   <DATA NAME="dt_atmos"  TYPE="integer"  DEFAULT="0">
-!     Atmospheric model time step in seconds, including the fast coupling with 
-!     land and sea ice. 
+!     Atmospheric model time step in seconds, including the fast coupling with
+!     land and sea ice.
 !   </DATA>
 !   <DATA NAME="dt_ocean"  TYPE="integer"  DEFAULT="0">
-!     Ocean model time step in seconds. 
+!     Ocean model time step in seconds.
 !   </DATA>
 !   <DATA NAME="dt_cpld"  TYPE="integer"  DEFAULT="0">
-!     Time step in seconds for coupling between ocean and atmospheric models: 
+!     Time step in seconds for coupling between ocean and atmospheric models:
 !     must be an integral multiple of dt_atmos and dt_ocean. This is the "slow" timestep.
 !   </DATA>
 !  <DATA NAME="do_atmos, do_ocean, do_ice, do_land, do_flux" TYPE="logical">
@@ -294,7 +294,7 @@ program coupler_main
 !  ALL the output fields sent by that component to the coupler have been
 !  overridden using the data_override feature. For advanced users only:
 !  if you're not sure, you should leave these values at TRUE.
-!  </DATA> 
+!  </DATA>
 !  <DATA NAME="concurrent" TYPE="logical">
 !  If true, the ocean executes concurrently with the atmosphere-land-ocean
 !   on a separate set of PEs.
@@ -302,7 +302,7 @@ program coupler_main
 !  call ocean...
 !  If using concurrent execution, you must set one of
 !   atmos_npes and ocean_npes, see below.
-!  </DATA> 
+!  </DATA>
 !  <DATA NAME="atmos_npes, ocean_npes" TYPE="integer">
 !  If concurrent is set to true, we use these to set the list of PEs on which
 !   each component runs.
@@ -310,7 +310,7 @@ program coupler_main
 !  If exactly one of these two is set non-zero, the other is set to the
 !   remainder from NPES.
 !  If both are set non-zero they must add up to NPES.
-!  </DATA> 
+!  </DATA>
 !  <DATA NAME="use_lag_fluxes" TYPE="logical">
 !  If true, then mom4 is forced with SBCs from one coupling timestep ago
 !  If false, then mom4 is forced with most recent SBCs.
@@ -318,21 +318,21 @@ program coupler_main
 !  can be shown to be stable and current fluxes to be unconditionally unstable.
 !  For dt_cpld>dt_ocean there is probably sufficient damping.
 !  use_lag_fluxes is set to TRUE by default.
-!  </DATA> 
+!  </DATA>
 !   <NOTE>
 !     <PRE>
 !     1.If no value is set for current_date, start_date, or calendar (or default value specified) then the value from restart
-!       file "INPUT/coupler.res" will be used. If neither a namelist value or restart file value exist the program will fail. 
+!       file "INPUT/coupler.res" will be used. If neither a namelist value or restart file value exist the program will fail.
 !     2.The actual run length will be the sum of months, days, hours, minutes, and seconds. A run length of zero is not a
-!       valid option. 
-!     3.The run length must be an intergal multiple of the coupling timestep dt_cpld. 
+!       valid option.
+!     3.The run length must be an intergal multiple of the coupling timestep dt_cpld.
 !     </PRE>
 !   </NOTE>
 ! </NAMELIST>
 
 
-  integer, dimension(6) :: current_date = (/ 0, 0, 0, 0, 0, 0 /)
-  character(len=17) :: calendar = '                 '
+  integer, dimension(6) :: current_date = (/ 1, 1, 1, 0, 0, 0 /)
+  character(len=17) :: calendar = 'thirty_day       '
   logical :: force_date_from_namelist = .false.  ! override restart values for date
   integer :: months=0, days=0, hours=0, minutes=0, seconds=0
 !mj exported dt_atmos into coupler_mod
@@ -362,7 +362,7 @@ program coupler_main
   mainClock = mpp_clock_id( 'Main loop' )
   termClock = mpp_clock_id( 'Termination' )
   call mpp_clock_begin(initClock)
-  
+
   call fms_init
   call constants_init
 
@@ -389,7 +389,7 @@ program coupler_main
 ! This is only possible in the serial case when use_lag_fluxes.
 !    call flux_ocean_to_ice( Time, Ocean, Ice, Ocean_ice_boundary )
 
-! Update Ice_ocean_boundary; first iteration is supplied by restart     
+! Update Ice_ocean_boundary; first iteration is supplied by restart
 !    if( use_lag_fluxes )then
 !        call flux_ice_to_ocean( Time, Ice, Ocean, Ice_ocean_boundary )
 !    end if
@@ -439,7 +439,7 @@ program coupler_main
 !                Land_ice_atmos_boundary, &
 !                Atmos_land_boundary, &
 !                Atmos_ice_boundary )
-            
+
 
 !      --------------------------------------------------------------
 
@@ -447,19 +447,19 @@ program coupler_main
 
 !           if (do_land) &
 !             call update_land_model_fast( Atmos_land_boundary, Land )
-            
+
 !      ---- ice model ----
 !           if (do_ice) &
 !             call update_ice_model_fast( Atmos_ice_boundary, Ice )
-            
+
 !      --------------------------------------------------------------
 !      ---- atmosphere up ----
 
 !           call flux_up_to_atmos( Time_atmos, Land, Ice, Land_ice_atmos_boundary )
-            
+
             if (do_atmos) &
               call update_atmos_model_up( Land_ice_atmos_boundary, Atm )
-            
+
 !--------------
 
          enddo
@@ -486,7 +486,7 @@ program coupler_main
 !        call mpp_set_current_pelist()
 !        call flux_ice_to_ocean( Time, Ice, Ocean, Ice_ocean_boundary )
 !    end if
-     
+
 !    if( Ocean%pe )then
 !        call mpp_set_current_pelist(Ocean%pelist)
 !        do no = 1,num_ocean_calls
@@ -501,7 +501,7 @@ program coupler_main
 
 !           if (do_ocean) call update_ocean_model( Ice_ocean_boundary, Ocean, &
 !                              ocean_seg_start, ocean_seg_end, num_ocean_calls)
-            
+
 !        enddo
 !   ------ end of ocean time step loop -----
 !-----------------------------------------------------------------------
@@ -638,7 +638,7 @@ contains
 
     if ( mpp_pe().EQ.mpp_root_pe() ) &
          write( stdlog(), 16 )date(1),trim(month_name(date(2))),date(3:6)
-16  format ('  current date used = ',i4,1x,a,2i3,2(':',i2.2),' gmt') 
+16  format ('  current date used = ',i4,1x,a,2i3,2(':',i2.2),' gmt')
 
 !-----------------------------------------------------------------------
 !------ initialize concurrent PEset management ------
@@ -721,7 +721,7 @@ contains
 !------ initialize diagnostics manager ------
 
 !jwd Fork here is somewhat dangerous. It relies on "no side effects" from
-!    diag_manager_init. diag_manager_init or this section should be 
+!    diag_manager_init. diag_manager_init or this section should be
 !    re-architected to guarantee this or remove this assumption.
 !    For instance, what follows assumes that get_base_date has the same
 !    time for both Atm and Ocean pes. While this should be the case, the
@@ -827,7 +827,7 @@ contains
 !-----------------------------------------------------------------------
 !------ initialize component models ------
 !------ grid info now comes from grid_spec file
-    
+
     if( Atm%pe )then
         call mpp_set_current_pelist(Atm%pelist)
 !---- atmosphere ----
@@ -993,4 +993,3 @@ contains
 !#######################################################################
 
 end program coupler_main
-

@@ -1,4 +1,4 @@
-
+x
 module betts_miller_mod
 
 !----------------------------------------------------------------------
@@ -41,8 +41,9 @@ private
 real    :: tau_bm=7200.
 real    :: rhbm = .8 
 logical :: do_simp = .true.
+
 !logical :: do_enadjusttemp = .false.
-logical :: do_shallower = .false.
+logical :: do_shallower = .true.
 logical :: do_changeqref = .false.
 logical :: do_envsat = .false.
 logical :: do_taucape = .false.

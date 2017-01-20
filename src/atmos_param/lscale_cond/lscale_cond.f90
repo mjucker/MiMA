@@ -33,8 +33,8 @@ private
 !   --- namelist ----
 
 real    :: hc=1.00
-logical :: do_evap=.false.
-logical :: use_df_stuff=.false.
+logical :: do_evap=.true.
+logical :: use_df_stuff=.true.
 
 namelist /lscale_cond_nml/  hc, do_evap, use_df_stuff
 
@@ -46,7 +46,7 @@ namelist /lscale_cond_nml/  hc, do_evap, use_df_stuff
 !
 !  do_evap   =  flag for the re-evaporation of moisture in
 !               sub-saturated layers below, if do_evap=.true. then
-!               re-evaporation is performed (default: do_evap=.false.)
+!               re-evaporation is performed (default: do_evap=.true.)
 !
 !-----------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ contains
 !           phalf    pressure at half (interface) model levels
 !           coldT    should precipitation be snow at this point?
 !   optional:
-!           mask     optional mask (0 or 1.) 
+!           mask     optional mask (0 or 1.)
 !           conv     logical flag; if true then no large-scale
 !                       adjustment is performed at that grid-point or
 !                       model level
@@ -302,4 +302,3 @@ subroutine precip_evap (pmass, tin, qin, qsat, dqsat, hlcp, &
 !#######################################################################
 
 end module lscale_cond_mod
-
