@@ -16,7 +16,7 @@ Namelist `coupler_nml`
 
  Variable | Recommended Value | Meaning
  :--- | :---: | :---
- dt_atmos | 600 | integration time step in [s]
+ dt_atmos | 900 | integration time step in [s]
  
 ### Dynamics
  
@@ -26,11 +26,13 @@ Namelist `coupler_nml`
  :--- | :---: | :---
  damping_order | 4 | 8<sup>th</sup> order numerical diffusion
  water_correction_limit | 200.e2 | [Pa] turn off water correction in stratosphere to avoid systematic sink
- initial_sphum | 2.e6 | [kg/kg] Start with some water vapor as the stratosphere takes very long to fill up dynamically
+ initial_sphum | 2.e-6 | [kg/kg] Start with some water vapor as the stratosphere takes very long to fill up dynamically
+ robert_coeff            | .03 | Robertson coefficient for implicit time stepping
  num_levels | >= 40 | Number of vertical levels
  vert_coord_option | 'uneven_sigma' | use hybrid sigma/pressure coordinates
- surf_res   | 0.4 | parameter 1 to define vertical level distribution
+ surf_res   | 0.5 | parameter 1 to define vertical level distribution
  scale_heights | 11.0 | parameter 2 to define vertical level distribution
+ exponent | 7.0 | parameter 3 to define vertical level distribution
  topography_option | 'gaussian' | if orographic forcing required
  
  Namelist `gaussian_topog_nml`, example for 3km wave-two in midlatitudes
@@ -150,17 +152,25 @@ do_entrain          | .false. | don't account for entrainment (which is off anyw
 use_df_stuff        | .true. | for consistency with df_stuff
 
 
-### Vertical diffusion
+### Vertical numerics
 
 Namelist `vert_turb_driver_nml`
 
-Variable | Default Value
+Variable | Recommended Value
  :--- | :---: 
 use_tau          | .false.
 constant_gust | 0.0
 do_mellor_yamada | .false.
 use_df_stuff  | .true.
 do_diffusivity         | .true.
+
+Namelist `vert_diff_driver_nml`
+
+Variable | Recommended Value
+:-- | :--:
+do_conserve_energy         | .true.
+use_virtual_temp_vert_diff | .false.
+
 
 
 ## Default values
@@ -185,12 +195,17 @@ The dynamical core is set up in `atmos_spectral/model/spectral_dynamics.f90` and
    water_correction_limit  | 200.e2 | correct water mass only below this level [Pa]. Introduces artificial sink in stratosphere if corrected there. 
    vert_advect_uv          | 'second_centered' | second order vertical advection scheme
    vert_advect_t           | 'second_centered' | second order vertical advection scheme
-   robert_coeff            | .03 | Robertson coefficient for implicit time stepping
+   robert_coeff            | .04 | Robertson coefficient for implicit time stepping
    lon_max                 | 128 | T42 resolution
    lat_max                 | 64  | T42 resolution
    num_fourier             | 42  | T42 resolution
    num_spherical           | 43  | T42 resolution
    fourier_inc             | 1   | T42 resolution
+   num_levels              | 18  | number of vertical levels
+   surf_res        | 0.1 | parameter 1 to define uneven_sigma levels
+   scale_heights | 4 | parameter 2 to define uneven_sigma levels
+   vert_coord_option       | 'even_sigma' | use sigma levels
+   exponent | 7.0 | parameter 3 to define vertical level distribution
 
 Initial conditions are set in `atmos_spectral/init/spectral_init_cond.f90` and the namelist `spectral_init_nml`.
 
@@ -479,9 +494,11 @@ do_entrain          | .true.
 use_df_stuff        | .false.
 
 
-### Vertical diffusion
+### Vertical numerics
 
-Again, nothing has been done to these schemes, but we report the default values. They can be found in file `atmos_param/vert_turb_driver/vert_turb_driver.f90` and namelist `vert_turb_driver_nml`. Make sure to check the [recommended values](#recommended-values).
+Again, nothing has been done to these schemes, but we report the default values. 
+
+File `atmos_param/vert_turb_driver/vert_turb_driver.f90` and namelist `vert_turb_driver_nml`. Make sure to check the [recommended values](#recommended-values).
 
 Variable | Default Value
  :--- | :---: 
@@ -497,3 +514,14 @@ gust_scheme  | 'constant'
 constant_gust | 1.0
 gust_factor   | 1.0
 use_df_stuff  | .false.
+
+
+File `atmos_param/vert_diff_driver/vert_diff_driver.f90` and namelist `vert_diff_driver_nml`. Make sure to check the [recommended values](#recommended-values).
+
+Variable | Default Value
+:-- | :--:
+do_conserve_energy         | .false.
+do_mcm_no_neg_q            | .false.
+use_virtual_temp_vert_diff | .true.
+do_mcm_plev                | .false.
+do_mcm_vert_diff_tq        | .false.
