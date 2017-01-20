@@ -1,8 +1,11 @@
 # Parameter settings
 
-This section shows most of the parameters and their default and/or recommended values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper.
+This section shows most of the parameters and their default and/or recommended values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper and comments in the source code.
 
 ## Recommended values
+
+Some of the default values are "safe choices", designed to have the least impact if the user is not aware of them.
+But these values are not necessarily the best ones, so this section gives some ballpark values which have been working well so far.
 
 ### General
 
@@ -12,7 +15,7 @@ Namelist `coupler_nml`
  :--- | :---: | :---
  dt_atmos | 600 | integration time step in [s]
  
- ### Dynamics
+### Dynamics
  
  Namelist `spectral_dynamics_nml`
  
@@ -60,6 +63,52 @@ Namelist `qflux_nml`
  :--- | :---: | :---
  qflux_amp | 30 | [W/m<sup>2</sup>] gives a good compromise between too strong jets and double ITCZ 
  warmpool_amp | 30 | [W/m<sup>2</sup> gives realistic warmpool anomaly and good cold point
+
+### Moisture
+
+Following *Frierson (2007)* we use large scale condenstion together with the Betts-Miller convection scheme with the "shallower" shallow convection adjustment.
+
+Namelist `moist_processes_nml`
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ do_mca | .false. | Do moist convective adjustment
+ do_lsc | .true. | Do large scale condensation
+ do_bm  | .true. | Do Betts-Miller convetion
+ use_df_stuff | .true. | When true, specific humidity = (rdgas/rvgas)*esat/pressure
+
+Namelist `betts_miller_nml`
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ rhbm   | 0.7  | relax to 70% relative humidity
+ do_simp | .false. | don't adjust time scales to make precipitation always continuous
+ do_shallower | .true. | shallow convection: choose smaller depth to make precip zero
+
+Namelist `moist_conv_nml` is only touched to make sure moisture handling is consistent accross namelists.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ use_df_stuff | .true. | Make everything consistent with above `use_df_stuff`
+
+Namelist `lscale_cond_nml`: We want to re-evaporate outfalling precipitation if any of the layers below are sub-saturated.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ do_evap | .true. | re-evaporate in below sub-saturated layers (if any)
+ use_df_stuff | .true. | Make everything consistent
+
+### Boundary conditions
+
+Namelist `damping_driver_nml`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ do_rayleigh | .true. | do simple Rayleigh friction at the top
+ trayfric | -0.5 | Rayleigh friction time scale of 1/2 day
+ sponge_bottom | 50 | Rayleigh friction above 0.5hPa
+ do_conserve_energy | .true. | account for heat release due to momentum loss
+ 
 
 
 ## Default values
@@ -133,55 +182,87 @@ These parameters are set in `coupler/simple_surface.f90`.
   elandlat        | -(1,1,1,1,1,1,1,1,1,1)| if so, gie land patches end longitude [deg]
  
 
-### Moist processes
+### Moisture
 
-In contrast to the initial *Frierson et al (2007)* setup, we turn off moist convective adjustment by default, and turn on Betts-Miller convection and use the alternative definition of specific humidity.
+In contrast to the initial *Frierson et al (2006)* setup, we turn off moist convective adjustment by default, and turn on Betts-Miller convection and use the alternative definition of specific humidity.
+
+#### Moist processes
 
 The moist processes parameters are set in `atmos_param/moist_processes/moist_processes.f90` and the namelist `moist_processes_nml`.
 
  Variable | Default Value | Meaning
  :--- | :---: | :---
- do_mca | .false. | Do moist convective adjustment
- do_lsc | .true. | Do large scale condensation
- do_bm  | .true. | Do Betts-Miller convetion
- do_df_stuff | .true. | When true, specific humidity = (rdgas/rvgas)*esat/pressure
+ do_mca | .true. | Do moist convective adjustment?
+ do_lsc | .true. | Do large scale condensation?
+ do_ras | .false. | Do relaxed Arakawa-Schubert?
+ do_strat | .false. | Do stratiform clouds?
+ do_dryadj | .false. | Do dry adjustment?
+ do_rh_clodus | .false. | Do relative humidity cloud scheme?
+ do_diag_clouds | .false. | Do Gordon's diagnostic cloud scheme?
+ do_donner_deep | .false. | Do Donner deep convection scheme?
+ use_tau | .false. | Use current time values? (future time if .false.)
+ do_gust_cv | .false. | Do convective gustiness?
+ do_bm  | .false. | Do Betts-Miller convetion?
+ do_bmmass | .false. | Do Betts-Miller mass flux scheme?
+ do_bmomp | .false. | Do Pauluis version of Betts-Miller scheme?
+ use_df_stuff | .false. | When true, specific humidity = (rdgas/rvgas)*esat/pressure
  
-### Betts-Miller
-
-We use a simple Betts-Miller convection
-scheme ($\tau_\mathrm{SBM} = $2hrs, RH$_\mathrm{SBM}=0.7$) with the
-‘shallower’ shallow convection as described by [@Frierson2007a].
-Precipitation only falls out if all layers below the condensation level
-are saturated, otherwise, the condensate is re-evaporated.
+ 
+#### Betts-Miller 
 
 The Betts-Miller parameters are set in `atmos_param/betts_miller/betts_miller.f90` and the namelist `betts_miller_nml`.
 
  Variable | Default Value | Meaning
  :--- | :---: | :---
  tau_bm | 7200 | relaxation time scale in [s]
- rhbm   | 0.7  | relative humidity to relax to
- do_sim | .false. | don't adjust time scales to make precipitation always continuous
- do_shallower | .true. | use shallower convection scheme
+ rhbm   | 0.8  | relative humidity to relax to
+ do_simp | .true. | adjust time scales to make precipitation always continuous?
+ do_shallower | .false. | shallow convection: choose smaller depth to make precip zero?
+ do_changeqref | .false. | shallow convection: change both q and T to make precip zero?
+ do_envsat | .false. | reference rhbm wrt environment (.true.) or parcel (.false.)?
+ do_taucape | .false. | make taubm proportional to 1/sqrt(CAPE)?
+ capetaubm | 900 | [J/kg] value of CAPE for which tau = tau_bm if do_taucape=.true.
+ tau_min | 2400 | [s] minimum tau_bm allowed if do_taucape=.true.
  
-### Moist convection
+#### Moist convective adjustment
 
-Moist convection parameters are in `atmos_param/moist_conv/moist_conv.f90` and the namelist `moist_conv_nml`. This is only touched to make sure moisture handling is consistent accross namelists.
+Moist convective adjustment parameters are in `atmos_param/moist_conv/moist_conv.f90` and the namelist `moist_conv_nml`. 
 
  Variable | Default Value | Meaning
  :--- | :---: | :---
- use_df_stuff | .true. | Make everything consistent with above `do_df_stuff`
+ beta | 0.0 | fraction of condensate detrained into stratiform cloud
+ use_df_stuff | .false. | 
 
-### Large Scale Condensation
+#### Large Scale Condensation
 
 We want to re-evaporate outfalling precipitation if any of the layers below are sub-saturated. Parameters are described in `atmos_param/lscale_cond/lscale_cond.f90` and the namelist `lscale_cond_nml`.
 
  Variable | Default Value | Meaning
  :--- | :---: | :---
- do_evap | .true. | re-evaporate in below sub-saturated layers (if any)
- use_df_stuff | .true. | Make everything consistent
+ hc | 1.0 | relative humidity at which condensation occurs
+ do_evap | .false. | re-evaporate in below sub-saturated layers (if any)?
+ use_df_stuff | .false. | For consistency with above
 
 
 ### Boundary conditions
+
+The upper boundary conditions are defined by how to deal with gravity waves. The simplest choice is simple Rayleigh friction (damping towards zero momentum), non-orographic gravity wave parameterization, orographic gravity wave drag, or a constant "gravity wave" drag.
+By default, no scheme is active, which will almost certainly cause the code to crash. See [recommended values](#recommended-values) above and source code comments for guidance.
+
+Parameters are described in `atmos_param/damping_driver/damping_driver.f90` and the namelist `damping_driver_nml`.
+
+ Variable | Default Value | Meaning
+ :--- | :---: | :---
+ do_rayleigh | .false. | do simple Rayleigh friction at the top?
+ trayfric | 0.0 | Rayleigh friction time scale, [s] if > 0, [-d] if < 0
+ sponge_bottom | 50 | [Pa] bottom of Rayleigh friction layer (sponge)
+ do_mg_drag | .false. | mountain gravity wave scheme (not tested!)
+ do_cg_drag | .false. | non-orographic gravity wave scheme (under development)
+ do_topo_drag | .false. | topographic drag scheme (not tested!)
+ do_const_drag | .false. | constant "gravity wave" scheme (not tested!)
+ do_conserve_energy | .false. | account for heat release due to momentum loss?
+
+
 
 The lower boundary conditions are unchanged with respect to FHZ06, i.e.
 the same Monin-Obukhov theory is applied for determining surface drag,
