@@ -1,3 +1,5 @@
+[back to top](https://mjucker.github.io/MiMA)
+
 # Getting started with MiMA
 
 This model is based on the gray radiation model of [Frierson, Held, and Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1).
