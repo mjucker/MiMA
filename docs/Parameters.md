@@ -2,7 +2,7 @@
 
 This section shows most of the parameters and their default and/or recommended values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper and comments in the source code.
 
-Go directly to [default values](#default-values).
+Go directly to [default values](#default-values) or an [input file with all recommended values](../input/input.nml).
 
 ## Recommended values
 
