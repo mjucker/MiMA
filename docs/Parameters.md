@@ -2,6 +2,8 @@
 
 This section shows most of the parameters and their default and/or recommended values. For details about the physical meaning of these parameters, please refer to the main MiMA reference paper and comments in the source code.
 
+Go directly to [default values](#default-values).
+
 ## Recommended values
 
 Some of the default values are "safe choices", designed to have the least impact if the user is not aware of them.
@@ -446,6 +448,7 @@ do_entrain          | .true.
 use_df_stuff        | .false.
 
 ### vert_turb_driver
+
 
 
 
