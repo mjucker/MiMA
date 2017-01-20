@@ -407,7 +407,7 @@ Parameters are described in `atmos_param/damping_driver/damping_driver.f90` and 
  do_const_drag | .false. | constant "gravity wave" scheme (not tested!)
  do_conserve_energy | .false. | account for heat release due to momentum loss?
 
-The lower boundary condition is set by the Monin-Obukhov boundary layer. It is used for atmospheric diffusivities in `atmos_param/diffusivity/diffusivity.f90` and surface fluxes in `coupler/surface_flux.f90`.  We didn't change anything in this part as compared to *Frierson et al (2006)*, and only report the default values here. Refer to [recommended values](#recommended-values) for the appropriate settings in MiMA.
+The lower boundary condition is set by the Monin-Obukhov boundary layer. It is used for atmospheric diffusivities in `atmos_param/diffusivity/diffusivity.f90` and surface fluxes in `coupler/surface_flux.f90`.  We didn't change anything in this part as compared to *Frierson et al (2006)*, and only report the default values here. Refer to [recommended values](#boundary-conditions) for the appropriate settings in MiMA.
 
 Namelist `surface_flux_nml`
 
@@ -447,9 +447,27 @@ ampns_max           | 1.0E20
 do_entrain          | .true.
 use_df_stuff        | .false.
 
-### vert_turb_driver
 
+### Vertical diffusion
 
+Again, nothing has been done to these schemes, but we report the default values. Make sure to check the [recommended values](#vertical-diffusion).
+
+logical :: do_shallow_conv  = .false.
+ logical :: do_mellor_yamada = .true.
+ logical :: do_diffusivity         = .false.
+ logical :: do_molecular_diffusion = .false.
+ logical :: do_edt                 = .false.
+ logical :: do_stable_bl     = .false.
+ logical :: use_tau          = .true.
+ logical :: do_entrain    = .false.
+ 
+ character(len=24) :: gust_scheme  = 'constant' ! valid schemes are:
+                                                !   => 'constant'
+                                                !   => 'beljaars'
+ real              :: constant_gust = 1.0
+ real              :: gust_factor   = 1.0
+ logical           :: use_df_stuff=.false.
+ 
 
 
 ### ocean_rough
