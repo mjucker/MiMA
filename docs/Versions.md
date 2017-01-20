@@ -1,3 +1,5 @@
+[back to top](https://mjucker.github.io/MiMA)
+
 # Version history
 
 This file is to be updated whenever major changes are implemented in MiMA. 
