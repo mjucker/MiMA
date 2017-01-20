@@ -147,6 +147,19 @@ do_entrain          | .false. | don't account for entrainment (which is off anyw
 use_df_stuff        | .true. | for consistency with df_stuff
 
 
+### Vertical diffusion
+
+Namelist `vert_turb_driver_nml`
+
+Variable | Default Value
+ :--- | :---: 
+use_tau          | .false.
+constant_gust | 0.0
+do_mellor_yamada | .false.
+use_df_stuff  | .true.
+do_diffusivity         | .true.
+
+
 ## Default values
 
 ### General
@@ -407,7 +420,7 @@ Parameters are described in `atmos_param/damping_driver/damping_driver.f90` and 
  do_const_drag | .false. | constant "gravity wave" scheme (not tested!)
  do_conserve_energy | .false. | account for heat release due to momentum loss?
 
-The lower boundary condition is set by the Monin-Obukhov boundary layer. It is used for atmospheric diffusivities in `atmos_param/diffusivity/diffusivity.f90` and surface fluxes in `coupler/surface_flux.f90`.  We didn't change anything in this part as compared to *Frierson et al (2006)*, and only report the default values here. Refer to [recommended values](#boundary-conditions) for the appropriate settings in MiMA.
+The lower boundary condition is set by the Monin-Obukhov boundary layer. It is used for atmospheric diffusivities in `atmos_param/diffusivity/diffusivity.f90` and surface fluxes in `coupler/surface_flux.f90`.  We didn't change anything in this part as compared to *Frierson et al (2006)*, and only report the default values here. Refer to [recommended values](#recommended-values) for the appropriate settings in MiMA.
 
 Namelist `surface_flux_nml`
 
@@ -450,23 +463,22 @@ use_df_stuff        | .false.
 
 ### Vertical diffusion
 
-Again, nothing has been done to these schemes, but we report the default values. Make sure to check the [recommended values](#vertical-diffusion).
+Again, nothing has been done to these schemes, but we report the default values. They can be found in file `atmos_param/vert_turb_driver/vert_turb_driver.f90` and namelist `vert_turb_driver_nml`. Make sure to check the [recommended values](#recommended-values).
 
-logical :: do_shallow_conv  = .false.
- logical :: do_mellor_yamada = .true.
- logical :: do_diffusivity         = .false.
- logical :: do_molecular_diffusion = .false.
- logical :: do_edt                 = .false.
- logical :: do_stable_bl     = .false.
- logical :: use_tau          = .true.
- logical :: do_entrain    = .false.
- 
- character(len=24) :: gust_scheme  = 'constant' ! valid schemes are:
-                                                !   => 'constant'
-                                                !   => 'beljaars'
- real              :: constant_gust = 1.0
- real              :: gust_factor   = 1.0
- logical           :: use_df_stuff=.false.
+Variable | Default Value
+ :--- | :---: 
+do_shallow_conv  | .false.
+do_mellor_yamada | .true.
+do_diffusivity         | .false.
+do_molecular_diffusion | .false.
+do_edt                 | .false.
+do_stable_bl     | .false.
+use_tau          | .true.
+do_entrain    | .false.
+gust_scheme  | 'constant' 
+constant_gust | 1.0
+gust_factor   | 1.0
+use_df_stuff  | .false.
  
 
 
