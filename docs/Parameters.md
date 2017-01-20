@@ -11,7 +11,7 @@ But these values are not necessarily the best ones, so this section gives some b
 
 Namelist `coupler_nml`
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  dt_atmos | 600 | integration time step in [s]
  
@@ -19,7 +19,7 @@ Namelist `coupler_nml`
  
  Namelist `spectral_dynamics_nml`
  
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  water_correction_limit | 200.e2 | [Pa] turn off water correction in stratosphere to avoid systematic sink
  initial_sphum | 2.e6 | [kg/kg] Start with some water vapor as the stratosphere takes very long to fill up dynamically
@@ -31,7 +31,7 @@ Namelist `coupler_nml`
  
  Namelist `gaussian_topog_nml`, example for 3km wave-two in midlatitudes
  
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
    height   | 3000., 3000., 
    olat     |   45.,   45.,
@@ -45,7 +45,7 @@ Namelist `coupler_nml`
 
 Namelist `simple_surface_nml`
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  Tm   | 285 | [K] some meridional profile already in initial conditions
  do_qflux | .true. | export tropical heat into extratropics. Mimic ocean circulation
@@ -59,7 +59,7 @@ Namelist `simple_surface_nml`
  
 Namelist `qflux_nml`
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  qflux_amp | 30 | [W/m<sup>2</sup>] gives a good compromise between too strong jets and double ITCZ 
  warmpool_amp | 30 | [W/m<sup>2</sup> gives realistic warmpool anomaly and good cold point
@@ -70,7 +70,7 @@ Following *Frierson (2007)* we use large scale condenstion together with the Bet
 
 Namelist `moist_processes_nml`
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  do_mca | .false. | Do moist convective adjustment
  do_lsc | .true. | Do large scale condensation
@@ -79,7 +79,7 @@ Namelist `moist_processes_nml`
 
 Namelist `betts_miller_nml`
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  rhbm   | 0.7  | relax to 70% relative humidity
  do_simp | .false. | don't adjust time scales to make precipitation always continuous
@@ -87,13 +87,13 @@ Namelist `betts_miller_nml`
 
 Namelist `moist_conv_nml` is only touched to make sure moisture handling is consistent accross namelists.
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  use_df_stuff | .true. | Make everything consistent with above `use_df_stuff`
 
 Namelist `lscale_cond_nml`: We want to re-evaporate outfalling precipitation if any of the layers below are sub-saturated.
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  do_evap | .true. | re-evaporate in below sub-saturated layers (if any)
  use_df_stuff | .true. | Make everything consistent
@@ -102,7 +102,7 @@ Namelist `lscale_cond_nml`: We want to re-evaporate outfalling precipitation if 
 
 Namelist `damping_driver_nml`.
 
- Variable | Default Value | Meaning
+ Variable | Recommended Value | Meaning
  :--- | :---: | :---
  do_rayleigh | .true. | do simple Rayleigh friction at the top
  trayfric | -0.5 | Rayleigh friction time scale of 1/2 day
