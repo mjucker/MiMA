@@ -301,9 +301,11 @@ RRTM directly. Those parameters are given in the first table and can be found in
   precip_lat            |    0           |  If so, only use poleward of this latitude [deg]
   precip_albedo_mode     |   ’full’      |  If so, use ’full’ (total), ’lscale’ (large scale), or ’conv’ (convective) precipitation for albedo calculation
 
-Table \[RRTM\_default\] gives the default values for all needed RRTM
+
+The next table gives the default values for all needed RRTM
 input parameters, with the parameter names as given by the original
-source code. We refer the reader to RRTM documentation and source code
+source code. These are not part of any namelist, but we report them here for completeness.
+We refer the reader to RRTM documentation and source code
 to learn the exact meanings of each input parameter. The parameter type
 is defined as follows: ‘fixed’ means the value is hard coded and cannot
 be changed without recompiling; ‘fixed input’ means that the variable
@@ -311,50 +313,46 @@ can be changed within a namelist at run time, but will not change during
 the simulation; ‘interactive’ means that the value is re-evaluated at
 each radiation time step before calling RRTM.
 
-  Variable     Type          Default
-  ------------ ------------- ------------
-  `iaer`       fixed         0
-  `h2vmr`      interactive   tracer
-  `o3vmr`      fixed input   from file
-  `co2vmr`     fixed input   300e-6
-  `ch4vmr`     fixed input   0
-  `n2ovmr`     fixed input   0
-  `o2vmr`      fixed input   0
-  `cfc11vmr`   fixed input   0
-  `cfc12vmr`   fixed input   0
-  `cfc22vmr`   fixed input   0
-  `ccl4vmr`    fixed input   0
-  `asdir`      fixed input   0.27
-  `aldir`      fixed         $=$`asdir`
-  `asdif`      fixed         $=$`asdir`
-  `aldir`      fixed         $=$`asdir`
-  `coszen`     interactive   computed
-  `adjes`      fixed input   1
-  `dyofyr`     fixed input   0
-  `scon`       fixed input   1368.22
-  `emis`       fixed         1
-  `inflgsw`    fixed         0
-  `iceflgsw`   fixed         0
-  `liqflgsw`   fixed         0
-  `cldfr`      fixed         0
-  `taucld`     fixed         0
-  `ssacld`     fixed         0
-  `asmcld`     fixed         0
-  `asmcld`     fixed         0
-  `fsfcld`     fixed         0
-  `cicewp`     fixed         0
-  `cliqwp`     fixed         0
-  `reice`      fixed         10
-  `reliq`      fixed         10
-  `tauaer`     fixed         0
-  `ssaaer`     fixed         0
-  `asmaer`     fixed         0
-  `acaer`      fixed         0
+  Variable   |  Type     |     Default
+:--- | :--- | :---
+  iaer      | fixed        | 0
+  h2vmr     | interactive  | tracer
+  o3vmr     | fixed input  | from file
+  co2vmr    | fixed input  | 300e-6
+  ch4vmr    | fixed input  | 0
+  n2ovmr    | fixed input  | 0
+  o2vmr     | fixed input  | 0
+  cfc11vmr  | fixed input  | 0
+  cfc12vmr  | fixed input  | 0
+  cfc22vmr  | fixed input  | 0
+  ccl4vmr   | fixed input  | 0
+  asdir     | fixed input  | 0.27
+  aldir     | fixed        | = asdir
+  asdif     | fixed        | = asdir
+  aldir     | fixed        | = asdir
+  coszen    | interactive  | computed
+  adjes     | fixed input  | 1
+  dyofyr    | fixed input  | 0
+  scon      | fixed input  | 1368.22
+  emis      | fixed        | 1
+  inflgsw   | fixed        | 0
+  iceflgsw  | fixed        | 0
+  liqflgsw  | fixed        | 0
+  cldfr     | fixed        | 0
+  taucld    | fixed        | 0
+  ssacld    | fixed        | 0
+  asmcld    | fixed        | 0
+  asmcld    | fixed        | 0
+  fsfcld    | fixed        | 0
+  cicewp    | fixed        | 0
+  cliqwp    | fixed        | 0
+  reice     | fixed        | 10
+  reliq     | fixed        | 10
+  tauaer    | fixed        | 0
+  ssaaer    | fixed        | 0
+  asmaer    | fixed        | 0
+  acaer     | fixed        | 0
 
-  : Input parameter settings for both RRTM short and long wave modules.
-  ‘fixed’ means hard coded, ‘fixed input’ is read from the input file
-  but remains constant, and ‘interactive’ is updated before every
-  radiation call.<span data-label="RRTM_default"></span>
 
 
 ### Boundary conditions
@@ -419,4 +417,4 @@ use_df_stuff        | .false.
 
 ### ocean_rough
 
-### physics_driver
+### physics_driver|
