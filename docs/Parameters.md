@@ -18,7 +18,7 @@ Namelist `coupler_nml`
 
  Variable | Recommended Value | Meaning
  :--- | :---: | :---
- dt_atmos | 900 | integration time step in [s]
+ dt_atmos | 600 | integration time step in [s]
  
 ### Dynamics
  
