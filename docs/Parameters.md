@@ -113,10 +113,10 @@ Namelist `lscale_cond_nml`: We want to re-evaporate outfalling precipitation if 
 Namelist `rrtm_radiation_nml`
 
  Variable | Recommended Value | Meaning
- :--- | :---: | :---c
+ :--- | :---: | :---
   do_read_ozone         |    .true.      |  Read ozone from file (only way to have non-zero ozone)
   ozone_file            |    ’ozone_1990’     | If so, filename without ’.nc’ extension - this file is in the repository
-  co2_val                |    300.           |  Constant value for CO<sub>2</sub> [ppm]
+  co2_val               |    300.           |  Constant value for CO<sub>2</sub> [ppm]
   dt_rad                |    7200           |  Radiation time step [s]. Every time step if < `dt_atmos`
 
 Namelist `astro_nml`.
