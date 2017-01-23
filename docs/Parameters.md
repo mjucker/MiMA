@@ -243,7 +243,7 @@ These parameters are set in `coupler/simple_surface.f90`.
   Variable           | Default Value | Meaning
   :--- | :---: | :---
   Tm              | 265 | Initial surface temperature [K]. 1K warmer than isothermal atmosphere seems reasonable to get convection going right away.
-  heat_capacity   | 4e-8 | [J/K/m<sup>2</sup>] 100m mixed layer depth
+  heat_capacity   | 4e8 | [J/K/m<sup>2</sup>] 100m mixed layer depth
   land_capacity   | -1 | same as `heat_capacity`
   trop_capacity   | -1 | same as `heat_capacity`
   trop_cap_limit  | 15 | [deg] Poleward boundary for `trop_capacity`
