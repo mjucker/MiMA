@@ -1,5 +1,5 @@
-# MiMA
-Model of an idealized Moist Atmosphere: Intermediate-complexity General Circulation Model with interactive water vapor and full radiation.
+# Model of an idealized Moist Atmosphere (MiMA)
+MiMA is an intermediate-complexity General Circulation Model with interactive water vapor and full radiation.
 
 Please see the documentation [online](http://mjucker.github.io/MiMA/) or [in this repository](docs/README.md) for information about the model.
 
