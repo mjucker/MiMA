@@ -3,6 +3,8 @@ MiMA is an intermediate-complexity General Circulation Model with interactive wa
 
 Please see the documentation [online](http://mjucker.github.io/MiMA/) or [in this repository](docs/README.md) for information about the model.
 
+Although free to use under a GPLv3 license, we ask you to cite the relevant scientific work given in the documentation in any publications using this code.
+
 ## License
 
 MiMA is distributed under a GNU GPLv3 license. That means you have permission to use, modify, and distribute the code, even for commercial use. However, you must make your code publicly available under the same license. See LICENSE.txt for more details.
