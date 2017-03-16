@@ -31,14 +31,5 @@ it_jobscript*
 simple_jobscript*
 local_*
 bin/mppnccombine.nyu
-bin/  
-doc_rrtm/  
-docs/  
-exp/  
-input/  
-LICENSE.txt  
-postprocessing/  
-README.md
-
 
 .DS_Store
