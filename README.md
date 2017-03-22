@@ -1,7 +1,7 @@
 # Model of an idealized Moist Atmosphere (MiMA) [![DOI](https://zenodo.org/badge/36012278.svg)](https://zenodo.org/badge/latestdoi/36012278)
 MiMA is an intermediate-complexity General Circulation Model with interactive water vapor and full radiation.
 
-Please see the documentation [online](http://mjucker.github.io/MiMA/) or [in this repository](docs/README.md) for information about the model.
+Please see the documentation [online](http://mjucker.github.io/MiMA/) or [in the docs folder](docs/) for information about the model.
 
 Although free to use under a GPLv3 license, we ask you to cite the relevant scientific work given in the documentation in any publications using this code.
 
