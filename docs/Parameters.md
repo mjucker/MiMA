@@ -363,8 +363,8 @@ RRTM directly. Those parameters are given in the first table and can be found in
   do_zm_rad             |    .false.     |  Only pass zonal mean radiative forcing to dynamics
   dt_rad                |    0           |  Radiation time step [s]. Every time step if < `dt_atmos`
   store_intermediate_rad |   .true.      |  Keep radiative forcing constant or set to zero between radiative time steps?
-  do_rad_time_avg       |    .true.      |  Compute zenith angle average over radiative time step or use instantaneous?
-  dt_rad_avg            |    86400.      |  Average zenith angle over this time step. Defaults to diurnal mean, e.g. incoming SW flux at the TOA will be zonally symmetric. =`dt_rad` if < 0
+  do_rad_time_avg       |    .true.      |  Compute zenith angle average over radiative time step (`true`) or use instantaneous (`false`)?
+  dt_rad_avg            |    86400.      |  Average zenith angle over this time interval [s]. Defaults to diurnal mean, e.g. incoming SW flux at the TOA will be zonally symmetric. Set equal to `dt_rad` if < 0
   lonstep               |    1           |  Only compute radiation at every nth longitudinal grid point
   do_precip_albedo      |    .false.     |  Link surface albedo to precipitation?
   precip_albedo         |    0.35        |  If so, set albedo for 100% precipitating grid boxes
