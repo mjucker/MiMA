@@ -1,4 +1,3 @@
-x
 module betts_miller_mod
 
 !----------------------------------------------------------------------
@@ -39,7 +38,7 @@ private
 !   --- namelist ----
 
 real    :: tau_bm=7200.
-real    :: rhbm = .8 
+real    :: rhbm = .8
 logical :: do_simp = .true.
 
 !logical :: do_enadjusttemp = .false.

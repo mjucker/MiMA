@@ -603,7 +603,7 @@ endif
 !  compute temperature change loss due to ke dissipation
 
    tdt = 0. !mj
-   if ( ) then
+   if (do_conserve_energy) then
        do k = 1, nlev_rayfric
           tdt(:,:,k) = -((u(:,:,k)+.5*dt*udt(:,:,k))*udt(:,:,k) +  &
                          (v(:,:,k)+.5*dt*vdt(:,:,k))*vdt(:,:,k)) / cp_air
