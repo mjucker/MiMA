@@ -56,7 +56,7 @@ cp exp/exec.$PLATFORM/mima.x $EXECDIR/
 cd $EXECDIR
 mkdir RESTART
 mpiexec -n $N_PROCS ./mima.x
-CCOMP=/PATH/TO/MiMA/REPOSITORY/bin/mppnccombine.$PLATFORM
+CCOMB=/PATH/TO/MiMA/REPOSITORY/bin/mppnccombine.$PLATFORM
 $CCOMB -r atmos_daily.nc atmos_daily.nc.*
 $CCOMB -r atmos_avg.nc atmos_avg.nc.*
 ```
