@@ -4,7 +4,8 @@
 !
 !    Modeling an idealized Moist Atmosphere (MiMA)
 !    Copyright (C) 2015  Martin Jucker
-!    https://github.com/mjucker/MiMA
+!    See https://mjucker.github.io/MiMA for documentation
+!    Main reference is Jucker and Gerber, JClim 2017, doi: http://dx.doi.org/10.1175/JCLI-D-17-0127.1
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by

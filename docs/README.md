@@ -13,13 +13,18 @@ MiMA is an intermediate-complexity General Circulation Model with interactive wa
 ## News
 With time, I hope to post usage, papers, etc. which relate to MiMA here. If you're a MiMA user, please let me know at <coding@martinjucker.com>.
 
+* June 2017: MiMA reference paper published in Journal of Climate:
+[M Jucker and EP Gerber, 2017: *Untangling the annual cycle of the tropical tropopause layer with an idealized moist model*, J Clim, doi:10.1175/JCLI-D-17-0127.1](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
+
 
 
 ## References
 
 MiMA
-* v1.0: TBD
-* latest version TBD
+* [Jucker and Gerber, J Clim (2017)](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
+* code:
+  * latest version: [![DOI](https://zenodo.org/badge/36012278.svg)](https://zenodo.org/badge/latestdoi/36012278)
+  * v1.0: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.321708.svg)](https://doi.org/10.5281/zenodo.321708)
 
 Gray radiation model
 * [Frierson, Held, Zurita-Gotor, JAS (2006)](http://journals.ametsoc.org/doi/abs/10.1175/JAS3753.1)
