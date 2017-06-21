@@ -140,8 +140,7 @@ contains
  real, dimension(size(udt,1),size(udt,2))             :: taubx, tauby
  real, dimension(size(udt,1),size(udt,2),size(udt,3)) :: taus
  real, dimension(size(udt,1),size(udt,2),size(udt,3)) :: utnd, vtnd, &
-                                                         ttnd, pmass, &
-                                                         p2
+                                                         ttnd, pmass
  logical :: used
 
  real, dimension(size(udt,1),size(udt,2),size(udt,3)+1) :: p_pass, &
@@ -163,8 +162,7 @@ contains
 !-----------------------------------------------------------------------
    if (do_rayleigh) then
 
-! mj pk02-like sponge       p2 = pfull * pfull
-!       call rayleigh (delt, p2, u, v, utnd, vtnd, ttnd)
+! mj pk02-like sponge     
        call rayleigh (delt, pfull, u, v, utnd, vtnd, ttnd)
        udt = udt + utnd
        vdt = vdt + vtnd
@@ -573,10 +571,10 @@ endif
 
 !#######################################################################
 
- subroutine rayleigh (dt, p2, u, v, udt, vdt, tdt)
+ subroutine rayleigh (dt, pres, u, v, udt, vdt, tdt)
 
   real,    intent(in)                      :: dt
-  real,    intent(in),  dimension(:,:,:)   :: p2, u, v
+  real,    intent(in),  dimension(:,:,:)   :: pres, u, v
   real,    intent(out), dimension(:,:,:)   :: udt, vdt, tdt
 
   real, dimension(size(u,1),size(u,2)) :: fact
@@ -587,9 +585,8 @@ endif
    udt = 0.
    vdt = 0.
    do k = 1, nlev_rayfric
-      where ( p2(:,:,k) < sponge_pbottom ) !mj note: p2==pfull now
-!         fact(:,:) = rfactr*(1.+(p2(:,:,1)-p2(:,:,k))/(p2(:,:,1)+p2(:,:,k)))
-         fact(:,:) = rfactr*(sponge_pbottom-p2(:,:,k))**2/(sponge_pbottom)**2
+      where ( pres(:,:,k) < sponge_pbottom )
+         fact(:,:) = rfactr*(sponge_pbottom-pres(:,:,k))**2/(sponge_pbottom)**2
          udt(:,:,k) = -u(:,:,k)*fact(:,:)
          vdt(:,:,k) = -v(:,:,k)*fact(:,:)
       endwhere
