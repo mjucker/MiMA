@@ -5,6 +5,10 @@ MiMA is an intermediate-complexity General Circulation Model with interactive wa
 
 Please see the documentation [online](http://mjucker.github.io/MiMA/) or [in the docs folder](docs/) for information about the model.
 
+See the 30 second trailer on [YouTube](https://www.youtube.com/watch?v=8UfaFnGtCrk "Model of an idealized Moist Atmosphere (MiMA)"): 
+
+[![MiMA thumbnail](https://img.youtube.com/vi/8UfaFnGtCrk/0.jpg)](https://www.youtube.com/watch?v=8UfaFnGtCrk "Model of an idealized Moist Atmosphere (MiMA)")
+
 Although free to use under a GPLv3 license, we ask you to cite the relevant scientific work given in the documentation in any publications using this code.
 
 ## License
