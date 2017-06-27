@@ -71,6 +71,7 @@ real ::   z_ref_heat      = 2.,       &
           trop_capacity   = -1.,      & !mj
           trop_cap_limit  = 15.,      & !mj
           heat_cap_limit  = 60.,      & !mj
+          zsurf_cap_limit = 10.,      & !mj
           np_cap_factor   =  1.,      & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.30,     &
@@ -109,7 +110,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
                               land_capacity,trop_capacity,       & !mj
                               trop_cap_limit, heat_cap_limit,    & !mj
-                              np_cap_factor,                     & !mj
+                              np_cap_factor, zsurf_cap_limit,    & !mj
                               roughness_choice, const_roughness, &
                               albedo_choice, const_albedo, do_oflx, &
 			      max_of, lonmax_of, latmax_of, latwidth_of, &
@@ -415,7 +416,6 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          dt_t_surf = sst_new - sst
          sst = sst + dt_t_surf
       else   !mj ocean depth function of latitude
-
          land_sea_heat_capacity = heat_capacity
          if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
             do j=1,size(Atm%t_bot,2)
@@ -437,7 +437,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 ! mj land heat capacity function of surface topography
          if(trim(land_option) .eq. 'zsurf')then
             call get_surf_geopotential(zsurf)
-            where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
+            where ( zsurf > zsurf_cap_limit ) land_sea_heat_capacity = land_capacity
          endif
 ! mj land heat capacity given through ?landlon, ?landlat
          if(trim(land_option) .eq. 'lonlat')then
