@@ -75,7 +75,7 @@ module rrtm_astro
             integer(kind=im)            ,intent(out):: dyofyr      ! day of the year to compute cosz at
 ! Locals
             real(kind=rb),dimension(size(lat,1),size(lat,2)) :: h,cos_h, &
-                 lat_h
+                 lat_h,fracday
 
             real dec_sin,dec_tan,dec,dec_cos,twopi,dt_pi
 
@@ -120,13 +120,14 @@ module rrtm_astro
             where(time_pi >= PI) time_pi = time_pi - twopi
             where(time_pi < -PI) time_pi = time_pi + twopi 
             !time_pi now contains local time at each grid point
-            !get day of the year relative to equinox. We set equinox at (equinox_day,equinox_day+0.5)*daysperyear
+            !get day of the year relative to March equinox. We set equinox at (equinox_day,equinox_day+0.5)*daysperyear
+            !note that GFDL computes relative to September equinox
             days = days - int(equinox_day*daysperyear)
             dyofyr   = modulo(days,daysperyear) 
             !convert into radians
             radday = dyofyr*radperday
             !get declination
-            dec_sin = sin(obliq*deg2rad)*sin(radday) !check sign ("-" in GFDL's code)
+            dec_sin = sin(obliq*deg2rad)*sin(radday) !("-" in GFDL's code due to differences in origin (March vs. September equinox))
             dec = asin(dec_sin)
             dec_cos = cos(dec)
 
@@ -206,7 +207,23 @@ module rrtm_astro
 !-----------------------------------------------------------------
                where(  h <  time_pi .and. twopi - h < tt  ) &
                   cosz = aa + bb*(stt + sh) / (tt + h - twopi)
-
+                  
+!-------------------------------------------------------------------
+!    day fraction is the fraction of the averaging period contained 
+!    within the (-h,h) period.
+!-------------------------------------------------------------------
+               where (time_pi < -h .and.      tt < -h)      fracday = 0.0
+               where (time_pi < -h .and. abs(tt) <= h)      fracday = (tt + h)/dt
+               where (time_pi < -h .and.       h < tt)      fracday = ( h + h)/dt 
+               where (abs(time_pi) <= h .and. abs(tt) <= h) fracday = (tt - time_pi)/dt
+               where (abs(time_pi) <= h .and.       h < tt) fracday = ( h - time_pi)/dt
+               where (      h <  time_pi             )      fracday = 0.0
+               where (twopi - h < tt) fracday = fracday + (tt + h - twopi)/dt
+!-------------------------------------------------------------------
+!    now we need to correct cosz by the fraction of day when 
+!     averaging
+!-------------------------------------------------------------------
+               cosz = cosz*fracday
 !-------------------------------------------------------------------
 !    daily mean
 !-------------------------------------------------------------------
