@@ -75,12 +75,12 @@ module rrtm_astro
             integer(kind=im)            ,intent(out):: dyofyr      ! day of the year to compute cosz at
 ! Locals
             real(kind=rb),dimension(size(lat,1),size(lat,2)) :: h,cos_h, &
-                 lat_h,fracday
+                 lat_h
 
-            real dec_sin,dec_tan,dec,dec_cos,twopi,dt_pi
+            real     :: dec_sin,dec_tan,dec,dec_cos,twopi,dt_pi
 
             integer  :: seconds,sec2,days,daysperyear
-            real,dimension(size(lon,1),size(lon,2)) :: time_pi,aa,bb,tt,st,stt,sh
+            real,dimension(size(lon,1),size(lon,2)) :: time_pi,aa,bb,tt,st,stt,sh,fracday
             real     :: radsec,radday
 
             integer  :: i,j
@@ -223,7 +223,7 @@ module rrtm_astro
 !    now we need to correct cosz by the fraction of day when 
 !     averaging
 !-------------------------------------------------------------------
-               cosz = cosz*fracday
+               cosz = cosz*fracday/radpersec
 !-------------------------------------------------------------------
 !    daily mean
 !-------------------------------------------------------------------
