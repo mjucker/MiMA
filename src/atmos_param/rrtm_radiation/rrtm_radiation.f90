@@ -582,6 +582,8 @@
           if(do_read_ozone)then
              call interpolator( o3_interp, Time_loc, p_half, o3f, trim(ozone_file))
              o3f = o3f*scale_ozone
+             !due to interpolation, some values might be negative
+             o3f = max(0.0,o3f)
           endif
 
           !interactive albedo: zonal mean of precipitation
@@ -610,6 +612,8 @@
           ! read water vapor
           if(do_read_h2o)then
              call interpolator( h2o_interp, Time_loc, p_half, q_tmp, trim(h2o_file))
+             ! some values might be negative due to interpolation
+             q_tmp = max(0.0,q_tmp)
           endif
 
           ! fixed water vapor
