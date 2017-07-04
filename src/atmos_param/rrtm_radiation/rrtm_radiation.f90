@@ -488,7 +488,7 @@
           integer k,j,i,ij,j1,i1,ij1,kend,dyofyr,seconds,days
           integer si,sj,sk,locmin(3)
           real(kind=rb),dimension(size(q,1),size(q,2),size(q,3)) :: o3f
-          real(kind=rb),dimension(ncols_rrt,nlay_rrt) :: pfull,tfull,fracday&
+          real(kind=rb),dimension(ncols_rrt,nlay_rrt) :: pfull,tfull&
                , hr,hrc, swhr, swhrc
           real(kind=rb),dimension(size(tdt,1),size(tdt,2),size(tdt,3)) :: tdt_rrtm
           real(kind=rb),dimension(ncols_rrt,nlay_rrt+1) :: uflx, dflx, uflxc, dflxc&
