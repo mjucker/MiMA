@@ -152,7 +152,9 @@
         logical            :: store_intermediate_rad =.true.  ! Keep rad constant over entire dt_rad?
                                                               ! Else only heat radiatively at every dt_rad
         logical            :: do_rad_time_avg =.true.         ! Average coszen for SW radiation over dt_rad?
-        integer(kind=im)   :: dt_rad_avg = 86400.             ! If averaging, over what time? dt_rad_avg=dt_rad if dt_rad_avg<=0
+        integer(kind=im)   :: dt_rad_avg = 86400.             ! If averaging, over what time?
+                                                              !  no averaging if dt_rad_avg = 0. (equivalent to do_rad_time_avg=.false.)
+                                                              !  dt_rad_avg=dt_rad if dt_rad_avg < 0
                                                               !  Default is to average over the whole day, i.e. remove diurnal  cycle.
                                                               !  This seems safest as the diurnal cycle has been observed
                                                               !  to create strong atmospheric tides with topography.
@@ -320,7 +322,11 @@
           ncols_rrt = ncols/lonstep
           nlay_rrt  = nlay
 
-          if(dt_rad_avg .le. 0) dt_rad_avg = dt_rad
+          if(dt_rad_avg .eq. 0.0) then
+             do_rad_time_avg = .false.
+          else if(dt_rad_avg .lt. 0) then
+             dt_rad_avg = dt_rad
+          endif
 
 !------------ allocate arrays to be used later  -------
           allocate(t_half(size(lonb,1)-1,size(latb)-1,nlay+1))
