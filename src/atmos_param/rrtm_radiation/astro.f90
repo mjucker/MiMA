@@ -228,7 +228,7 @@ module rrtm_astro
 !    daily mean
 !-------------------------------------------------------------------
             else if ( dt .ge. 86400. ) then
-                  cosz = aa + bb / PI
+                  cosz = ( aa*h + bb*sin(h) ) / PI
 
 !----------------------------------------------------------------------
 !    if instantaneous values are desired, define cosz at time t.
