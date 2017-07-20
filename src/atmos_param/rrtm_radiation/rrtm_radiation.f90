@@ -92,6 +92,9 @@
                                                                             ! between radiation steps to
                                                                             ! determine precip_albedo
                                                                             ! dimension (lon x lat)
+        real(kind=rb),allocatable,dimension(:,:)   :: olr,isr               ! Outgoing LW and Incoming SW radiation
+                                                                            ! diagnostics only [W/m2]
+                                                                            ! dimension (lon x lat)
         integer(kind=im)                           :: num_precip            ! number of times precipitation
                                                                             ! has been summed in rrtm_precip
         integer(kind=im)                           :: dt_last               ! time of last radiation calculation
@@ -176,6 +179,7 @@
 !-------------------- diagnostics fields -------------------------------
 
         integer :: id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,id_flux_sw,id_flux_lw,id_albedo,id_ozone,id_thalf
+        integer :: id_olr,id_isr
         character(len=14), parameter :: mod_name = 'rrtm_radiation'
         real :: missing_value = -999.
 
@@ -273,6 +277,14 @@
           id_flux_lw = &
                register_diag_field ( mod_name, 'flux_lw', axes(1:2), Time, &
                  'LW surface flux', &
+                 'W/m2', missing_value=missing_value               )
+          id_olr     = &
+               register_diag_field ( mod_name, 'olr', axes(1:2), Time, &
+                 'Outgoing longwave radation', &
+                 'W/m2', missing_value=missing_value               )
+          id_isr     = &
+               register_diag_field ( mod_name, 'isr', axes(1:2), Time, &
+                 'Incoming shortwave radation', &
                  'W/m2', missing_value=missing_value               )
           id_albedo  = &
                register_diag_field ( mod_name, 'rrtm_albedo', axes(1:2), Time, &
@@ -387,8 +399,10 @@
           if(do_precip_albedo)allocate(rrtm_precip(size(lonb,1)-1,size(latb,1)-1))
           if(store_intermediate_rad .or. id_tdt_rad > 0)&
                allocate(tdt_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
-          if(id_tdt_sw > 0)allocate(tdt_sw_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
-          if(id_tdt_lw > 0)allocate(tdt_lw_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
+          if(id_tdt_sw .gt. 0) allocate(tdt_sw_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
+          if(id_tdt_lw .gt. 0) allocate(tdt_lw_rad(size(lonb,1)-1,size(latb,1)-1,nlay))
+          if(id_isr .gt. 0) allocate(isr(size(lonb,1)-1,size(latb,1)-1))
+          if(id_olr .gt. 0) allocate(olr(size(lonb,1)-1,size(latb,1)-1))
 
           if(do_precip_albedo)then
              rrtm_precip = 0.
@@ -500,7 +514,7 @@
           real(kind=rb),dimension(ncols_rrt,nlay_rrt+1) :: uflx, dflx, uflxc, dflxc&
                ,swuflx, swdflx, swuflxc, swdflxc
           real(kind=rb),dimension(size(q,1)/lonstep,size(q,2),size(q,3)  ) :: swijk,lwijk
-          real(kind=rb),dimension(size(q,1)/lonstep,size(q,2)) :: swflxijk,lwflxijk
+          real(kind=rb),dimension(size(q,1)/lonstep,size(q,2)) :: swflxijk,lwflxijk,olrijk,isrijk
           real(kind=rb),dimension(ncols_rrt,nlay_rrt+1):: phalf,thalf
           real(kind=rb),dimension(ncols_rrt)   :: tsrf,cosz_rr,albedo_rr
           real(kind=rb) :: dlon,dlat,dj,di
@@ -700,6 +714,7 @@
           endif
 
           swijk   = reshape(swhr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
+          isrijk  = reshape(swdflx(:,sk+1),(/ si/lonstep,sj /))
 
           hr = 0.
           dflx = 0.
@@ -735,6 +750,7 @@
           endif
 
           lwijk   = reshape(hr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
+          olrijk  = reshape(uflx(:,sk+1),(/ si/lonstep,sj /))
 
 !---------------------------------------------------------------------------------------------------------------
           ! get radiation
@@ -757,8 +773,10 @@
                            +       di *(swijk(i1,:,:) + lwijk(i1,:,:)) &
                            +   (1.-di)*(swijk(i ,:,:) + lwijk(i ,:,:))
                    endif
-                   if(id_tdt_sw>0)tdt_sw_rad(ij1,:,:)=di*swijk(i1,:,:)+(1.-di)*swijk(i,:,:)
-                   if(id_tdt_lw>0)tdt_lw_rad(ij1,:,:)=di*lwijk(i1,:,:)+(1.-di)*lwijk(i,:,:)
+                   if(id_tdt_sw .gt. 0)tdt_sw_rad(ij1,:,:)=di*swijk(i1,:,:)+(1.-di)*swijk(i,:,:)
+                   if(id_tdt_lw .gt. 0)tdt_lw_rad(ij1,:,:)=di*lwijk(i1,:,:)+(1.-di)*lwijk(i,:,:)
+                   if(id_olr    .gt. 0)olr(ij1,:)         =di*olrijk(i1,:) +(1.-di)*olrijk(i,:)
+                   if(id_isr    .gt. 0)isr(ij1,:)         =di*isrijk(i1,:) +(1.-di)*isrijk(i,:)
                 enddo
              enddo
           endif
@@ -824,9 +842,10 @@
 !
 ! Modules
           use rrtm_vars,only:         sw_flux,lw_flux,zencos,tdt_rad,tdt_sw_rad,tdt_lw_rad,&
+                                      &olr,isr,&
                                       &id_tdt_rad,id_tdt_sw,id_tdt_lw,id_coszen,&
                                       &id_flux_sw,id_flux_lw,id_albedo,id_ozone,&
-                                      &id_thalf
+                                      &id_thalf,id_isr,id_olr
           use diag_manager_mod, only: register_diag_field, send_data
           use time_manager_mod,only:  time_type
 ! Input variables
@@ -861,6 +880,14 @@
 !------- Net LW surface flux                   ------------
           if ( id_flux_lw > 0 ) then
              used = send_data ( id_flux_lw, lw_flux, Time, is, js )
+          endif
+!------- Incoming SW radiation                   ------------
+          if ( id_isr > 0 ) then
+             used = send_data ( id_isr, isr, Time, is, js )
+          endif
+!------- Outgoing LW radiation                   ------------
+          if ( id_olr > 0 ) then
+             used = send_data ( id_olr, olr, Time, is, js )
           endif
 !------- Interactive albedo                    ------------
           if ( present(albedo_loc)) then
