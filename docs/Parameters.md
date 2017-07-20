@@ -18,7 +18,7 @@ Namelist `coupler_nml`
 
  Variable | Recommended Value | Meaning
  :--- | :---: | :---
- dt_atmos | 600 | integration time step in [s]
+ dt_atmos | 900 | integration time step in [s]
  
 ### Dynamics
  
@@ -33,7 +33,7 @@ Namelist `coupler_nml`
  num_levels | >= 40 | Number of vertical levels
  vert_coord_option | 'uneven_sigma' | use hybrid sigma/pressure coordinates
  surf_res   | 0.5 | parameter 1 to define vertical level distribution
- scale_heights | 11.0 | parameter 2 to define vertical level distribution
+ scale_heights | 9.0 | parameter 2 to define vertical level distribution
  exponent | 7.0 | parameter 3 to define vertical level distribution
  topography_option | 'gaussian' | if orographic forcing required
  
@@ -135,7 +135,7 @@ Namelist `damping_driver_nml`.
  :--- | :---: | :---
  do_rayleigh | .true. | do simple Rayleigh friction at the top
  trayfric | -0.5 | Rayleigh friction time scale of 1/2 day
- sponge_bottom | 50 | Rayleigh friction above 0.5hPa
+ sponge_bottom | 100 | Rayleigh friction above 0.5hPa
  do_conserve_energy | .true. | account for heat release due to momentum loss
  
 Namelist `surface_flux_nml`
