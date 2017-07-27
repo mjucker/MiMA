@@ -126,6 +126,8 @@ use damping_driver_mod,      only: damping_driver,      &
 
 use grey_radiation_mod, only: grey_radiation_init, grey_radiation, grey_radiation_end
 
+use local_heating_mod, only:  local_heating_init,local_heating
+
 !mj: RRTM radiative scheme
 use rrtmg_lw_init
 use rrtmg_lw_rad
@@ -573,6 +575,8 @@ real, dimension(:,:,:),  intent(out),  optional  :: diffm, difft
          call rrtmg_sw_ini(cp_air)
          call rrtm_radiation_init(axes,Time,id*jd,kd,lonb,latb)
       endif
+      
+      if(do_local_heating) call local_heating_init
 
 !-----------------------------------------------------------------------
 !    initialize atmos_tracer_driver_mod.
@@ -1281,6 +1285,12 @@ real,  dimension(:,:,:), intent(out)  ,optional :: diffm, difft
          !need t at half grid
          call interp_temp(z_full,z_half,t_surf_rad,t)
          call run_rrtmg(is,js,Time,lat,lon,p_full,p_half,albedo,q,t,t_surf_rad,tdt,coszen,flux_sw,flux_lw)
+      endif
+!----------------------------------------------------------------------
+!    artificial local heating if required
+!----------------------------------------------------------------------
+      if(do_local_heating) then
+        call local_heating(lon,lat,p_full,tdt)
       endif
 
 !----------------------------------------------------------------------
