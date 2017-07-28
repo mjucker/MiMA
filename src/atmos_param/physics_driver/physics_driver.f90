@@ -195,6 +195,8 @@ logical :: do_rrtm_radiation = .true.
 
 logical :: do_damping = .true.
 
+logical :: do_local_heating = .false.
+
 real    :: diff_min = 1.e-3    ! minimum value of a diffusion 
                                ! coefficient beneath which the
                                ! coefficient is reset to zero
@@ -232,7 +234,7 @@ namelist / physics_driver_nml / do_netcdf_restart, do_radiation, &
                                 do_moist_processes, tau_diff,      &
                                 diff_min, diffusion_smooth, &
                                 do_grey_radiation, do_rrtm_radiation, &
-                                do_damping
+                                do_damping, do_local_heating
 
 !---------------------------------------------------------------------
 !------- public data ------
@@ -576,7 +578,7 @@ real, dimension(:,:,:),  intent(out),  optional  :: diffm, difft
          call rrtm_radiation_init(axes,Time,id*jd,kd,lonb,latb)
       endif
       
-      if(do_local_heating) call local_heating_init
+      if(do_local_heating) call local_heating_init(axes, Time)
 
 !-----------------------------------------------------------------------
 !    initialize atmos_tracer_driver_mod.
@@ -1290,7 +1292,7 @@ real,  dimension(:,:,:), intent(out)  ,optional :: diffm, difft
 !    artificial local heating if required
 !----------------------------------------------------------------------
       if(do_local_heating) then
-        call local_heating(lon,lat,p_full,tdt)
+        call local_heating(is,js,Time,lon,lat,p_full,tdt)
       endif
 
 !----------------------------------------------------------------------
