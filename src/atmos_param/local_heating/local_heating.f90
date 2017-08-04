@@ -12,13 +12,16 @@ module local_heating_mod
   use diag_manager_mod, only: register_diag_field, send_data
   use time_manager_mod, only: time_type
 
-  use  time_manager_mod, only: time_type, get_time
+  use  time_manager_mod, only: time_type, get_time, length_of_year
 
   use  diag_manager_mod, only: register_diag_field, send_data
 
   use  field_manager_mod, only: MODEL_ATMOS, parse
 
-  use constants_mod, only   : RADIAN
+  use constants_mod, only   : RADIAN,PI
+  
+  use rrtm_astro,only : equinox_day
+
   implicit none
   
   !-----------------------------------------------------------------------
@@ -35,13 +38,24 @@ module local_heating_mod
   !-------------------- namelist -----------------------------------------
   !-----------------------------------------------------------------------
   integer,parameter :: ngauss = 10
-  real,dimension(ngauss) :: hamp      = 0.        ! heating amplitude [K/d]
-  real,dimension(ngauss) :: latwidth  = 15.       ! latitudinal width of Gaussian heating [deg]
-  real,dimension(ngauss) :: latcenter = 90.       ! latitudinal center of Gaussian heating [deg]
-  real,dimension(ngauss) :: pwidth    = 2.        ! height of Gaussian heating in log-pressure [log10(hPa)]
-  real,dimension(ngauss) :: pcenter   = 1.       ! center of Gaussian heating in pressure [hPa]
+  real,dimension(ngauss)   :: hamp      = 0.        ! heating amplitude [K/d]
+  real,dimension(ngauss)   :: latwidth  = 15.       ! latitudinal width of Gaussian heating [deg]
+  real,dimension(ngauss)   :: latcenter = 90.       ! latitudinal center of Gaussian heating [deg]
+  real,dimension(ngauss)   :: pwidth    = 2.        ! height of Gaussian heating in log-pressure [log10(hPa)]
+  real,dimension(ngauss)   :: pcenter   = 1.        ! center of Gaussian heating in pressure [hPa]
+  integer,dimension(ngauss):: hk        = 0         ! temporal wave number for cosine
+                                                    !  0 -> no cosine
+                                                    !  1 -> heating in one season only
+                                                    !  2 -> heating in two seasons, etc
+  real,dimension(ngauss)   :: hphase    = 0.        ! phasing of cosine in annual cycle in [pi]
+                                                    !  relative to March equinox
+                                                    !  example: for hk = 1, that means
+                                                    !  0   -> heating in JFMAMJ
+                                                    !  0.5 -> heating in AMJJAS
+                                                    !  1   -> heating in JASOND
+                                                    !  1.5 -> heating in ONDJFM
   
-  namelist /local_heating_nml/ hamp,latwidth,latcenter,pwidth,pcenter
+  namelist /local_heating_nml/ hamp,latwidth,latcenter,pwidth,pcenter,hk,hphase
   
   
   ! local variables
@@ -54,7 +68,7 @@ contains
     integer, intent(in), dimension(4) :: axes
     type(time_type), intent(in)       :: Time
     !-----------------------------------------------------------------------
-    integer  unit, io, ierr, n
+    integer :: unit, io, ierr, n
 
     !     ----- read namelist -----
 
@@ -75,6 +89,7 @@ contains
        hamp(n)      = hamp(n)/86400.      ! convert K/d to K/s
        latcenter(n) = latcenter(n)/RADIAN ! convert degrees to radians
        latwidth(n)  = latwidth(n)/RADIAN  ! convert degrees to radians
+       hphase(n)    = hphase(n)*PI        ! convert to radians
     enddo
   !----
   !------------ initialize diagnostic fields ---------------
@@ -100,13 +115,24 @@ contains
     integer :: i,j,k,n
     real, dimension(size(lon,1),size(lon,2)) :: lat_factor
     real, dimension(size(tdt_tot,1),size(tdt_tot,2),size(tdt_tot,3)) :: tdt
-    real    :: logp,p_factor
+    real    :: logp,p_factor,t_factor,cosdays
     logical :: used
+    integer :: seconds,days,daysperyear
     
+    ! get temporal dependencies
+    call get_time(length_of_year(),seconds,daysperyear)
+    call get_time(Time,seconds,days)
+    !  day of the year relative to equinox_day
+    days = days - int(equinox_day*daysperyear)
+    cosdays = modulo(days,daysperyear)*1.0/daysperyear*2*PI
+    ! days is now the day of the year relative to March equinox
 
     tdt = 0.
     do n = 1,ngauss
        if ( hamp(n) .ne. 0. ) then
+          ! temporal component
+          t_factor = max(0.0,cos(hk(n)*cosdays-hphase(n)))
+          ! meridional component
           do j = 1,size(lon,2)
              do i = 1,size(lon,1)
                 lat_factor(i,j) = exp( -(lat(i,j)-latcenter(n))**2/(2*(latwidth(n))**2) )
@@ -117,8 +143,10 @@ contains
              do j = 1,size(lon,2)
                 do i = 1,size(lon,1)
                    logp = log10(p_full(i,j,k))
+                   ! vertical component
                    p_factor = exp(-(logp-logpc(n))**2/(2*(pwidth(n))**2))
-                   tdt(i,j,k) = tdt(i,j,k) + hamp(n)*lat_factor(i,j)*p_factor
+                   ! everything together
+                   tdt(i,j,k) = tdt(i,j,k) + hamp(n)*t_factor*lat_factor(i,j)*p_factor
                 enddo
              enddo
           enddo
