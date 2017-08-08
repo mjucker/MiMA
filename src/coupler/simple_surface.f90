@@ -26,6 +26,12 @@ use      constants_mod, only: rdgas, rvgas, cp_air, hlv, hlf
 use ocean_rough_mod, only: compute_ocean_roughness
 ! mj know about surface topography
 use spectral_dynamics_mod,only: get_surf_geopotential
+
+! cig know about ocean_mask and grid boundaries
+use  topography_mod,only: get_ocean_mask
+use  transforms_mod, only: get_grid_boundaries, grid_domain,get_grid_domain, get_lon_max, get_lat_max  
+use     mpp_domains_mod, only: mpp_global_field
+
 ! mj read SSTs
 use interpolator_mod, only: interpolate_type,interpolator_init&
      &,CONSTANT,interpolator
@@ -86,10 +92,12 @@ real ::   z_ref_heat      = 2.,       &
 	  lat_glacier      = 45.,     &
 	  maxofmerid       = .5,      &
 	  latmaxofmerid    = 25.,     &
-	  Tm               = 265.,    &
+	  Tm               = 305.,    &
 	  deltaT           = 40.,     &
           qflux_amp        = 30.,     & !mj
           qflux_width      = 16.        !mj
+!cig
+real ::   land_optionthreshold      = 10.        
 
 
 integer :: surface_choice   = 1
@@ -118,7 +126,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
 			      deltaT,                            &
                               do_qflux,do_warmpool,              &  !mj
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
-                              land_option,slandlon,slandlat,     &  !mj
+                              land_option,land_optionthreshold,slandlon,slandlat,     &  !mj
                               elandlon,elandlat,                 &
                               albedo_exp,albedo_cntr,albedo_wdth    !mj
 
@@ -134,6 +142,11 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                                        flux_t, flux_q, flux_lw
 
   real, allocatable, dimension(:,:) :: sst, flux_u, flux_v, flux_o
+
+! cig added next  line , april 2 2017, ocean mask is logical
+ logical, allocatable, dimension(:,:) :: ocean_mask
+ 
+
 !mj read sst from input file
   type(interpolate_type),save :: sst_interp
 
@@ -276,12 +289,13 @@ pi = 4.0*atan(1.)
              0.5*(1+tanh((lat-albedo_cntr)/albedo_wdth))
      enddo
 !mj add symmetric higher albedo - sin2 increase from equator to pole
-   elseif(albedo_choice .eq. 6) then
-      do j = 1, size(Atm%t_bot,2)
-         lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
-         albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
-              sin(lat)**2
-      enddo
+  elseif(albedo_choice .eq. 6) then
+     do j = 1, size(Atm%t_bot,2)
+        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
+        albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
+             sin(lat)**2
+     enddo
+
    endif
 
 
@@ -373,6 +387,11 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  logical :: used
 ! mj know about topography
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: zsurf,land_sea_heat_capacity
+
+
+	
+	 
+
 ! mj input SST
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: sst_new
 ! mj shallower ocean in tropics, land-sea contrast
@@ -437,11 +456,22 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 ! mj land heat capacity function of surface topography
          if(trim(land_option) .eq. 'zsurf')then
             call get_surf_geopotential(zsurf)
-            where ( zsurf > 10. ) land_sea_heat_capacity = land_capacity
+            where ( zsurf > land_optionthreshold ) land_sea_heat_capacity = land_capacity
          endif
+
+! cig land heat capacity function of ocean_mask (if ocean mask exists)
+       if(trim(land_option) .eq. 'oceanmask')then
+ 	
+            where ( .NOT. ocean_mask  ) land_sea_heat_capacity = land_capacity
+	 !cig: make sure everything is ok 	 
+ !write (*,*) "ocean_mask", ocean_mask(12,2), ocean_mask(12,:), ocean_mask(3,:)  
+  !write (*,*) "heat_capacity", land_sea_heat_capacity(12,:), land_sea_heat_capacity(3,:) 
+
+         endif
+
 ! mj land heat capacity given through ?landlon, ?landlat
          if(trim(land_option) .eq. 'lonlat')then
-            do j=1,size(Atm%t_bot,2)
+            do j=1,size(Atm%t_bot,2) 
                lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
                do i=1,size(Atm%t_bot,1)
                   lon = 0.5*180/pi*( Atm%lon_bnd(i+1) + Atm%lon_bnd(i) )
@@ -531,14 +561,21 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  type (atmos_data_type), intent(in)  :: Atm
 
  integer :: unit, ierr, io
-
+ 
  integer :: i, j, lati
  real :: xx, xx2, lat, lon, pi, y0
  real :: coslat !mj
  real, dimension(100) :: oftabl
  real, dimension(32) :: ssttabl
 
- pi = 4.0*atan(1.)
+
+integer :: is, ie, js, je
+real, allocatable, dimension(:) :: blon, blat
+ logical ::    water_file_exists
+
+call get_grid_domain(is, ie, js, je)
+ ! cig added previous four lines, april 2 2017, ocean mask is logical, initialize the oceanmask. 
+
 
  !-----------------------------------------------------------------------
 !------ read namelist ------
@@ -551,6 +588,30 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
       enddo
  10   call close_file (unit)
    endif
+
+
+
+ ! epg: 17.05.18 - the following, set up cig on 170402, should only be called if land option is set to ocean mask 
+if(trim(land_option) .eq. 'oceanmask') then 
+   allocate(ocean_mask   (size(Atm%t_bot,1),size(Atm%t_bot,2)))
+ 
+   pi = 4.0*atan(1.)
+
+
+   call get_grid_domain(is, ie, js, je)
+	 allocate(blon(is:ie+1), blat(js:je+1))
+ 	 call get_grid_boundaries(blon, blat)
+		  water_file_exists = get_ocean_mask(blon, blat, ocean_mask)
+	  if(.not.water_file_exists) then
+		call error_mesg('update_simple_surface','ocean_mask is not present and water data file does not exist', FATAL)
+	  endif
+	  deallocate(blon, blat)
+
+endif  
+ 
+
+
+
 !mj make choices compatible
    !if(do_read_sst .or. do_sc_sst) call error_mesg ('simple_surface',  &
    !              'THERE IS A BUG WITH DO_READ_SST, SO I AM STOPPING', FATAL)
