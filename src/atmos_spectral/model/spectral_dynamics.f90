@@ -43,7 +43,7 @@ use   spectral_damping_mod, only: spectral_damping_init, spectral_damping_end, c
 use           leapfrog_mod, only: leapfrog, leapfrog_2level_A, leapfrog_2level_B
 
 use       fv_advection_mod, only: fv_advection_init, fv_advection_end, a_grid_horiz_advection
-
+                                  
 use    water_borrowing_mod, only: water_borrowing
 
 use    global_integral_mod, only: mass_weighted_global_integral
@@ -112,6 +112,11 @@ character(len=32), parameter :: default_representation = 'spectral'
 character(len=32), parameter :: default_advect_vert    = 'second_centered'
 character(len=32), parameter :: default_hole_filling   = 'off'
 
+
+! epg+ray: this netcdf include file is needed to load in specified initial
+! conditions.  Only used if specify_initial_conditions == .true.
+include 'netcdf.inc'
+
 !===============================================================================================
 ! namelist variables
 
@@ -160,6 +165,14 @@ real    :: damping_coeff       = 1.15740741e-4, & ! (one tenth day)**-1
            initial_sphum       = 0.0, &
      reference_sea_level_press =  101325. , &
            water_correction_limit = 0.e2 !mj
+
+!epg+ray: this next namelist variable allows you to upload initial conditions
+!         u,v,T, ps, and q must be specified (as: ucomp, vcomp, temp, ps, and sphum, respecitively)
+!         in a netcdf file called "initial_conditions.nc" and placed in the INPUT/ directory
+logical :: specify_initial_conditions = .false.
+
+
+
 !===============================================================================================
 
 real, dimension(2) :: valid_range_t = (/ 100.,500./)
@@ -177,7 +190,7 @@ namelist /spectral_dynamics_nml/ use_virtual_temperature, damping_option,       
                                  valid_range_t, eddy_sponge_coeff, zmu_sponge_coeff, zmv_sponge_coeff, &
                                  print_interval, num_steps,                                          &
                                  water_correction_limit                                                 !mj
-
+                                 
 contains
 
 !===============================================================================================
@@ -251,7 +264,7 @@ else
   call error_mesg('spectral_dynamics_init','"'//trim(vert_advect_t)//'"'//' is not a valid value for vert_advect_t.', FATAL)
 endif
 
-! transforms_init must be called before the remaining
+! transforms_init must be called before the remaining 
 ! restart data can be read or the fields can be allocated.
 ! This is because transforms_init calls spec_mpp_init,
 ! which is where domains are determined.
@@ -335,7 +348,7 @@ if(nsphum == NO_TRACER) then
     nhum = 0
     dry_model = .true.
   else
-    nhum = nmix_rat
+    nhum = nmix_rat 
     dry_model = .false.
   endif
 else
@@ -464,6 +477,11 @@ real, dimension(ms:me, ns:ne, num_levels) :: real_part, imag_part
 character(len=64) :: file, tr_name
 character(len=4) :: ch1,ch2,ch3,ch4,ch5,ch6
 
+! epg+ray: for loading the initial tracer distribution (after Lorenzo Polvani's code for doing this)
+real, allocatable,dimension(:,:,:) :: lmptmp
+integer :: ncid,vid,err,counts(3)
+! ------
+
 file = 'INPUT/spectral_dynamics.res.nc'
 if(file_exist(trim(file))) then
   call field_size(trim(file), 'vors_real', siz)
@@ -541,7 +559,7 @@ else
                           vert_coord_option, vert_difference_option, scale_heights, surf_res, p_press, p_sigma, &
                           exponent, ocean_topog_smoothing, pk, bk,                                              &
                           vors(:,:,:,1), divs(:,:,:,1), ts(:,:,:,1), ln_ps(:,:,1), ug(:,:,:,1), vg(:,:,:,1),    &
-                          tg(:,:,:,1), psg(:,:,1), vorg, divg, surf_geopotential, ocean_mask)
+                          tg(:,:,:,1), psg(:,:,1), vorg, divg, surf_geopotential, ocean_mask,specify_initial_conditions)
 
   vors (:,:,:,2) = vors (:,:,:,1)
   divs (:,:,:,2) = divs (:,:,:,1)
@@ -553,12 +571,42 @@ else
   psg  (:,:,  2) = psg  (:,:,  1)
   do ntr = 1,num_tracers
     if(trim(tracer_attributes(ntr)%name) == 'sphum') then
-      grid_tracers(:,:,:,:,ntr) = initial_sphum
+      if(specify_initial_conditions) then  
+         !epg+ray: This loads in sphum from the file initial_conditions.nc
+         if (.not.file_exist('initial_conditions.nc')) then
+            call error_mesg('spectral_initialize_fields','Could not find initial_conditions.nc!',FATAL)
+         endif
+         
+         ! open up the netcdf file`
+         ncid = ncopn('initial_conditions.nc',NCNOWRIT,err)
+         ! This array tells us the size of input variables.
+         counts(1) = size(grid_tracers,1)
+         counts(2) = size(grid_tracers,2)
+         counts(3) = size(grid_tracers,3)
+         ! Allocate space to put the initial condition information, temporarily.
+         allocate(lmptmp(counts(1),counts(2),counts(3)))          
+         
+         ! load sphum, if it has been specified.  Otherwise write error and break.
+         vid = ncvid(ncid,'sphum',err)
+         if(err == 0) then
+            call ncvgt(ncid,vid,(/is,js,1/),counts,lmptmp,err)
+            grid_tracers(:,:,:,1,ntr) = lmptmp
+            grid_tracers(:,:,:,2,ntr) = lmptmp
+            if(mpp_pe() == mpp_root_pe()) then
+               print *,'tracer ', trim(tracer_attributes(ntr)%name), ' read in from initial_conditions.nc'
+            endif
+         else
+            call error_mesg('read_restart_or_do_coldstart','Could not find '//trim(tracer_attributes(ntr)%name)// &
+                'in initial_conditions.nc',FATAL)
+         endif
+      else 
+         grid_tracers(:,:,:,:,ntr) = initial_sphum
+      endif
     else if(trim(tracer_attributes(ntr)%name) == 'mix_rat') then
       grid_tracers(:,:,:,:,ntr) = 0.
     else
       grid_tracers(:,:,:,:,ntr) = 0.
-    endif
+    endif   
     call trans_grid_to_spherical(grid_tracers(:,:,:,1,ntr), spec_tracers(:,:,:,1,ntr))
     spec_tracers(:,:,:,2,ntr) = spec_tracers(:,:,:,1,ntr)
   enddo
@@ -682,7 +730,7 @@ if(robert_coeff < 0. .or. robert_coeff > 1.) then
 endif
 
 if((do_energy_correction .or. do_water_correction) .and. .not.do_mass_correction) then
-  call error_mesg('check_dynamics_nml','.not.do_mass_correction must be .true. when either &
+  call error_mesg('check_dynamics_nml','.not.do_mass_correction must be .true. when either & 
            &do_energy_correction or do_water_correction is .true.', FATAL)
 endif
 
@@ -903,7 +951,7 @@ if(minval(tg(:,:,:,future)) < valid_range_t(1) .or. maxval(tg(:,:,:,future)) > v
 endif
 
 call update_tracers(tracer_attributes, dt_tracers_tmp, wg, p_half, delta_t, dt_hadv, dt_vadv)
-!mj add a vertical limit to water correction
+!mj add a vertical limit to water correction 
 !call compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction)
 call compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction, p_full)
 
@@ -956,7 +1004,7 @@ real :: kappa
 integer :: k
 
 kappa = rdgas/cp_air
-
+   
 dmean_tot = 0.
 
 if(vert_difference_option == 'simmons_and_burridge') then
@@ -1106,10 +1154,10 @@ call divide_by_cos(dx_psg)
 call divide_by_cos(dy_psg)
 
 return
-end subroutine compute_pressure_gradient
+end subroutine compute_pressure_gradient 
 
 !===================================================================================
-!mj add a vertical limit to water correction
+!mj add a vertical limit to water correction 
 !subroutine compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction)
 subroutine compute_corrections(delta_t, tracer_attributes, temperature_correction, water_correction, p_full)
 
@@ -1181,7 +1229,7 @@ if(do_water_correction) then
 endif
 
 return
-end subroutine compute_corrections
+end subroutine compute_corrections 
 
 !===================================================================================
 
@@ -1218,7 +1266,7 @@ if(do_water_correction) then
 endif
 
 return
-end subroutine initialize_corrections
+end subroutine initialize_corrections 
 
 !================================================================================
 
