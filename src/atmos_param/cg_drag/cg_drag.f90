@@ -119,21 +119,21 @@ real       :: Bn = 0.0  ! amplitude for the narrow spectrum [ m^2/s^2 ]
 real       :: cw = 40.0 ! half-width for the wide c spectrum [ m/s ]
                         ! previous values: 50.0, 25.0 
 real       :: cwtropics = 40.0 ! half-width for the wide c spectrum [ m/s ]
-                        ! previous values: 50.0, 25.0 
+                        ! in tropics
 real       :: cn =  2.0 ! half-width for the narrow c spectrum  [ m/s ]
 
-real        :: Bt_eq=.000         ! additional momentum stress at equator - CURRENTLY NOT USED! 
+real        :: Bt_eq=.000         ! additional momentum stress at equator  
 
-real        :: Bt_eq_width=4.0    ! scaling for width of equtorial momentum flux  (equator) CURRENTLY NOT USED!
+real        :: Bt_eq_width=4.0    ! scaling for width of equtorial momentum flux  (equator) 
 
 real        :: phi0n = 30., phi0s = -30., dphin = 5., dphis = -5.
 
-!add by chaim jan 2017
-real        :: weightminus2=0.  
+!add by chaim jan 2017, but no longer used
+!real        :: weightminus2=0.  
 
-real        :: weightminus1=0.
+!real        :: weightminus1=0.
 
-real        :: weighttop=1.
+!real        :: weighttop=1.
 
 logical     :: calculate_ked=.false. 
                                   ! calculate ked diagnostic ?
@@ -167,8 +167,10 @@ namelist / cg_drag_nml /         &
                           num_diag_pts_ij, num_diag_pts_latlon, &
                           i_coords_gl, j_coords_gl,   &
                           lat_coords_gl, lon_coords_gl, &
-                          phi0n,phi0s,dphin,dphis, Bw, Bn, cw, cwtropics, cn, flag, &
-			  weightminus2, weightminus1, weighttop
+                          phi0n,phi0s,dphin,dphis, Bw, Bn, cw, & 
+                          cwtropics, cn, flag
+
+! non longer used:			  weightminus2, weightminus1, weighttop
 
 
 !--------------------------------------------------------------------
