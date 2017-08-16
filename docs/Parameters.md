@@ -439,7 +439,10 @@ Variable | Default Value | Meaning
 
 ### Boundary conditions
 
-The upper boundary conditions are defined by how to deal with gravity waves. The simplest choice is simple Rayleigh friction (damping towards zero momentum), non-orographic gravity wave parameterization, orographic gravity wave drag, or a constant "gravity wave" drag.
+The "upper boundary conditions" are determined largely by how the model approximates momentum transport of unresolved gravity waves.  Gravity waves of scale 10-1000 km transport momentum from the lower troposphere to the UTLS and middle atmosphere.  They are not well resolved at conventional resolutions, and many of their sources (convection and frontegenis) are also not resolved, such that they must be parameterized.  The simplest choice is Rayleigh friction (damping towards zero momentum); as documented by Shepherd and Shaw (2005, JAS), this is quite unrealistic.  A more realistic options include a non-orographic gravity wave parameterization, or even a simple a constant "gravity wave" drag.  Orographic gravity waves are also an important source; some are captured by the non-orographic scheme, but future development could add a orographic scheme. (The default GFDL version is here, but has not been tested; it's a fairly primitive scheme and often used in an unphysical parameter regime in GFDL climate models.) 
+
+The non-orographic gravity wave parameterization was developed by Alexander and Dunkerton (1999, JAS).  It was implemented by GFDL, and modified slightly (as discussed in Cohen et al. 2014) to conserve momentum at the upper boundary.  It is referred to as "cg_drag" in the code, denoting that it captures "convectively" generated gravity waves.  It specifies a spectrum of gravity waves, launched from the upper troposphere, and controlled with the cg_drag_nml namelist.  The current configuration was modified and tuned by Chaim Garfinkel to capture the Quasi-Bienniel Oscillation and tune the stratospheric polar vortex strength.  Note, however, that the vortex variability and QBO-like variability is very sensitive to resolve waves (particularly large scale stationary waves associated with topography and land-sea contrast) and vertical resolution.  Do not expect to observe a realistic vortex or QBO with the default parameters.  It is recommended that the user look at the complete parameter definitions in src/atmos_param/cg_drag/cg_drag.f90.  Brief parameter definitions and suggestions are provided below.
+
 By default, no scheme is active, which will almost certainly cause the code to crash. See [recommended values](#recommended-values) above and source code comments for guidance.
 
 Parameters are described in `atmos_param/damping_driver/damping_driver.f90` and the namelist `damping_driver_nml`.
@@ -450,7 +453,7 @@ Parameters are described in `atmos_param/damping_driver/damping_driver.f90` and 
  trayfric | 0.0 | Rayleigh friction time scale, [s] if > 0, [-d] if < 0
  sponge_bottom | 50 | [Pa] bottom of Rayleigh friction layer (sponge)
  do_mg_drag | .false. | mountain gravity wave scheme (not tested!)
- do_cg_drag | .false. | non-orographic gravity wave scheme (under development)
+ do_cg_drag | .false. | non-orographic gravity wave scheme 
  do_topo_drag | .false. | topographic drag scheme (not tested!)
  do_const_drag | .false. | constant "gravity wave" scheme (not tested!)
  do_conserve_energy | .false. | account for heat release due to momentum loss?
@@ -494,6 +497,29 @@ ampns               | .false.
 ampns_max           | 1.0E20  
 do_entrain          | .true.
 use_df_stuff        | .false.
+
+Namelist `cg_drag_nml`
+
+Variable = Suggested Value,  brief definition.
+     Bt_0  = 0.005,    background value of total wave stress (Pa) outside of equator region
+     Bt_nh = 0.000,   enhancement of wave stress in NH (Pa, negative value subtracts)
+     Bt_eq = 0.0045,  total wave stress in equatorial region (Pa) 
+     Bt_sh = 0.001,    enhancement of wave stress in SH (Pa, negative value subtracts)
+     phi0n = 15.,       transition latitude to NH wave stress 
+     phi0s =-15.,      transition latitude to SH wave stress
+     dphin = 10.,      width of transition region, NH (degrees latitude)
+     dphis =-10.,     width of transition region, SH  (degrees latitude)
+     flag=1,            if 1, peak wave flux is at c=0 m/s; if 0, peak wave flux at c=u (wind speed at source level)
+     Bw = 0.4,       amplitude of the wide spectrum, m^2/s^2 (wide spectrum seeks to capture non-orographic waves)
+     Bn = 8.4,        amplitude of the narrow spectrum m^2/s^2 (narrow spectrum seeks to capture stationary orographic waves)
+     cw = 40.0,             half width, wide spectrum
+     cwtropics = 40.0,   half width, wide spectrum in tropics
+     cn =  2.0,              half width, narrow spectrum
+     source_level_pressure = 315.e+02,   waves are launched at this level (Pa)
+     damp_level_pressure = 0.85e+02,    any momentum that travels above this level is evenly spread between here and top of model (Pa); this was added to stabilize model top
+     cg_drag_freq = 21600,  frequency at which cg_drag is called (seconds) 
+
+
 
 
 ### Vertical numerics
