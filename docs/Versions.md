@@ -10,4 +10,5 @@ Any contributor to the code should change this file when merging into the master
 The newest changes should be on the top of this list
 
 ## v1.X
+* v1.0.1: Patch for v1.0. Addresses incoming solar radiation issues when diurnal cycle averaging is used
 * v1.0: initial published version, as described in [Jucker and Gerber, J Clim (2017)](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
