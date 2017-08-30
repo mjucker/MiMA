@@ -227,6 +227,7 @@ The namelist `physics_driver_nml` steers which physics components are used. It r
  do_grey_radiation | .false. | rather do grey radiation?
  do_rrtm_radiation | .true. | or RRTM radiation?
  do_damping | .true. | do any of the damping schemes?
+ do_local_heating | .false. | add artificial local heating? If so, see `local_heating_nml` namelist
  diff_min | 1.e-3    | minimum value of a diffusion coefficient beneath which the coefficient is reset to zero
  diffusion_smooth | .true. | diffusion coefficients should be smoothed in time?
  do_netcdf_restart | .true. | make restart files netCDF format?
@@ -436,6 +437,20 @@ Variable | Default Value | Meaning
         solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
         equinox_day | 0.25              | fraction of the year defining March equinox.
         
+
+#### Local heating
+      
+
+If `do_local_heating = .true.` in `physics_driver_nml`, the namelist `local_heating_nml` can be used to set the form and position of the desired local heating.
+
+Variable | Default Value | Meaning
+ :--- | :---: | :---
+      hamp | 0 | amplitude of Gaussian heating in [K/s], maximum 10 entries
+      latcenter| 90 | horizontal center of the Gaussian in [degrees latitude], maximum 10 entries
+      latwidth | 15 | horizontal width of the Gaussian in the [degrees latitude], maximum 10 entries
+      pcenter | 1 | vertical center of the Gaussian in the vertical [hPa], maximum 10 entries
+      pwidth  | 2  | vertical width of the Gaussian in orders of magnitude [log10(hPa)], maximum 10 entries
+
 
 ### Boundary conditions
 
