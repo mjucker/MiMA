@@ -500,24 +500,25 @@ use_df_stuff        | .false.
 
 Namelist `cg_drag_nml`
 
-Variable = Suggested Value,  brief definition.
-     Bt_0  = 0.005,    background value of total wave stress (Pa) outside of equator region
-     Bt_nh = 0.000,   enhancement of wave stress in NH (Pa, negative value subtracts)
-     Bt_eq = 0.0045,  total wave stress in equatorial region (Pa) 
-     Bt_sh = 0.001,    enhancement of wave stress in SH (Pa, negative value subtracts)
-     phi0n = 15.,       transition latitude to NH wave stress 
-     phi0s =-15.,      transition latitude to SH wave stress
-     dphin = 10.,      width of transition region, NH (degrees latitude)
-     dphis =-10.,     width of transition region, SH  (degrees latitude)
-     flag=1,            if 1, peak wave flux is at c=0 m/s; if 0, peak wave flux at c=u (wind speed at source level)
-     Bw = 0.4,       amplitude of the wide spectrum, m^2/s^2 (wide spectrum seeks to capture non-orographic waves)
-     Bn = 8.4,        amplitude of the narrow spectrum m^2/s^2 (narrow spectrum seeks to capture stationary orographic waves)
-     cw = 40.0,             half width, wide spectrum
-     cwtropics = 40.0,   half width, wide spectrum in tropics
-     cn =  2.0,              half width, narrow spectrum
-     source_level_pressure = 315.e+02,   waves are launched at this level (Pa)
-     damp_level_pressure = 0.85e+02,    any momentum that travels above this level is evenly spread between here and top of model (Pa); this was added to stabilize model top
-     cg_drag_freq = 21600,  frequency at which cg_drag is called (seconds) 
+Variable | Default Value | Meaning
+ :--- | :---: | :---
+     Bt_0  | 0.005  |  background value of total wave stress (Pa) outside of equator region
+     Bt_nh | 0.000  |  enhancement of wave stress in NH (Pa, negative value subtracts)
+     Bt_eq | 0.0045 |  total wave stress in equatorial region (Pa) 
+     Bt_sh | 0.001  |  enhancement of wave stress in SH (Pa, negative value subtracts)
+     phi0n | 15.    |  transition latitude to NH wave stress 
+     phi0s | -15.   |  transition latitude to SH wave stress
+     dphin | 10.    |  width of transition region, NH (degrees latitude)
+     dphis | -10.   |  width of transition region, SH  (degrees latitude)
+     flag  | 1      |  if 1, peak wave flux is at c=0 m/s; if 0, peak wave flux at c=u (wind speed at source level)
+     Bw    | 0.4    |  amplitude of the wide spectrum, m^2/s^2 (wide spectrum seeks to capture non-orographic waves)
+     Bn    | 8.4    |  amplitude of the narrow spectrum m^2/s^2 (narrow spectrum seeks to capture stationary orographic waves)
+     cw    | 40.0   |  half width, wide spectrum
+     cwtropics | 40.0 | half width, wide spectrum in tropics
+     cn    |  2.0   |  half width, narrow spectrum
+     source_level_pressure | 315.e+02 |   waves are launched at this level (Pa)
+     damp_level_pressure   | 0.85e+02 |    any momentum that travels above this level is evenly spread between here and top of model (Pa); this was added to stabilize model top
+     cg_drag_freq | 21600 |  frequency at which cg_drag is called (seconds) 
 
 
 
