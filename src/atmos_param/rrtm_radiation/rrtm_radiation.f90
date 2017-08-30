@@ -714,7 +714,7 @@
           endif
 
           swijk   = reshape(swhr(:,sk:1:-1),(/ si/lonstep,sj,sk /))*daypersec
-          isrijk  = reshape(swdflx(:,sk+1),(/ si/lonstep,sj /))
+          isrijk  = reshape(swdflx(:,sk+1)-swuflx(:,sk+1),(/ si/lonstep,sj /))
 
           hr = 0.
           dflx = 0.

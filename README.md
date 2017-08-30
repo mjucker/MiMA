@@ -1,7 +1,7 @@
 # Model of an idealized Moist Atmosphere (MiMA) [![DOI](https://zenodo.org/badge/36012278.svg)](https://zenodo.org/badge/latestdoi/36012278)
 MiMA is an intermediate-complexity General Circulation Model with interactive water vapor and full radiation. It is published in
 
-[M Jucker and EP Gerber, 2017: *Untangling the annual cycle of the tropical tropopause layer with an idealized moist model*, J Clim](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
+[M Jucker and EP Gerber, 2017: *Untangling the annual cycle of the tropical tropopause layer with an idealized moist model*, Journal of Climate 30, 7339-7358](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
 
 Please see the documentation [online](http://mjucker.github.io/MiMA/) or [in the docs folder](docs/) for information about the model.
 
