@@ -39,8 +39,10 @@ module local_heating_mod
   !-----------------------------------------------------------------------
   integer,parameter :: ngauss = 10
   real,dimension(ngauss)   :: hamp      = 0.        ! heating amplitude [K/d]
-  real,dimension(ngauss)   :: latwidth  = 15.       ! latitudinal width of Gaussian heating [deg]
-  real,dimension(ngauss)   :: latcenter = 90.       ! latitudinal center of Gaussian heating [deg]
+  real,dimension(ngauss)   :: lonwidth  = -1.       ! zonal width of Gaussian heating [deg], zonally symmetric if <0
+  real,dimension(ngauss)   :: loncenter = 90.       ! zonal center of Gaussian heating [deg]
+  real,dimension(ngauss)   :: latwidth  = 15.       ! meridional width of Gaussian heating [deg]
+  real,dimension(ngauss)   :: latcenter = 90.       ! meridional center of Gaussian heating [deg]
   real,dimension(ngauss)   :: pwidth    = 2.        ! height of Gaussian heating in log-pressure [log10(hPa)]
   real,dimension(ngauss)   :: pcenter   = 1.        ! center of Gaussian heating in pressure [hPa]
   integer,dimension(ngauss):: hk        = 0         ! temporal wave number for cosine
@@ -55,7 +57,7 @@ module local_heating_mod
                                                     !  1   -> heating in JASOND
                                                     !  1.5 -> heating in ONDJFM
   
-  namelist /local_heating_nml/ hamp,latwidth,latcenter,pwidth,pcenter,hk,hphase
+  namelist /local_heating_nml/ hamp,lonwidth,loncenter,latwidth,latcenter,pwidth,pcenter,hk,hphase
   
   
   ! local variables
@@ -87,6 +89,8 @@ contains
        pcenter(n)   = pcenter(n)*100      ! convert hPa to Pa
        logpc(n)     = log10(pcenter(n))   ! work in log10(p)
        hamp(n)      = hamp(n)/86400.      ! convert K/d to K/s
+       loncenter(n) = loncenter(n)/RADIAN ! convert degrees to radians
+       lonwidth(n)  = lonwidth(n)/RADIAN  ! convert degrees to radians
        latcenter(n) = latcenter(n)/RADIAN ! convert degrees to radians
        latwidth(n)  = latwidth(n)/RADIAN  ! convert degrees to radians
        hphase(n)    = hphase(n)*PI        ! convert to radians
@@ -113,6 +117,7 @@ contains
     real, dimension(:,:,:),intent(inout) :: tdt_tot
     ! local variables
     integer :: i,j,k,n
+    real, dimension(size(lon,1),size(lon,2)) :: lon_factor
     real, dimension(size(lon,1),size(lon,2)) :: lat_factor
     real, dimension(size(tdt_tot,1),size(tdt_tot,2),size(tdt_tot,3)) :: tdt
     real    :: logp,p_factor,t_factor,cosdays
@@ -135,6 +140,9 @@ contains
           ! meridional component
           do j = 1,size(lon,2)
              do i = 1,size(lon,1)
+                if ( loncenter(n) .ge. 0.0 ) then
+                   lon_factor(i,j) = exp( -(lon(i,j)-loncenter(n))**2/(2*(lonwidth(n))**2) )
+                endif
                 lat_factor(i,j) = exp( -(lat(i,j)-latcenter(n))**2/(2*(latwidth(n))**2) )
              enddo
           enddo
@@ -146,7 +154,7 @@ contains
                    ! vertical component
                    p_factor = exp(-(logp-logpc(n))**2/(2*(pwidth(n))**2))
                    ! everything together
-                   tdt(i,j,k) = tdt(i,j,k) + hamp(n)*t_factor*lat_factor(i,j)*p_factor
+                   tdt(i,j,k) = tdt(i,j,k) + hamp(n)*t_factor*lon_factor(i,j)*lat_factor(i,j)*p_factor
                 enddo
              enddo
           enddo
