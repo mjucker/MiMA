@@ -123,8 +123,8 @@ Namelist `astro_nml`.
 
 Variable | Recommended Value | Meaning
  :--- | :---: | :---
-        solr_cnst  | 1360           | solar constant [W/m2]
-        [ solday     | 90           | if perpetual equinox desired and calendar='thirt_day' ]
+ solr_cnst  | 1360           | solar constant [W/m2]
+ [ solday     | 90           | if perpetual equinox desired and calendar='thirt_day' ]
 
 
 ### Boundary conditions
@@ -430,12 +430,12 @@ All things which define Earth versus other planets/planetary systems are set in 
 
 Variable | Default Value | Meaning
  :--- | :---: | :---
-        obliq      | 23.439             | Earth's obliquity in [degrees latitude]
-        use_dyofyr | .false.            | use day of the year to compute Earth-Sun distance? Note that this is done internally in RRTM, and assumes 365days/year.
-        solrad     | 1.0                | distance Earth-Sun [AU] if use_dyofyr=.false.
-        solr_cnst  | 1368.22            | solar constant [W/m2]
-        solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
-        equinox_day | 0.25              | fraction of the year defining March equinox.
+ obliq      | 23.439             | Earth's obliquity in [degrees latitude]
+ use_dyofyr | .false.            | use day of the year to compute Earth-Sun distance? Note that this is done internally in RRTM, and assumes 365days/year.
+ solrad     | 1.0                | distance Earth-Sun [AU] if use_dyofyr=.false.
+ solr_cnst  | 1368.22            | solar constant [W/m2]
+ solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
+ equinox_day | 0.25              | fraction of the year defining March equinox.
         
 
 #### Local heating
@@ -445,17 +445,15 @@ If `do_local_heating = .true.` in `physics_driver_nml`, the namelist `local_heat
 
 Variable | Default Value | Meaning
  :--- | :---: | :---
-      hamp | 0 | amplitude of Gaussian heating in [K/d], maximum 10 entries
-      loncenter| -1 | zonal center of the Gaussian in [degrees longitude]. Zonally symmetric if <0. maximum 10 entries
-      lonwidth | 90 | zonal width of the Gaussian, if loncenter >= 0. [degrees longitude], maximum 10 entries
-      latcenter| 90 | meridional center of the Gaussian in [degrees latitude], maximum 10 entries
-      latwidth | 15 | meridional width of the Gaussian in the [degrees latitude], maximum 10 entries
-      pcenter | 1 | vertical center of the Gaussian in the vertical [hPa], maximum 10 entries
-      pwidth  | 2  | vertical width of the Gaussian in orders of magnitude [log10(hPa)], maximum 10 entries
-      hk      | 0  | temporal wave number for cosine: 
-              |    |  0 -> constant, 1 -> heating in one season only, 2 -> heating in two seasons, etc.
-      hphase  | 0  | phasing of cosine in annual cycle, in units of Pi, relative to March equinox. 
-              |    |  ex: hk = 1, then for hphase = 0 -> JFMAMJ, 0.5 -> AMJJAS, 1 -> JASOND, 1.5 -> ONDJFM
+ hamp | 0 | amplitude of Gaussian heating in [K/d], maximum 10 entries
+ loncenter| -1 | zonal center of the Gaussian in [degrees longitude]. Zonally symmetric if <0. maximum 10 entries
+ lonwidth | 90 | zonal width of the Gaussian, if loncenter >= 0. [degrees longitude], maximum 10 entries
+ latcenter| 90 | meridional center of the Gaussian in [degrees latitude], maximum 10 entries
+ latwidth | 15 | meridional width of the Gaussian in the [degrees latitude], maximum 10 entries
+ pcenter | 1 | vertical center of the Gaussian in the vertical [hPa], maximum 10 entries
+ pwidth  | 2  | vertical width of the Gaussian in orders of magnitude [log10(hPa)], maximum 10 entries
+ hk      | 0  | temporal wave number for cosine: <br> 0 -> constant, 1 -> heating in one season only, 2 -> heating in two seasons, etc.
+ hphase  | 0  | phasing of cosine in annual cycle, in units of Pi, relative to March equinox. <br> ex: hk = 1, then for hphase = 0 -> JFMAMJ, 0.5 -> AMJJAS, 1 -> JASOND, 1.5 -> ONDJFM
       
 
 
