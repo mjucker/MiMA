@@ -445,11 +445,18 @@ If `do_local_heating = .true.` in `physics_driver_nml`, the namelist `local_heat
 
 Variable | Default Value | Meaning
  :--- | :---: | :---
-      hamp | 0 | amplitude of Gaussian heating in [K/s], maximum 10 entries
-      latcenter| 90 | horizontal center of the Gaussian in [degrees latitude], maximum 10 entries
-      latwidth | 15 | horizontal width of the Gaussian in the [degrees latitude], maximum 10 entries
+      hamp | 0 | amplitude of Gaussian heating in [K/d], maximum 10 entries
+      loncenter| -1 | zonal center of the Gaussian in [degrees longitude]. Zonally symmetric if <0. maximum 10 entries
+      lonwidth | 90 | zonal width of the Gaussian, if loncenter >= 0. [degrees longitude], maximum 10 entries
+      latcenter| 90 | meridional center of the Gaussian in [degrees latitude], maximum 10 entries
+      latwidth | 15 | meridional width of the Gaussian in the [degrees latitude], maximum 10 entries
       pcenter | 1 | vertical center of the Gaussian in the vertical [hPa], maximum 10 entries
       pwidth  | 2  | vertical width of the Gaussian in orders of magnitude [log10(hPa)], maximum 10 entries
+      hk      | 0  | temporal wave number for cosine: 
+              |    |  0 -> constant, 1 -> heating in one season only, 2 -> heating in two seasons, etc.
+      hphase  | 0  | phasing of cosine in annual cycle, in units of Pi, relative to March equinox. 
+              |    |  ex: hk = 1, then for hphase = 0 -> JFMAMJ, 0.5 -> AMJJAS, 1 -> JASOND, 1.5 -> ONDJFM
+      
 
 
 ### Boundary conditions
