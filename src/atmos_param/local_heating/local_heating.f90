@@ -41,10 +41,13 @@ module local_heating_mod
   real,dimension(ngauss)   :: hamp      = 0.        ! heating amplitude [K/d]
   real,dimension(ngauss)   :: lonwidth  = -1.       ! zonal width of Gaussian heating [deg], zonally symmetric if <0
   real,dimension(ngauss)   :: loncenter = 90.       ! zonal center of Gaussian heating [deg]
+  real,dimension(ngauss)   :: lonmove   = 0.        ! zonal center motion [deg/day]
   real,dimension(ngauss)   :: latwidth  = 15.       ! meridional width of Gaussian heating [deg]
-  real,dimension(ngauss)   :: latcenter = 90.       ! meridional center of Gaussian heating [deg]
+  real,dimension(ngauss)   :: latcenter = 0.        ! meridional center of Gaussian heating [deg]
+  real,dimension(ngauss)   :: latmove   = 0.        ! metidional center motion [deg/day]
   real,dimension(ngauss)   :: pwidth    = 2.        ! height of Gaussian heating in log-pressure [log10(hPa)]
   real,dimension(ngauss)   :: pcenter   = 1.        ! center of Gaussian heating in pressure [hPa]
+  real,dimension(ngauss)   :: pmove     = 0.        ! vertical center motion [hPa/day]
   integer,dimension(ngauss):: hk        = 0         ! temporal wave number for cosine
                                                     !  0 -> no cosine
                                                     !  1 -> heating in one season only
@@ -56,8 +59,14 @@ module local_heating_mod
                                                     !  0.5 -> heating in AMJJAS
                                                     !  1   -> heating in JASOND
                                                     !  1.5 -> heating in ONDJFM
+ logical,dimension(ngauss):: isperiodic = .false.   ! if .true., heating will be re-initialized
+                                                    !  whenever heating becomes non-zero after being zero (hk > 0)
   
-  namelist /local_heating_nml/ hamp,lonwidth,loncenter,latwidth,latcenter,pwidth,pcenter,hk,hphase
+  namelist /local_heating_nml/ hamp \
+                               ,lonwidth,loncenter,lonmove \
+                               ,latwidth,latcenter,latmove \
+                               ,pwidth,pcenter,pmove       \
+                               ,hk,hphase,isperiodic
   
   
   ! local variables
@@ -87,13 +96,15 @@ contains
    ! ---- convert input units to code units  -----
     do n = 1,ngauss
        pcenter(n)   = pcenter(n)*100      ! convert hPa to Pa
-       logpc(n)     = log10(pcenter(n))   ! work in log10(p)
        hamp(n)      = hamp(n)/86400.      ! convert K/d to K/s
        loncenter(n) = loncenter(n)/RADIAN ! convert degrees to radians
        lonwidth(n)  = lonwidth(n)/RADIAN  ! convert degrees to radians
+       lonmove(n)   = lonmove(n)/RADIAN/86400. ! convert degrees/day to radians/s
        latcenter(n) = latcenter(n)/RADIAN ! convert degrees to radians
        latwidth(n)  = latwidth(n)/RADIAN  ! convert degrees to radians
+       latmove(n)   = latmove(n)/RADIAN/86400. ! convert degrees/day to radians/s
        hphase(n)    = hphase(n)*PI        ! convert to radians
+       pmove(n)     = pmove(n)*100./86400.! convert hPa/day to Pa/s
     enddo
   !----
   !------------ initialize diagnostic fields ---------------
@@ -120,30 +131,53 @@ contains
     real, dimension(size(lon,1),size(lon,2)) :: lon_factor
     real, dimension(size(lon,1),size(lon,2)) :: lat_factor
     real, dimension(size(tdt_tot,1),size(tdt_tot,2),size(tdt_tot,3)) :: tdt
-    real    :: logp,p_factor,t_factor,cosdays
+    real    :: logp,p_factor,t_factor,cosdays,tcenter(3)
     logical :: used
-    integer :: seconds,days,daysperyear
+    integer :: seconds,days,daysperyear,fullseconds,startsecs,deltasecs
     
     ! get temporal dependencies
     call get_time(length_of_year(),seconds,daysperyear)
     call get_time(Time,seconds,days)
+    !  get passed time in units of seconds for moving heating source
+    fullseconds = days*86400+seconds
     !  day of the year relative to equinox_day
     days = days - int(equinox_day*daysperyear)
     cosdays = modulo(days,daysperyear)*1.0/daysperyear*2*PI
-    ! days is now the day of the year relative to March equinox
+    !   days is now the day of the year relative to March equinox
+    
 
     tdt = 0.
     do n = 1,ngauss
        if ( hamp(n) .ne. 0. ) then
-          ! temporal component
+          ! temporal periodic component
           t_factor = max(0.0,cos(hk(n)*cosdays-hphase(n)))
-          ! meridional component
+          if ( isperiodic(n) ) then
+             if ( t_factor .eq. 0. ) then
+                startsecs = fullseconds
+             endif
+          else
+             startsecs = 0
+          endif
+          deltasecs = fullseconds - startsecs
+          ! compute the center position
+          !  longitude:
+          tcenter(1) = modulo(loncenter(n) + lonmove(n)*deltasecs,2*PI)
+          tcenter(2) =        latcenter(n) + latmove(n)*deltasecs
+          tcenter(3) =  log10(pcenter  (n) + pmove  (n)*deltasecs)
+          ! meridional and zonal components
           do j = 1,size(lon,2)
              do i = 1,size(lon,1)
                 if ( loncenter(n) .ge. 0.0 ) then
-                   lon_factor(i,j) = exp( -(lon(i,j)-loncenter(n))**2/(2*(lonwidth(n))**2) )
+                   lon_factor(i,j) = exp( -(lon(i,j)-tcenter(1))**2/(2*(lonwidth(n))**2) )
+                   ! there is a problem when the heating is close to 360/0
+                   lon_factor(i,j) = max(lon_factor(i,j), \
+                                     exp( -(lon(i,j)+2*PI-tcenter(1))**2/(2*(lonwidth(n))**2) ) )
+                   lon_factor(i,j) = max(lon_factor(i,j), \
+                                     exp( -(lon(i,j)-2*PI-tcenter(1))**2/(2*(lonwidth(n))**2) ) )
+                else
+                   lon_factor(i,j) = 1.0
                 endif
-                lat_factor(i,j) = exp( -(lat(i,j)-latcenter(n))**2/(2*(latwidth(n))**2) )
+                lat_factor(i,j) = exp( -(lat(i,j)-tcenter(2))**2/(2*(latwidth(n))**2) )
              enddo
           enddo
     
@@ -152,7 +186,7 @@ contains
                 do i = 1,size(lon,1)
                    logp = log10(p_full(i,j,k))
                    ! vertical component
-                   p_factor = exp(-(logp-logpc(n))**2/(2*(pwidth(n))**2))
+                   p_factor = exp(-(logp-tcenter(3))**2/(2*(pwidth(n))**2))
                    ! everything together
                    tdt(i,j,k) = tdt(i,j,k) + hamp(n)*t_factor*lon_factor(i,j)*lat_factor(i,j)*p_factor
                 enddo
