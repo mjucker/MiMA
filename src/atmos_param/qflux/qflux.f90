@@ -81,7 +81,7 @@ contains
     integer i,j
     real lon,lat,piphase
 
-    piphase = warmpool_phase/pi
+    piphase = warmpool_phase*pi/180.
     do j=1,size(latb)-1
        lat = 0.5*(latb(j+1) + latb(j))*180./pi
        lat = (lat-warmpool_centr)/warmpool_width
