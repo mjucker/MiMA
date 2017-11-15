@@ -48,29 +48,26 @@ module local_heating_mod
   real,dimension(ngauss)   :: pwidth    = 2.        ! height of Gaussian heating in log-pressure [log10(hPa)]
   real,dimension(ngauss)   :: pcenter   = 1.        ! center of Gaussian heating in pressure [hPa]
   real,dimension(ngauss)   :: pmove     = 0.        ! vertical center motion [hPa/day]
-  integer,dimension(ngauss):: hk        = 0         ! temporal wave number for cosine
-                                                    !  0 -> no cosine
-                                                    !  1 -> heating in one season only
-                                                    !  2 -> heating in two seasons, etc
-  real,dimension(ngauss)   :: hphase    = 0.        ! phasing of cosine in annual cycle in [pi]
-                                                    !  relative to March equinox
-                                                    !  example: for hk = 1, that means
-                                                    !  0   -> heating in JFMAMJ
-                                                    !  0.5 -> heating in AMJJAS
-                                                    !  1   -> heating in JASOND
-                                                    !  1.5 -> heating in ONDJFM
- logical,dimension(ngauss):: isperiodic = .false.   ! if .true., heating will be re-initialized
-                                                    !  whenever heating becomes non-zero after being zero (hk > 0)
+  logical,dimension(ngauss):: is_periodic= .false.  ! if .true., reset location in accordance with temporal evolution
+                                                    !  in this case, tphase and tperiod also apply to spatial position
+  real,dimension(ngauss)   :: twidth    =-1.        ! temporal width of Gaussian heating [days],
+                                                    !   constant in time if <0
+  real,dimension(ngauss)   :: tphase    = 0.        ! temporal phase of Gaussian heating [days]
+  real,dimension(ngauss)   :: tperiod   =-1.        ! temporal period of Gaussian heating
+                                                    ! if < 0, period is in fraction of year
+                                                    ! if > 0, period is in days
   
   namelist /local_heating_nml/ hamp \
                                ,lonwidth,loncenter,lonmove \
                                ,latwidth,latcenter,latmove \
                                ,pwidth,pcenter,pmove       \
-                               ,hk,hphase,isperiodic
+                               ,is_periodic                \
+                               ,twidth,tphase,tperiod
   
   
   ! local variables
   real,dimension(ngauss) :: logpc
+  integer                :: daysperyear
   
 contains
   
@@ -79,6 +76,7 @@ contains
     integer, intent(in), dimension(4) :: axes
     type(time_type), intent(in)       :: Time
     !-----------------------------------------------------------------------
+    integer :: seconds
     integer :: unit, io, ierr, n
 
     !     ----- read namelist -----
@@ -94,6 +92,7 @@ contains
     endif
     
    ! ---- convert input units to code units  -----
+    call get_time(length_of_year(),seconds,daysperyear)
     do n = 1,ngauss
        pcenter(n)   = pcenter(n)*100      ! convert hPa to Pa
        hamp(n)      = hamp(n)/86400.      ! convert K/d to K/s
@@ -103,8 +102,11 @@ contains
        latcenter(n) = latcenter(n)/RADIAN ! convert degrees to radians
        latwidth(n)  = latwidth(n)/RADIAN  ! convert degrees to radians
        latmove(n)   = latmove(n)/RADIAN/86400. ! convert degrees/day to radians/s
-       hphase(n)    = hphase(n)*PI        ! convert to radians
        pmove(n)     = pmove(n)*100./86400.! convert hPa/day to Pa/s
+       if ( tperiod(n) .lt. 0.0 ) tperiod(n) = -tperiod(n)*daysperyear ! convert year fraction to day of year
+       twidth(n)    = twidth(n)*86400     ! convert to seconds
+       tphase(n)    = tphase(n)*86400     ! convert to seconds
+       tperiod(n)   = tperiod(n)*86400    ! convert to seconds
     enddo
   !----
   !------------ initialize diagnostic fields ---------------
@@ -131,39 +133,34 @@ contains
     real, dimension(size(lon,1),size(lon,2)) :: lon_factor
     real, dimension(size(lon,1),size(lon,2)) :: lat_factor
     real, dimension(size(tdt_tot,1),size(tdt_tot,2),size(tdt_tot,3)) :: tdt
-    real    :: logp,p_factor,t_factor,cosdays,tcenter(3)
+    real    :: logp,p_factor,t_factor,targ,tcenter(3)
     logical :: used
-    integer :: seconds,days,daysperyear,fullseconds,startsecs,deltasecs
+    integer :: seconds,days,fullseconds,startseconds,deltasecs
     
-    ! get temporal dependencies
-    call get_time(length_of_year(),seconds,daysperyear)
     call get_time(Time,seconds,days)
-    !  get passed time in units of seconds for moving heating source
     fullseconds = days*86400+seconds
-    !  day of the year relative to equinox_day
-    days = days - int(equinox_day*daysperyear)
-    cosdays = modulo(days,daysperyear)*1.0/daysperyear*2*PI
-    !   days is now the day of the year relative to March equinox
     
 
     tdt = 0.
     do n = 1,ngauss
        if ( hamp(n) .ne. 0. ) then
-          ! temporal periodic component
-          t_factor = max(0.0,cos(hk(n)*cosdays-hphase(n)))
-          if ( isperiodic(n) ) then
-             if ( t_factor .eq. 0. ) then
-                startsecs = fullseconds
-             endif
+          ! local heating position is determined at peak heating time
+          if ( is_periodic(n) ) then
+             deltasecs = mod(fullseconds-tphase(n),tperiod(n))
           else
-             startsecs = 0
+             deltasecs = fullseconds
           endif
-          deltasecs = fullseconds - startsecs
           ! compute the center position
-          !  longitude:
-          tcenter(1) = modulo(loncenter(n) + lonmove(n)*deltasecs,2*PI)
-          tcenter(2) =        latcenter(n) + latmove(n)*deltasecs
-          tcenter(3) =  log10(pcenter  (n) + pmove  (n)*deltasecs)
+          tcenter(1) =   mod(loncenter(n) + lonmove(n)*deltasecs,2*PI)
+          tcenter(2) =       latcenter(n) + latmove(n)*deltasecs
+          tcenter(3) = log10(pcenter  (n) + pmove  (n)*deltasecs)
+          ! temporal component
+          if (twidth(n) .lt. 0.0 ) then
+             t_factor = 1.0
+          else
+             targ = mod(fullseconds-tphase(n),tperiod(n))
+             t_factor = exp( -(targ)**2/(2*(twidth(n))**2) )
+          endif
           ! meridional and zonal components
           do j = 1,size(lon,2)
              do i = 1,size(lon,1)
