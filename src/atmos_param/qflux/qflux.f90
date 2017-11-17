@@ -89,7 +89,7 @@ contains
           do i=1,size(lonb)-1
              lon = 0.5*(lonb(i+1) + lonb(i))
              flux(i,j) = flux(i,j) &
-                  &+ (1.-lat**2.)*warmpool_amp*cos(warmpool_k*lon+piphase)
+                  &+ (1.-lat**2.)*warmpool_amp*cos(warmpool_k*lon - piphase)
           enddo
        endif
     enddo
