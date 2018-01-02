@@ -133,7 +133,7 @@ contains
     real, dimension(size(lon,1),size(lon,2)) :: lon_factor
     real, dimension(size(lon,1),size(lon,2)) :: lat_factor
     real, dimension(size(tdt_tot,1),size(tdt_tot,2),size(tdt_tot,3)) :: tdt
-    real    :: logp,p_factor,t_factor,targ,tcenter(3)
+    real    :: logp,p_factor,t_factor,targ,tcenter(3),halfper
     logical :: used
     integer :: seconds,days,fullseconds,startseconds,deltasecs
     
@@ -145,8 +145,9 @@ contains
     do n = 1,ngauss
        if ( hamp(n) .ne. 0. ) then
           ! local heating position is determined at peak heating time
+          halfper = 0.5*tperiod(n)
           if ( is_periodic(n) ) then
-             deltasecs = mod(fullseconds-tphase(n),tperiod(n))
+             deltasecs = mod(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
           else
              deltasecs = fullseconds
           endif
@@ -158,7 +159,7 @@ contains
           if (twidth(n) .lt. 0.0 ) then
              t_factor = 1.0
           else
-             targ = mod(fullseconds-tphase(n),tperiod(n))
+             targ = mod(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
              t_factor = exp( -(targ)**2/(2*(twidth(n))**2) )
           endif
           ! meridional and zonal components
