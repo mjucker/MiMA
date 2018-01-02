@@ -44,7 +44,7 @@ module local_heating_mod
   real,dimension(ngauss)   :: lonmove   = 0.        ! zonal center motion [deg/day]
   real,dimension(ngauss)   :: latwidth  = 15.       ! meridional width of Gaussian heating [deg]
   real,dimension(ngauss)   :: latcenter = 0.        ! meridional center of Gaussian heating [deg]
-  real,dimension(ngauss)   :: latmove   = 0.        ! metidional center motion [deg/day]
+  real,dimension(ngauss)   :: latmove   = 0.        ! meridional center motion [deg/day]
   real,dimension(ngauss)   :: pwidth    = 2.        ! height of Gaussian heating in log-pressure [log10(hPa)]
   real,dimension(ngauss)   :: pcenter   = 1.        ! center of Gaussian heating in pressure [hPa]
   real,dimension(ngauss)   :: pmove     = 0.        ! vertical center motion [hPa/day]
