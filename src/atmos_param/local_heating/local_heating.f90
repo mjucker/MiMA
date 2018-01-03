@@ -26,7 +26,7 @@ module local_heating_mod
   
   !-----------------------------------------------------------------------
   !---------- interfaces ------------
-  public :: local_heating,local_heating_init
+  public :: local_heating,local_heating_init,horizontal_heating
   
   !---------------------------------------------------------------------------------------------------------------
   !
@@ -45,11 +45,16 @@ module local_heating_mod
   real,dimension(ngauss)   :: latwidth  = 15.       ! meridional width of Gaussian heating [deg]
   real,dimension(ngauss)   :: latcenter = 0.        ! meridional center of Gaussian heating [deg]
   real,dimension(ngauss)   :: latmove   = 0.        ! meridional center motion [deg/day]
-  real,dimension(ngauss)   :: pwidth    = 2.        ! height of Gaussian heating in log-pressure [log10(hPa)]
+  real,dimension(ngauss)   :: pwidth    =-1.        ! height of Gaussian heating in log-pressure [log10(hPa)]
+                                                    !  if <0, local heating will be surface heating
   real,dimension(ngauss)   :: pcenter   = 1.        ! center of Gaussian heating in pressure [hPa]
   real,dimension(ngauss)   :: pmove     = 0.        ! vertical center motion [hPa/day]
-  logical,dimension(ngauss):: is_periodic= .false.  ! if .true., reset location in accordance with temporal evolution
-                                                    !  in this case, tphase and tperiod also apply to spatial position
+  logical,dimension(ngauss):: is_periodic= .false.  ! if .true., reset location in accordance 
+                                                    !  with temporal evolution
+                                                    !  in this case, tphase and tperiod 
+                                                    !  also apply to spatial position
+                                                    !  periodicity is unidirectional for longitude,
+                                                    !   but back-and-forth for latitude
   real,dimension(ngauss)   :: twidth    =-1.        ! temporal width of Gaussian heating [days],
                                                     !   constant in time if <0
   real,dimension(ngauss)   :: tphase    = 0.        ! temporal phase of Gaussian heating [days]
@@ -130,63 +135,29 @@ contains
     real, dimension(:,:,:),intent(inout) :: tdt_tot
     ! local variables
     integer :: i,j,k,n
-    real, dimension(size(lon,1),size(lon,2)) :: lon_factor
-    real, dimension(size(lon,1),size(lon,2)) :: lat_factor
+    real, dimension(size(lon,1),size(lon,2)) :: horiz_tdt
     real, dimension(size(tdt_tot,1),size(tdt_tot,2),size(tdt_tot,3)) :: tdt
-    real    :: logp,p_factor,t_factor,targ,tcenter(3),halfper
+    real    :: logp,p_factor,tcenter(3,ngauss)
     logical :: used
-    integer :: seconds,days,fullseconds,startseconds,deltasecs
-    
-    call get_time(Time,seconds,days)
-    fullseconds = days*86400+seconds
     
 
     tdt = 0.
+    call horizontal_heating(Time,lon,lat,horiz_tdt,tcenter)
     do n = 1,ngauss
-       if ( hamp(n) .ne. 0. ) then
-          ! local heating position is determined at peak heating time
-          halfper = 0.5*tperiod(n)
-          if ( is_periodic(n) ) then
-             deltasecs = mod(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
-          else
-             deltasecs = fullseconds
-          endif
-          ! compute the center position
-          tcenter(1) =   mod(loncenter(n) + lonmove(n)*deltasecs,2*PI)
-          tcenter(2) =       latcenter(n) + latmove(n)*deltasecs
-          tcenter(3) = log10(pcenter  (n) + pmove  (n)*deltasecs)
-          ! temporal component
-          if (twidth(n) .lt. 0.0 ) then
-             t_factor = 1.0
-          else
-             targ = mod(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
-             t_factor = exp( -(targ)**2/(2*(twidth(n))**2) )
-          endif
-          ! meridional and zonal components
-          do j = 1,size(lon,2)
-             do i = 1,size(lon,1)
-                if ( loncenter(n) .ge. 0.0 ) then
-                   lon_factor(i,j) = exp( -(lon(i,j)-tcenter(1))**2/(2*(lonwidth(n))**2) )
-                   ! there is a problem when the heating is close to 360/0
-                   lon_factor(i,j) = max(lon_factor(i,j), \
-                                     exp( -(lon(i,j)+2*PI-tcenter(1))**2/(2*(lonwidth(n))**2) ) )
-                   lon_factor(i,j) = max(lon_factor(i,j), \
-                                     exp( -(lon(i,j)-2*PI-tcenter(1))**2/(2*(lonwidth(n))**2) ) )
-                else
-                   lon_factor(i,j) = 1.0
-                endif
-                lat_factor(i,j) = exp( -(lat(i,j)-tcenter(2))**2/(2*(latwidth(n))**2) )
-             enddo
-          enddo
-    
+       if ( hamp(n) .ne. 0. .and. pwidth(n) .gt. 0. ) then
+          ! add vertical component
           do k=1,size(p_full,3)
              do j = 1,size(lon,2)
                 do i = 1,size(lon,1)
-                   logp = log10(p_full(i,j,k))
                    ! vertical component
-                   p_factor = exp(-(logp-tcenter(3))**2/(2*(pwidth(n))**2))
+                   if ( pwidth(n) .lt. 0.0 ) then
+                      p_factor = 1.0
+                   else
+                      logp = log10(p_full(i,j,k))
+                      p_factor = exp(-(logp-tcenter(3,n))**2/(2*(pwidth(n))**2))
+                   endif
                    ! everything together
-                   tdt(i,j,k) = tdt(i,j,k) + hamp(n)*t_factor*lon_factor(i,j)*lat_factor(i,j)*p_factor
+                   tdt(i,j,k) = tdt(i,j,k) + horiz_tdt(i,j)*p_factor
                 enddo
              enddo
           enddo
@@ -201,7 +172,76 @@ contains
     endif
 
    end subroutine local_heating
+
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------
+  !-----------------------------------------------------------------------
+  !-----------------------------------------------------------------------
+
+   subroutine horizontal_heating(Time,lon,lat,horiz_tdt,tcenter)
+    implicit none
+    type(time_type),intent(in)       :: Time
+    real, dimension(:,:),intent(in)  :: lon,lat
+    real, dimension(:,:),intent(out) :: horiz_tdt
+    real, dimension(3,ngauss),intent(out),optional :: tcenter
+    ! local variables
+    integer :: i,j,d,n,deltasecs
+    integer :: seconds,days,fullseconds
+    real    :: tcent(3),t_factor,targ,halfper
+    real, dimension(size(lon,1),size(lon,2)) :: lon_factor,lat_factor
+     
+    call get_time(Time,seconds,days)
+    fullseconds = days*86400+seconds
+
+    horiz_tdt = 0.0
+    if ( present(tcenter) )then
+       tcenter = 0.0
+    endif
+    do n = 1,ngauss
+       if ( hamp(n) .ne. 0. ) then
+          ! local heating position is determined at peak heating time
+          halfper = 0.5*tperiod(n)
+          if ( is_periodic(n) ) then
+             deltasecs = mod(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
+          else
+             deltasecs = fullseconds
+          endif
+          ! compute the center position
+          tcent(1) =   mod(loncenter(n) + lonmove(n)*deltasecs,2*PI)
+          tcent(2) =       latcenter(n) + latmove(n)*abs(deltasecs)
+          tcent(3) = log10(pcenter  (n) + pmove  (n)*deltasecs)
+          ! temporal component
+          if (twidth(n) .lt. 0.0 ) then
+             t_factor = 1.0
+          else
+             targ = mod(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
+             t_factor = exp( -(targ)**2/(2*(twidth(n))**2) )
+          endif
+          ! meridional and zonal components
+          do j = 1,size(lon,2)
+             do i = 1,size(lon,1)
+                if ( loncenter(n) .ge. 0.0 ) then
+                   lon_factor(i,j) = exp( -(lon(i,j)-tcent(1))**2/(2*(lonwidth(n))**2) )
+                   ! there is a problem when the heating is close to 360/0
+                   lon_factor(i,j) = max(lon_factor(i,j), \
+                                     exp( -(lon(i,j)+2*PI-tcent(1))**2/(2*(lonwidth(n))**2) ) )
+                   lon_factor(i,j) = max(lon_factor(i,j), \
+                                     exp( -(lon(i,j)-2*PI-tcent(1))**2/(2*(lonwidth(n))**2) ) )
+                else
+                   lon_factor(i,j) = 1.0
+                endif
+                lat_factor(i,j) = exp( -(lat(i,j)-tcent(2))**2/(2*(latwidth(n))**2) )
+             enddo
+          enddo
+          horiz_tdt = horiz_tdt + hamp(n)*t_factor*lon_factor*lat_factor
+          if ( present(tcenter) ) then
+             do d=1,3
+                tcenter(d,n) = tcent(d)
+             enddo
+          endif
+       endif
+    enddo
+
+   end subroutine horizontal_heating
 
 end module local_heating_mod
