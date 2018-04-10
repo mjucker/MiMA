@@ -14,7 +14,7 @@
     topography_option       = 'gaussian',
     vert_coord_option       = 'uneven_sigma',
     surf_res                = 0.5,
-    scale_heights           = 11.0,
+    scale_heights           =  9.0,
     exponent                =  7.0 /
 
 &gaussian_topog_nml
@@ -72,7 +72,7 @@
  &damping_driver_nml
      do_rayleigh   = .true.,
      trayfric      = -0.5,
-     sponge_pbottom=  50.,
+     sponge_pbottom=  100.,
      do_conserve_energy = .true. /
 
  &surface_flux_nml

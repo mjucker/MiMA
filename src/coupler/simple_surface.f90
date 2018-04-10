@@ -104,6 +104,7 @@ logical :: do_read_sst      = .false. !mj
 logical :: do_sc_sst        = .false. !mj
 character(len=256) :: sst_file
 character(len=256) :: land_option = 'none'
+character(len=256) :: land_sea_mask_file = 'lmask'
 real,dimension(10) :: slandlon=0,slandlat=0,elandlon=-1,elandlat=-1
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
@@ -120,7 +121,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               do_qflux,do_warmpool,              &  !mj
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
                               land_option,slandlon,slandlat,     &  !mj
-                              elandlon,elandlat,                 &
+                              elandlon,elandlat,land_sea_mask_file,&!mj
                               albedo_exp,albedo_cntr,albedo_wdth    !mj
 
 !-----------------------------------------------------------------------
@@ -135,8 +136,9 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                                        flux_t, flux_q, flux_lw
 
   real, allocatable, dimension(:,:) :: sst, flux_u, flux_v, flux_o
-!mj read sst from input file
-  type(interpolate_type),save :: sst_interp
+!mj read sst and land sea mask from input file
+  real, allocatable, dimension(:,:) :: land_sea_mask
+  type(interpolate_type),save :: sst_interp, lmask_interp
 
 contains
 
@@ -438,9 +440,11 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          if(trim(land_option) .eq. 'zsurf')then
             call get_surf_geopotential(zsurf)
             where ( zsurf > zsurf_cap_limit ) land_sea_heat_capacity = land_capacity
-         endif
+! mj land heat capacity given in inputfile
+         else if(trim(land_option) .eq. 'input')then
+            where(land_sea_mask .gt. 0) land_sea_heat_capacity = land_capacity
 ! mj land heat capacity given through ?landlon, ?landlat
-         if(trim(land_option) .eq. 'lonlat')then
+         else if(trim(land_option) .eq. 'lonlat')then
             do j=1,size(Atm%t_bot,2)
                lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
                do i=1,size(Atm%t_bot,1)
@@ -576,6 +580,12 @@ allocate(flux_o(size(Atm%t_bot,1),size(Atm%t_bot,2)))
 !mj read fixed SSTs
 if( do_read_sst ) then
    call interpolator_init( sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
+endif
+!mj read land sea mask
+if( trim(land_option) .eq. 'input' ) then
+   allocate(land_sea_mask(size(Atm%t_bot,1),size(Atm%t_bot,2)))
+   if(mpp_pe() .eq. mpp_root_pe()) write(*,'(a)') 'Reading land-sea mask from file INPUT/'//trim(land_sea_mask_file)//'.nc'
+   call read_data('INPUT/'//trim(land_sea_mask_file),trim(land_sea_mask_file),land_sea_mask,domain=Atm%domain)
 endif
 
 if(file_exist('INPUT/simple_surface.res.nc')) then
