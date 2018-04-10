@@ -29,7 +29,6 @@ git_message
 *~
 it_jobscript*
 simple_jobscript*
-local_*
 bin/mppnccombine.nyu
 
 .DS_Store

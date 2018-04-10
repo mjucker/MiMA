@@ -18,7 +18,7 @@ Namelist `coupler_nml`
 
  Variable | Recommended Value | Meaning
  :--- | :---: | :---
- dt_atmos | 600 | integration time step in [s]
+ dt_atmos | 900 | integration time step in [s]
  
 ### Dynamics
  
@@ -33,7 +33,7 @@ Namelist `coupler_nml`
  num_levels | >= 40 | Number of vertical levels
  vert_coord_option | 'uneven_sigma' | use hybrid sigma/pressure coordinates
  surf_res   | 0.5 | parameter 1 to define vertical level distribution
- scale_heights | 11.0 | parameter 2 to define vertical level distribution
+ scale_heights | 9.0 | parameter 2 to define vertical level distribution
  exponent | 7.0 | parameter 3 to define vertical level distribution
  topography_option | 'gaussian' | if orographic forcing required
  
@@ -123,8 +123,8 @@ Namelist `astro_nml`.
 
 Variable | Recommended Value | Meaning
  :--- | :---: | :---
-        solr_cnst  | 1360           | solar constant [W/m2]
-        [ solday     | 90           | if perpetual equinox desired and calendar='thirt_day' ]
+ solr_cnst  | 1360           | solar constant [W/m2]
+ [ solday     | 90           | if perpetual equinox desired and calendar='thirt_day' ]
 
 
 ### Boundary conditions
@@ -135,7 +135,7 @@ Namelist `damping_driver_nml`.
  :--- | :---: | :---
  do_rayleigh | .true. | do simple Rayleigh friction at the top
  trayfric | -0.5 | Rayleigh friction time scale of 1/2 day
- sponge_bottom | 50 | Rayleigh friction above 0.5hPa
+ sponge_bottom | 100 | Rayleigh friction above 0.5hPa
  do_conserve_energy | .true. | account for heat release due to momentum loss
  
 Namelist `surface_flux_nml`
@@ -227,6 +227,7 @@ The namelist `physics_driver_nml` steers which physics components are used. It r
  do_grey_radiation | .false. | rather do grey radiation?
  do_rrtm_radiation | .true. | or RRTM radiation?
  do_damping | .true. | do any of the damping schemes?
+ do_local_heating | .false. | add artificial local heating? If so, see `local_heating_nml` namelist
  diff_min | 1.e-3    | minimum value of a diffusion coefficient beneath which the coefficient is reset to zero
  diffusion_smooth | .true. | diffusion coefficients should be smoothed in time?
  do_netcdf_restart | .true. | make restart files netCDF format?
@@ -429,13 +430,32 @@ All things which define Earth versus other planets/planetary systems are set in 
 
 Variable | Default Value | Meaning
  :--- | :---: | :---
-        obliq      | 23.439             | Earth's obliquity in [degrees latitude]
-        use_dyofyr | .false.            | use day of the year to compute Earth-Sun distance? Note that this is done internally in RRTM, and assumes 365days/year.
-        solrad     | 1.0                | distance Earth-Sun [AU] if use_dyofyr=.false.
-        solr_cnst  | 1368.22            | solar constant [W/m2]
-        solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
-        equinox_day | 0.25              | fraction of the year defining March equinox.
+ obliq      | 23.439             | Earth's obliquity in [degrees latitude]
+ use_dyofyr | .false.            | use day of the year to compute Earth-Sun distance? Note that this is done internally in RRTM, and assumes 365days/year.
+ solrad     | 1.0                | distance Earth-Sun [AU] if use_dyofyr=.false.
+ solr_cnst  | 1368.22            | solar constant [W/m2]
+ solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
+ equinox_day | 0.25              | fraction of the year defining March equinox.
         
+
+#### Local heating
+      
+
+If `do_local_heating = .true.` in `physics_driver_nml`, the namelist `local_heating_nml` can be used to set the form and position of the desired local heating.
+
+Variable | Default Value | Meaning
+ :--- | :---: | :---
+ hamp | 0 | amplitude of Gaussian heating in [K/d], maximum 10 entries
+ loncenter| -1 | zonal center of the Gaussian in [degrees longitude]. Zonally symmetric if <0. maximum 10 entries
+ lonwidth | 90 | zonal width of the Gaussian, if loncenter >= 0. [degrees longitude], maximum 10 entries
+ latcenter| 90 | meridional center of the Gaussian in [degrees latitude], maximum 10 entries
+ latwidth | 15 | meridional width of the Gaussian in the [degrees latitude], maximum 10 entries
+ pcenter | 1 | vertical center of the Gaussian in the vertical [hPa], maximum 10 entries
+ pwidth  | 2  | vertical width of the Gaussian in orders of magnitude [log10(hPa)], maximum 10 entries
+ hk      | 0  | temporal wave number for cosine: <br> 0 -> constant, 1 -> heating in one season only, 2 -> heating in two seasons, etc.
+ hphase  | 0  | phasing of cosine in annual cycle, in units of Pi, relative to March equinox. <br> ex: hk = 1, then for hphase = 0 -> JFMAMJ, 0.5 -> AMJJAS, 1 -> JASOND, 1.5 -> ONDJFM
+      
+
 
 ### Boundary conditions
 
