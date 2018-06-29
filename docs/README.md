@@ -9,16 +9,17 @@ MiMA is an intermediate-complexity General Circulation Model with interactive wa
 * [References](#references): Required and relevant references
 * [License](#license): License information
 
-See the 30 second trailer on [YouTube](https://www.youtube.com/watch?v=8UfaFnGtCrk "Model of an idealized Moist Atmosphere (MiMA)"): 
+See the 30 second trailer on [YouTube](https://www.youtube.com/watch?v=8UfaFnGtCrk "Model of an idealized Moist Atmosphere (MiMA)"):
 
 [![MiMA thumbnail](https://img.youtube.com/vi/8UfaFnGtCrk/0.jpg)](https://www.youtube.com/watch?v=8UfaFnGtCrk "Model of an idealized Moist Atmosphere (MiMA)")
 
 ## News
 With time, I hope to post usage, papers, etc. which relate to MiMA here. If you're a MiMA user, please let me know of any news at <coding@martinjucker.com>.
 
-* August 2017: Bugfix patch (v1.0.1) addresses incoming SW radation bugs
+* February 2018: Talk and poster about MiMA at the [2nd Pan-GASS meeting](http://singh.sci.monash.edu/Pan-GASS/index.shtml). The poster can be viewed [here](https://doi.org/10.6084/m9.figshare.6118934.v1).
+* August 2017: Bugfix patch (v1.0.1) addresses incoming SW radation bugs.
 * June 2017: MiMA reference paper published in Journal of Climate:
-[M Jucker and EP Gerber, 2017: *Untangling the annual cycle of the tropical tropopause layer with an idealized moist model*, J Clim, doi:10.1175/JCLI-D-17-0127.1](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
+[M Jucker and EP Gerber, 2017: *Untangling the annual cycle of the tropical tropopause layer with an idealized moist model*, J Clim, doi:10.1175/JCLI-D-17-0127.1](http://dx.doi.org/10.1175/JCLI-D-17-0127.1).
 
 
 
