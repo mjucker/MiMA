@@ -16,6 +16,7 @@ See the 30 second trailer on [YouTube](https://www.youtube.com/watch?v=8UfaFnGtC
 ## News
 With time, I hope to post usage, papers, etc. which relate to MiMA here. If you're a MiMA user, please let me know of any news at <coding@martinjucker.com>.
 
+* March 2018: [Isca framework](https://empslocal.ex.ac.uk/people/staff/gv219/ISCA/index.html) (which contains MiMA) reference paper published in Geoscientific Model Development: [Vallis _et al._, 2018: *Isca, v1.0: a framework for the global modelling of the atmospheres of Earth and other planets at varying levels of complexity*, Geosci. Model Dev., doi:10.5194/gmd-11-843-2018](https://doi.org/10.5194/gmd-11-843-2018)
 * February 2018: Talk and poster about MiMA at the [2nd Pan-GASS meeting](http://singh.sci.monash.edu/Pan-GASS/index.shtml). The poster can be viewed [here](https://doi.org/10.6084/m9.figshare.6118934.v1).
 * August 2017: Bugfix patch (v1.0.1) addresses incoming SW radation bugs.
 * June 2017: MiMA reference paper published in Journal of Climate:
