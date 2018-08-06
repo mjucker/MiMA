@@ -33,7 +33,7 @@ use interpolator_mod, only: interpolate_type,interpolator_init&
 use qflux_mod, only: qflux_init,qflux,warmpool
 !mj local surface heating
 use physics_driver_mod, only: do_local_heating
-use local_heating_mod, only: horizontal_heating,ngauss,hamp,pwidth
+use local_heating_mod, only: horizontal_heating,ngauss,hamp,pcenter
 
 implicit none
 private
@@ -843,7 +843,7 @@ endif
 !mj adding local surface heating
 if ( do_local_heating ) then
    do j=1,ngauss
-      if ( hamp(j) .gt. 0. .and. pwidth(j) .lt. 0. ) then
+      if ( hamp(j) .gt. 0. .and. pcenter(j) .lt. 0. ) then
          do_surface_heating = .true.
       endif
    enddo

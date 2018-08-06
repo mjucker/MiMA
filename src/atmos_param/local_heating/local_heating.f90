@@ -45,9 +45,10 @@ module local_heating_mod
   real,dimension(ngauss)   :: latwidth  = 15.       ! meridional width of Gaussian heating [deg]
   real,dimension(ngauss)   :: latcenter = 0.        ! meridional center of Gaussian heating [deg]
   real,dimension(ngauss)   :: latmove   = 0.        ! meridional center motion [deg/day]
-  real,dimension(ngauss)   :: pwidth    =-1.        ! height of Gaussian heating in log-pressure [log10(hPa)]
+  real,dimension(ngauss)   :: pwidth    = 1.        ! height of Gaussian heating in log-pressure [log10(hPa)]
+                                                    !  if <0, local heating will be constant in the vertical
+  real,dimension(ngauss)   :: pcenter   =-1.        ! center of Gaussian heating in pressure [hPa]
                                                     !  if <0, local heating will be surface heating
-  real,dimension(ngauss)   :: pcenter   = 1.        ! center of Gaussian heating in pressure [hPa]
   real,dimension(ngauss)   :: pmove     = 0.        ! vertical center motion [hPa/day]
   logical,dimension(ngauss):: is_periodic= .false.  ! if .true., reset location in accordance 
                                                     !  with temporal evolution
@@ -73,6 +74,7 @@ module local_heating_mod
   ! local variables
   real,dimension(ngauss) :: logpc
   integer                :: daysperyear
+  logical                :: do_3d_heating
   
 contains
   
@@ -98,8 +100,10 @@ contains
     
    ! ---- convert input units to code units  -----
     call get_time(length_of_year(),seconds,daysperyear)
+    do_3d_heating = .false.
     do n = 1,ngauss
        pcenter(n)   = pcenter(n)*100      ! convert hPa to Pa
+       if ( pcenter(n) .gt. 0.0 ) do_3d_heating = .true.
        hamp(n)      = hamp(n)/86400.      ! convert K/d to K/s
        loncenter(n) = loncenter(n)/RADIAN ! convert degrees to radians
        lonwidth(n)  = lonwidth(n)/RADIAN  ! convert degrees to radians
@@ -115,10 +119,15 @@ contains
     enddo
   !----
   !------------ initialize diagnostic fields ---------------
-    id_tdt_lheat = &
+    ! only needed if we actually do 3D heating
+    if ( do_3d_heating ) then
+       id_tdt_lheat = &
          register_diag_field ( mod_name, 'tdt_lheat', axes(1:3), Time, &
          'Temperature tendency due to local heating', &
          'K/s', missing_value=missing_value               )
+    else
+       id_tdt_lheat = 0
+    endif
     
   end subroutine local_heating_init
     
@@ -142,27 +151,31 @@ contains
     
 
     tdt = 0.
-    call horizontal_heating(Time,lon,lat,horiz_tdt,tcenter)
-    do n = 1,ngauss
-       if ( hamp(n) .ne. 0. .and. pwidth(n) .gt. 0. ) then
-          ! add vertical component
-          do k=1,size(p_full,3)
-             do j = 1,size(lon,2)
-                do i = 1,size(lon,1)
-                   ! vertical component
-                   if ( pwidth(n) .lt. 0.0 ) then
-                      p_factor = 1.0
-                   else
-                      logp = log10(p_full(i,j,k))
-                      p_factor = exp(-(logp-tcenter(3,n))**2/(2*(pwidth(n))**2))
-                   endif
-                   ! everything together
-                   tdt(i,j,k) = tdt(i,j,k) + horiz_tdt(i,j)*p_factor
+    if ( do_3d_heating ) then
+       ! horizontal heating first
+       call horizontal_heating(Time,lon,lat,horiz_tdt,tcenter)
+       ! then vertical heating
+       do n = 1,ngauss
+          if ( hamp(n) .ne. 0. .and. pcenter(n) .gt. 0. ) then
+             ! add vertical component
+             do k=1,size(p_full,3)
+                do j = 1,size(lon,2)
+                   do i = 1,size(lon,1)
+                      ! vertical component
+                      if ( pwidth(n) .lt. 0.0 ) then
+                         p_factor = 1.0
+                      else
+                         logp = log10(p_full(i,j,k))
+                         p_factor = exp(-(logp-tcenter(3,n))**2/(2*(pwidth(n))**2))
+                      endif
+                      ! everything together
+                      tdt(i,j,k) = tdt(i,j,k) + horiz_tdt(i,j)*p_factor
+                   enddo
                 enddo
              enddo
-          enddo
-       endif
-    enddo
+          endif
+       enddo
+    endif
      
     tdt_tot = tdt_tot + tdt
      
@@ -189,6 +202,7 @@ contains
     integer :: seconds,days,fullseconds
     real    :: tcent(3),t_factor,targ,halfper
     real, dimension(size(lon,1),size(lon,2)) :: lon_factor,lat_factor
+    logical :: do_horiz
      
     call get_time(Time,seconds,days)
     fullseconds = days*86400+seconds
@@ -198,7 +212,23 @@ contains
        tcenter = 0.0
     endif
     do n = 1,ngauss
+       ! check if heating should be added
+       do_horiz = .false.
+       !  first, is the amplitude non-zero?
        if ( hamp(n) .ne. 0. ) then
+          !  then, 3D vs. 2D heating
+          !  If pcenter < 0: 2D heating -> .not. present(tcenter)
+          !  If pcenter > 0: 3D heating -> present(tcenter)
+          if ( present(tcenter) ) then ! calling from 3D atmosphere
+             if ( pcenter(n) .gt. 0.0 ) then
+                do_horiz = .true.
+             endif
+          elseif ( pcenter(n) .lt. 0.0 ) then ! calling from simple_surface
+             do_horiz = .true.
+          endif
+       endif
+       ! compute horizontal heating if it should be added
+       if ( do_horiz ) then
           ! local heating position is determined at peak heating time
           halfper = 0.5*tperiod(n)
           if ( is_periodic(n) ) then
@@ -209,7 +239,11 @@ contains
           ! compute the center position
           tcent(1) =   mod(loncenter(n) + lonmove(n)*deltasecs,2*PI)
           tcent(2) =       latcenter(n) + latmove(n)*abs(deltasecs)
-          tcent(3) = log10(pcenter  (n) + pmove  (n)*deltasecs)
+          if ( pcenter(n) .gt. 0.0 ) then
+             tcent(3) = log10(pcenter  (n) + pmove  (n)*deltasecs)
+          else
+             tcent(3) = pcenter(n)
+          endif
           ! temporal component
           if (twidth(n) .lt. 0.0 ) then
              t_factor = 1.0
