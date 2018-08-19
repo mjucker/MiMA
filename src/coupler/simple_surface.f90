@@ -843,7 +843,7 @@ endif
 !mj adding local surface heating
 if ( do_local_heating ) then
    do j=1,ngauss
-      if ( hamp(j) .gt. 0. .and. pcenter(j) .lt. 0. ) then
+      if ( hamp(j) .ne. 0. .and. pcenter(j) .lt. 0. ) then
          do_surface_heating = .true.
       endif
    enddo
