@@ -245,15 +245,15 @@ real            :: d608   = d378/d622
 !   </DATA>
 ! </NAMELIST>
 
-logical :: no_neg_q         = .false.  ! for backwards compatibility
-logical :: use_virtual_temp = .true. 
-logical :: alt_gustiness    = .false.
-logical :: old_dtaudv       = .false.
-logical :: use_mixing_ratio = .false.
-logical :: use_df_stuff     = .false.
-real    :: gust_const       =  1.0
-logical :: ncar_ocean_flux  = .false.
-logical :: raoult_sat_vap   = .false.
+logical :: no_neg_q          = .false.  ! for backwards compatibility
+logical :: use_virtual_temp  = .true. 
+logical :: alt_gustiness     = .false.
+logical :: old_dtaudv        = .false.
+logical :: use_mixing_ratio  = .false.
+logical :: use_df_stuff      = .false.
+real    :: gust_const        =  1.0
+logical :: ncar_ocean_flux   = .false.
+logical :: raoult_sat_vap    = .false.
 
 namelist /surface_flux_nml/ no_neg_q,         &
                             use_virtual_temp, &
@@ -454,6 +454,8 @@ subroutine surface_flux_1d (                                           &
                              seawater, cd_m, cd_t, cd_q, u_star, b_star     )
   end if
 
+	
+
   where (avail)
      ! scale momentum drag coefficient on orographic roughness
      cd_m = cd_m*(log(z_atm/rough_mom+1)/log(z_atm/rough_scale+1))**2
@@ -473,8 +475,11 @@ subroutine surface_flux_1d (                                           &
 
      ! evaporation
      rho_drag  =  drag_q * rho
-     flux_q    =  rho_drag * (q_surf0 - q_atm) ! flux of water vapor  (Kg/(m**2 s))
-
+     flux_q    =  rho_drag *  (q_surf0 - q_atm) ! flux of water vapor  (Kg/(m**2 s))
+     where(flux_q < 0.0) !added by CIG on May 31 2018; never should have negative evaporation
+	flux_q = 0.0
+     endwhere
+	
      where (land)
         dedq_surf = rho_drag
         dedt_surf = 0
@@ -486,6 +491,9 @@ subroutine surface_flux_1d (                                           &
      dedq_atm  = -rho_drag   ! d(latent heat flux)/d(atmospheric mixing ratio)
 
      q_star = flux_q / (u_star * rho)             ! moisture scale
+
+   
+
      ! ask Chris and Steve K if we still want to keep this for diagnostics
      q_surf = q_atm + flux_q / (rho*cd_q*w_atm)   ! surface specific humidity
 
@@ -517,6 +525,9 @@ subroutine surface_flux_1d (                                           &
      q_surf     = 0.0
      w_atm      = 0.0
   endwhere
+
+ !CIG - diagnose negative evaporation  - may 31 2018
+  !    write (*,*) "delq",   MINVAL( (flux_q) )  
 
   ! calculate d(stress component)/d(atmos wind component)
   dtaudu_atm = 0.0

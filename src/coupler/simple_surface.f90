@@ -26,6 +26,12 @@ use      constants_mod, only: rdgas, rvgas, cp_air, hlv, hlf
 use ocean_rough_mod, only: compute_ocean_roughness
 ! mj know about surface topography
 use spectral_dynamics_mod,only: get_surf_geopotential
+
+! cig know about ocean_mask and grid boundaries
+use  topography_mod,only: get_ocean_mask
+use  transforms_mod, only: get_grid_boundaries, grid_domain,get_grid_domain, get_lon_max, get_lat_max  
+use     mpp_domains_mod, only: mpp_global_field
+
 ! mj read SSTs
 use interpolator_mod, only: interpolate_type,interpolator_init&
      &,CONSTANT,interpolator
@@ -71,7 +77,6 @@ real ::   z_ref_heat      = 2.,       &
           trop_capacity   = -1.,      & !mj
           trop_cap_limit  = 15.,      & !mj
           heat_cap_limit  = 60.,      & !mj
-          zsurf_cap_limit = 10.,      & !mj
           np_cap_factor   =  1.,      & !mj
           const_roughness = 3.21e-05, &
           const_albedo    = 0.30,     &
@@ -87,15 +92,19 @@ real ::   z_ref_heat      = 2.,       &
 	  lat_glacier      = 45.,     &
 	  maxofmerid       = .5,      &
 	  latmaxofmerid    = 25.,     &
-	  Tm               = 265.,    &
+	  Tm               = 305.,    &
 	  deltaT           = 40.,     &
           qflux_amp        = 30.,     & !mj
           qflux_width      = 16.        !mj
+!cig
+real ::   land_optionthreshold      = 10., & 
+          mom_roughness_land  = 1., &
+	  q_roughness_land  = 1.       
 
 
 integer :: surface_choice   = 1
 integer :: roughness_choice = 1
-integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp, 5->tanh with albedo_cntr,albedo_wdth, 6->sin2\phi between const_albedo and higher_albedo
+integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp, 5->tanh with albedo_cntr,albedo_wdth
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
 logical :: do_qflux         = .false. !mj
@@ -104,24 +113,23 @@ logical :: do_read_sst      = .false. !mj
 logical :: do_sc_sst        = .false. !mj
 character(len=256) :: sst_file
 character(len=256) :: land_option = 'none'
-character(len=256) :: land_sea_mask_file = 'lmask'
 real,dimension(10) :: slandlon=0,slandlat=0,elandlon=-1,elandlat=-1
 
 namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               surface_choice,  heat_capacity,    &
                               land_capacity,trop_capacity,       & !mj
                               trop_cap_limit, heat_cap_limit,    & !mj
-                              np_cap_factor, zsurf_cap_limit,    & !mj
+                              np_cap_factor,                     & !mj
                               roughness_choice, const_roughness, &
                               albedo_choice, const_albedo, do_oflx, &
 			      max_of, lonmax_of, latmax_of, latwidth_of, &
 			      lonwidth_of, higher_albedo, lat_glacier, &
 			      do_oflxmerid, maxofmerid, latmaxofmerid, Tm, &
-			      deltaT,                            &
+			      deltaT,  mom_roughness_land,  q_roughness_land,     &  !cig
                               do_qflux,do_warmpool,              &  !mj
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
-                              land_option,slandlon,slandlat,     &  !mj
-                              elandlon,elandlat,land_sea_mask_file,&!mj
+                              land_option,land_optionthreshold,slandlon,slandlat,     &  !mj
+                              elandlon,elandlat,                 &
                               albedo_exp,albedo_cntr,albedo_wdth    !mj
 
 !-----------------------------------------------------------------------
@@ -136,9 +144,13 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                                        flux_t, flux_q, flux_lw
 
   real, allocatable, dimension(:,:) :: sst, flux_u, flux_v, flux_o
-!mj read sst and land sea mask from input file
-  real, allocatable, dimension(:,:) :: land_sea_mask
-  type(interpolate_type),save :: sst_interp, lmask_interp
+
+! cig added next  line , april 2 2017, ocean mask is logical
+ logical, allocatable, dimension(:,:) :: ocean_mask
+ 
+
+!mj read sst from input file
+  type(interpolate_type),save :: sst_interp
 
 contains
 
@@ -209,6 +221,7 @@ pi = 4.0*atan(1.)
    glacier = .false.
    seawater= .false.
 
+   
    if(roughness_choice == 1) then
      rough_mom   = const_roughness
      rough_heat  = const_roughness
@@ -217,6 +230,21 @@ pi = 4.0*atan(1.)
 !    call compute_ocean_roughness (mask, flux_u, flux_v,   & ! Fez
      call compute_ocean_roughness (mask, u_star, &           ! Inchon and beyond. Changes answers.
                          rough_mom, rough_heat, rough_moist)
+ elseif(roughness_choice == 3) then   !added by CIG on april 8 2018
+     rough_mom   = const_roughness
+     rough_heat  = const_roughness
+     rough_moist = const_roughness
+     if(trim(land_option) .eq. 'oceanmask')then
+ 	
+         where ( .NOT. ocean_mask  ) rough_mom   = const_roughness * mom_roughness_land
+	 where ( .NOT. ocean_mask  ) rough_moist   = const_roughness * q_roughness_land
+	 !cig: make sure everything is ok 	 
+ 	!write (*,*) "ocean_mask", ocean_mask(12,2), ocean_mask(12,:), ocean_mask(3,:)  
+  	!write (*,*) "rough_mom", rough_mom(12,:), rough_heat(12,:) 
+	 
+         endif
+    
+
    endif
 
    if(albedo_choice == 1) then
@@ -278,13 +306,7 @@ pi = 4.0*atan(1.)
         albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
              0.5*(1+tanh((lat-albedo_cntr)/albedo_wdth))
      enddo
-!mj add symmetric higher albedo - sin2 increase from equator to pole
-   elseif(albedo_choice .eq. 6) then
-      do j = 1, size(Atm%t_bot,2)
-         lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
-         albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
-              sin(lat)**2
-      enddo
+
    endif
 
 
@@ -337,18 +359,19 @@ pi = 4.0*atan(1.)
 !=======================================================================
 !-------------------- diagnostics section ------------------------------
 
-   if ( id_wind       > 0 ) used = send_data ( id_wind,       wind,               Time )
-   if ( id_drag_moist > 0 ) used = send_data ( id_drag_moist, cd_q,               Time )
-   if ( id_drag_heat  > 0 ) used = send_data ( id_drag_heat,  cd_t,               Time )
-   if ( id_drag_mom   > 0 ) used = send_data ( id_drag_mom,   cd_m,               Time )
-   if ( id_rough_heat > 0 ) used = send_data ( id_rough_heat, rough_heat,         Time )
-   if ( id_rough_mom  > 0 ) used = send_data ( id_rough_mom,  rough_mom,          Time )
-   if ( id_u_star     > 0 ) used = send_data ( id_u_star,     u_star,             Time )
-   if ( id_b_star     > 0 ) used = send_data ( id_b_star,     b_star,             Time )
-   if ( id_t_atm      > 0 ) used = send_data ( id_t_atm,      Atm%t_bot,          Time )
-   if ( id_u_atm      > 0 ) used = send_data ( id_u_atm,      Atm%u_bot,          Time )
-   if ( id_v_atm      > 0 ) used = send_data ( id_v_atm,      Atm%v_bot,          Time )
-   if ( id_albedo     > 0 ) used = send_data ( id_albedo,     albedo,             Time )
+   if ( id_wind        > 0 ) used = send_data ( id_wind,       wind,               Time )
+   if ( id_drag_moist  > 0 ) used = send_data ( id_drag_moist, cd_q,               Time )
+   if ( id_drag_heat   > 0 ) used = send_data ( id_drag_heat,  cd_t,               Time )
+   if ( id_drag_mom    > 0 ) used = send_data ( id_drag_mom,   cd_m,               Time )
+   if ( id_rough_heat  > 0 ) used = send_data ( id_rough_heat, rough_heat,         Time )
+   if ( id_rough_mom   > 0 ) used = send_data ( id_rough_mom,  rough_mom,          Time )
+   if ( id_rough_moist > 0 ) used = send_data ( id_rough_moist,  rough_moist,      Time )
+   if ( id_u_star      > 0 ) used = send_data ( id_u_star,     u_star,             Time )
+   if ( id_b_star      > 0 ) used = send_data ( id_b_star,     b_star,             Time )
+   if ( id_t_atm       > 0 ) used = send_data ( id_t_atm,      Atm%t_bot,          Time )
+   if ( id_u_atm       > 0 ) used = send_data ( id_u_atm,      Atm%u_bot,          Time )
+   if ( id_v_atm       > 0 ) used = send_data ( id_v_atm,      Atm%v_bot,          Time )
+   if ( id_albedo      > 0 ) used = send_data ( id_albedo,     albedo,             Time )
 
 
 
@@ -376,6 +399,11 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  logical :: used
 ! mj know about topography
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: zsurf,land_sea_heat_capacity
+
+
+	
+	 
+
 ! mj input SST
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: sst_new
 ! mj shallower ocean in tropics, land-sea contrast
@@ -412,12 +440,15 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    flux_q     =  flux_q        + dedq_atm * f_q_delt_n
    dedt_surf  =  dedt_surf     + dedq_atm * e_q_n
 
+
+
    if(surface_choice == 1) then
       if(do_sc_sst) then !mj sst read from input file
          call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
          dt_t_surf = sst_new - sst
          sst = sst + dt_t_surf
       else   !mj ocean depth function of latitude
+
          land_sea_heat_capacity = heat_capacity
          if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
             do j=1,size(Atm%t_bot,2)
@@ -439,13 +470,22 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 ! mj land heat capacity function of surface topography
          if(trim(land_option) .eq. 'zsurf')then
             call get_surf_geopotential(zsurf)
-            where ( zsurf > zsurf_cap_limit ) land_sea_heat_capacity = land_capacity
-! mj land heat capacity given in inputfile
-         else if(trim(land_option) .eq. 'input')then
-            where(land_sea_mask .gt. 0) land_sea_heat_capacity = land_capacity
+            where ( zsurf > land_optionthreshold ) land_sea_heat_capacity = land_capacity
+         endif
+
+! cig land heat capacity function of ocean_mask (if ocean mask exists)
+       if(trim(land_option) .eq. 'oceanmask')then
+ 	
+            where ( .NOT. ocean_mask  ) land_sea_heat_capacity = land_capacity
+	 !cig: make sure everything is ok 	 
+ !write (*,*) "ocean_mask", ocean_mask(12,2), ocean_mask(12,:), ocean_mask(3,:)  
+  !write (*,*) "heat_capacity", land_sea_heat_capacity(12,:), land_sea_heat_capacity(3,:) 
+
+         endif
+
 ! mj land heat capacity given through ?landlon, ?landlat
-         else if(trim(land_option) .eq. 'lonlat')then
-            do j=1,size(Atm%t_bot,2)
+         if(trim(land_option) .eq. 'lonlat')then
+            do j=1,size(Atm%t_bot,2) 
                lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
                do i=1,size(Atm%t_bot,1)
                   lon = 0.5*180/pi*( Atm%lon_bnd(i+1) + Atm%lon_bnd(i) )
@@ -535,15 +575,27 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  type (atmos_data_type), intent(in)  :: Atm
 
  integer :: unit, ierr, io
-
+ 
  integer :: i, j, lati
  real :: xx, xx2, lat, lon, pi, y0
  real :: coslat !mj
  real, dimension(100) :: oftabl
  real, dimension(32) :: ssttabl
 
+
+integer :: is, ie, js, je
+real, allocatable, dimension(:) :: blon, blat
+ logical ::    water_file_exists
+
+call get_grid_domain(is, ie, js, je)
+ ! cig added previous four lines, april 2 2017, ocean mask is logical, initialize the oceanmask
+
+allocate(ocean_mask   (size(Atm%t_bot,1),size(Atm%t_bot,2)))
+ 
  pi = 4.0*atan(1.)
 
+
+ 	
  !-----------------------------------------------------------------------
 !------ read namelist ------
 
@@ -555,6 +607,20 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
       enddo
  10   call close_file (unit)
    endif
+
+
+! cig added next four lines, april 2 2017
+ if(trim(land_option) .eq. 'oceanmask')then
+   call get_grid_domain(is, ie, js, je)
+	 allocate(blon(is:ie+1), blat(js:je+1))
+ 	 call get_grid_boundaries(blon, blat)
+		  water_file_exists = get_ocean_mask(blon, blat, ocean_mask)
+	  if(.not.water_file_exists) then
+		call error_mesg('simple_surface_init','ocean_mask is not present and water data file does not exist', FATAL)
+	  endif
+	  deallocate(blon, blat)
+endif
+ 
 !mj make choices compatible
    !if(do_read_sst .or. do_sc_sst) call error_mesg ('simple_surface',  &
    !              'THERE IS A BUG WITH DO_READ_SST, SO I AM STOPPING', FATAL)
@@ -580,12 +646,6 @@ allocate(flux_o(size(Atm%t_bot,1),size(Atm%t_bot,2)))
 !mj read fixed SSTs
 if( do_read_sst ) then
    call interpolator_init( sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
-endif
-!mj read land sea mask
-if( trim(land_option) .eq. 'input' ) then
-   allocate(land_sea_mask(size(Atm%t_bot,1),size(Atm%t_bot,2)))
-   if(mpp_pe() .eq. mpp_root_pe()) write(*,'(a)') 'Reading land-sea mask from file INPUT/'//trim(land_sea_mask_file)//'.nc'
-   call read_data('INPUT/'//trim(land_sea_mask_file),trim(land_sea_mask_file),land_sea_mask,domain=Atm%domain)
 endif
 
 if(file_exist('INPUT/simple_surface.res.nc')) then
