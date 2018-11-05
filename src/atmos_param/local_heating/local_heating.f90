@@ -203,7 +203,7 @@ contains
     real    :: tcent(3),t_factor,targ,halfper
     real, dimension(size(lon,1),size(lon,2)) :: lon_factor,lat_factor
     logical :: do_horiz
-     
+    
     call get_time(Time,seconds,days)
     fullseconds = days*86400+seconds
 
@@ -232,7 +232,7 @@ contains
           ! local heating position is determined at peak heating time
           halfper = 0.5*tperiod(n)
           if ( is_periodic(n) ) then
-             deltasecs = mod(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
+             deltasecs = modulo(fullseconds-tphase(n)+halfper,tperiod(n))-halfper
           else
              deltasecs = fullseconds
           endif
