@@ -1,21 +1,18 @@
 # template for the Intel fortran compiler version 8
 # typical use with mkmf
 # mkmf -t template.ifc -c"-Duse_libMPI -Duse_netCDF" path_names /usr/local/include
-FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -i-dynamic -assume byterecl -i4 -r8 -g -I${NETCDF_INC} -I${MVAPICH2_INC}
+
+FFLAGS = ${DEBUG} -fpp -stack_temps -safe_cray_ptr -ftz -assume byterecl -O2 -i4 -r8 -g ${INC_NETCDF} -I${MPI_INC} -fPIC -unroll -ip -axCORE-AVX2 -qopenmp -qopt-report-phase=openmp 
+#-fp-model strict
+
 #FFLAGS = ${DEBUG} -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -O3 -axAVX -xSSE2 -ipo -i4 -r8 -g ${INC_NETCDF} -I${MVAPICH2_INC}
-#FFLAGS = ${DEBUG} -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -O0 -i4 -r8 -g -I${NETCDF_INC} -I${MVAPICH2_INC}
-OPT = -O2 -xSSE4.2 -axAVX
-OPT = -O2
-#OPT = -O1 
-#OPT = -O0
+#FFLAGS = ${DEBUG} -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -O0 -i4 -r8 -g ${INC_NETCDF} -I${MVAPICH2_INC}
 
-FFLAGS += ${OPT}
-
-CPPFLAGS =  -I/usr/include -I/usr/local/include -I${NETCDF_INC}  -I${MVAPICH2_INC} #-I/usr/mpi/intel/mvapich-1.1.0/include
+CPPFLAGS = -I${MPI_INC} 
 
 FC = mpif90
 LD = mpif90
 
-LDFLAGS = -shared-intel -L/usr/local/lib ${LIB_NETCDF}
+LDFLAGS = ${FFLAGS} -shared-intel -L${NETCDF_LIB} -lnetcdff
 
 CFLAGS = -D__IFC
