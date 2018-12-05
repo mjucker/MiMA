@@ -117,14 +117,14 @@ endif
 
 ! epg: This was written by Lorenzo Polvani to load in the initial conditions
 !      from a netcdf file, which must be called "initial_conditions.nc" and must be placed in the
-!      input directory from where the code is being run.
+!      INPUT directory from where the code is being run.
 If (choice_of_init == 3) then !initialize with prescribed input
-   if (.not.file_exist('initial_conditions.nc')) then
-      call error_mesg('spectral_initialize_fields','Could not find initial_conditions.nc!',FATAL)
+   if (.not.file_exist('INPUT/initial_conditions.nc')) then
+      call error_mesg('spectral_initialize_fields','Could not find INPUT/initial_conditions.nc!',FATAL)
    end if
 
    ! first, open up the netcdf file
-   ncid = ncopn('initial_conditions.nc',NCNOWRIT,err)
+   ncid = ncopn('INPUT/initial_conditions.nc',NCNOWRIT,err)
    ! This array tells us the size of input variables.
    counts(1) = size(ug,1)
    counts(2) = size(ug,2)
