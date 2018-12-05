@@ -189,7 +189,7 @@ namelist /spectral_dynamics_nml/ use_virtual_temperature, damping_option,       
                                  p_press, p_sigma, exponent, ocean_topog_smoothing, initial_sphum,   &
                                  valid_range_t, eddy_sponge_coeff, zmu_sponge_coeff, zmv_sponge_coeff, &
                                  print_interval, num_steps,                                          &
-                                 water_correction_limit                                                 !mj
+                                 water_correction_limit, specify_initial_conditions        !mj + epg
 
 contains
 
