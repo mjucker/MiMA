@@ -573,12 +573,12 @@ else
     if(trim(tracer_attributes(ntr)%name) == 'sphum') then
       if(specify_initial_conditions) then  
          !epg+ray: This loads in sphum from the file initial_conditions.nc
-         if (.not.file_exist('initial_conditions.nc')) then
-            call error_mesg('spectral_initialize_fields','Could not find initial_conditions.nc!',FATAL)
+         if (.not.file_exist('INPUT/initial_conditions.nc')) then
+            call error_mesg('spectral_initialize_fields','Could not find INPUT/initial_conditions.nc!',FATAL)
          endif
          
          ! open up the netcdf file`
-         ncid = ncopn('initial_conditions.nc',NCNOWRIT,err)
+         ncid = ncopn('INPUT/initial_conditions.nc',NCNOWRIT,err)
          ! This array tells us the size of input variables.
          counts(1) = size(grid_tracers,1)
          counts(2) = size(grid_tracers,2)
