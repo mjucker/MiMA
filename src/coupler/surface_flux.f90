@@ -254,6 +254,7 @@ logical :: use_df_stuff     = .false.
 real    :: gust_const       =  1.0
 logical :: ncar_ocean_flux  = .false.
 logical :: raoult_sat_vap   = .false.
+logical :: no_surface_fluxes = .false. !epg: option to turn off all surface fluxes
 
 namelist /surface_flux_nml/ no_neg_q,         &
                             use_virtual_temp, &
@@ -263,7 +264,8 @@ namelist /surface_flux_nml/ no_neg_q,         &
                             use_mixing_ratio, &
                             use_df_stuff,     &
                             ncar_ocean_flux,  &
-                            raoult_sat_vap
+                            raoult_sat_vap,   &
+                            no_surface_fluxes   !epg
    
 
 
@@ -363,6 +365,8 @@ subroutine surface_flux_1d (                                           &
 
   if (do_init) call surface_flux_init
 
+
+
   !---- use local value of surf temp ----
 
   t_surf0 = 200.   !  avoids out-of-bounds in es lookup 
@@ -458,9 +462,18 @@ subroutine surface_flux_1d (                                           &
      ! scale momentum drag coefficient on orographic roughness
      cd_m = cd_m*(log(z_atm/rough_mom+1)/log(z_atm/rough_scale+1))**2
      ! surface layer drag coefficients
-     drag_t = cd_t * w_atm
-     drag_q = cd_q * w_atm
-     drag_m = cd_m * w_atm
+     
+     ! epg: this allows you to turn off all fluxes, which can be useful in
+     ! running eddy life cycle experiments
+     if (no_surface_fluxes) then   
+       drag_t = 0.
+       drag_q = 0.
+       drag_m = 0.
+     else    
+       drag_t = cd_t * w_atm
+       drag_q = cd_q * w_atm
+       drag_m = cd_m * w_atm
+     endif
 
      ! density
      rho = p_atm / (rdgas * tv_atm)  
@@ -490,7 +503,12 @@ subroutine surface_flux_1d (                                           &
      q_surf = q_atm + flux_q / (rho*cd_q*w_atm)   ! surface specific humidity
 
      ! upward long wave radiation
-     flux_r    =   stefan*t_surf**4               ! (W/m**2)
+     ! epg: this flag allows you to turn off all fluxes
+     if (no_surface_fluxes) then
+        flux_r = 0.
+     else
+        flux_r    =   stefan*t_surf**4               ! (W/m**2)
+     endif
      drdt_surf = 4*stefan*t_surf**3               ! d(upward longwave)/d(surface temperature)
 
      ! stresses
@@ -532,6 +550,8 @@ subroutine surface_flux_1d (                                           &
         dtaudv_atm = -cd_m*rho*(dw_atmdv*v_dif + w_atm)
      endwhere
   endif
+
+
 
 end subroutine surface_flux_1d
 ! </SUBROUTINE>
