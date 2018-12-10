@@ -74,9 +74,9 @@ Theoretically, there is also the possibility of running the full AM2 radiation s
 
 MiMA can be used to run life cycle experiments, as explore in Yamada and Pauluis (2017).  To specify the initial conditions, activate this flag in "spectral_dynamics_nml":
 
-* specify_initial_conditions = .true. /
+* specify_initial_conditions = .true.
 
-Then a netcdf file containing the initial conditions for zonal wind, meridional wind, temperature, specific humidity, and surface pressure (ucomp, vcomp, temp, sphum, and ps, respectively) must be provided.  It should be at the resolution of the model.  It should be named initial_conditions.nc and placed in the INPUT/ directory where the model is executed.  Note that if you do not include an slight perturbation, the model will maintain a zonally symmetric state, stuck to the unstabled fixed point.  There are different strategies for exciting zonal asymmetries.  You can add random noise, or focus in on a particular wavenumber, as detailed below.
+Then a netcdf file containing the initial conditions for zonal wind, meridional wind, temperature, specific humidity, and surface pressure (ucomp, vcomp, temp, sphum, and ps, respectively) must be provided.  It should be at the resolution of the model.  It should be named initial_conditions.nc and placed in the INPUT/ directory where the model is executed.  Note that if you do not include a slight zonal perturbation, the model will maintain a zonally symmetric state, stuck to the unstabled fixed point.  There are different strategies for exciting zonal asymmetries.  You can add random noise, or focus in on a particular wavenumber, as detailed below.
 
 A traditional life cycle is run with no forcing.  To shut off all diabatic processes, you must make these adjustments to the name list.  To turn off radiation and damping (except for hyperdiffusion), add these options to "physics_driver_nml"
 
