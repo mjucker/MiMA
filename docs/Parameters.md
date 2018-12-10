@@ -36,7 +36,9 @@ Namelist `coupler_nml`
  scale_heights | 9.0 | parameter 2 to define vertical level distribution
  exponent | 7.0 | parameter 3 to define vertical level distribution
  topography_option | 'gaussian' | if orographic forcing required
- 
+ specify_initial_conditions | .false. | If set to true, the model will look for initial conditions in INPUT/initial_conditions.nc
+
+
  Namelist `gaussian_topog_nml`, example for 3km wave-two in midlatitudes
  
  Variable | Recommended Value | Meaning
@@ -48,6 +50,8 @@ Namelist `coupler_nml`
    wlon     |   20.,   20.,
    rlat     |    0.,    0.,
    rlon     |    0.,    0., /
+
+  
 
  
 ### Mixed layer
@@ -145,6 +149,11 @@ Variable | Recommended Value | Meaning
  use_virtual_temp | .false. | for consistency with df_stuff
  old_dtaudv       | .true. | use alternative d(stress)/d(wind component)
  use_df_stuff     | .true. | for consistency with df_stuff
+ no_surface_momentum_flux  | .false. | use to turn off surface momentum fluxes
+ no_surface_moisture_flux  | .false. | use to turn off surface moisture fluxes
+ no_surface_heat_flux      | .false. | use to turn off surface heat fluxes
+ no_surface_radiative_flux | .false. | use to turn off surface radiative fluxes
+
 
 Namelist `diffusivity_nml`
 
