@@ -1,6 +1,8 @@
 module spectral_initialize_fields_mod
 
-use              fms_mod, only: mpp_pe, mpp_root_pe, write_version_number
+! epg: we added "error_mesg, FATAL, and file_exist" here so that we can report an error if 
+!      the initial_conditions.nc file is missing.
+use              fms_mod, only: mpp_pe, mpp_root_pe, write_version_number, file_exist, FATAL, error_mesg
 
 use        constants_mod, only: rdgas
 
@@ -19,6 +21,10 @@ character(len=128), parameter :: tagname = &
 '$Name: lima $'
 
 logical :: entry_to_logfile_done = .false.
+
+! epg: this netcdf include file is needed to load in specified initial
+! conditions.  Only used if choice_of_init == 3
+include 'netcdf.inc'
 
 contains
 
@@ -44,6 +50,12 @@ real :: initial_sea_level_press, global_mean_psg
 real :: initial_perturbation   = 1.e-7
 
 integer :: ms, me, ns, ne, is, ie, js, je, num_levels
+
+! epg: needed to load in initial conditions from a netcdf file
+!      code was initially developed by Lorenzo Polvani; hence lmp
+real, allocatable,dimension(:,:,:) :: lmptmp
+integer :: ncid,vid,err,counts(3)
+! --------
 
 if(.not.entry_to_logfile_done) then
   call write_version_number(version, tagname)
@@ -102,6 +114,56 @@ if(choice_of_init == 2) then   ! initial vorticity perturbation used in benchmar
   endif
   call uv_grid_from_vor_div(vors, divs, ug, vg)
 endif
+
+! epg: This was written by Lorenzo Polvani to load in the initial conditions
+!      from a netcdf file, which must be called "initial_conditions.nc" and must be placed in the
+!      INPUT directory from where the code is being run.
+If (choice_of_init == 3) then !initialize with prescribed input
+   if (.not.file_exist('INPUT/initial_conditions.nc')) then
+      call error_mesg('spectral_initialize_fields','Could not find INPUT/initial_conditions.nc!',FATAL)
+   end if
+
+   ! first, open up the netcdf file
+   ncid = ncopn('INPUT/initial_conditions.nc',NCNOWRIT,err)
+   ! This array tells us the size of input variables.
+   counts(1) = size(ug,1)
+   counts(2) = size(ug,2)
+   counts(3) = size(ug,3)
+   ! Allocate space to put the initial condition information, temporarily.
+   allocate(lmptmp(counts(1),counts(2),counts(3)))
+   
+   ! load the zonal wind initial conditions
+   vid = ncvid(ncid,'ucomp',err)
+   call ncvgt(ncid,vid,(/is,js,1/),counts,lmptmp,err)
+   ug(:,:,:) = lmptmp
+ 
+   ! load the meridional wind
+   vid = ncvid(ncid,'vcomp',err)
+   call ncvgt(ncid,vid,(/is,js,1/),counts,lmptmp,err)
+   vg(:,:,:) = lmptmp
+ 
+   ! load temperature
+   vid = ncvid(ncid,'temp',err)
+   call ncvgt(ncid,vid,(/is,js,1/),counts,lmptmp,err)
+   tg(:,:,:) = lmptmp
+
+   ! load surface pressure
+   vid = ncvid(ncid,'ps',err)
+   call ncvgt(ncid,vid,(/is,js/),counts(1:2),lmptmp(:,:,1),err)
+   psg(:,:) = lmptmp(:,:,1)
+   ln_psg = log(psg(:,:))
+ 
+   ! close up the input netcdf file.
+   call ncclos(ncid,err)
+ 
+   ! and lastly, let us know that it worked!
+   if(mpp_pe() == mpp_root_pe()) then
+      print *, 'initial dynamical fields read in from initial_conditions.nc'
+   endif
+ 
+endif
+!epg: end of lorenzo polvani's script --------
+
 
 !  initial spectral fields (and spectrally-filtered) grid fields
 
