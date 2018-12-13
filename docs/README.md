@@ -19,6 +19,7 @@ With time, I hope to post usage, papers, etc. which relate to MiMA here. If you'
 * March 2018: [Isca framework](https://empslocal.ex.ac.uk/people/staff/gv219/ISCA/index.html) (which contains MiMA) reference paper published in Geoscientific Model Development: [Vallis _et al._, 2018: *Isca, v1.0: a framework for the global modelling of the atmospheres of Earth and other planets at varying levels of complexity*, Geosci. Model Dev., doi:10.5194/gmd-11-843-2018](https://doi.org/10.5194/gmd-11-843-2018)
 * February 2018: Talk and poster about MiMA at the [2nd Pan-GASS meeting](http://singh.sci.monash.edu/Pan-GASS/index.shtml). The poster can be viewed [here](https://doi.org/10.6084/m9.figshare.6118934.v1).
 * August 2017: Bugfix patch (v1.0.1) addresses incoming SW radation bugs.
+* June 2017: Ray Yamada and Olivier Pauluis use MiMA for baroclinic lifecycle studies: [Yamada, R., and O. Pauluis, 2017: Wave-mean-flow interactions in moist baroclinic lifecycles. J. Atmo. Sci., 74, 2143-2162, doi:10.1175/JAS-D-16-0329.1](https://doi.org/10.1175/JAS-D-16-0329.1)
 * June 2017: MiMA reference paper published in Journal of Climate:
 [M Jucker and EP Gerber, 2017: *Untangling the annual cycle of the tropical tropopause layer with an idealized moist model*, J Clim, doi:10.1175/JCLI-D-17-0127.1](http://dx.doi.org/10.1175/JCLI-D-17-0127.1).
 
