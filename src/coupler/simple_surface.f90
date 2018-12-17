@@ -499,8 +499,10 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          enddo
       enddo
       call horizontal_heating(Time,lon2d,lat2d,horiz_heat)
-      dt_t_surf = dt_t_surf + horiz_heat*dt
+   else
+      horiz_heat = 0.0 ! for diagnostics output
    endif
+   dt_t_surf = dt_t_surf + horiz_heat*dt
    !###############################
    ! apply all heating
    sst = sst + dt_t_surf
