@@ -111,7 +111,6 @@
 !---------------------------------------------------------------------------------------------------------------
 ! input files: file names are always given without '.nc', which is always assumed
 !  the field to be read within the file needs to have the same name as the file
-! OBS! reading of radiation is still experimental at this point!
         logical            :: do_read_radiation=.false.       ! read SW and LW radiation in the atmosphere from
                                                               !  external file? Surface fluxes are still computed
         character(len=256) :: radiation_file='radiation'      !  file name to read radiation

@@ -254,6 +254,11 @@ logical :: use_df_stuff     = .false.
 real    :: gust_const       =  1.0
 logical :: ncar_ocean_flux  = .false.
 logical :: raoult_sat_vap   = .false.
+logical :: no_surface_momentum_flux  = .false. !epg: option to turn off surface momentum fluxes
+logical :: no_surface_moisture_flux  = .false. !epg: option to turn off surface moisture fluxes
+logical :: no_surface_heat_flux      = .false. !epg: option to turn off surface heat fluxes
+logical :: no_surface_radiative_flux = .false. !epg: option to turn off surface radiative fluxes
+
 
 namelist /surface_flux_nml/ no_neg_q,         &
                             use_virtual_temp, &
@@ -263,8 +268,11 @@ namelist /surface_flux_nml/ no_neg_q,         &
                             use_mixing_ratio, &
                             use_df_stuff,     &
                             ncar_ocean_flux,  &
-                            raoult_sat_vap
-   
+                            raoult_sat_vap,   &
+                            no_surface_momentum_flux, &   
+                            no_surface_moisture_flux, &
+                            no_surface_heat_flux, &
+                            no_surface_radiative_flux 
 
 
 contains
@@ -357,11 +365,26 @@ subroutine surface_flux_1d (                                           &
        t_surf0,  t_surf1,  u_dif,     v_dif,               &
        rho_drag, drag_t,    drag_m,   drag_q,    rho,      &
        q_atm,    q_surf0,  dw_atmdu,  dw_atmdv
-
+       
+   
   integer :: i, nbad
+
+  !epg: these coefficients allow one to zero out the surface fluxes
+  !     by default, nothing happens
+  real :: cfm = 1.0
+  real :: cfq = 1.0
+  real :: cft = 1.0
+  real :: cfr = 1.0
 
 
   if (do_init) call surface_flux_init
+
+  ! epg: this allows you to turn off surface fluxes, which can be useful in
+  ! running eddy life cycle experiments
+  if (no_surface_momentum_flux) cfm = 0.0
+  if (no_surface_moisture_flux) cfq = 0.0
+  if (no_surface_heat_flux) cft = 0.0
+  if (no_surface_radiative_flux) cfr = 0.0
 
   !---- use local value of surf temp ----
 
@@ -458,9 +481,12 @@ subroutine surface_flux_1d (                                           &
      ! scale momentum drag coefficient on orographic roughness
      cd_m = cd_m*(log(z_atm/rough_mom+1)/log(z_atm/rough_scale+1))**2
      ! surface layer drag coefficients
-     drag_t = cd_t * w_atm
-     drag_q = cd_q * w_atm
-     drag_m = cd_m * w_atm
+     
+     ! epg: the coeffieciets cft, cfq, and cfm default to 1.0, but are set to 
+     !      0.0 if no_surface_fluxes has turned on 
+     drag_t = cft * cd_t * w_atm
+     drag_q = cfq * cd_q * w_atm
+     drag_m = cfm * cd_m * w_atm
 
      ! density
      rho = p_atm / (rdgas * tv_atm)  
@@ -489,8 +515,8 @@ subroutine surface_flux_1d (                                           &
      ! ask Chris and Steve K if we still want to keep this for diagnostics
      q_surf = q_atm + flux_q / (rho*cd_q*w_atm)   ! surface specific humidity
 
-     ! upward long wave radiation
-     flux_r    =   stefan*t_surf**4               ! (W/m**2)
+     ! epg: cfr is 1.0 by default, but set to 0.0 when no_surface_radiative_flux is activated
+     flux_r    =   cfr * stefan*t_surf**4               ! (W/m**2)
      drdt_surf = 4*stefan*t_surf**3               ! d(upward longwave)/d(surface temperature)
 
      ! stresses
@@ -532,6 +558,8 @@ subroutine surface_flux_1d (                                           &
         dtaudv_atm = -cd_m*rho*(dw_atmdv*v_dif + w_atm)
      endwhere
   endif
+
+
 
 end subroutine surface_flux_1d
 ! </SUBROUTINE>
