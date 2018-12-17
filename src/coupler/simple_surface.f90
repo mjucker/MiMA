@@ -31,6 +31,9 @@ use interpolator_mod, only: interpolate_type,interpolator_init&
      &,CONSTANT,interpolator
 !mj q-flux
 use qflux_mod, only: qflux_init,qflux,warmpool
+!mj local surface heating
+use physics_driver_mod, only: do_local_heating
+use local_heating_mod, only: horizontal_heating,ngauss,hamp,pcenter
 
 implicit none
 private
@@ -57,10 +60,11 @@ integer :: id_drag_moist,  id_drag_heat,  id_drag_mom,              &
            id_t_ref,  id_rh_ref, id_u_ref,  id_v_ref,               &
            id_del_h,  id_del_m,  id_del_q, id_albedo, id_entrop_evap, &
            id_entrop_shflx, id_entrop_lwflx,                        &
-           id_heat !mj
+           id_heat,id_tdt_horiz !mj
 
 logical :: first_static = .true.
 logical :: do_init = .true.
+logical :: do_surface_heating = .false.
 
 !-----------------------------------------------------------------------
 
@@ -370,6 +374,8 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
                      gamma, dtmass, delta_t, delta_q, dflux_t, dflux_q, &
                      flux, deriv, dt_t_surf, &
                      entrop_evap, entrop_shflx, entrop_lwflx
+real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
+                     lon2d,lat2d,horiz_heat
 
 
  real    :: cp_inv
@@ -412,11 +418,15 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    flux_q     =  flux_q        + dedq_atm * f_q_delt_n
    dedt_surf  =  dedt_surf     + dedq_atm * e_q_n
 
+
+   dt_t_surf  = 0.0
+   !###############################
+   ! heating due to surface fluxes
+   !
    if(surface_choice == 1) then
       if(do_sc_sst) then !mj sst read from input file
          call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
          dt_t_surf = sst_new - sst
-         sst = sst + dt_t_surf
       else   !mj ocean depth function of latitude
          land_sea_heat_capacity = heat_capacity
          if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
@@ -470,7 +480,6 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 ! mj end
 
          dt_t_surf = flux/(1.0 -deriv)
-         sst = sst + dt_t_surf
       endif
 
    elseif(surface_choice == 2) then
@@ -478,7 +487,25 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
       dt_t_surf  = 0.0
 
    endif
-
+   
+   !###############################
+   ! additional heating
+   !
+   if ( do_surface_heating ) then
+      do j = 1,size(Atm%t_bot,2)
+         do i = 1,size(Atm%t_bot,1)
+            lat2d(i,j) = 0.5*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+            lon2d(i,j) = 0.5*( Atm%lon_bnd(i+1) + Atm%lon_bnd(i) )
+         enddo
+      enddo
+      call horizontal_heating(Time,lon2d,lat2d,horiz_heat)
+   else
+      horiz_heat = 0.0 ! for diagnostics output
+   endif
+   dt_t_surf = dt_t_surf + horiz_heat*dt
+   !###############################
+   ! apply all heating
+   sst = sst + dt_t_surf
 
 
   flux_t     = flux_t      + dt_t_surf*dhdt_surf
@@ -498,6 +525,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    if ( id_q_flux > 0 ) used = send_data ( id_q_flux, flux_q, Time )
    if ( id_o_flux > 0 ) used = send_data ( id_o_flux, flux_o, Time )
    if ( id_heat   > 0 ) used = send_data ( id_heat,land_sea_heat_capacity,Time )
+   if ( id_tdt_horiz   > 0 ) used = send_data ( id_tdt_horiz,horiz_heat,Time )
    if ( id_entrop_evap > 0 ) then
       entrop_evap = flux_q/sst
       used = send_data ( id_entrop_evap, entrop_evap, Time)
@@ -814,6 +842,15 @@ if ( do_qflux .or. do_warmpool) then
    if ( do_warmpool) call warmpool(Atm%lon_bnd,Atm%lat_bnd,flux_o)
 endif
 
+!mj adding local surface heating
+if ( do_local_heating ) then
+   do j=1,ngauss
+      if ( hamp(j) .ne. 0. .and. pcenter(j) .lt. 0. ) then
+         do_surface_heating = .true.
+      endif
+   enddo
+endif
+
 
     do_init = .false.
 
@@ -977,6 +1014,9 @@ subroutine diag_field_init ( Time, atmos_axes )
    id_heat        = & !mj
    register_diag_field ( mod_name, 'heat_capacity',atmos_axes, Time,     &
                         'mixed layer heat capacity','none' )
+   id_tdt_horiz        = & !mj
+   register_diag_field ( mod_name, 'tdt_surf',atmos_axes, Time,     &
+                        'local surface heating','none' )
    id_entrop_evap      = &
    register_diag_field ( mod_name, 'entrop_evap', atmos_axes, Time,     &
                         'entropy source from evap','kg/m2/s/K' )

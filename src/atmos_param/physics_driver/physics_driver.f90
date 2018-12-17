@@ -160,7 +160,8 @@ character(len=128) :: tagname = '$Name:  $'
 public  physics_driver_init, physics_driver_down,   &
         physics_driver_up, physics_driver_end, &
         do_moist_in_phys_up, get_diff_t, &
-        get_radturbten, zero_radturbten
+        get_radturbten, zero_radturbten, &
+        do_local_heating
 
 private          &
 

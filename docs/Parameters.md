@@ -439,12 +439,12 @@ All things which define Earth versus other planets/planetary systems are set in 
 
 Variable | Default Value | Meaning
  :--- | :---: | :---
- obliq      | 23.439             | Earth's obliquity in [degrees latitude]
- use_dyofyr | .false.            | use day of the year to compute Earth-Sun distance? Note that this is done internally in RRTM, and assumes 365days/year.
- solrad     | 1.0                | distance Earth-Sun [AU] if use_dyofyr=.false.
- solr_cnst  | 1368.22            | solar constant [W/m2]
- solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
- equinox_day | 0.25              | fraction of the year defining March equinox.
+obliq      | 23.439             | Earth's obliquity in [degrees latitude]
+use_dyofyr | .false.            | use day of the year to compute Earth-Sun distance? Note that this is done internally in RRTM, and assumes 365days/year.
+solrad     | 1.0                | distance Earth-Sun [AU] if use_dyofyr=.false.
+solr_cnst  | 1368.22            | solar constant [W/m2]
+solday     | 0                  | if >0, do perpetual run corresponding to day of the year = solday in [0,days per year]
+equinox_day | 0.25              | fraction of the year defining March equinox.
         
 
 #### Local heating
@@ -453,16 +453,22 @@ Variable | Default Value | Meaning
 If `do_local_heating = .true.` in `physics_driver_nml`, the namelist `local_heating_nml` can be used to set the form and position of the desired local heating.
 
 Variable | Default Value | Meaning
- :--- | :---: | :---
- hamp | 0 | amplitude of Gaussian heating in [K/d], maximum 10 entries
- loncenter| -1 | zonal center of the Gaussian in [degrees longitude]. Zonally symmetric if <0. maximum 10 entries
- lonwidth | 90 | zonal width of the Gaussian, if loncenter >= 0. [degrees longitude], maximum 10 entries
- latcenter| 90 | meridional center of the Gaussian in [degrees latitude], maximum 10 entries
- latwidth | 15 | meridional width of the Gaussian in the [degrees latitude], maximum 10 entries
- pcenter | 1 | vertical center of the Gaussian in the vertical [hPa], maximum 10 entries
- pwidth  | 2  | vertical width of the Gaussian in orders of magnitude [log10(hPa)], maximum 10 entries
- hk      | 0  | temporal wave number for cosine: <br> 0 -> constant, 1 -> heating in one season only, 2 -> heating in two seasons, etc.
- hphase  | 0  | phasing of cosine in annual cycle, in units of Pi, relative to March equinox. <br> ex: hk = 1, then for hphase = 0 -> JFMAMJ, 0.5 -> AMJJAS, 1 -> JASOND, 1.5 -> ONDJFM
+:--- | :---: | :---
+hamp | 0 | amplitude of Gaussian heating in [K/d], maximum 10 entries
+loncenter| -1 | zonal center of the Gaussian in [degrees longitude]. Zonally symmetric if <0. maximum 10 entries
+lonwidth | -1 | zonal width of the Gaussian, if loncenter >= 0. [degrees longitude], maximum 10 entries
+lonmove  | 0  | zonal speed of moving heat source [deg/day], maximum 10 entries
+latcenter|  0 | meridional center of the Gaussian in [degrees latitude], maximum 10 entries
+latwidth | 15 | meridional width of the Gaussian in the [degrees latitude], maximum 10 entries
+latmove  | 0  | meridonal speed of moving heat source [deg/day], maximum 10 entries
+pcenter | -1 | vertical center of the Gaussian in the vertical [hPa] no vertical structure if <0, maximum 10 entries
+pwidth  | 1  | vertical width of the Gaussian in orders of magnitude [log10(hPa)], constant with pressure if <0, maximum 10 entries
+pmove   | 0  | vertical speed of moving heat source [hPa/day], maximum 10 entries
+is_periodic | .false. | reset location periodically? Periodicity is unidirectional in longitude and pressure, back-and-forth in latitude, maximum 10 entries
+twidth  | -1 | temporal width of Gaussian [days]. constant in time if <0, maximum 10 entries
+tphase  | 0  | temporal phase of Gaussian heating [days], maximum 10 entries
+tperiod | -1 | temporal period of Gaussian heating; [fraction of year] if <0, [days] if >0, maximum 10 entries
+
       
 
 

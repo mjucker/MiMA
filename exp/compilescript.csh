@@ -3,8 +3,8 @@
 set echo 
 #--------------------------------------------------------------------------------------------------------
 # define variables
-set platform  = nyu                                     # A unique identifier for your platform
-set npes      = 16                                       # number of processors
+set platform  = nci                                   # A unique identifier for your platform
+set npes      = $PBS_NCPUS                            # number of processors
 set template  = $cwd/../bin/mkmf.template.$platform   # path to template for your platform
 set mkmf      = $cwd/../bin/mkmf                      # path to executable mkmf
 set sourcedir = $cwd/../src                           # path to directory containing model source code
@@ -18,8 +18,26 @@ set diagtable = $cwd/diag_table           # path to diagnositics table
 set fieldtable = $cwd/field_table         # path to field table (specifies tracers)
 #--------------------------------------------------------------------------------------------------------
 # compile mppnccombine.c, will be used only if $npes > 1
+set add_flag = 0
+if (! $?NETCDF_INC || ! $?NETCDF_LIB) then
+    set add_flag = 1
+else
+    if ("$NETCDF_INC" == "" || "$NETCDF_LIB" == "") then
+        set add_flag = 1
+    endif
+endif	
+if ($add_flag) then
+    set NETCDF_INC = `nc-config --includedir`
+    set NETCDF_LIB = `nc-config --libdir`
+    echo "NETCDF_INC: "$NETCDF_INC
+    echo "NETCDF_LIB: "$NETCDF_LIB
+endif
 if ( ! -f $mppnccombine ) then
   icc -O -o $mppnccombine -I$NETCDF_INC -L$NETCDF_LIB $cwd/../postprocessing/mppnccombine.c -lnetcdf
+endif
+if ($add_flag) then
+    set NETCDF_INC = `nc-config --fflags`
+    set NETCDF_LIB = `nc-config --flibs`
 endif
 #--------------------------------------------------------------------------------------------------------
 # setup directory structure
