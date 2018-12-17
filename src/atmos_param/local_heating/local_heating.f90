@@ -39,8 +39,8 @@ module local_heating_mod
   !-----------------------------------------------------------------------
   integer,parameter :: ngauss = 10
   real,dimension(ngauss)   :: hamp      = 0.        ! heating amplitude [K/d]
-  real,dimension(ngauss)   :: lonwidth  = -1.       ! zonal width of Gaussian heating [deg], zonally symmetric if <0
-  real,dimension(ngauss)   :: loncenter = 90.       ! zonal center of Gaussian heating [deg]
+  real,dimension(ngauss)   :: lonwidth  = -1.       ! zonal width of Gaussian heating [deg]
+  real,dimension(ngauss)   :: loncenter = -1.       ! zonal center of Gaussian heating [deg], zonally symmetric if <0
   real,dimension(ngauss)   :: lonmove   = 0.        ! zonal center motion [deg/day]
   real,dimension(ngauss)   :: latwidth  = 15.       ! meridional width of Gaussian heating [deg]
   real,dimension(ngauss)   :: latcenter = 0.        ! meridional center of Gaussian heating [deg]
@@ -54,8 +54,9 @@ module local_heating_mod
                                                     !  with temporal evolution
                                                     !  in this case, tphase and tperiod 
                                                     !  also apply to spatial position
-                                                    !  periodicity is unidirectional for longitude,
-                                                    !   but back-and-forth for latitude
+                                                    !  periodicity is unidirectional for longitude, and pressure,
+                                                    !   ["jump back" to start]
+                                                    !   but back-and-forth for latitude [reverse motion]
   real,dimension(ngauss)   :: twidth    =-1.        ! temporal width of Gaussian heating [days],
                                                     !   constant in time if <0
   real,dimension(ngauss)   :: tphase    = 0.        ! temporal phase of Gaussian heating [days]
@@ -151,6 +152,8 @@ contains
     
 
     tdt = 0.
+    ! if local heating is 2D only it is done via horizontal_heating
+    !  within simple_surface.f90
     if ( do_3d_heating ) then
        ! horizontal heating first
        call horizontal_heating(Time,lon,lat,horiz_tdt,tcenter)
@@ -240,7 +243,7 @@ contains
           tcent(1) =   mod(loncenter(n) + lonmove(n)*deltasecs,2*PI)
           tcent(2) =       latcenter(n) + latmove(n)*abs(deltasecs)
           if ( pcenter(n) .gt. 0.0 ) then
-             tcent(3) = log10(pcenter  (n) + pmove  (n)*deltasecs)
+             tcent(3)=log10(pcenter (n) + pmove  (n)*abs(deltasecs))
           else
              tcent(3) = pcenter(n)
           endif
