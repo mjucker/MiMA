@@ -18,7 +18,9 @@ use      transforms_mod, only: compute_gaussian, compute_legendre, &
                                get_sin_lat, get_wts_lat, transforms_are_initialized,      &
                                get_lon_max, get_lat_max, get_num_fourier, get_fourier_inc,&
                                get_num_spherical, get_grid_domain, get_spec_domain,       &
-                               grid_domain, spectral_domain, area_weighted_global_mean
+                               area_weighted_global_mean
+
+use         spec_mpp_mod,only: grid_domain, spectral_domain
 
 use     mpp_domains_mod, only: mpp_global_field
 

@@ -10,7 +10,9 @@ use time_manager_mod,      only: time_type, set_time, get_time, operator(-), ope
 use press_and_geopot_mod,  only: pressure_variables, compute_pressures_and_heights
 
 use transforms_mod,        only: get_grid_boundaries, get_deg_lon, get_deg_lat, get_wts_lat, &
-                                 get_grid_domain, get_lon_max, get_lat_max, grid_domain
+                                 get_grid_domain, get_lon_max, get_lat_max
+
+use           spec_mpp_mod,only: grid_domain
 
 use spectral_dynamics_mod, only: get_reference_sea_level_press, get_num_levels
 
