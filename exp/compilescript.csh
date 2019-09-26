@@ -28,12 +28,16 @@ else
 endif	
 if ($add_flag) then
     set NETCDF_INC = `nc-config --includedir`
-    set NETCDF_LIB = `nc-config --libdir`
+    set NETCDF_LIB = `nc-config --libs`
     echo "NETCDF_INC: "$NETCDF_INC
     echo "NETCDF_LIB: "$NETCDF_LIB
 endif
 if ( ! -f $mppnccombine ) then
-  icc -O -o $mppnccombine -I$NETCDF_INC -L$NETCDF_LIB $cwd/../postprocessing/mppnccombine.c -lnetcdf
+  icc -O -o $mppnccombine -I$NETCDF_INC $NETCDF_LIB $cwd/../postprocessing/mppnccombine.c 
+endif
+if ($add_flag) then
+    set NETCDF_INC = `nc-config --fflags`
+    set NETCDF_LIB = `nc-config --flibs`
 endif
 if ($add_flag) then
     set NETCDF_INC = `nc-config --fflags`

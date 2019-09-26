@@ -6,12 +6,11 @@ LIB_NETCDF := $(shell nc-config --flibs)
 MPI_INC := -I${FPATH} $(shell mpif90 -showme:compiler)
 LIB_MPI := -L${OMPI_F90LIBS} $(shell mpif90 -showme:link)
 
-# this does not work with 64 CPUs
-FFLAGS = -fpp -stack_temps -safe-cray-ptr -ftz -i-dynamic -assume byterecl -i4 -r8 -g -I${NETCDF_INC} ${MPI_INC}
+
 # this works with 64 CPUs
 FFLAGS = -fpp -ftz -i-dynamic -assume byterecl -i4 -r8 -g -I${NETCDF_INC} ${MPI_INC}
-# this is what MOM4 uses in template.ia64
-FFLAGS = -what -fpp -fno-alias -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -g -i4 -r8 -Wp,-w
+# this is what MOM4 uses in template.ia64 (minus the deprecated -i-dynamic)
+FFLAGS = -what -fpp -fno-alias -stack_temps -safe_cray_ptr -ftz -assume byterecl -g -i4 -r8 -Wp,-w
 #FFLAGS = ${DEBUG} -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -O3 -axAVX -xSSE2 -ipo -i4 -r8 -g ${INC_NETCDF} -I${MVAPICH2_INC}
 #FFLAGS = ${DEBUG} -stack_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -O0 -i4 -r8 -g -I${NETCDF_INC} -I${MVAPICH2_INC}
 #OPT = -O2 -xSSE4.2 -axAVX
