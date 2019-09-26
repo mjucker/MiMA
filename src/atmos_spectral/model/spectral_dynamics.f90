@@ -26,8 +26,8 @@ use         transforms_mod, only: transforms_init,         transforms_end,      
                                   get_spherical_wave,      get_sin_lat,               &
                                   vor_div_from_uv_grid,    uv_grid_from_vor_div,      &
                                   horizontal_advection,    get_grid_domain,           &
-                                  get_spec_domain,         grid_domain,               &
-                                  spectral_domain,         get_deg_lon, get_deg_lat
+                                  get_spec_domain,         get_deg_lon, get_deg_lat
+use            spec_mpp_mod,only: grid_domain, spectral_domain
 
 use     vert_advection_mod, only: vert_advection, SECOND_CENTERED, FOURTH_CENTERED, VAN_LEER_LINEAR, FINITE_VOLUME_PARABOLIC, &
                                   ADVECTIVE_FORM

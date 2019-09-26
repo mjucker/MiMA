@@ -12,7 +12,8 @@ use     diag_manager_mod, only: diag_axis_init, register_diag_field, register_st
 
 use press_and_geopot_mod, only: pressure_variables
 
-use       transforms_mod, only: grid_domain, get_deg_lon, get_deg_lat, get_grid_domain
+use       transforms_mod, only: get_deg_lon, get_deg_lat, get_grid_domain
+use          spec_mpp_mod,only: grid_domain
 
 use        constants_mod, only: hlv, cp_air, grav, kappa, rvgas, rdgas, &
                                 RADIUS, RADIAN, OMEGA !mj

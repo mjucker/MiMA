@@ -12,8 +12,8 @@ use         constants_mod, only: grav, pi
 use   vert_coordinate_mod, only: compute_vert_coord
 
 use        transforms_mod, only: get_grid_boundaries, get_deg_lon, get_deg_lat, trans_grid_to_spherical, &
-                                 trans_spherical_to_grid, grid_domain, spectral_domain, get_grid_domain, &
-                                 get_spec_domain
+                                 trans_spherical_to_grid, get_grid_domain, get_spec_domain 
+use           spec_mpp_mod,only: grid_domain, spectral_domain
 
 use  press_and_geopot_mod, only: press_and_geopot_init, pressure_variables
 

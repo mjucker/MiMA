@@ -1,5 +1,4 @@
 
-
 module simple_surface_mod
 
 !use atmos_coupled_mod, only: atmos_boundary_data_type
@@ -26,6 +25,7 @@ use      constants_mod, only: rdgas, rvgas, cp_air, hlv, hlf
 use ocean_rough_mod, only: compute_ocean_roughness
 ! mj know about surface topography
 use spectral_dynamics_mod,only: get_surf_geopotential
+use topography_mod, only:       get_ocean_mask
 ! mj read SSTs
 use interpolator_mod, only: interpolate_type,interpolator_init&
      &,CONSTANT,interpolator
@@ -140,8 +140,11 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                                        flux_t, flux_q, flux_lw
 
   real, allocatable, dimension(:,:) :: sst, flux_u, flux_v, flux_o
+! mj know about topography
+  real, allocatable, dimension(:,:) :: zsurf,land_sea_heat_capacity
 !mj read sst and land sea mask from input file
   real, allocatable, dimension(:,:) :: land_sea_mask
+  logical,allocatable,dimension(:,:):: lmask_navy
   type(interpolate_type),save :: sst_interp, lmask_interp
 
 contains
@@ -380,13 +383,12 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 
  real    :: cp_inv
  logical :: used
-! mj know about topography
- real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: zsurf,land_sea_heat_capacity
 ! mj input SST
  real,dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: sst_new
 ! mj shallower ocean in tropics, land-sea contrast
- real :: lon,lat,pi,loc_cap
- integer :: i,j,k
+ !real :: lon,lat,pi,loc_cap
+ real :: pi
+ integer :: i,j
 
    pi = 4.*atan(1.)
 
@@ -423,51 +425,55 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
    !###############################
    ! heating due to surface fluxes
    !
-   if(surface_choice == 1) then
+   if(surface_choice == 1)then
       if(do_sc_sst) then !mj sst read from input file
          call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
          dt_t_surf = sst_new - sst
-      else   !mj ocean depth function of latitude
-         land_sea_heat_capacity = heat_capacity
-         if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
-            do j=1,size(Atm%t_bot,2)
-               lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
-               if ( lat > 0. ) then
-                  loc_cap = heat_capacity*np_cap_factor
-               else
-                  loc_cap = heat_capacity
-               endif
-               if ( abs(lat) < trop_cap_limit ) then
-                  land_sea_heat_capacity(:,j) = trop_capacity
-               elseif ( abs(lat) < heat_cap_limit ) then
-                  land_sea_heat_capacity(:,j) = trop_capacity*(1.-(abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)) + (abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)*loc_cap
-               elseif ( lat > heat_cap_limit ) then
-                  land_sea_heat_capacity(:,j) = loc_cap
-               end if
-            enddo
-         endif
-! mj land heat capacity function of surface topography
-         if(trim(land_option) .eq. 'zsurf')then
-            call get_surf_geopotential(zsurf)
-            where ( zsurf > zsurf_cap_limit ) land_sea_heat_capacity = land_capacity
-! mj land heat capacity given in inputfile
-         else if(trim(land_option) .eq. 'input')then
-            where(land_sea_mask .gt. 0) land_sea_heat_capacity = land_capacity
-! mj land heat capacity given through ?landlon, ?landlat
-         else if(trim(land_option) .eq. 'lonlat')then
-            do j=1,size(Atm%t_bot,2)
-               lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
-               do i=1,size(Atm%t_bot,1)
-                  lon = 0.5*180/pi*( Atm%lon_bnd(i+1) + Atm%lon_bnd(i) )
-                  do k=1,size(slandlat)
-                     if ( lon >= slandlon(k) .and. lon <= elandlon(k) &
-                          &.and. lat >= slandlat(k) .and. lat <= elandlat(k) )then
-                        land_sea_heat_capacity(i,j) = land_capacity
-                     endif
-                  enddo
-               enddo
-            enddo
-         endif
+      else
+      !else   !mj ocean depth function of latitude
+!!$         land_sea_heat_capacity = heat_capacity
+!!$         if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
+!!$            do j=1,size(Atm%t_bot,2)
+!!$               lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+!!$               if ( lat > 0. ) then
+!!$                  loc_cap = heat_capacity*np_cap_factor
+!!$               else
+!!$                  loc_cap = heat_capacity
+!!$               endif
+!!$               if ( abs(lat) < trop_cap_limit ) then
+!!$                  land_sea_heat_capacity(:,j) = trop_capacity
+!!$               elseif ( abs(lat) < heat_cap_limit ) then
+!!$                  land_sea_heat_capacity(:,j) = trop_capacity*(1.-(abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)) + (abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)*loc_cap
+!!$               elseif ( lat > heat_cap_limit ) then
+!!$                  land_sea_heat_capacity(:,j) = loc_cap
+!!$               end if
+!!$            enddo
+!!$         endif
+!!$         if (trim(land_option) .eq. 'interpolated')then
+!!$            lmask_navy = get_ocean_mask(Atm%lon_bnd,Atm%lat_bnd,lmask_navy)
+!!$            where(lmask_navy) land_sea_heat_capacity = land_capacity
+!!$! mj land heat capacity function of surface topography
+!!$         else if(trim(land_option) .eq. 'zsurf')then
+!!$            call get_surf_geopotential(zsurf)
+!!$            where ( zsurf > zsurf_cap_limit ) land_sea_heat_capacity = land_capacity
+!!$! mj land heat capacity given in inputfile
+!!$         else if(trim(land_option) .eq. 'input')then
+!!$            where(land_sea_mask .gt. 0) land_sea_heat_capacity = land_capacity
+!!$! mj land heat capacity given through ?landlon, ?landlat
+!!$         else if(trim(land_option) .eq. 'lonlat')then
+!!$            do j=1,size(Atm%t_bot,2)
+!!$               lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+!!$               do i=1,size(Atm%t_bot,1)
+!!$                  lon = 0.5*180/pi*( Atm%lon_bnd(i+1) + Atm%lon_bnd(i) )
+!!$                  do k=1,size(slandlat)
+!!$                     if ( lon >= slandlon(k) .and. lon <= elandlon(k) &
+!!$                          &.and. lat >= slandlat(k) .and. lat <= elandlat(k) )then
+!!$                        land_sea_heat_capacity(i,j) = land_capacity
+!!$                     endif
+!!$                  enddo
+!!$               enddo
+!!$            enddo
+!!$         endif
 
          flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
               - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
@@ -564,11 +570,14 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
 
  integer :: unit, ierr, io
 
- integer :: i, j, lati
+ integer :: i, j, k, lati
  real :: xx, xx2, lat, lon, pi, y0
  real :: coslat !mj
  real, dimension(100) :: oftabl
  real, dimension(32) :: ssttabl
+! mj shallower ocean in tropics, land-sea contrast
+ real :: loc_cap
+ logical :: ocean_mask_worked
 
  pi = 4.0*atan(1.)
 
@@ -609,12 +618,66 @@ allocate(flux_o(size(Atm%t_bot,1),size(Atm%t_bot,2)))
 if( do_read_sst ) then
    call interpolator_init( sst_interp, trim(sst_file)//'.nc',Atm%lon_bnd,Atm%lat_bnd, data_out_of_bounds=(/CONSTANT/) )
 endif
-!mj read land sea mask
-if( trim(land_option) .eq. 'input' ) then
-   allocate(land_sea_mask(size(Atm%t_bot,1),size(Atm%t_bot,2)))
-   if(mpp_pe() .eq. mpp_root_pe()) write(*,'(a)') 'Reading land-sea mask from file INPUT/'//trim(land_sea_mask_file)//'.nc'
-   call read_data('INPUT/'//trim(land_sea_mask_file),trim(land_sea_mask_file),land_sea_mask,domain=Atm%domain)
+
+!mj land sea mask
+if (surface_choice .eq. 1 .and. .not. do_sc_sst)then
+    allocate(land_sea_heat_capacity(size(Atm%t_bot,1), size(Atm%t_bot,2)))
+    land_sea_heat_capacity = heat_capacity
+    if ( trop_capacity .ne. heat_capacity .or. np_cap_factor .ne. 1.0 ) then
+        do j=1,size(Atm%t_bot,2)
+           lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+           if ( lat > 0. ) then
+              loc_cap = heat_capacity*np_cap_factor
+           else
+              loc_cap = heat_capacity
+           endif
+           if ( abs(lat) < trop_cap_limit ) then
+              land_sea_heat_capacity(:,j) = trop_capacity
+           elseif ( abs(lat) < heat_cap_limit ) then
+              land_sea_heat_capacity(:,j) = trop_capacity*(1.-(abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)) + (abs(lat)-trop_cap_limit)/(heat_cap_limit-trop_cap_limit)*loc_cap
+           elseif ( lat > heat_cap_limit ) then
+              land_sea_heat_capacity(:,j) = loc_cap
+           end if
+        enddo
+     endif
+     if( trim(land_option) .eq. 'input' ) then
+        allocate(land_sea_mask(size(Atm%t_bot,1),size(Atm%t_bot,2)))
+        if(mpp_pe() .eq. mpp_root_pe()) write(*,'(a)') 'Reading land-sea mask from file INPUT/'//trim(land_sea_mask_file)//'.nc'
+        call read_data('INPUT/'//trim(land_sea_mask_file),trim(land_sea_mask_file),land_sea_mask,domain=Atm%domain)
+! mj use navy land-sea mask
+     else if (trim(land_option) .eq. 'interpolated')then
+        allocate(lmask_navy(size(land_sea_heat_capacity,1),size(land_sea_heat_capacity,2)))
+        ocean_mask_worked = get_ocean_mask(Atm%lon_bnd,Atm%lat_bnd,lmask_navy)
+        if(.not.ocean_mask_worked) then
+           call error_mesg('get_ocean_mask','land_option="'//trim(land_option)//'"'// &
+                         ' and ocean_mask is not present but water data file does not exist', FATAL)
+        endif
+        where(.not. lmask_navy) land_sea_heat_capacity = land_capacity
+! mj land heat capacity function of surface topography
+     else if(trim(land_option) .eq. 'zsurf')then
+        allocate(zsurf(size(Atm%t_bot,1), size(Atm%t_bot,2)))
+        call get_surf_geopotential(zsurf)
+        where ( zsurf > zsurf_cap_limit ) land_sea_heat_capacity = land_capacity
+! mj land heat capacity given in inputfile
+     else if(trim(land_option) .eq. 'input')then
+        where(land_sea_mask .gt. 0) land_sea_heat_capacity = land_capacity
+! mj land heat capacity given through ?landlon, ?landlat
+     else if(trim(land_option) .eq. 'lonlat')then
+        do j=1,size(Atm%t_bot,2)
+           lat = 0.5*180/pi*( Atm%lat_bnd(j+1) + Atm%lat_bnd(j) )
+           do i=1,size(Atm%t_bot,1)
+              lon = 0.5*180/pi*( Atm%lon_bnd(i+1) + Atm%lon_bnd(i) )
+              do k=1,size(slandlat)
+                 if ( lon >= slandlon(k) .and. lon <= elandlon(k) &
+                      &.and. lat >= slandlat(k) .and. lat <= elandlat(k) )then
+                    land_sea_heat_capacity(i,j) = land_capacity
+                 endif
+              enddo
+           enddo
+        enddo
+     endif
 endif
+
 
 if(file_exist('INPUT/simple_surface.res.nc')) then
   call read_data('INPUT/simple_surface.res.nc', 'sst',    sst,    domain=Atm%domain)
