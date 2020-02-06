@@ -63,7 +63,7 @@ private   gwfc
 !!$integer                                :: vers, old_time_step
 
 !wfc++ Addition for regular use
-      integer, allocatable, dimension(:,:)     ::  source_level
+      integer, allocatable, dimension(:,:)     ::  source_level, damp_level
 
       real,     allocatable, dimension(:,:)     ::  source_amp
       real,     allocatable, dimension(:,:,:)   ::  gwd_u, gwd_v
@@ -86,6 +86,8 @@ real        :: source_level_pressure= 315.e+02
                                   ! by 1013.25 hPa) will be the gravity
                                   ! wave source level at the equator 
                                   ! [ Pa ]
+real       ::  damp_level_pressure=0.8e+02
+				  ! added by cig, feb 27, 2017. any waves reaching the top level will  be deposited down to this level
 integer     :: nk=1               ! number of wavelengths contained in 
                                   ! the gravity wave spectrum
 real        :: cmax=99.6          ! maximum phase speed in gravity wave
@@ -102,11 +104,38 @@ real        :: Bt_nh=.001         ! additional momentum stress for NH [Pa]
 
 real        :: Bt_sh=-.001        ! additional momentum stress for SH [Pa]
 
+! epg - 30.6.16 - I shifted these spectral parameters to the name list
+!---------------------------------------------------------------------
+!---------------------------------------------------------------------
+!   wave spectrum parameters.
+!---------------------------------------------------------------------
+
+integer    :: flag = 1  ! flag = 1  for peak flux at  c    = 0
+                        ! flag = 0  for peak flux at (c-u) = 0
+real       :: Bw = 0.4  ! amplitude for the wide spectrum [ m^2/s^2 ]  
+                        ! ~ u'w'
+real       :: Bn = 0.0  ! amplitude for the narrow spectrum [ m^2/s^2 ] 
+                        ! ~ u'w';  previous values: 5.4
+real       :: cw = 40.0 ! half-width for the wide c spectrum [ m/s ]
+                        ! previous values: 50.0, 25.0 
+real       :: cwtropics = 40.0 ! half-width for the wide c spectrum [ m/s ]
+                        ! previous values: 50.0, 25.0 
+real       :: cn =  2.0 ! half-width for the narrow c spectrum  [ m/s ]
+
 real        :: Bt_eq=.000         ! additional momentum stress at equator - CURRENTLY NOT USED! 
 
 real        :: Bt_eq_width=4.0    ! scaling for width of equtorial momentum flux  (equator) CURRENTLY NOT USED!
 
 real        :: phi0n = 30., phi0s = -30., dphin = 5., dphis = -5.
+
+!add by chaim jan 2017
+real        :: weightminus2=0.  
+
+real        :: weightminus1=0.
+
+real        :: weighttop=1.
+
+real        :: kelvin_kludge=1.
 
 logical     :: calculate_ked=.false. 
                                   ! calculate ked diagnostic ?
@@ -133,14 +162,16 @@ real,    dimension(MAX_PTS)  ::  lon_coords_gl=-999.
 
 namelist / cg_drag_nml /         &
                           cg_drag_freq, cg_drag_offset, &
-                          source_level_pressure,   &
+                          source_level_pressure, damp_level_pressure,   &
                           nk, cmax, dc, Bt_0, Bt_aug,  &
                           Bt_sh, Bt_nh, Bt_eq,  Bt_eq_width,  &
                           calculate_ked,    &
                           num_diag_pts_ij, num_diag_pts_latlon, &
                           i_coords_gl, j_coords_gl,   &
                           lat_coords_gl, lon_coords_gl, &
-                          phi0n,phi0s,dphin,dphis
+                          phi0n,phi0s,dphin,dphis, Bw, Bn, cw, cwtropics, cn, flag, &
+			  weightminus2, weightminus1, weighttop,kelvin_kludge
+
 
 !--------------------------------------------------------------------
 !-------- public data  -----
@@ -180,24 +211,14 @@ namelist / cg_drag_nml /         &
 !-------------------------------------------------------------------
 real,    dimension(:),     allocatable   :: c0, kwv, k2
 
-
-!---------------------------------------------------------------------
-!   wave spectrum parameters.
-!---------------------------------------------------------------------
 integer    :: nc        ! number of wave speeds in spectrum
                         ! (symmetric around c = 0)
-integer    :: flag = 1  ! flag = 1  for peak flux at  c    = 0
-                        ! flag = 0  for peak flux at (c-u) = 0
-real       :: Bw = 0.4  ! amplitude for the wide spectrum [ m^2/s^2 ]  
-                        ! ~ u'w'
-real       :: Bn = 0.0  ! amplitude for the narrow spectrum [ m^2/s^2 ] 
-                        ! ~ u'w';  previous values: 5.4
-real       :: cw = 40.0 ! half-width for the wide c spectrum [ m/s ]
-                        ! previous values: 50.0, 25.0 
-real       :: cn =  2.0 ! half-width for the narrow c spectrum  [ m/s ]
-integer    :: klevel_of_source
+integer    :: klevel_of_source, klevel_of_damp
                         ! k index of the gravity wave source level at
                         ! the equator in a standard atmosphere
+			! also k index of level up to where  mesosphere drag is dumped  (cig, feb 27 2017)
+
+
 
 !---------------------------------------------------------------------
 !   variables which control module calculations:
@@ -323,7 +344,7 @@ type(time_type),         intent(in)      :: Time
       call diag_manager_init
       call constants_init
 #ifdef COL_DIAG
-      call column_diagnostics_init 
+!      call column_diagnostics_init 
 #endif SKIP
 !---------------------------------------------------------------------
 !    read namelist.
@@ -356,6 +377,7 @@ type(time_type),         intent(in)      :: Time
       idf  = size(lonb) - 1
 
       allocate(  source_level(idf,jdf)  )
+      allocate(  damp_level(idf,jdf)  )
       allocate(  source_amp(idf,jdf)  )
 !      allocate(  lat(idf,jdf)  )
 
@@ -365,11 +387,15 @@ type(time_type),         intent(in)      :: Time
 !    ied as the source location via namelist input.
 !--------------------------------------------------------------------
       do k=1,kmax
+	 if (pref(k) < damp_level_pressure) then
+          klevel_of_damp = k        
+        endif
         if (pref(k) > source_level_pressure) then
           klevel_of_source = k
           exit
         endif
       end do
+
 
       do j=1,jdf
 !mj change of dimensions
@@ -378,13 +404,35 @@ type(time_type),         intent(in)      :: Time
           lat(i,j)=  0.5*( latb(j+1)+latb(j) )
           source_level(i,j) = (kmax + 1) - ((kmax + 1 -    &
                               klevel_of_source)*cos(lat(i,j)) + 0.5)
-          source_amp(i,j) = Bt_0 +                         &
-                      Bt_nh*0.5*(1.+tanh((lat(i,j)/pif-phi0n)/dphin)) + &
-                      Bt_sh*0.5*(1.+tanh((lat(i,j)/pif-phi0s)/dphis))
+   	  
+	  damp_level(i,j) = klevel_of_damp  !cig
+
+!code added by ipw - nov 23, 2016
+       if (lat(i,j) > phi0n) then
+                source_amp(i,j) = Bt_0 + Bt_nh*0.5*(1.+tanh((lat(i,j)/pif-phi0n)/dphin))+ &
+                Bt_sh*0.5*(1.+tanh((lat(i,j)/pif-phi0s)/dphis));
+        elseif (lat(i,j) < phi0s) then
+               source_amp(i,j) = Bt_0 + Bt_nh*0.5*(1.+tanh((lat(i,j)/pif-phi0n)/dphin))+ &
+               Bt_sh*0.5*(1.+tanh((lat(i,j)/pif-phi0s)/dphis));
+        elseif ((lat(i,j) <= dphin) .and. (lat(i,j) >= dphis))  then
+	       source_amp(i,j) = Bt_eq
+	elseif ((lat(i,j) <= phi0n) .and. (lat(i,j) > dphin))  then
+		source_amp(i,j) = Bt_0 + (Bt_eq-Bt_0)/(phi0n-dphin)*(phi0n-lat(i,j))
+	elseif ((lat(i,j) < dphis) .and. (lat(i,j) >= phi0s))  then
+		source_amp(i,j) = Bt_0 + (Bt_eq-Bt_0)/(phi0s-dphis)*(phi0s-lat(i,j))
+	endif         
+
+! source_amp(i,j) = Bt_0 +                         &
+!                     Bt_nh*0.5*(1.+tanh((lat(i,j)/pif-phi0n)/dphin)) + &
+!                    Bt_sh*0.5*(1.+tanh((lat(i,j)/pif-phi0s)/dphis))
         end do
       end do
       source_level = MIN (source_level, kmax-1)
+      damp_level = MIN (damp_level, kmax)
 
+!cig: make sure everyhing is ok
+!	  write (*,*) "damp",pref(klevel_of_damp), '  ', klevel_of_damp, '  ', damp_level_pressure, '  ', damp_level(2,2), '  ', damp_level(12,2)
+ 
 !      deallocate( lat )
 
 !---------------------------------------------------------------------
@@ -427,7 +475,7 @@ type(time_type),         intent(in)      :: Time
                      (mod_name, num_diag_pts_latlon, num_diag_pts_ij, &
                       i_coords_gl, j_coords_gl, lat_coords_gl,   &
 !mj dimensions are different
-!                      lon_coords_gl, lonb(:,1), latb(1,:), do_column_diagnostics, &
+                      lon_coords_gl, lonb(:,1), latb(1,:), do_column_diagnostics, &
                       lon_coords_gl, lonb, latb, do_column_diagnostics, &
                       diag_lon, diag_lat, diag_i, diag_j, diag_units)
       endif
@@ -643,6 +691,7 @@ real, dimension(:,:,:), intent(out)     :: gwfcng_x, gwfcng_y
 !       ked_xtnd      effective diffusion coefficient from cg_drag_mod 
 !                     [ m^2/s ]
 !       source_level  k index of gravity wave source level ((i,j) array)
+!       damp_level    k index of gravity wave mesospheric dumping level ((i,j) array)
 !       iz0           k index of gravity wave source level in a column
 !       used          return code for netcdf diagnostics
 !       bflim         minimum allowable value of squared buoyancy 
@@ -753,13 +802,13 @@ real, dimension(:,:,:), intent(out)     :: gwfcng_x, gwfcng_y
 !    is returned in the vertically-extended arrays gwfcng and ked_gwfc.
 !    upon return move the output fields into model-sized arrays. 
 !---------------------------------------------------------------------
-       call gwfc (is, ie, js, je, source_level, source_amp,    &
+       call gwfc (is, ie, js, je, damp_level, source_level, source_amp, lat,   &
                      zden, zu, zbf,zzchm, gwd_xtnd, ked_xtnd)
 
           gwfcng_x  (:,:,1:kmax) = gwd_xtnd(:,:,1:kmax  )
           ked_gwfc_x(:,:,1:kmax) = ked_xtnd(:,:,1:kmax  )
           
-       call gwfc (is, ie, js, je, source_level, source_amp,    &
+       call gwfc (is, ie, js, je, damp_level, source_level, source_amp,  lat,  &
                      zden, zv, zbf,zzchm, gwd_ytnd, ked_ytnd)
           gwfcng_y  (:,:,1:kmax) = gwd_ytnd(:,:,1:kmax  )
           ked_gwfc_y(:,:,1:kmax) = ked_ytnd(:,:,1:kmax  )
@@ -1185,7 +1234,7 @@ end subroutine cg_drag_end
 
 !####################################################################
 
-subroutine gwfc (is, ie, js, je, source_level, source_amp, rho, u,    &
+subroutine gwfc (is, ie, js, je, damp_level, source_level, source_amp, lat, rho, u,    &
                  bf, z, gwf, ked)
 
 !-------------------------------------------------------------------
@@ -1198,8 +1247,8 @@ subroutine gwfc (is, ie, js, je, source_level, source_amp, rho, u,    &
 
 !-------------------------------------------------------------------
 integer,                     intent(in)             :: is, ie, js, je
-integer, dimension(:,:),     intent(in)             :: source_level
-real,    dimension(:,:),     intent(in)             :: source_amp
+integer, dimension(:,:),     intent(in)             :: source_level, damp_level
+real,    dimension(:,:),     intent(in)             :: source_amp, lat
 real,    dimension(:,:,0:),  intent(in)             :: rho, u, bf, z
 real,    dimension(:,:,0:),  intent(out)            :: gwf
 real,    dimension(:,:,0:),  intent(out)            :: ked
@@ -1211,6 +1260,7 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
 !                       in the physics_window being integrated
 !      source_level     k index of model level serving as gravity wave
 !                       source
+!      damp_level       k index of the lowest model level at which all drag that reaches the model top is partially dumped
 !      source_amp     amplitude of  gravity wave source [Pa]
 !                       
 !      rho              atmospheric density [ kg/m^3 ] 
@@ -1239,9 +1289,9 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
       real   , dimension (nc) ::   c0mu0, B0
       real                    ::   fm, fe, Hb, alp2, Foc, c, test, rbh,&
                                    eps, Bsum
-      integer                 ::   iz0 
+      integer                 ::   iz0, iztop
       integer                 ::   i, j, k, ink, n
-      real                    ::   ampl
+      real                    ::   ampl, cwthis, Bnthis, flagthis
 !------------------------------------------------------------------
 !  local variables:
 ! 
@@ -1292,9 +1342,23 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
       ked = 0.0
 
       do j=1,size(u,2)
+  	     
+
         do i=1,size(u,1)  
+!added by cig, january 2017
+	  if ((lat(i+is-1,j+js-1) <= dphin) .and. (lat(i+is-1,j+js-1) >= dphis)) then
+                cwthis=cwtropics
+		Bnthis=0.
+		flag=0
+    	  else   
+                cwthis=cw
+		Bnthis=Bn
+		flagthis=flag
+ 	  endif    
+
 ! The following index-offsets are needed in case a physics_window is being used.
           iz0 = source_level(i+is-1,j+js-1)
+	  iztop = damp_level(i+is-1,j+js-1)
           ampl= source_amp(i+is-1,j+js-1)
 
 !--------------------------------------------------------------------
@@ -1318,13 +1382,15 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
 !    define wave momentum flux at source level for phase speed n. Add
 !    the contribution from this phase speed to the previous sum.
 !---------------------------------------------------------------------
-              c = c0(n)*flag + c0mu0(n)*(1 - flag)
+              c = c0(n)*flagthis + c0mu0(n)*(1 - flagthis)
               if (c0mu0(n) < 0.0) then
-                B0(n) = -1.0*(Bw*exp(-alog(2.0)*(c/cw)**2) +    &
-                              Bn*exp(-alog(2.0)*(c/cn)**2))
+                B0(n) = -1.0*(Bw*exp(-alog(2.0)*(c/cwthis)**2) +    &
+                              Bnthis*exp(-alog(2.0)*(c/cn)**2))
+		B0(n) =B0(n)*kelvin_kludge
               else 
-                B0(n) = (Bw*exp(-alog(2.0)*(c/cw)**2)  +  &
-                         Bn*exp(-alog(2.0)*(c/cn)**2))
+                B0(n) = (Bw*exp(-alog(2.0)*(c/cwthis)**2)  +  &
+                         Bnthis*exp(-alog(2.0)*(c/cn)**2))
+		
               endif
               Bsum = Bsum + abs(B0(n))
             endif
@@ -1466,32 +1532,58 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
                 !     deposited in the uppermost layer (which exist above the top model level,
                 !     as explained in cg_drag_calc,  must be added to the level below, which is
                 !     the actual top level of the model.
+		!cig: place the extra momentum flux in the top 3 layers instead of all in the top layer
                 if ( k==0 ) then
-                   wv_frcng(k+1) =  0.5*wv_frcng(k+1) + wv_frcng(k)
+                   wv_frcng(k+1) =  0.5*wv_frcng(k+1) !+ weighttop*wv_frcng(k) cig commented out
                 else
-                   wv_frcng(k+1) =  0.5*(wv_frcng(k+1) + wv_frcng(k))
+                    wv_frcng(k+1) =  0.5*(wv_frcng(k+1) + wv_frcng(k))
                 endif
+
+		
      
+
                 diff_coeff(k) = (rho(i,j,iz0)/rbh)*fe*eps/(dz(k)*   &
                                  bf(i,j,k)*bf(i,j,k))
                 
                 !epg: following what we did above...
+		!cig: place the extra momentum flux in the top 3 layers instead of all in the top layer
                 if ( k==0 ) then
-                   diff_coeff(k+1) =  0.5*diff_coeff(k+1) + diff_coeff(k)
+                   diff_coeff(k+1) =  0.5*diff_coeff(k+1) !+ weighttop*diff_coeff(k) cig commented out
                 else
                    diff_coeff(k+1) = 0.5*(diff_coeff(k+1) + diff_coeff(k))
                 endif
+
+	       !cig: following what we did above...
+              
                                 
               else 
                 wv_frcng(iz0) = 0.0
                 diff_coeff(iz0) = 0.0
               endif
-            end do  ! (k loop)               
+            end do  ! (k loop)  
+            
+!cig: place the extra momentum flux in the layers above a specific threshold instead of all in the top layer   (k=0 isn't a real model level)
+!	  write (*,*) "iztop",iztop, '  ', damp_level(i,j), '  ', damp_level_pressure, '  ', iz0, '  ', source_level_pressure
+ 	   do k=1,iztop
+              wv_frcng(k) =  wv_frcng(k) + wv_frcng(0)/REAL(iztop)
+               diff_coeff(k) = diff_coeff(k) + diff_coeff(0)/REAL(iztop) 
+            end do   
 
+!cig: place the extra momentum flux in the top 3 layers instead of all in the top layer  
+!	    wv_frcng(1) =  wv_frcng(1) + weighttop*wv_frcng(0)           
+!            wv_frcng(2) =  wv_frcng(2) + weightminus1*wv_frcng(0)
+!            wv_frcng(3) =  wv_frcng(3) + weightminus2*wv_frcng(0)
+
+!	    diff_coeff(1) = diff_coeff(1) + weighttop*diff_coeff(0)	       
+!	    diff_coeff(2) = diff_coeff(2) + weightminus1*diff_coeff(0)	       
+!	    diff_coeff(3) = diff_coeff(3) + weightminus2*diff_coeff(0)
+                 
 !---------------------------------------------------------------------
 !    increment the total forcing at each point with that obtained from
 !    the set of waves with the current wavenumber.
 !---------------------------------------------------------------------
+
+
             do k=0,iz0      
               gwf(i,j,k) = gwf(i,j,k) + wv_frcng(k)
               ked(i,j,k) = ked(i,j,k) + diff_coeff(k)
