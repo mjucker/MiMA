@@ -500,6 +500,9 @@ subroutine surface_flux_1d (                                           &
      ! evaporation
      rho_drag  =  drag_q * rho
      flux_q    =  rho_drag * (q_surf0 - q_atm) ! flux of water vapor  (Kg/(m**2 s))
+     where(flux_q < 0.0) !added by CIG on May 31 2018; never should have negative evaporation
+	flux_q = 0.0
+     endwhere
 
      where (land)
         dedq_surf = rho_drag
@@ -543,6 +546,9 @@ subroutine surface_flux_1d (                                           &
      q_surf     = 0.0
      w_atm      = 0.0
   endwhere
+
+  !CIG - diagnose negative evaporation  - may 31 2018
+  !    write (*,*) "delq",   MINVAL( (flux_q) )  
 
   ! calculate d(stress component)/d(atmos wind component)
   dtaudu_atm = 0.0
