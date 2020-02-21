@@ -84,7 +84,8 @@ real ::   z_ref_heat      = 2.,       &
           const_roughness = 3.21e-05, &
           const_albedo    = 0.30,     &
           albedo_exp      = 2.,       & !mj
-          albedo_cntr     = 45.,      & !mj
+          albedo_cntrSH     = 45.,      & !mj
+          albedo_cntrNH     = 65.,      & !cig
           albedo_wdth     = 10.,      & !mj
 	  max_of          = 25.,      &
 	  lonmax_of       = 180.,     &
@@ -106,7 +107,7 @@ real ::   mom_roughness_land  = 1., &
 
 integer :: surface_choice   = 1
 integer :: roughness_choice = 1
-integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp, 5->tanh with albedo_cntr,albedo_wdth
+integer :: albedo_choice    = 1 ! 1->constant, 2->NH or SH step, 3->N-S symmetric step, 4->profile with albedo_exp,5->tanh with albedo_cntrNH,albedo_cntrSH,albedo_wdth,  6->sin2 increase from equator to pole, 7->as in 5 but with higher albedo for deserts
 logical :: do_oflx          = .false.
 logical :: do_oflxmerid     = .false.
 logical :: do_qflux         = .false. !mj
@@ -133,7 +134,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
                               land_option,slandlon,slandlat,     &  !mj
                               elandlon,elandlat,                 &
-                              albedo_exp,albedo_cntr,albedo_wdth    !mj
+                              albedo_exp,albedo_cntrSH,albedo_cntrNH,albedo_wdth    !mj
 
 !-----------------------------------------------------------------------
 
@@ -262,6 +263,8 @@ pi = 4.0*atan(1.)
 
  endif
 
+
+
    if(albedo_choice == 1) then
      albedo = const_albedo
    elseif(albedo_choice == 2) then
@@ -312,37 +315,33 @@ pi = 4.0*atan(1.)
         lat = abs(lat)
         albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*(lat/90.)**albedo_exp
      enddo
+!mj add symmetric higher_albedo - tanh increase around albedo_cntr with width
+! albedo_wdth. albedo_cntr can differ between the hemispheres
+  elseif(albedo_choice .eq. 5) then
+     do j = 1, size(Atm%t_bot,2)
+        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
+        lat = abs(lat)
+        albedo(:,j) = const_albedo + &	
+	     (higher_albedo-const_albedo)*0.5*(1+tanh((lat-albedo_cntrNH)/albedo_wdth)) + &
+	     (higher_albedo-const_albedo)*0.5*(1-tanh((lat+albedo_cntrSH)/albedo_wdth))
 
- elseif(albedo_choice .eq. 5) then !mj add symmetric higher albedo - sin2 increase from equator to pole
-
+     enddo
+!mj add symmetric higher albedo - sin2 increase from equator to pole
+   elseif(albedo_choice .eq. 6) then
       do j = 1, size(Atm%t_bot,2)
          lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))
          albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
               sin(lat)**2
       enddo
-   !mj add symmetric higher_albedo - tanh increase around albedo_cntr with width
- elseif(albedo_choice .eq. 6) then
-    do j = 1, size(Atm%t_bot,2)
-        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi
-        lat = abs(lat)
-        albedo(:,j) = const_albedo + (higher_albedo-const_albedo)*&
-             0.5*(1+tanh((lat-albedo_cntr)/albedo_wdth))
-     enddo
-  elseif(albedo_choice .eq. 7) then ! cig: as in option 6, ice edge in SH is 5 degrees further equatorward as compared to that in NH
-     do j = 1, size(Atm%t_bot,2)
-        lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi       
-        albedo(:,j) = const_albedo + &
-             (higher_albedo-const_albedo)*0.5*(1+tanh((lat-albedo_cntr-5)/albedo_wdth)) + &
-	     (higher_albedo-const_albedo)*0.5*(1-tanh((lat+albedo_cntr)/albedo_wdth))
-     enddo
- elseif(albedo_choice .eq. 8) then  !cig: as in option 6, ice edge in SH is 3 degrees further equatorward as compared to that in NH and Gobi, Sahara, and Australian deserts have increased albedo
+    
+ elseif(albedo_choice .eq. 7) then  !cig: as in option 5, but Gobi, Sahara, and Australian deserts have increased albedo
      do j = 1, size(Atm%t_bot,2)
         lat = 0.5*(Atm%lat_bnd(j+1) + Atm%lat_bnd(j))*180/pi       
 
 	albedo(:,j) = const_albedo + &
-                (higher_albedo-const_albedo)*0.5*(1+tanh((lat-albedo_cntr)/albedo_wdth)) + &
-	        (higher_albedo-const_albedo)*0.5*(1-tanh((lat+albedo_cntr-3)/(albedo_wdth+3)))
-            
+             (higher_albedo-const_albedo)*0.5*(1+tanh((lat-albedo_cntrNH)/albedo_wdth)) + &
+	     (higher_albedo-const_albedo)*0.5*(1-tanh((lat+albedo_cntrSH)/albedo_wdth))
+
 	do i = 1, size(Atm%t_bot,1)
              lon = 0.5*(Atm%lon_bnd(i+1) + Atm%lon_bnd(i))*180/pi       
           
