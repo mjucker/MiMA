@@ -24,9 +24,9 @@ real ::    warmpool_k     = 1,    & ! wave number of warmpool []
            north_sea_heat = 0., & !add extra perturbation to move heat from Canada to North Sea
 	   Pac_ITCZextra = 0., & !extra q flux in tropical South Pacific to strengthen local ITCZ	 
 	   Pac_SPCZextra = 0., & !extra q flux in subtropical pacific to modulate SPCZ
-	   Africaextra = 0.,   &  !extra q flux by Agulhaus
+	   Africaextra = 0.     !extra q flux by Agulhaus
 	
-integer :: warmpool_localization_choice    = 1 ! 1->cos, 2->cos but restricted to Indo-Pacific
+integer :: warmpool_localization_choice    = 1 ! 1->Jucker and Gerber 2017. 2->Garfinkel et al 2020, NH stationary waves. 3->Garfinkel et al 2021, SH biases
 logical :: qflux_initialized = .false.
 
 
