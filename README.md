@@ -3,6 +3,12 @@ MiMA is an intermediate-complexity General Circulation Model with interactive wa
 
 [M Jucker and EP Gerber, 2017: *Untangling the annual cycle of the tropical tropopause layer with an idealized moist model*, Journal of Climate 30, 7339-7358](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
 
+for v1.x and 
+
+[Garfinkel et al. (2020): *The building blocks of Northern Hemisphere wintertime stationary waves*, Journal of Climate](http://journals.ametsoc.org/doi/10.1175/JCLI-D-19-0181.1)
+
+for v2.0.
+
 Please see the documentation [online](http://mjucker.github.io/MiMA/) or [in the docs folder](docs/) for information about the model.
 
 See the 30 second trailer on [YouTube](https://www.youtube.com/watch?v=8UfaFnGtCrk "Model of an idealized Moist Atmosphere (MiMA)"): 
