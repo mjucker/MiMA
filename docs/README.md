@@ -34,6 +34,7 @@ With time, I hope to post usage, papers, etc. which relate to MiMA here. If you'
 
 MiMA
 * [Jucker and Gerber, J Clim (2017)](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
+* [Garfinkel et al., J Clim (2020)](http://journals.ametsoc.org/doi/10.1175/JCLI-D-19-0181.1)
 * code:
   * latest version: [![DOI](https://zenodo.org/badge/36012278.svg)](https://zenodo.org/badge/latestdoi/36012278)
   * v1.1: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3637607.svg)](https://doi.org/10.5281/zenodo.3637607)
