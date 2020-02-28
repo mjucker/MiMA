@@ -489,7 +489,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
          call interpolator( sst_interp, Time, sst_new, trim(sst_file) )
          dt_t_surf = sst_new - sst
         
-      
+      else 
          flux    = (flux_lw + Atm%flux_sw - hlf*Atm%fprec &
               - (flux_t + hlv*flux_q) + flux_o)*dt/land_sea_heat_capacity
 
