@@ -24,9 +24,12 @@ real ::    warmpool_k     = 1,    & ! wave number of warmpool []
            north_sea_heat = 0., & !add extra perturbation to move heat from Canada to North Sea
 	   Pac_ITCZextra = 0., & !extra q flux in tropical South Pacific to strengthen local ITCZ	 
 	   Pac_SPCZextra = 0., & !extra q flux in subtropical pacific to modulate SPCZ
-	   Africaextra = 0.     !extra q flux by Agulhaus
-	
-integer :: warmpool_localization_choice    = 1 ! 1->Jucker and Gerber 2017. 2->Garfinkel et al 2020, NH stationary waves. 3->Garfinkel et al 2021, SH biases
+	   Africaextra  = 0.,   &  !extra q flux by Agulhaus	
+	   Sampeextra   = 0.,   &
+	   Hawaiiextra  = 0.
+    
+
+integer :: warmpool_localization_choice    = 1 ! 1->cos, 2->cos but restricted to Indo-Pacific
 logical :: qflux_initialized = .false.
 
 
@@ -34,8 +37,8 @@ namelist /qflux_nml/ qflux_amp,qflux_width,&
                      warmpool_amp,warmpool_width,warmpool_centr,&
                      warmpool_k,warmpool_phase,warmpool_localization_choice,&
 		     gulf_k,gulf_phase,gulf_amp,kuroshio_amp,trop_atlantic_amp,&
-		     north_sea_heat,  Pac_ITCZextra, &
-		        Pac_SPCZextra,  Africaextra 
+		     north_sea_heat, Pac_ITCZextra,Sampeextra, &
+		     Pac_SPCZextra,Africaextra,Hawaiiextra 
 
 private 
 
@@ -193,7 +196,7 @@ contains
                      &- 27.60*exp(-(lon*180./pi-140)**2./(2*1521))*(exp(-(latorig-19.7)**2./(2*49)))   &
 		     &- (5.2)*exp(-(lon*180./pi-140)**2./(2*64))*(exp(-(latorig-20.)**2./(2*16)))   &
                      &+ 35.4*exp(-(lon*180./pi-160)**2./(2*400))*exp(-(latorig-35)**2./(2*36)) &
-	   	     &+ 49.5*exp(-(lon*180./pi-3*latorig-45.)**2./(2*100.))*exp(-(lon*180./pi+latorig-160.)**2./(2*400.)) &
+	   	     &+ (49.5-Hawaiiextra*.0228)*exp(-(lon*180./pi-3*latorig-45.-Hawaiiextra/5)**2./(2*100.))*exp(-(lon*180./pi+latorig-160.)**2./(2*400.)) &
 		     &+ 22.9*exp(-(lon*180./pi-90)**2./(2*144))*exp(-(latorig-0)**2./(2*25)) 
 	     else 
 		flux(i,j) = flux(i,j) & 
@@ -205,39 +208,42 @@ contains
 
   if(  warmpool_localization_choice == 3 .and. warmpool_amp .gt. 0.001 .AND. latorig .le. 24. .AND. latorig .ge. -78. .AND. lon .ge. 129.*pi/180. .AND. lon .lt. 290.*pi/180.) then !add south pacific and SPCZ at expense of further cold tongue  modified by cig, may 28 2019, also includes Australia bit from Kuroshio above
 		 flux(i,j) = flux(i,j) & 
-                     &-(50. -Pac_SPCZextra*.28)*exp(-(lon*180./pi-270)**2./(2*81))*(exp(-(latorig+0.)**2./(2*9)))   &
-		     &-(50. -Pac_SPCZextra*.28)*exp(-(lon*180./pi-250)**2./(2*81))*(exp(-(latorig+1.)**2./(2*9)))   &
-		     &-(50.-Pac_SPCZextra*.28)*exp(-(lon*180./pi-230)**2./(2*81))*(exp(-(latorig+2.)**2./(2*9)))   &
-		     &-39.*exp(-(lon*180./pi-210)**2./(2*81))*(exp(-(latorig+2.)**2./(2*9)))   &
-		     & -36.*exp(-(lon*180./pi-190)**2./(2*81))*(exp(-(latorig+0.)**2./(2*9))) &		  
-		     & -16.*exp(-(lon*180./pi-170)**2./(2*81))*(exp(-(latorig+0.)**2./(2*9))) &		  
+                     &-(50. -Pac_SPCZextra*.28-Hawaiiextra*.6)*exp(-(lon*180./pi-270)**2./(2*81))*(exp(-(latorig+0.)**2./(2*9)))   &
+		     &-(50. -Pac_SPCZextra*.28-Hawaiiextra*.6)*exp(-(lon*180./pi-250)**2./(2*81))*(exp(-(latorig+1.)**2./(2*9)))   &
+		     &-(50.-Pac_SPCZextra*.28-Hawaiiextra*.6)*exp(-(lon*180./pi-230)**2./(2*81))*(exp(-(latorig+2.)**2./(2*9)))   &
+		     &-(39.-Hawaiiextra*.6)*exp(-(lon*180./pi-210)**2./(2*81))*(exp(-(latorig+2.)**2./(2*9)))   &
+		     & -(36.-Hawaiiextra*.676)*exp(-(lon*180./pi-190)**2./(2*81))*(exp(-(latorig+0.)**2./(2*9))) &		  
+		     & -(16.-Hawaiiextra*.676)*exp(-(lon*180./pi-170)**2./(2*81))*(exp(-(latorig+0.)**2./(2*9))) &		  
 		     &-40.*exp(-(lon*180./pi-287)**2./(2*4))*(exp(-(latorig+25.)**2./(2*81)))   &
 		     &-15.*exp(-(lon*180./pi-282)**2./(2*25))*(exp(-(latorig+15.)**2./(2*81)))   &
-		     &-(25.+ Pac_ITCZextra+Pac_SPCZextra)*exp(-(lon*180./pi-240)**2./(2*1600))*(exp(-(latorig+21.)**2./(2*121)))   &	 	     
-		     &-38.0*exp(-(lon*180./pi-195)**2./(2*169))*(exp(-(latorig-16.)**2./(2*49)))   &
-		     &-51.4*exp(-(lon*180./pi-225)**2./(2*169))*(exp(-(latorig-16.)**2./(2*49)))   &
-                     &+ (28.2+ Pac_ITCZextra*.8623)*exp(-(lon*180./pi-220)**2./(2*1600))*exp(-(latorig+57)**2./(2*225)) &
-		     &+ (14.+Pac_SPCZextra*1.1195)*exp(-(lon*180./pi-165)**2./(2*400))*exp(-(latorig+20)**2./(2*25))&
-		     &+ (16.+Pac_SPCZextra*1.1195)*exp(-(lon*180./pi-195)**2./(2*400))*exp(-(latorig+33)**2./(2*49)) &		   
-		     &+ (50.+Pac_SPCZextra*1.1195)*exp(-(lon*180./pi-155)**2./(2*9))*exp(-(latorig+30)**2./(2*49)) &
-		     &+ (40.+Pac_SPCZextra*1.1195)*exp(-(lon*180./pi-180)**2./(2*25))*exp(-(latorig+40)**2./(2*25))&
-		     &+ (41.+ Pac_ITCZextra)*exp(-(lon*180./pi-240)**2./(2*900))*exp(-(latorig+62)**2./(2*64)) &
-  		     &+ 60.*exp(-(lon*180./pi-180)**2./(2*169))*(exp(-(latorig-6.97)**2./(2*4))) &   
-		     &+ 47.*exp(-(lon*180./pi-210)**2./(2*169))*(exp(-(latorig-6.97)**2./(2*4))) &   
-		     &+ 45.*exp(-(lon*180./pi-240)**2./(2*169))*(exp(-(latorig-6.97)**2./(2*4))) &
-		     &+ (19.5+Pac_SPCZextra)*exp(-(lon*180./pi-145)**2./(2*196))*(exp(-(latorig-3.)**2./(2*16)))  &
-		     &+ (40.+Pac_SPCZextra*.435)*exp(-(lon*180./pi-150)**2./(2*169))*(exp(-(latorig-7.)**2./(2*9)))    
+		     &-(25.+ Pac_ITCZextra+Pac_SPCZextra-Hawaiiextra*.5)*exp(-(lon*180./pi-240)**2./(2*1600))*(exp(-(latorig+21.)**2./(2*121)))   &	 	     
+		     &-(38.0-Hawaiiextra*.7)*exp(-(lon*180./pi-195)**2./(2*169))*(exp(-(latorig-16.)**2./(2*49)))   &
+		     &-(51.4-Hawaiiextra*.7)*exp(-(lon*180./pi-225)**2./(2*169))*(exp(-(latorig-16.)**2./(2*49)))   &
+                     &+ (28.2 -Hawaiiextra*25/30*.8623)*exp(-(lon*180./pi-220)**2./(2*1600))*exp(-(latorig+57)**2./(2*225)) &
+		     &+ (14.+Pac_SPCZextra*.9)*exp(-(lon*180./pi-165)**2./(2*400))*exp(-(latorig+20)**2./(2*25))&
+		     &+ (16.+Pac_SPCZextra*.9)*exp(-(lon*180./pi-195)**2./(2*400))*exp(-(latorig+33)**2./(2*49)) &		   
+		     &+ (50.+Pac_SPCZextra*.9)*exp(-(lon*180./pi-155)**2./(2*9))*exp(-(latorig+30)**2./(2*49)) &
+		     &+ (40.+Pac_SPCZextra*.9)*exp(-(lon*180./pi-180)**2./(2*25))*exp(-(latorig+40)**2./(2*25))&
+		     &+ (41. -Hawaiiextra*25/30)*exp(-(lon*180./pi-240)**2./(2*900))*exp(-(latorig+62)**2./(2*64)) &
+  		     &+ (60.-Hawaiiextra)*exp(-(lon*180./pi-180)**2./(2*169))*(exp(-(latorig-6.97)**2./(2*4))) &   
+		     &+ (47.-Hawaiiextra)*exp(-(lon*180./pi-210)**2./(2*169))*(exp(-(latorig-6.97)**2./(2*4))) &   
+		     &+ (45.-Hawaiiextra)*exp(-(lon*180./pi-240)**2./(2*169))*(exp(-(latorig-6.97)**2./(2*4))) &
+		     &+ (19.5+Pac_SPCZextra*.4-Hawaiiextra*.5158)*exp(-(lon*180./pi-145)**2./(2*196))*(exp(-(latorig-3.)**2./(2*16)))  &
+		     &+ (40.+Pac_SPCZextra*.35-Hawaiiextra*.5158)*exp(-(lon*180./pi-150)**2./(2*169))*(exp(-(latorig-7.)**2./(2*9))) 
 	endif
-
-
+	 if(  warmpool_localization_choice == 3 .and. warmpool_amp .gt. 0.001 .AND. latorig .le. 30. .AND. latorig .ge. -16. .AND. lon .ge. 50.*pi/180. .AND. lon .lt. 220.*pi/180.) then !add south pacific and SPCZ at expense of further cold tongue  modified by cig, may 28 2019, also includes Australia bit from Kuroshio above
+ 		 flux(i,j) = flux(i,j) & 
+			&+ Hawaiiextra*.9*exp(-(lon*180./pi-145)**2./(2*400))*(exp(-(latorig-16.)**2./(2*25)))     	
+	endif
 
  if(  warmpool_localization_choice == 3 .and. warmpool_amp .gt. 0.001 .AND. latorig .le. 10. .AND. latorig .ge. -36. .AND. lon .ge. 50.*pi/180. .AND. lon .lt. 220.*pi/180.) then !add south pacific and south indian at expense of Australia  modified by cig, may 13 2019
 		 flux(i,j) = flux(i,j) & 
                      &-(qflux_amp+warmpool_amp)*1.02*exp(-(lon*180./pi-135)**2./(2*225))*(exp(-(latorig+20.)**2./(2*36)))   &
                      &-(qflux_amp+warmpool_amp)*1.02*10/44*exp(-(lon*180./pi-147)**2./(2*64))*(exp(-(latorig+27.)**2./(2*49)))   &
                      &+ (qflux_amp+warmpool_amp)*1.02*16.6/44*exp(-(lon*180./pi-120)**2./(2*900))*exp(-(latorig+20)**2./(2*36)) &
-		     &+ (qflux_amp+warmpool_amp)*1.02*(27.89)/44*exp(-(lon*180./pi-100)**2./(2*100))*exp(-(latorig+10)**2./(2*16)) &
-		      &+ (qflux_amp+warmpool_amp)*1.02*4.9/44*exp(-(lon*180./pi-135)**2./(2*225))*exp(-(latorig+0)**2./(2*16)) 
+		     &+ (qflux_amp+warmpool_amp)*1.02*(27.89-Hawaiiextra*1.412)/44*exp(-(lon*180./pi-100)**2./(2*100))*exp(-(latorig+10)**2./(2*16)) &
+		     &+ (qflux_amp+warmpool_amp)*1.02*4.9/44*exp(-(lon*180./pi-135)**2./(2*225))*exp(-(latorig+0)**2./(2*16))  &
+                     &+ (Pac_SPCZextra*.7137)*exp(-(lon*180./pi-130)**2./(2*196))*(exp(-(latorig+8.)**2./(2*81)))  
 		   
 	endif
 
@@ -300,6 +306,19 @@ contains
 		     &+ 11.*exp(-(lon*180./pi-36)**2./(2*30))*(exp(-(latorig-0.)**2./(2*50))) 
 		    
 	endif
+
+        if(  warmpool_localization_choice == 3 .and. latorig .le. -30. .AND. latorig .ge. -61. .and. abs(Sampeextra) .gt. 0.001 ) then !add Agulhas current add expense of Africa  modified by cig, feb 19 2020
+		 flux(i,j) = flux(i,j) & 
+		     &+ (Sampeextra*.8822)*exp(-(latorig+40)**2./(2*16)) &
+		     &- (Sampeextra)*exp(-(latorig+48)**2./(2*16)) 
+	      
+	endif
+        if(  warmpool_localization_choice == 3 .and. latorig .le. -45. .AND. latorig .ge. -65. .and. abs(Pac_ITCZextra) .gt. 0.001 ) then !add zonally symmetric heating modified by cig, June 2 2020
+		 flux(i,j) = flux(i,j) & 
+		     &+ (Pac_ITCZextra*.74537)*exp(-(latorig+55)**2./(2*49))  
+	      
+	endif
+
 
       if(  warmpool_localization_choice == 3  .AND. latorig .ge. -61. .AND. latorig .le. -30. .AND. lon .ge. 290.*pi/180. ) then !add dipole in south atlantic  modified by cig, august 4 2019
 		 flux(i,j) = flux(i,j) &  
