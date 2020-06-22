@@ -219,7 +219,6 @@ integer    :: klevel_of_source, klevel_of_damp
 			! also k index of level up to where  mesosphere drag is dumped  (cig, feb 27 2017)
 
 
-
 !---------------------------------------------------------------------
 !   variables which control module calculations:
 !   
@@ -311,12 +310,14 @@ type(time_type),         intent(in)      :: Time
       integer                 :: n, i, j, k
       integer                 :: idf, jdf, kmax
       real                    :: pif = 3.14159265358979/180.
+      real                    :: pifinv = 180./3.14159265358979
 !      real                    :: pif = PI/180.
 
 !      real, allocatable       :: lat(:,:)
 !mj dimensions are different for non-cubed sphere version
 !      real                    :: lat(size(lonb,1) - 1, size(latb,2) - 1)
       real                    :: lat(size(lonb) - 1, size(latb) - 1)
+      real                    :: thislatdeg
 !-------------------------------------------------------------------
 !   local variables: 
 !   
@@ -406,20 +407,20 @@ type(time_type),         intent(in)      :: Time
                               klevel_of_source)*cos(lat(i,j)) + 0.5)
    	  
 	  damp_level(i,j) = klevel_of_damp  !cig
-
+	thislatdeg=lat(i,j)*pifinv
 !code added by ipw - nov 23, 2016
-       if (lat(i,j) > phi0n) then
-                source_amp(i,j) = Bt_0 + Bt_nh*0.5*(1.+tanh((lat(i,j)/pif-phi0n)/dphin))+ &
-                Bt_sh*0.5*(1.+tanh((lat(i,j)/pif-phi0s)/dphis));
-        elseif (lat(i,j) < phi0s) then
-               source_amp(i,j) = Bt_0 + Bt_nh*0.5*(1.+tanh((lat(i,j)/pif-phi0n)/dphin))+ &
-               Bt_sh*0.5*(1.+tanh((lat(i,j)/pif-phi0s)/dphis));
-        elseif ((lat(i,j) <= dphin) .and. (lat(i,j) >= dphis))  then
+       if (thislatdeg > phi0n) then
+                source_amp(i,j) = Bt_0 + Bt_nh*0.5*(1.+tanh((thislatdeg-phi0n)/dphin))+ &
+                Bt_sh*0.5*(1.+tanh((thislatdeg-phi0s)/dphis));
+        elseif (thislatdeg < phi0s) then
+               source_amp(i,j) = Bt_0 + Bt_nh*0.5*(1.+tanh((thislatdeg-phi0n)/dphin))+ &
+               Bt_sh*0.5*(1.+tanh((thislatdeg-phi0s)/dphis));
+        elseif ((thislatdeg <= dphin) .and. (thislatdeg >= dphis))  then
 	       source_amp(i,j) = Bt_eq
-	elseif ((lat(i,j) <= phi0n) .and. (lat(i,j) > dphin))  then
-		source_amp(i,j) = Bt_0 + (Bt_eq-Bt_0)/(phi0n-dphin)*(phi0n-lat(i,j))
-	elseif ((lat(i,j) < dphis) .and. (lat(i,j) >= phi0s))  then
-		source_amp(i,j) = Bt_0 + (Bt_eq-Bt_0)/(phi0s-dphis)*(phi0s-lat(i,j))
+	elseif ((thislatdeg <= phi0n) .and. (thislatdeg > dphin))  then
+		source_amp(i,j) = Bt_0 + (Bt_eq-Bt_0)/(phi0n-dphin)*(phi0n-thislatdeg)
+	elseif ((thislatdeg < dphis) .and. (thislatdeg >= phi0s))  then
+		source_amp(i,j) = Bt_0 + (Bt_eq-Bt_0)/(phi0s-dphis)*(phi0s-thislatdeg)
 	endif         
 
 ! source_amp(i,j) = Bt_0 +                         &
@@ -1291,7 +1292,8 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
                                    eps, Bsum
       integer                 ::   iz0, iztop
       integer                 ::   i, j, k, ink, n
-      real                    ::   ampl, cwthis, Bnthis, flagthis
+      real                    ::   ampl, cwthis, Bnthis, flagthis, kelvin_kludgethis
+      real                    :: pifinv = 180./3.14159265358979
 !------------------------------------------------------------------
 !  local variables:
 ! 
@@ -1346,14 +1348,16 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
 
         do i=1,size(u,1)  
 !added by cig, january 2017
-	  if ((lat(i+is-1,j+js-1) <= dphin) .and. (lat(i+is-1,j+js-1) >= dphis)) then
+	  if ((lat(i+is-1,j+js-1)*pifinv <= dphin) .and. (lat(i+is-1,j+js-1)*pifinv >= dphis)) then
                 cwthis=cwtropics
 		Bnthis=0.
 		flag=0
+		kelvin_kludgethis=kelvin_kludge
     	  else   
                 cwthis=cw
 		Bnthis=Bn
 		flagthis=flag
+		kelvin_kludgethis=1.0
  	  endif    
 
 ! The following index-offsets are needed in case a physics_window is being used.
@@ -1386,7 +1390,7 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
               if (c0mu0(n) < 0.0) then
                 B0(n) = -1.0*(Bw*exp(-alog(2.0)*(c/cwthis)**2) +    &
                               Bnthis*exp(-alog(2.0)*(c/cn)**2))
-		B0(n) =B0(n)*kelvin_kludge
+		B0(n) =B0(n)*kelvin_kludgethis
               else 
                 B0(n) = (Bw*exp(-alog(2.0)*(c/cwthis)**2)  +  &
                          Bnthis*exp(-alog(2.0)*(c/cn)**2))
@@ -1589,7 +1593,8 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
               ked(i,j,k) = ked(i,j,k) + diff_coeff(k)
             end do              
           end do   ! wavelength loop
-        end do  ! i loop                      
+        end do  ! i loop     
+               
       end do   ! j loop                 
 
 !--------------------------------------------------------------------
