@@ -1,101 +1,210 @@
- &coupler_nml
+&coupler_nml
    days   = 360,
-   dt_atmos = 900,
+   dt_atmos =500,
    current_date = 0001,1,1,0,0,0
    calendar = 'thirty_day' /
 
 # Note: damping_order = 4 specifies del 8'th diffusion
-
  &spectral_dynamics_nml
+    damping_option          = 'resolution_dependent',
+    damping_order           = 4,
+    do_mass_correction      =.true.,
+    do_energy_correction    =.true., 
+    do_water_correction     =.true.,  
     water_correction_limit  = 200.e2,
-    initial_sphum           = 2.e-06,
+    initial_sphum           = 2.e-06,  
+    use_virtual_temperature =.false., 
+    vert_advect_uv          = 'second_centered',
+    vert_advect_t           = 'second_centered',
+    use_implicit            = .true.,
+    longitude_origin        = 0.,
     robert_coeff            = .03,
+    alpha_implicit          = .5,
+    reference_sea_level_press=1.e5,
+    lon_max                 = 128,
+    lat_max                 = 64,
     num_levels              = 40,
-    topography_option       = 'gaussian',
+    num_fourier             = 42,
+    num_spherical           = 43,
+    fourier_inc             = 1,
+    triang_trunc            =.true.,
+    topography_option       = 'interpolated',
+    ocean_topog_smoothing = 0.995,
     vert_coord_option       = 'uneven_sigma',
-    surf_res                = 0.5,
-    scale_heights           =  9.0,
-    exponent                =  7.0 /
+    surf_res                = 0.1,
+    scale_heights           = 7.9,
+    exponent                = 1.4 /
 
-&gaussian_topog_nml
-  height   = 3000., 3000., 
-   olat    =   45.,   45.,
-   olon    =   90.,  270.,
-   wlat    =   20.,   20.,
-   wlon    =   20.,   20.,
-   rlat    =    0.,    0.,
-   rlon    =    0.,    0., /
-   
+
+# Empty namelist causes all values to take on default values.
+
+ &spectral_init_cont_nml
+    initial_temperature = 264. /
+
 ---------- physics namelists --------------
+
+ &rrtm_radiation_nml
+     h2o_lower_limit        = 2.e-07,
+     co2ppmv                = 390.,
+     do_read_ozone          = .true.,
+     ozone_file             = 'ozone_1990',
+     dt_rad_avg             =  4500,
+     dt_rad                 =  4500,
+     lonstep                = 4 /
+
+ &astro_nml
+     solr_cnst   = 1370. /
 
  &simple_surface_nml
      do_qflux         = .true.,
-     do_warmpool      = .true.,
+     surface_choice   = 1,
      Tm               = 285.,
-     heat_capacity    = 4.e08,
-     albedo_choice    = 1,
-     const_albedo     = 0.22 /
-     
- &qflux_nml
-   	qflux_amp = 30.0,
-	warmpool_amp = 30.0 /
-     
+     heat_capacity    = 3.e08,
+     land_capacity    = 1.e07,
+     trop_capacity    = 1.e08,
+     trop_cap_limit   = 20.
+     const_albedo     = 0.23,
+     albedo_choice    = 7,
+     albedo_wdth      = 5,
+     higher_albedo    = 0.80,
+     albedo_cntrNH    =  68.,
+     albedo_cntrSH    =  64.,
+     lat_glacier      = -70,
+     land_option      = 'interpolated',
+     do_warmpool = .true.,
+     roughness_choice = 4,
+     mom_roughness_land = 5.e3,
+     q_roughness_land = 1.e-12  /   
+#e-17 gives good results
+
+&qflux_nml
+     qflux_amp        = 26.,
+      warmpool_localization_choice = 3,
+     warmpool_k       = 1.66666, 
+     warmpool_amp     = 18., 
+     warmpool_width   = 35.,
+     qflux_width      = 16.,
+     warmpool_phase   = 140.,
+     warmpool_centr   = 0.,
+     gulf_k       = 4.0, 
+      gulf_amp     = 70., 
+     kuroshio_amp = 40.,
+     trop_atlantic_amp = 50.,
+     gulf_phase   = 310., 
+     Hawaiiextra = 30.0,
+      Pac_ITCZextra = -0.0,
+     north_sea_heat =0.0/
+# kuroshio_amp    = 50.,warmpool_amp     = 25., 
+
+ &damping_driver_nml
+     do_rayleigh   = .false.,
+     trayfric      = -0.5,
+     sponge_pbottom=  50.,
+     do_conserve_energy = .true.,
+     do_cg_drag    = .true., 
+     do_mg_drag = .false./
+
+&topography_nml
+	topog_file = 'INPUT/navy_topography.data.nc', 
+	water_file = 'INPUT/navy_pctwater.data.nc' /
+
+#Bn intiall 0, 5.4, 8.4 
+
+#flag            
+ &cg_drag_nml
+     Bt_0  = 0.0043,  
+     Bt_nh = 0.00,
+     Bt_eq = 0.0043,
+     Bt_sh = 0.00,
+     phi0n = 15.,
+     phi0s =-15.,
+     dphin = 10.,
+     dphis =-10.,
+     flag=0,
+     Bw = 0.4,
+     Bn = 0.0,
+     cw = 35.0,
+     cwtropics = 35.0,
+     cn =  2.0,
+    kelvin_kludge = 1.0,
+     weighttop = 0.7,
+     weightminus1 = 0.28,
+     weightminus2 = 0.02,
+     source_level_pressure = 315.e+02,
+     damp_level_pressure = 0.85e+02,
+     cg_drag_freq = 21600 /
+
  &moist_processes_nml
+     do_bm           =.true.,   
+     do_bmmass       =.false., 
+     do_bmomp        =.false.,
      do_mca          =.false.,
      do_lsc          =.true.,
-     do_bm           =.true.,
-     use_df_stuff = .true. /     
+     do_strat        =.false., 
+     do_ras          =.false.,
+     do_diag_clouds  =.false.,
+     do_rh_clouds    =.false.,
+     use_df_stuff = .true. /
 
  &betts_miller_nml
+       tau_bm = 7200.,
        rhbm   = .7   , 
        do_simp = .false., 
-       do_shallower = .true. /
+       do_shallower = .true., 
+       do_changeqref = .false.,
+       do_envsat = .false., 
+       do_taucape = .false., 
+       capetaubm = 900., 
+       tau_min = 2400./
 
- &moist_conv_nml
+&moist_conv_nml
+       beta = 0.0,
        use_df_stuff = .true./
+
+ &monin_obukhov_nml
+       rich_crit  = 2.0,
+       drag_min   = 4.e-05 /
+
+
 
  &lscale_cond_nml
        do_evap = .true.,
-       use_df_stuff = .true. /    
-     
-     
- &rrtm_radiation_nml
-     do_read_ozone          = .true.,
-     ozone_file             = 'ozone_1990',
-     co2ppmv                = 300.,
-     dt_rad                 =  7200 /
-
- &astro_nml
-     solr_cnst   = 1360. /
-
-
- &damping_driver_nml
-     do_rayleigh   = .true.,
-     trayfric      = -0.5,
-     sponge_pbottom=  100.,
-     do_conserve_energy = .true. /
-
- &surface_flux_nml
-     use_virtual_temp = .false.,
-     use_df_stuff = .true.,
-     old_dtaudv = .true. /
-
- &diffusivity_nml
-     do_entrain = .false
-     use_df_stuff = .true. /
-
-
- &vert_turb_driver_nml
-    use_tau          = .false.,
-    constant_gust    = 0.,
-    do_mellor_yamada = .false.,
-    use_df_stuff = .true., 
-    do_diffusivity = .true./
+       use_df_stuff = .true. /
 
  &vert_diff_driver_nml
         do_conserve_energy = .true.,
 	use_virtual_temp_vert_diff = .false. /
 
+
+
+ &diffusivity_nml
+     do_entrain = .false
+     use_df_stuff = .true. /
+
+ &surface_flux_nml
+     use_virtual_temp = .false.,
+     use_df_stuff = .true.,
+     old_dtaudv = .true.,
+     gust_const       =  1.0 /
+
+
+
+ &vert_turb_driver_nml
+    use_tau          = .false.,
+    gust_scheme      = 'constant',
+    constant_gust    = 0.,
+    do_mellor_yamada = .false.,
+    do_shallow_conv  = .false.,
+    use_df_stuff = .true., 
+    do_diffusivity = .true./
+
+ &ocean_rough_nml
+      rough_scheme = 'beljaars' /
+
+ &physics_driver_nml
+     do_grey_radiation = .false.,
+     do_rrtm_radiation = .true.,
+     do_damping = .true. /
 
 # domains_stack_size will vary for different model resolutions,
 # domain decompositions, and number of processors used.
@@ -106,3 +215,7 @@
  &fms_io_nml
     threading_write = 'single',
     fileset_write = 'single' /
+
+
+
+
