@@ -38,7 +38,7 @@
 
 # Empty namelist causes all values to take on default values.
 
- &spectral_init_cont_nml
+ &spectral_init_cond_nml
     initial_temperature = 264. /
 
 ---------- physics namelists --------------
