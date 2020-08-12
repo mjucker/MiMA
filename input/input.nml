@@ -38,7 +38,7 @@
 
 # Empty namelist causes all values to take on default values.
 
- &spectral_init_cont_nml
+ &spectral_init_cond_nml
     initial_temperature = 264. /
 
 ---------- physics namelists --------------
@@ -75,7 +75,6 @@
      roughness_choice = 4,
      mom_roughness_land = 5.e3,
      q_roughness_land = 1.e-12  /   
-#e-17 gives good results
 
 &qflux_nml
      qflux_amp        = 26.,
@@ -94,7 +93,6 @@
      Hawaiiextra = 30.0,
       Pac_ITCZextra = -0.0,
      north_sea_heat =0.0/
-# kuroshio_amp    = 50.,warmpool_amp     = 25., 
 
  &damping_driver_nml
      do_rayleigh   = .false.,
@@ -108,9 +106,7 @@
 	topog_file = 'INPUT/navy_topography.data.nc', 
 	water_file = 'INPUT/navy_pctwater.data.nc' /
 
-#Bn intiall 0, 5.4, 8.4 
-
-#flag            
+            
  &cg_drag_nml
      Bt_0  = 0.0043,  
      Bt_nh = 0.00,
