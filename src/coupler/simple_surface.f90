@@ -84,8 +84,9 @@ real ::   z_ref_heat      = 2.,       &
           const_roughness = 3.21e-05, &
           const_albedo    = 0.30,     &
           albedo_exp      = 2.,       & !mj
-          albedo_cntrSH     = 45.,      & !mj
-          albedo_cntrNH     = 65.,      & !cig
+          albedo_cntrSH     = 45.,    & !mj
+          albedo_cntrNH     = 65.,    & !cig
+          albedo_desert     = 0.20,   & !cig
           albedo_wdth     = 10.,      & !mj
 	  max_of          = 25.,      &
 	  lonmax_of       = 180.,     &
@@ -134,7 +135,7 @@ namelist /simple_surface_nml/ z_ref_heat, z_ref_mom,             &
                               do_read_sst,do_sc_sst,sst_file,    &  !mj
                               land_option,slandlon,slandlat,     &  !mj
                               elandlon,elandlat,                 &
-                              albedo_exp,albedo_cntrSH,albedo_cntrNH,albedo_wdth    !mj
+                              albedo_exp,albedo_cntrSH,albedo_cntrNH,albedo_wdth,albedo_desert     !mj
 
 !-----------------------------------------------------------------------
 
@@ -347,11 +348,10 @@ pi = 4.0*atan(1.)
           
             
             if (  (lon .gt. 118. .and.  lon .lt. 145. .and. lat .gt. -30. .and.  lat .lt. -19.) .or. &
-		 (lon .gt. 80. .and.  lon .lt. 100. .and. lat .gt. 32. .and.  lat .lt. 37.)  .or. & 
-		(lon .gt. 80. .and.  lon .lt. 110. .and. lat .gt. 37. .and.  lat .lt. 41.)  .or. & 
-		(lon .gt. 80. .and.  lon .lt. 115. .and. lat .gt. 41. .and.  lat .lt. 49.)  .or. & 
+		 (lon .gt. 80. .and.  lon .lt. 105. .and. lat .gt. 32. .and.  lat .lt. 40.)  .or. & 
+		(lon .gt. 80. .and.  lon .lt. 115. .and. lat .gt. 40. .and.  lat .lt. 52.)  .or. & 		
 		( (lon .gt. 345. .or.  lon .lt. 50.) .and. lat .gt. 13. .and.  lat .lt. 30.) ) then
-                 albedo(i,j) = const_albedo + 0.2
+                 albedo(i,j) = const_albedo +   albedo_desert
  
             endif
 	enddo
@@ -595,8 +595,6 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
  logical :: ocean_mask_worked
 
  pi = 4.0*atan(1.)
-
-
  	
  !-----------------------------------------------------------------------
 !------ read namelist ------
@@ -609,7 +607,7 @@ real, dimension(size(Atm%t_bot,1), size(Atm%t_bot,2)) :: &
       enddo
  10   call close_file (unit)
    endif
-
+  
 !mj make choices compatible
    !if(do_read_sst .or. do_sc_sst) call error_mesg ('simple_surface',  &
    !              'THERE IS A BUG WITH DO_READ_SST, SO I AM STOPPING', FATAL)
@@ -727,7 +725,6 @@ if (surface_choice .eq. 1 .and. .not. do_sc_sst)then
 	       where(.not. lmask_navy) land_sea_heat_capacity = land_capacity
    endif
 endif
-
 
 
 

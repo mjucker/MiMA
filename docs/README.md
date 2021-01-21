@@ -16,6 +16,11 @@ See the 30 second trailer on [YouTube](https://www.youtube.com/watch?v=8UfaFnGtC
 ## News
 With time, I hope to post usage, papers, etc. which relate to MiMA here. If you're a MiMA user, please let me know of any news at <coding@martinjucker.com>.
 
+* February 2020: New release (v1.1) adds restart from arbitrary initial conditions (as used in [Yamada and Pauluis (2017)](https://doi.org/10.1175/JAS-D-16-0329.1) below) and possibility to use the Navy high-resolution land-sea mask.
+* January 2020: Two new papers published using MiMA for research on climate dynamics. These papers have further developed MiMA and their additions will be published in the upcoming v2.0: 
+  * [Garfinkel, C.I., I. White, E.P. Gerber, M. Jucker, and M. Erez (2020): _The building blocks of Northern Hemisphere wintertime stationary waves_, Journal of Climate, doi:10.1175/JCLI-D-19-0181.1](https://doi.org/10.1175/JCLI-D-19-0181.1) which, among other important findings, shows that MiMA is just as good as any CMIP5 model to represent Northern Hemisphere stationary waves.
+  * [White, I.P., C. Garfinkel, E. Gerber, M. Jucker, P. Hitchcock, and J. Rao (2020): _The generic nature of the tropospheric response to sudden stratospheric warmings_, Journal of Climate, doi: 10.1175/JCLI-D-16-0703.1](https://doi.org/10.1175/JCLI-D-16-0703.1) which examines the evolution of naturally occurring versus synthetically forced Sudden Stratospheric Warmings.
+* August 2019: [Iceberg](https://research-iceberg.github.io) article about MiMA's various choices for mixed layer depth and albedo distribution: [_The surface of an aquaplanet GCM_](https://research-iceberg.github.io/papers/M_Jucker_201907/). PDF: <a href="https://doi.org/10.5281/zenodo.3358284" target="_blank">doi.org/10.5281/zenodo.3358284</a>
 * March 2018: [Isca framework](https://empslocal.ex.ac.uk/people/staff/gv219/ISCA/index.html) (which contains MiMA) reference paper published in Geoscientific Model Development: [Vallis _et al._, 2018: *Isca, v1.0: a framework for the global modelling of the atmospheres of Earth and other planets at varying levels of complexity*, Geosci. Model Dev., doi:10.5194/gmd-11-843-2018](https://doi.org/10.5194/gmd-11-843-2018)
 * February 2018: Talk and poster about MiMA at the [2nd Pan-GASS meeting](http://singh.sci.monash.edu/Pan-GASS/index.shtml). The poster can be viewed [here](https://doi.org/10.6084/m9.figshare.6118934.v1).
 * August 2017: Bugfix patch (v1.0.1) addresses incoming SW radation bugs.
@@ -29,8 +34,10 @@ With time, I hope to post usage, papers, etc. which relate to MiMA here. If you'
 
 MiMA
 * [Jucker and Gerber, J Clim (2017)](http://dx.doi.org/10.1175/JCLI-D-17-0127.1)
+* [Garfinkel et al., J Clim (2020)](http://journals.ametsoc.org/doi/10.1175/JCLI-D-19-0181.1)
 * code:
   * latest version: [![DOI](https://zenodo.org/badge/36012278.svg)](https://zenodo.org/badge/latestdoi/36012278)
+  * v1.1: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3637607.svg)](https://doi.org/10.5281/zenodo.3637607)
   * v1.0: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.321708.svg)](https://doi.org/10.5281/zenodo.321708)
 
 Gray radiation model

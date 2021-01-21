@@ -2,6 +2,8 @@
 0001 1 1 0 0 0
 #output files
 "atmos_daily",    24, "hours", 1, "days", "time",
+"atmos_davg",     24, "hours", 1, "days", "time",
+"atmos_dext",     24, "hours", 1, "days", "time",
 "atmos_avg",      -1, "hours", 1, "days", "time",
 #diagnostic field entries. 
 # quantities needed for plevel interpolation,
@@ -11,22 +13,17 @@
 # dynamics variables
  "dynamics",        "ucomp",      "ucomp",          "atmos_daily",    "all", .false., "none", 2,
  "dynamics",        "temp",       "temp",           "atmos_daily",    "all", .false., "none", 2,
- "dynamics",        "sphum",      "sphum",          "atmos_daily",    "all", .false.,  "none", 2,
+ "dynamics",        "sphum",      "sphum",          "atmos_daily",    "all", .false., "none", 2,
  "dynamics",        "ucomp",      "ucomp",          "atmos_avg",      "all", .true.,  "none", 2,
- "dynamics",        "vcomp",      "vcomp",          "atmos_avg",      "all", .true.,  "none", 2,
  "dynamics",        "temp",       "temp",           "atmos_avg",      "all", .true.,  "none", 2,
- "dynamics",        "omega",      "omega",          "atmos_avg",      "all", .true.,  "none", 2,
- "dynamics",        "div",        "div",            "atmos_avg",      "all", .true.,  "none", 2,
- "dynamics",        "vor",        "vor",            "atmos_avg",      "all", .true.,  "none", 2,
  "dynamics",        "sphum",      "sphum",          "atmos_avg",      "all", .true.,  "none", 2,
 # surface variables
- "simple_surface",  "t_surf",     "t_surf",         "atmos_daily",    "all", .false., "none", 2,
+ "simple_surface",  "t_surf",     "t_surf",         "atmos_davg",     "all", .true., "none", 2,
+ "simple_surface",  "t_surf",     "t_surf_max",     "atmos_dext",     "all", "max",  "none", 2,
+ "simple_surface",  "t_surf",     "t_surf_min",     "atmos_dext",     "all", "min",  "none", 2,
 # moisture variables
-  "moist",          "precip",     "precip",         "atmos_daily",    "all", .false., "none", 2,
-  "moist",          "rh",         "rh",             "atmos_daily",    "all", .false., "none", 2,
-# radiation variables
-  "rrtm_radiation", "tdt_rad",    "tdt_rad",        "atmos_daily",    "all", .false., "none", 2,
-  "rrtm_radiation", "flux_sw",    "flux_sw",        "atmos_daily",    "all", .false., "none", 2,
+  "moist",          "precip",     "precip",         "atmos_davg",     "all", .true., "none", 2,
+  "moist",          "precip",     "precip_max",     "atmos_dext",     "all", "max",  "none", 2,
 #=============================================================================================
 #
 #  FORMATS FOR FILE ENTRIES (not all input values are used)
