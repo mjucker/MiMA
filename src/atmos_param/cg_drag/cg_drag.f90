@@ -1351,7 +1351,7 @@ real,    dimension(:,:,0:),  intent(out)            :: ked
 	  if ((lat(i+is-1,j+js-1)*pifinv <= dphin) .and. (lat(i+is-1,j+js-1)*pifinv >= dphis)) then
                 cwthis=cwtropics
 		Bnthis=0.
-		flag=0
+		flagthis=0
 		kelvin_kludgethis=kelvin_kludge
     	  else   
                 cwthis=cw
