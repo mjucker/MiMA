@@ -98,6 +98,8 @@ integer :: fourier_max, fourier_inc, num_fourier, num_spherical
 integer :: ms, me, ns, ne
 logical :: module_is_initialized = .false.
 
+logical :: make_zonallysymmetric_local, do_truncate_local
+
 real, allocatable, dimension(:,:) :: coef_uvm
 real, allocatable, dimension(:,:) :: coef_uvc
 real, allocatable, dimension(:,:) :: coef_uvp
@@ -111,10 +113,13 @@ real, allocatable, dimension(:,:) :: triangle_mask
 contains
 
 !--------------------------------------------------------------------------
-subroutine spherical_init(radius, num_fourier_in, fourier_inc_in, num_spherical_in)
+subroutine spherical_init(radius, num_fourier_in, fourier_inc_in, num_spherical_in, make_zonallysymmetric,do_truncate,truncatewave1,truncatewave2,truncatewave0)
 
 real,    intent(in) :: radius
 integer, intent(in) :: num_fourier_in, fourier_inc_in, num_spherical_in
+logical, intent(in), optional :: make_zonallysymmetric !IW
+logical, intent(in), optional :: do_truncate, truncatewave0 !IW
+integer, intent(in), optional :: truncatewave1, truncatewave2 !IW
 
 integer :: m,n
 
@@ -128,6 +133,18 @@ num_fourier = num_fourier_in
 fourier_inc = fourier_inc_in
 fourier_max = fourier_inc*num_fourier
 num_spherical = num_spherical_in
+
+if(present(make_zonallysymmetric)) then !IW, following ISCA
+  make_zonallysymmetric_local = make_zonallysymmetric
+else
+  make_zonallysymmetric_local = .false.
+end if
+
+if(present(do_truncate)) then !IW: truncate waves
+  do_truncate_local = do_truncate
+else
+  do_truncate_local = .false.
+end if
 
 allocate(eigen_laplacian(0:num_fourier,0:num_spherical))
 allocate(epsilon        (0:num_fourier,0:num_spherical))
@@ -152,6 +169,13 @@ do n=0,num_spherical
     fourier_wave(m,n)   = m*fourier_inc
     spherical_wave(m,n) = fourier_wave(m,n) + n
     if(spherical_wave(m,n).gt.num_spherical-1) triangle_mask(m,n) = 0.0
+	if(make_zonallysymmetric_local .AND. m.gt.0) triangle_mask(m,n) = 0.0 !GC make zonally symmetric: i.e., set all fourier modes >=1 equal to 0
+
+	! IW: Truncate certain wavenumber bands
+	if(do_truncate_local .AND. m.ge.truncatewave1 .AND. m.le.truncatewave2) triangle_mask(m,n) = 0.0
+	! also may want to remove wave0 - relevant if you want to truncate e.g., waves 0,4+ but to keep purely waves 1-3
+	if(do_truncate_local .AND. truncatewave0) triangle_mask(m,n) = 0.0
+
   end do
 end do
 
