@@ -73,6 +73,8 @@ character(len=128), parameter :: tagname = '$Name:  $'
 integer :: id_ps, id_u, id_v, id_t, id_vor, id_div, id_omega, id_wspd, id_slp, id_div9
 integer :: id_pres_full, id_pres_half, id_zfull, id_zhalf
 integer :: id_uu, id_vv, id_tt, id_omega_omega, id_uv, id_omega_t
+integer :: id_forcingterm ! IW: To output forcing to nc file
+integer :: reference_day, reference_second ! IW: added for stratospheric heating/cooling
 integer, allocatable, dimension(:) :: id_tr
 real :: gamma, expf, expf_inverse
 character(len=8) :: mod_name = 'dynamics'
@@ -112,6 +114,8 @@ character(len=32), parameter :: default_representation = 'spectral'
 character(len=32), parameter :: default_advect_vert    = 'second_centered'
 character(len=32), parameter :: default_hole_filling   = 'off'
 
+! IW: for outputting thermal-forcing tendencies
+real, allocatable, dimension(:,:,:) :: forcingterm
 
 ! epg+ray: this netcdf include file is needed to load in specified initial
 ! conditions.  Only used if specify_initial_conditions == .true.
@@ -125,7 +129,14 @@ logical :: do_mass_correction     = .true. , &
            do_energy_correction   = .true. , &
            use_virtual_temperature= .false., &
            use_implicit           = .true.,  &
-           triang_trunc           = .true.
+           triang_trunc           = .true.,  &
+	   do_stratoblob 	  = .false., & ! IW: impose some strato heating/cooling
+	   remove_trough          = .false.,& ! IW: remove troughs in zonally-asymmetric forcing? NB: inadvisable if doing 
+		! mixed zonally symmetric-asymmetric forcing (code currently does not support this, use at own discretion)
+           make_zonallysymmetric  = .false.,& ! IW: Add namelist option to run model as zonally symmetric
+	   truncatewave0          = .false.,& ! IW: truncate wave 0? (i.e., remove zonal mean?)
+           do_truncate            = .false., & ! IW: namelist option for truncating chosen wavenumbers
+           do_forcingrotate          = .false. ! IW: rotate zonally-asymmetric forcing with height
 
 integer :: damping_order       = 2, &
            damping_order_vor   =-1, &
@@ -136,7 +147,12 @@ integer :: damping_order       = 2, &
            num_spherical       = 43,  & ! T42
            fourier_inc         = 1,   &
            num_levels          = 18,  &
-           num_steps           = 1
+           num_steps           = 1,   &         
+           TimeDuration        = 0, & ! IW: in days. Duration of ZM heating. NB: if you want indefinite duration, set TimeDuration = days from coupler_nml
+	   TimeDurationZA      = 0, & ! IW: in days. Duration of ZA heating
+	   kwn                 = 2,& ! IW: Wavenumber of ZA vortex perturbation
+	   truncatewave1       = 4,& ! IW: lowest wavenumber to truncate
+           truncatewave2       = 42 ! IW: highest wavenumber to truncate (max is num_spherical)
 
 integer, dimension(2) ::  print_interval=(/1,0/)
 
@@ -145,6 +161,7 @@ character(len=64) :: topography_option      = 'interpolated', & ! realistic topo
                      damping_option         = 'resolution_dependent', &
                      vert_advect_uv         = default_advect_vert,   &
                      vert_advect_t          = default_advect_vert,   &
+		     stratoblob_ZMorZA 	    = 'zonalmean', & ! IW: 'zonalmean' or 'zonallyasymmetric'
                      vert_difference_option = 'simmons_and_burridge'
 
 real    :: damping_coeff       = 1.15740741e-4, & ! (one tenth day)**-1
@@ -164,18 +181,31 @@ real    :: damping_coeff       = 1.15740741e-4, & ! (one tenth day)**-1
          ocean_topog_smoothing = .93, &
            initial_sphum       = 0.0, &
      reference_sea_level_press =  101325. , &
-           water_correction_limit = 0.e2 !mj
+           water_correction_limit = 0.e2, &!mj
+           scalefacZM =  10.0, & ! IW: zonally-symmetric heating value
+	   scalefacZA =  0.0, & ! IW: zonally-asymmetric heating value
+	   ! NB: If you want only zonally-symmetric, or zonally-asymmetric heating, then the corresponding 
+           ! nml variable (scalefacZM, scalefacZA) MUST be set to zero. It does not suffice to set TimeDuration=0 
+	   ! or TimeDurationZA=0 as there are issues with timesteps <1day
+           phi0 = 60, & ! IW: latitude of where zonal-mean forcing reaches half its 
+	   ! magnitude (60 is sufficient to fully weaken vortex). Can be <0 (i.e., Southern Hemisphere)
+	   phiZAlow = 50, & ! IW: with phiZAhigh below, give the lat width of the ZA heating
+	   phiZAhigh = 70, & ! IW
+           dphi = -10, & ! IW: halfwidth of zonally-symmetric heating
+	   plow = 60.e2, & ! IW: level at which to start linearly reducing forcing below
+           ptrop = 150.e2, & ! IW: level at which forcing ends entirely
+	   lonloc = 90.0, & ! IW: longitude to centre first ridge of vortex perturbation east of GMT
+	   lonup=175, & ! IW: if do_forcingrotate=true then this gives the lon of ridge at top level
+	   londown=290 ! IW: same but at lowest forcing level
 
 !epg+ray: this next namelist variable allows you to upload initial conditions
 !         u,v,T, ps, and q must be specified (as: ucomp, vcomp, temp, ps, and sphum, respecitively)
 !         in a netcdf file called "initial_conditions.nc" and placed in the INPUT/ directory
 logical :: specify_initial_conditions = .false.
 
-
-
 !===============================================================================================
 
-real, dimension(2) :: valid_range_t = (/ 100.,500./)
+real, dimension(2) :: valid_range_t = (/ 10.,800./)
 
 namelist /spectral_dynamics_nml/ use_virtual_temperature, damping_option,                            &
                                  damping_order, damping_coeff, damping_order_vor, damping_coeff_vor, &
@@ -188,9 +218,13 @@ namelist /spectral_dynamics_nml/ use_virtual_temperature, damping_option,       
                                  topography_option, vert_coord_option, scale_heights, surf_res,      &
                                  p_press, p_sigma, exponent, ocean_topog_smoothing, initial_sphum,   &
                                  valid_range_t, eddy_sponge_coeff, zmu_sponge_coeff, zmv_sponge_coeff, &
-                                 print_interval, num_steps,                                          &
-                                 water_correction_limit, specify_initial_conditions        !mj + epg
-
+                                 print_interval, num_steps, 					     &
+				 water_correction_limit, specify_initial_conditions,                 & !mj + epg 
+				 do_stratoblob, scalefacZM, scalefacZA, phi0, dphi, TimeDuration,     & ! IW, until end				 
+				 plow, ptrop, stratoblob_ZMorZA, lonloc, kwn,    &
+				 phiZAlow, phiZAhigh, remove_trough, TimeDurationZA, make_zonallysymmetric, &
+				 do_truncate, truncatewave1, truncatewave2, truncatewave0, & 
+				 lonup, londown, do_forcingrotate
 contains
 
 !===============================================================================================
@@ -270,7 +304,8 @@ endif
 ! which is where domains are determined.
 
 call transforms_init(radius, lat_max, lon_max, num_fourier, fourier_inc, num_spherical, south_to_north=south_to_north, &
-                     triang_trunc=triang_trunc, longitude_origin=longitude_origin)
+                     triang_trunc=triang_trunc, longitude_origin=longitude_origin, make_zonallysymmetric=make_zonallysymmetric, &
+			do_truncate=do_truncate, truncatewave1=truncatewave1, truncatewave2=truncatewave2,truncatewave0=truncatewave0)
 
 call get_grid_domain(is, ie, js, je)
 call get_spec_domain(ms, me, ns, ne)
@@ -458,6 +493,13 @@ call set_domain(grid_domain)
 call get_time(Time_step, seconds, days)
 dt_real = 86400*days + seconds
 
+! IW: To create a reference time for first day of restart to be used in heating in four_in_one
+if (do_stratoblob == .true.) then
+call get_time(Time, seconds, days)
+reference_day=days
+reference_second=seconds
+endif
+
 module_is_initialized = .true.
 return
 end subroutine spectral_dynamics_init
@@ -635,6 +677,11 @@ allocate (vorg(is:ie, js:je, num_levels))
 allocate (divg(is:ie, js:je, num_levels))
 
 allocate (surf_geopotential(is:ie, js:je))
+
+if(do_stratoblob == .true.) then
+allocate (forcingterm(is:ie, js:je, num_levels)) ! IW: allocate for outputting thermal forcing
+forcingterm=0.
+endif
 
 allocate (grid_tracers(is:ie, js:je, num_levels, num_time_levels, num_tracers))
 allocate (spec_tracers(ms:me, ns:ne, num_levels, num_time_levels, num_tracers))
@@ -838,8 +885,8 @@ if (use_virtual_temperature .and. .not.dry_model) then
 else
   virtual_t = tg(:,:,:,current)
 endif
-
-call four_in_one (divg, ug(:,:,:,current), vg(:,:,:,current), virtual_t, grid_tracers(:,:,:,current,nhum), psg(:,:,current), &
+! IW: include Time in four_in_one
+call four_in_one (Time,divg, ug(:,:,:,current), vg(:,:,:,current), virtual_t, grid_tracers(:,:,:,current,nhum), psg(:,:,current), &
    ln_p_half, ln_p_full, p_full, dx_psg, dy_psg, dt_psg_tmp, wg, wg_full, dt_tg_tmp, dt_ug_tmp, dt_vg_tmp, &
    kegen, kegenq, kegenqtinv)
 
@@ -850,6 +897,7 @@ else
 endif
 
 dt_ln_psg = dt_psg_tmp/psg(:,:,current)
+
 call trans_grid_to_spherical(dt_ln_psg, dt_ln_ps)
 
 dp = p_half(:,:,2:num_levels+1) - p_half(:,:,1:num_levels)
@@ -867,6 +915,7 @@ call vert_advection(delta_t, wg, dp, tg(:,:,:,time_level),  dt_grid_tmp, scheme=
 dt_tg_tmp = dt_tg_tmp + dt_grid_tmp
 
 call horizontal_advection(ts(:,:,:,current), ug(:,:,:,current), vg(:,:,:,current), dt_tg_tmp)
+
 call trans_grid_to_spherical(dt_tg_tmp, dt_ts)
 
 do k=1,num_levels
@@ -881,6 +930,8 @@ call vor_div_from_uv_grid(dt_ug_tmp, dt_vg_tmp, dt_vors, dt_divs, triang = trian
 phig_full_plus_ke = phig_full + .5*(ug(:,:,:,current)**2 + vg(:,:,:,current)**2)
 call trans_grid_to_spherical(phig_full_plus_ke, phis_plus_ke)
 dt_divs = dt_divs - compute_laplacian(phis_plus_ke)
+
+!----------------------------------------------------------------------------------------------
 
 if(use_implicit) call implicit_correction (dt_divs, dt_ts, dt_ln_ps, divs, ts, ln_ps, delta_t, previous, current)
 
@@ -917,6 +968,7 @@ call trans_spherical_to_grid(vors(:,:,:,future), vorg)
 call uv_grid_from_vor_div(vors(:,:,:,future), divs(:,:,:,future), ug(:,:,:,future), vg(:,:,:,future))
 call trans_spherical_to_grid(ts   (:,:,:,future), tg(:,:,:,future))
 call trans_spherical_to_grid(ln_ps(:,:,  future), ln_psg)
+
 psg(:,:,future) = exp(ln_psg)
 
 if(minval(tg(:,:,:,future)) < valid_range_t(1) .or. maxval(tg(:,:,:,future)) > valid_range_t(2)) then
@@ -979,7 +1031,7 @@ end subroutine spectral_dynamics
 
 !================================================================================
 
-subroutine four_in_one(divg, u_grid, v_grid, t_grid, q_grid, p_surf, ln_p_half, ln_p_full, p_full, &
+subroutine four_in_one(Time, divg, u_grid, v_grid, t_grid, q_grid, p_surf, ln_p_half, ln_p_full, p_full, &
                        dx_psg, dy_psg, dt_psg, wg, wg_full, dt_tg, dt_ug, dt_vg, &
                        kegen, kegenq, kegenqtinv)
 
@@ -999,12 +1051,171 @@ real, intent(inout), dimension(:,:,:) :: dt_tg, dt_ug, dt_vg
 
 real, dimension(is:ie, js:je) :: dp, dp_inv, dlog_1, dlog_2, dlog_3, dmean, dmean_tot
 real, dimension(is:ie, js:je) :: x1, x2, x3, x4, x5, p_surf_inv
-
 real :: kappa
 integer :: k
 
-kappa = rdgas/cp_air
+! IW: Setup for adding a Zonally-symmetric or zonally-asymmetric Cooling or Heating in high-latitude stratosphere
+type(time_type),  intent(in) :: Time ! current timestep used to set duration of heating
+integer :: i,j,second,day ! different integers required
+real :: Q_ZM, Q_ZA, deg2rad ! heating rate for ZM and ZA (K/day), and degrees to radians
+real, dimension(lat_max  ) :: deg_lat
+real, dimension(lon_max  ) :: deg_lon
+real, allocatable, dimension(:,:) :: deg_lat_2d, deg_lon_2d
+! Define matrices for latitudinal profiles (ZM and ZA), and for lon profile 
+real, allocatable, dimension(:,:,:) :: latprofileZM, latprofileZA, lonprofileZA, ZMandZAprofile
+real :: templon ! for forcing that rotates with height
 
+if(do_stratoblob == .true.) then ! Setup forcing
+
+call get_time(Time, second, day) ! get current time step
+if (.not.module_is_initialized) call error_mesg('spectral_dynamics','module_not_initialized',FATAL)
+
+forcingterm=0. ! Best to set matrix for output equal to zero initially
+
+! Allocate matrices and get lats and lons
+if(stratoblob_ZMorZA == 'zonallyasymmetric') then
+call get_deg_lat(deg_lat)
+call get_deg_lon(deg_lon)
+	allocate (deg_lat_2d (is:ie, js:je))
+	allocate (deg_lon_2d (is:ie, js:je)) 
+	allocate (latprofileZM (is:ie, js:je, num_levels)) ! ZM forcing
+	allocate (lonprofileZA (is:ie, js:je, num_levels)) ! ZA forcing
+	allocate (latprofileZA (is:ie, js:je, num_levels)) ! ZA forcing
+	allocate (ZMandZAprofile (is:ie, js:je, num_levels)) ! Overall forcing profile
+	ZMandZAprofile =0. ! Best to set matrices equal to zero initially
+	latprofileZM =0.
+	latprofileZA =0.
+	lonprofileZA = 0.
+
+	! Create a 2-d matrix of lats and lons
+	do j=js,je
+	  deg_lat_2d(:,j) = deg_lat(j)
+	enddo
+	do i=is,ie
+	  deg_lon_2d(i,:) = deg_lon(i)
+	enddo
+elseif(stratoblob_ZMorZA == 'zonalmean') then
+call get_deg_lat(deg_lat)
+	allocate (deg_lat_2d (is:ie, js:je))
+	allocate (latprofileZM (is:ie, js:je, num_levels)) ! ZM forcing
+
+	! Create a 2-d matrix of lats
+	do j=js,je
+	  deg_lat_2d(:,j) = deg_lat(j)
+	enddo
+endif
+
+! ZM profile is required for both ZM and ZA forcing, so setup first
+Q_ZM=scalefacZM/86400. ! ZM heating rate
+deg2rad= pi/180 ! pi/180
+
+if(stratoblob_ZMorZA == 'zonallyasymmetric') then
+do k=1,num_levels ! lat profile of ZM forcing
+if (phi0 > 0) then ! NH
+latprofileZM(:,:,k)=(1-tanh((deg_lat_2d(:,:)-phi0)/(dphi)))/2
+elseif (phi0 < 0) then ! SH
+latprofileZM(:,:,k)=(1+tanh((deg_lat_2d(:,:)-phi0)/(dphi)))/2
+endif
+enddo
+
+! create lat profile for ZA heating
+do k=1,num_levels
+do j=js,je
+  if (phi0 > 0) then ! NH
+  if(phiZAlow*deg2rad<deg_lat_2d(1,j)*deg2rad .and. deg_lat_2d(1,j)*deg2rad<phiZAhigh*deg2rad) then
+	latprofileZA(:,j,k)=sin(pi*(deg_lat_2d(:,j)*deg2rad-phiZAlow*deg2rad)/(phiZAhigh*deg2rad-phiZAlow*deg2rad))
+  else
+	latprofileZA(:,j,k)=0.
+  endif
+  elseif (phi0 < 0) then ! SH
+  if(phiZAlow*deg2rad>deg_lat_2d(1,j)*deg2rad .and. deg_lat_2d(1,j)*deg2rad>phiZAhigh*deg2rad) then
+	latprofileZA(:,j,k)=sin(pi*(deg_lat_2d(:,j)*deg2rad-phiZAlow*deg2rad)/(phiZAhigh*deg2rad-phiZAlow*deg2rad))
+  else
+	latprofileZA(:,j,k)=0.
+  endif
+  endif
+enddo
+enddo
+
+! create lon-profile of ZA heating for use in creating wave-1 or wave-2 - 
+! NB, the first ridge to east of GMT is centered on lonloc
+! added on 14/09/20: ability to make this ZA forcing rotate with height
+do k = 1,num_levels
+if(do_forcingrotate) then ! rotate forcing with height
+	if(k==1) then ! top level
+	lonprofileZA(:,:,k)=cos(kwn*deg2rad*deg_lon_2d(:,:) - kwn*lonup*deg2rad)
+	elseif(p_full(1,1,k)<=ptrop) then ! i.e., above lowest forcing level up to toplevel-1
+	templon=lonup+p_full(1,1,k)*(londown-lonup)/(ptrop-p_full(1,1,1)) !p_full(1) is top level
+	lonprofileZA(:,:,k)=cos(kwn*deg2rad*deg_lon_2d(:,:) - kwn*templon*deg2rad)
+	endif
+else ! no rotated forcing
+	lonprofileZA(:,:,k)=cos(kwn*deg2rad*deg_lon_2d(:,:) - kwn*lonloc*deg2rad)
+endif
+enddo
+
+! Determine whether to apply ZA and/or ZM forcing at this timestep according to TimeDuration and TimeDurationZA
+if (day-reference_day <= TimeDuration .and. day-reference_day <= TimeDurationZA) then ! Apply both ZM and ZA at this timestep
+	Q_ZA=scalefacZA/86400. ! define scale factor for ZA heating using scalefac from namelist (Q_ZM defined above)
+!print *, 'Apply both ZA and ZM- day:',day, 'day-refday',day-reference_day 
+elseif (day-reference_day > TimeDuration .and. day-reference_day <= TimeDurationZA) then ! Apply ZA only from now
+	Q_ZA=scalefacZA/86400. ! ZA heating rate
+	Q_ZM=0.0 ! i.e., no ZM
+!print *, 'Apply only ZA- day:',day, 'day-refday',day-reference_day 
+elseif (day-reference_day <= TimeDuration .and. day-reference_day > TimeDurationZA) then ! Apply ZM only from now
+	Q_ZA=0.0 ! no ZA
+else ! i.e., prescribed duration reached, so no forcing, set coeffs to zero
+	Q_ZM=0.0
+	Q_ZA=0.0
+!print *, 'Apply no forcing - day:',day
+endif
+
+! Now remove troughs of the wave if requested (only if Q_ZA not equal 0)
+if (day-reference_day <= TimeDurationZA) then 
+	if (remove_trough == .true.) then
+		if(Q_ZM == 0.0) then ! Pure asymmetric forcing
+			do k=1,num_levels
+			do i=is,ie
+			do j=js,je
+			ZMandZAprofile(i,j,k) = max(0.0*Q_ZA,Q_ZA*lonprofileZA(i,j,k))*latprofileZA(i,j,k)			
+			enddo
+			enddo
+			enddo
+		else ! mixed symmetric+asymmetric forcing
+			do k=1,num_levels
+			do i=is,ie
+			do j=js,je
+			ZMandZAprofile(i,j,k) = max(Q_ZM*latprofileZM(i,j,k),max(0.0,Q_ZA*lonprofileZA(i,j,k))*latprofileZA(i,j,k))
+			enddo
+			enddo
+			enddo
+		endif
+	elseif (remove_trough == .false.) then
+		if(Q_ZM == 0.0) then ! Pure asymmetric forcing
+			do k=1,num_levels
+			do i=is,ie
+			do j=js,je
+			ZMandZAprofile(i,j,k) = Q_ZA*lonprofileZA(i,j,k)*latprofileZA(i,j,k)			
+			enddo
+			enddo
+			enddo
+		else ! mixed symmetric+asymmetric forcing
+			! As stated in nml above, keeping troughs in presence of symmetric forcing has not been written yet
+		endif
+	endif
+endif
+elseif(stratoblob_ZMorZA == 'zonalmean') then
+do k=1,num_levels ! lat profile of ZM forcing
+if (phi0 > 0) then ! NH
+latprofileZM(:,:,k)=Q_ZM*(1-tanh((deg_lat_2d(:,:)-phi0)/(dphi)))/2
+elseif (phi0 < 0) then ! SH
+latprofileZM(:,:,k)=Q_ZM*(1+tanh((deg_lat_2d(:,:)-phi0)/(dphi)))/2
+endif
+enddo
+
+endif
+endif
+
+kappa = rdgas/cp_air
 dmean_tot = 0.
 
 if(vert_difference_option == 'simmons_and_burridge') then
@@ -1022,7 +1233,41 @@ if(vert_difference_option == 'simmons_and_burridge') then
     dmean = divg(:,:,k)*dp + dbk(k)*(u_grid(:,:,k)*dx_psg + v_grid(:,:,k)*dy_psg)
     x4 = (dmean_tot*dlog_3 + dmean*dlog_1)*dp_inv
     x5 = x4 - u_grid(:,:,k)*x2 - v_grid(:,:,k)*x3
-    dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5
+
+    ! IW: include high-latitude heating\cooling
+    if (do_stratoblob == .true.) then
+	if (p_full(1,1,k)<=plow) then 
+		if(stratoblob_ZMorZA == 'zonallyasymmetric') then
+			dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5 + ZMandZAprofile(:,:,k)
+			forcingterm(:,:,k)=ZMandZAprofile(:,:,k)
+		elseif(stratoblob_ZMorZA == 'zonalmean') then
+			if (day-reference_day <= TimeDuration) then
+			dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5 + latprofileZM(:,:,k)
+			forcingterm(:,:,k)=latprofileZM(:,:,k)
+			else ! prescribed ZM duration reached, so turn off from now
+			dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5
+			endif
+		endif
+	elseif (p_full(1,1,k)>plow .and. p_full(1,1,k)<=ptrop) then ! linear decrease from plow to ptrop
+		if(stratoblob_ZMorZA == 'zonallyasymmetric') then
+			dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5 + (p_full(1,1,k)-ptrop)/(plow-ptrop)*ZMandZAprofile(:,:,k)
+			forcingterm(:,:,k)=(p_full(1,1,k)-ptrop)/(plow-ptrop)*ZMandZAprofile(:,:,k)
+		elseif(stratoblob_ZMorZA == 'zonalmean') then
+			if (day-reference_day <= TimeDuration) then
+			dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5 + (p_full(1,1,k)-ptrop)/(plow-ptrop)*latprofileZM(:,:,k)
+			forcingterm(:,:,k)=(p_full(1,1,k)-ptrop)/(plow-ptrop)*latprofileZM(:,:,k)
+			else ! prescribed ZM duration reached, so turn off from now
+			dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5
+			endif
+		endif
+        else
+	    dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5
+	endif
+
+    else ! i.e., do not add any warm/cold blob
+	dt_tg(:,:,k) = dt_tg(:,:,k) - kappa*t_grid(:,:,k) * x5
+    endif
+
     kegen(:,:,k) = -kappa*t_grid(:,:,k) * x5
     kegenq(:,:,k) = -kappa*t_grid(:,:,k) * x5 * q_grid(:,:,k)
     kegenqtinv(:,:,k) = -kappa * x5 * q_grid(:,:,k)
@@ -1030,6 +1275,18 @@ if(vert_difference_option == 'simmons_and_burridge') then
     dmean_tot = dmean_tot + dmean
     wg(:,:,k+1) = - dmean_tot
   enddo
+
+  if(do_stratoblob == .true.) then
+	if(stratoblob_ZMorZA == 'zonallyasymmetric') then
+	deallocate(latprofileZM)
+	deallocate(latprofileZA)
+	deallocate(lonprofileZA)
+	deallocate(ZMandZAprofile)
+	elseif(stratoblob_ZMorZA == 'zonalmean') then
+	deallocate(latprofileZM)
+	endif
+  endif
+
 else if(vert_difference_option == 'mcm') then
   p_surf_inv = 1.0/p_surf
   do k = 1,num_levels
@@ -1592,10 +1849,17 @@ if(id_slp > 0) then
   expf_inverse = 1./expf
 endif
 
+! IW: Output applied thermal forcing terms
+id_forcingterm = register_diag_field(mod_name, &
+      'forcingterm', axes_3d_full, Time, 'applied thermal forcing',           'deg_K/sec')
+
 allocate(id_tr(num_tracers))
 do ntr=1,num_tracers
   call get_tracer_names(MODEL_ATMOS, ntr, tname, longname, units)
   id_tr(ntr) = register_diag_field(mod_name, tname, axes_3d_full, Time, longname, units)
+
+!id_dtracers_dt = register_diag_field(mod_name, &
+!      'dtracers_dt',axes_3d_full),  Time, 'dtracers_dt',                   'none')
 enddo
 
 return
@@ -1623,6 +1887,9 @@ if(id_vor > 0)    used = send_data(id_vor, vorg, Time)
 if(id_div > 0)    used = send_data(id_div, divg, Time)
 if(id_omega > 0)  used = send_data(id_omega, wg_full, Time)
 if(num_levels > 8 .and. id_div9 > 0) used = send_data(id_div9, divg(:,:,9), Time)
+
+! IW: Output applied thermal forcing
+if(id_forcingterm > 0)    used = send_data(id_forcingterm, forcingterm, Time)
 
 if(id_zfull > 0 .or. id_zhalf > 0) then
   call compute_pressures_and_heights(t_grid, p_surf, z_full, z_half, p_full, p_half)
