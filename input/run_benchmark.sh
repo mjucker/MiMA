@@ -2,11 +2,12 @@ ulimit -s unlimited
 
 platform=nci
 plevel=plevel.sh
-NCPUS=8
+NCPUS=32
 
 mkdir ../benchmark
 cp -r * ../benchmark/
 cd ../benchmark
+cp input_benchmark.nml input.nml
 mkdir RESTART
 cp ../exp/exec.${platform}/mima.x .
 cp ../bin/mppnccombine.${platform} .
@@ -34,7 +35,7 @@ do
 	then
             rm ${fileName}
 	fi
-	./${mppnccombine} ${fileName} ${baseName}.nc.????
+	./mppnccombine.${platform} ${fileName} ${baseName}.nc.????
 	if [ $? -eq 0 ]
 	then
             rm ${baseName}.nc.????
@@ -49,5 +50,9 @@ do
         fi
         mv plevel.nc ${fileName/.nc/.plev.nc}
     done
+    tar cvf ${yy}.restart.tar RESTART/*
     mv ${yy}.* ${yy}/
+    cp RESTART/* INPUT/
 done
+
+#python benchmark_analysis.py
