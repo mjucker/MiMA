@@ -168,11 +168,7 @@ integer :: num_spherical=0
 
 logical :: south_to_north_local
 logical :: triang_trunc_local
-logical :: make_zonallysymmetric_local
 real :: longitude_origin_local
-
-logical :: do_truncate_local, truncatewave0
-integer :: truncatewave1, truncatewave2
 
 integer :: trunc_fourier
 logical :: module_is_initialized = .false.
@@ -200,8 +196,7 @@ subroutine transforms_init(radius,            &
                            num_spherical_in,  &
                            south_to_north,    &
                            triang_trunc,      &
-                           longitude_origin,  &
-			   make_zonallysymmetric, do_truncate, truncatewave1, truncatewave2,truncatewave0)  !
+                           longitude_origin)
 !---------------------------------------------------------------------------
 
 real,    intent(in) :: radius
@@ -211,9 +206,9 @@ integer, intent(in) :: num_fourier_in
 integer, intent(in) :: fourier_inc_in
 integer, intent(in) :: num_spherical_in
 
-logical, intent(in), optional :: south_to_north, triang_trunc, make_zonallysymmetric, do_truncate,truncatewave0
+logical, intent(in), optional :: south_to_north, triang_trunc
 real,    intent(in), optional :: longitude_origin
-integer :: namelist_unit, ierr, io, truncatewave1, truncatewave2
+integer :: namelist_unit, ierr, io
 
 real, allocatable :: wts_lat(:)
 real :: sum_wts, del_lon
@@ -248,18 +243,6 @@ else
   south_to_north_local = .true.
 end if
 
-if(present(make_zonallysymmetric)) then ! following ISCA
-  make_zonallysymmetric_local = make_zonallysymmetric
-else
-  make_zonallysymmetric_local = .false.
-end if
-
-if(present(do_truncate)) then ! IW: truncate wavenumbers
-  do_truncate_local = do_truncate
-else
-  do_truncate_local = .false.
-end if
-
 if(present(triang_trunc)) then
   triang_trunc_local = triang_trunc
 else
@@ -278,9 +261,7 @@ call get_spec_domain(ms, me, ns, ne)
    
 ! initialize spherical_fourier (which initializes spherical)
 call spherical_fourier_init(radius, lat_max, num_fourier, fourier_inc, num_spherical, &
-                            south_to_north=south_to_north_local, make_zonallysymmetric=make_zonallysymmetric_local,&
-				do_truncate=do_truncate_local, truncatewave1=truncatewave1, &
-				   truncatewave2=truncatewave2,truncatewave0=truncatewave0)   
+                            south_to_north=south_to_north_local)   
 
 trunc_fourier = num_fourier
 
