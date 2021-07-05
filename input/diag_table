@@ -1,269 +1,56 @@
-spectral_rrtm
+"MiMA"
 0001 1 1 0 0 0
 #output files
-#"atmos_daily",    1, "days",  1, "seconds", "time",
-"atmos_daily_avg",      1, "days",  1, "seconds", "time",
-"atmos_4xdaily",        6, "hours", 1, "seconds", "time",
-"atmos_4xdaily_avg",    6, "hours", 1, "seconds", "time",
-"atmos_every",     0, "seconds", 1, "seconds", "time",
-#"atmos_avg",   -1, "days",  1, "days",    "time",
-
-
-"dynamics",    "forcingterm",   "forcingterm", "atmos_daily_avg", "all", .true., "none", 2,
-
-## Loading out dynamical tendencies
-#"dynamics",    "du_dt",   "du_dt", "atmos_daily_avg", "all", .true., "none", 2,
-#"dynamics",    "dv_dt",      "dv_dt",   "atmos_daily_avg", "all", .true., "none", 2,
-#"dynamics",    "dt_dt",      "dt_dt",   "atmos_daily_avg", "all", .true., "none", 2,
-#"dynamics",    "dln_ps_dt",  "dln_ps_dt", "atmos_daily_avg", "all", .true., "none", 2,
-
-
-#output variables - miscellaneous
-"dynamics",    "bk",      "bk",    "atmos_4xdaily", "all", .false., "none", 2,
-"dynamics",    "pk",      "pk",    "atmos_4xdaily", "all", .false., "none", 2,
-#"dynamics",    "zsurf",   "zsurf", "atmos_4xdaily", "all", .false., "none", 2,
-"dynamics",    "ps",      "ps",    "atmos_4xdaily", "all", .false., "none", 2,
-"dynamics",    "temp",    "temp",  "atmos_4xdaily", "all", .false., "none", 2,
-"dynamics",    "height",    "height",  "atmos_4xdaily", "all", .false., "none", 2,
-"dynamics",    "ucomp",   "ucomp", "atmos_4xdaily", "all", .false., "none", 2,
-"dynamics",    "vcomp",   "vcomp", "atmos_4xdaily", "all", .false., "none", 2,
-"dynamics",    "omega",   "omega", "atmos_4xdaily", "all", .false., "none", 2,
-
-"dynamics",    "sphum",   "sphum", "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "bk",      "bk",   "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "pk",      "pk",   "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "zsurf",  "zsurf", "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "tsurf",  "tsurf", "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "height",  "height", "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "ucomp",      "ucomp",   "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "vcomp",      "vcomp",   "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "temp",      "temp",   "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",    "omega",      "omega",   "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics",  "div",         "div",         "atmos_daily_avg", "all", .true.,  "none", 2,
-"dynamics",  "vor",         "vor",         "atmos_daily_avg", "all", .true.,  "none", 2,
-"dynamics",    "ps",      "ps",   "atmos_daily_avg", "all", .true.,  "none", 2,
-"dynamics",    "slp",      "slp",   "atmos_daily_avg", "all", .true.,  "none", 2,
-"moist",        "rh",     "rh",   "atmos_daily_avg", "all", .true.,  "none", 2,
-"moist",     "precip",  "precip", "atmos_daily_avg", "all", .true.,  "none", 2,
-##"moist", "prec_conv", "prec_conv", "atmos_daily_avg", "all", .true., "none", 2,
-##"moist", "prec_ls",   "prec_ls",  "atmos_daily_avg", "all", .true.,  "none", 2,
-
-##--- Surface variables ---##
-## --- usurf, tsurf, zsurf are not the lowest atm level, but the surface variables 
-##"dynamics",    "usurf",   "usurf", "atmos_4xdaily", "all", .false., "none", 2,
-"simple_surface", "evap", "evap",     "atmos_daily_avg", "all", .true.,  "none", 2,
-#"simple_surface",  "oflx",  "oflx",   "atmos_daily_avg", "all", .true.,  "none", 2,
-#"simple_surface",  "albedo",  "albedo",   "atmos_daily_avg", "all", .true.,  "none", 2,
-"simple_surface",  "u_atm",  "u_atm",   "atmos_daily_avg", "all", .true.,  "none", 2,
-"simple_surface",  "v_atm",  "v_atm",   "atmos_daily_avg", "all", .true.,  "none", 2,
-"simple_surface", "t_surf", "t_surf", "atmos_daily_avg", "all", .true., "none", 2,
-"simple_surface", "shflx",   "shflx",       "atmos_daily_avg", "all", .true., "none", 2,
-# NB that u_surf does not work as the surface wind as register_diag_field in simple_surface.f90
-# is for u_atm (bottom level u). Further, in surface_flux.f90, u_surf is only an input and
-# not an output (hence cannot be outputted to file).
-#--------------------------------
-
-##------ Diabatic Heating Rate terms in TDEE (sensible heat, latent heat, longwave cooling, shortwave heating)
-"rrtm_radiation",  "tdt_lw",  "tdt_lw",  "atmos_daily_avg", "all", .true.,  "none", 2, 
-"rrtm_radiation",  "tdt_sw",  "tdt_sw",  "atmos_daily_avg", "all", .true.,  "none", 2,
-"vert_diff",  "tdt_vdif",    "tdt_vdif",    "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics_every",   "tdt_dampuv",  "tdt_dampuv",  "atmos_daily_avg", "all", .true., "none", 2,
-"dynamics_every",   "tdt_tempcor", "tdt_tempcor", "atmos_daily_avg", "all", .true., "none", 2,
-"moist",  "tdt_ls",  "tdt_ls",  "atmos_daily_avg", "all", .true., "none", 2,
-"moist",  "tdt_conv", "tdt_conv", "atmos_daily_avg", "all", .true., "none", 2,
-##------
-
-#- GWD terms
-"damping", "udt_cgwd", "udt_cwgd","atmos_daily_avg", "all", .true., "none", 2,
-#"damping", "vdt_cgwd", "vdt_cwgd","atmos_daily_avg", "all", .true., "none", 2,
-
-
-# PV and calculated terms in every_step_diagnostics
-##"dynamics_every",    "pv",      "pv",   "atmos_daily_avg", "all", .true., "none", 2,
-##"dynamics_every",    "psi_dwc",      "psi_dwc",   "atmos_daily_avg", "all", .true., "none", 2,
-##"dynamics_every",    "upvp",      upvp",   "atmos_daily_avg", "all", .true., "none", 2,
-#"dynamics_every",   "vpTp",      "vpTp",           "atmos_4xdaily",    "all", .false., "none", 2,
-#"dynamics_every",   "pv",        "pv",             "atmos_4xdaily",    "all", .false., "none", 2,
-#"dynamics_every",   "pvCorrec",  "pvCorrec",       "atmos_4xdaily",    "all", .false., "none", 2,
-#"dynamics_every",   "pottemp",   "pottemp",         "atmos_4xdaily",    "all", .false., "none", 2,
-
-#------
-
-# --- Extra surface and moisture terms
-##"simple_surface", "heat_capacity",    "heat_capacity", "atmos_daily_avg", "all", .true., "none", 2,
-##"simple_surface",  "rough_mom",  "rough_mom",   "atmos_daily_avg", "all", .true.,  "none", 2,
-##"simple_surface",  "rough_moist",  "rough_moist",   "atmos_daily_avg", "all", .true.,  "none", 2,
-#"moist",       "precip",  "precip",   "atmos_4xdaily_avg", "all", .true.,  "none", 2,
-#"moist",  "prec_conv", "prec_conv",   "atmos_4xdaily_avg", "all", .true.,  "none", 2,
-#"moist",  "prec_ls",     "prec_ls",   "atmos_4xdaily_avg", "all", .true.,  "none", 2,
-
-# ------ u and dudt daily tendencies - 160220 
-##"dynamics",    "ucomp",      "ucomp",   "atmos_every", "all", .false., "none", 2,
-##"dynamics",    "dudt",      "dudt",   "atmos_every", "all", .false., "none", 2,
-##"dynamics_every",        "u_every",    "u_every",    "atmos_every", "all", .false., "none", 2,
-##"dynamics_every",        "udt_damp",    "udt_damp",    "atmos_every", "all", .false., "none", 2,
-#----- 160220
-
-
-#-----------------------------------------------------------------------------------------
-# "dynamics",    "bk",             "bk",             "atmos_daily",    "all", .false., "none", 2,
-# "dynamics",    "pk",             "pk",             "atmos_daily",    "all", .false., "none", 2,
-# "dynamics",    "zsurf",          "zsurf",          "atmos_daily",    "all", .false., "none", 2,
-# "dynamics",    "bk",             "bk",             "atmos_avg",    "all", .false., "none", 2,
-# "dynamics",    "pk",             "pk",             "atmos_avg",    "all", .false., "none", 2,
-# "dynamics",    "zsurf",          "zsurf",          "atmos_avg",    "all", .false., "none", 2,
-# "rrtm_radiation",  "tdt_rad",     "tdt_rad",     "atmos_avg",   "all", .true.,  "none", 2,
-# "rrtm_radiation",  "tdt_lw",      "tdt_lw",      "atmos_daily", "all", .false.,  "none", 2,
-# "rrtm_radiation",  "tdt_sw",      "tdt_sw",      "atmos_daily", "all", .false.,  "none", 2,
-# "rrtm_radiation",  "flux_sw",     "flux_sw",     "atmos_daily", "all", .false.,  "none", 2,
-# "rrtm_radiation",  "coszen",      "coszen",      "atmos_daily", "all", .false., "none", 2,
-# "rrtm_radiation",  "ozone",       "ozone",       "atmos_daily", "all", .false., "none", 2,
-# "rrtm_radiation",  "flux_lw",     "flux_lw",     "atmos_daily", "all", .false.,  "none", 2,
-# "rrtm_radiation",  "rrtm_albedo", "rrtm_albedo", "atmos_avg",   "all", .true.,   "none", 2,
-# "moist",        "rh",          "rh",          "atmos_daily", "all", .false.,  "none", 2,
-# "dynamics",        "sphum",       "sphum",       "atmos_daily", "all", .false.,  "none", 2,
-# "dynamics",  "vor",         "vor",         "atmos_daily", "all", .true.,  "none", 2,
-# "dynamics",  "div",         "div",         "atmos_daily", "all", .true.,  "none", 2,
-# "moist",     "tdt_ls",      "tdt_ls",      "atmos_daily", "all", .true., "none", 2,
-# "moist",     "precip",      "precip",      "atmos_daily", "all", .false.,  "none", 2,
-# "moist",     "prec_conv",   "prec_conv",   "atmos_daily", "all", .true.,  "none", 2,
-# "moist",     "prec_ls",     "prec_ls",     "atmos_daily", "all", .true.,  "none", 2,
-# "moist",     "cape",        "cape",        "atmos_daily", "all", .true.,  "none", 2,
-# "moist",     "cin",         "cin",         "atmos_daily", "all", .true.,  "none", 2,
-# "moist",     "bmflag",      "bmflag",      "atmos_daily", "all", .true., "none", 2,
-# "moist",     "klzbs",       "klzbs",       "atmos_daily", "all", .true., "none", 2,
-# "simple_surface",  "evap",  "evap",        "atmos_daily", "all", .true.,  "none", 2,
-# "simple_surface",  "t_surf", "t_surf",     "atmos_daily", "all", .false.,  "none", 2,
-# "simple_surface", "shflx",   "shflx",       "atmos_daily", "all", .true., "none", 2,
-# "dynamics",  "ps",          "ps",          "atmos_daily", "all", .true.,  "none", 2,
-# "dynamics",  "ps",          "ps",          "atmos_dailya", "all", .true.,  "none", 2,
-# "simple_surface", "u_star", "u_star",      "atmos_daily", "all", .true.,  "none", 2,
-# "simple_surface", "b_star", "b_star",      "atmos_daily", "all", .true.,  "none", 2,
-# "dynamics",  "ps",          "ps",          "atmos_daily", "all", .false.,  "none", 2,
-# "dynamics",  "ps",          "ps",          "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "ucomp",       "ucomp",       "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "vcomp",       "vcomp",       "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "temp",        "temp",        "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "sphum",       "sphum",       "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "omega",       "omega",       "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "omega",       "omega",       "atmos_daily", "all", .false.,  "none", 2,
-# "dynamics_every",  "dry_stat_en", "dry_stat_en", "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "moist_stat_en", "moist_stat_en", "atmos_avg", "all", .true., "none", 2,
-# "dynamics",  "div",         "div",         "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "vor",         "vor",         "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics",  "wspd",        "wspd",        "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "uv",          "uv",          "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "vq",          "vq",          "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "vdse",        "vdse",        "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "vp",          "vp",          "atmos_avg", "all", .true.,  "none", 2, 
-# "dynamics_every",  "omegap",      "omegap",      "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wdse",        "wdse",        "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wq",          "wq",          "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wv",          "wv",          "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wu",          "wu",          "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wdsep",       "wdsep",       "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wqp",         "wqp",         "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wvp",         "wvp",         "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wup",         "wup",         "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "kegen",       "kegen",       "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "kegenq",      "kegenq",      "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "kegenqtinv",  "kegenqtinv",  "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wsubt",       "wsubt",       "atmos_avg", "all", .true.,  "none", 2,
-# "dynamics_every",  "wsubtv",      "wsubtv",      "atmos_avg", "all", .true.,  "none", 2,
-# "moist",     "precip",      "precip",      "atmos_avg", "all", .true.,  "none", 2,
-#"moist",     "tref",        "tref",        "atmos_avg", "all", .true.,  "none", 2,
-#"moist",     "qref",        "qref",        "atmos_avg", "all", .true.,  "none", 2, 
-#"moist",     "prec_conv",   "prec_conv",   "atmos_avg", "all", .true.,  "none", 2,
-# "moist",     "prec_ls",     "prec_ls",     "atmos_avg", "all", .true.,  "none", 2,
-# "moist",     "rh",          "rh",          "atmos_avg", "all", .true.,  "none", 2,
-# "moist",     "cape",        "cape",        "atmos_avg", "all", .true.,  "none", 2,
-# "moist",     "cin",         "cin",         "atmos_avg", "all", .true.,  "none", 2,
-# "vert_turb", "z_pbl",       "z_pbl",       "atmos_avg", "all", .true.,  "none", 2,
-# "vert_turb", "diff_t",      "diff_t",      "atmos_avg", "all", .true.,  "none", 2,
-#"vert_turb", "tke",         "tke",         "atmos_avg", "all", .true.,  "none", 2,
-# "vert_turb", "diff_m",      "diff_m",      "atmos_avg", "all", .true.,  "none", 2,
-# "simple_surface",  "drag_heat",   "drag_heat",   "atmos_avg", "all", .true.,  "none", 2,
-# "vert_turb", "gust",       "gust",        "atmos_avg", "all", .true.,  "none", 2,
-# "simple_surface",  "t_surf",      "t_surf",      "atmos_avg", "all", .true.,  "none", 2,
-# "moist",           "rhsurf",      "rhsurf",      "atmos_avg", "all", .true.,  "none", 2,
-# "simple_surface",  "shflx",       "shflx",       "atmos_avg", "all", .true.,  "none", 2,
-# "simple_surface",  "evap",        "evap",        "atmos_avg", "all", .true.,  "none", 2,
-# "simple_surface",  "lwflx",       "lwflx",       "atmos_avg", "all", .true.,  "none", 2,
-# "simple_surface",  "wind",        "wind",        "atmos_avg", "all", .true.,  "none", 2,
-# "simple_surface",  "u_star",      "u_star",      "atmos_avg", "all", .true., "none", 2,
-# "simple_surface",  "b_star",      "b_star",      "atmos_avg", "all", .true., "none", 2,
-# "simple_surface",  "entrop_evap", "entrop_evap", "atmos_avg", "all", .true., "none", 2,
-# "simple_surface",  "entrop_shflx", "entrop_shflx", "atmos_avg", "all", .true., "none", 2,
-# "simple_surface",  "entrop_lwflx", "entrop_lwflx", "atmos_avg", "all", .true., "none", 2,
-# "rrtm_radiation",  "olr",         "olr",         "atmos_avg", "all", .true.,  "none", 2,
-# "rrtm_radiation",  "lwdn_sfc",    "lwdn_sfc",    "atmos_avg", "all", .true.,  "none", 2,
-# "rrtm_radiation",  "lwup_sfc",    "lwup_sfc",    "atmos_avg", "all", .true.,  "none", 2,
-# "rrtm_radiation",  "flux_rad",    "flux_rad",    "atmos_avg", "all", .true., "none", 2,
-# "rrtm_radiation",  "flux_lw",     "flux_lw",     "atmos_avg", "all", .true., "none", 2,
-# "rrtm_radiation",  "flux_sw",     "flux_sw",     "atmos_avg", "all", .true., "none", 2,
-# "vert_diff",       "tdt_vdif",    "tdt_vdif",    "atmos_avg", "all", .true., "none", 2,
-# "vert_diff",       "qdt_vdif",    "qdt_vdif",    "atmos_avg", "all", .true., "none", 2,
-# "vert_diff",       "udt_vdif",    "udt_vdif",    "atmos_avg", "all", .true., "none", 2,
-# "vert_diff",   "tdt_diss_vdif", "tdt_diss_vdif", "atmos_avg", "all", .true., "none", 2,
-# "vert_diff", "diss_heat_vdif", "diss_heat_vdif", "atmos_avg", "all", .true., "none", 2,
-# "vert_diff", "entrop_vdif_sens", "entrop_vdif_sens", "atmos_avg", "all", .true., "none", 2,
-# "vert_diff", "entrop_vdif_kediss", "entrop_vdif_kediss", "atmos_avg", "all", .true., "none", 2,
-# "damping",         "udt_rdamp",   "udt_rdamp",   "atmos_avg", "all", .true., "none", 2,
-# "moist",           "tdt_conv",    "tdt_conv",    "atmos_avg", "all", .true., "none", 2,
-# "moist",           "qdt_conv",    "qdt_conv",    "atmos_avg", "all", .true., "none", 2,
-# "moist",           "tdt_ls",      "tdt_ls",      "atmos_avg", "all", .true., "none", 2,
-# "moist",           "qdt_ls",      "qdt_ls",      "atmos_avg", "all", .true., "none", 2,
-# "moist",           "entrop_ls",   "entrop_ls",   "atmos_avg", "all", .true., "none", 2,
-###"dynamics_every",        "udt_damp",    "udt_damp",    "atmos_daily_avg", "all", .true., "none", 2,
-# "dynamics_every",        "vdt_damp",    "vdt_damp",    "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",        "tdt_damp",    "tdt_damp",    "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",    "entrop_dampuv", "entrop_dampuv", "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",      "entrop_dampt", "entrop_dampt", "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",        "tdt_dampuv",  "tdt_dampuv",  "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",        "tdt_tempcor", "tdt_tempcor", "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",      "qdt_watercor", "qdt_watercor", "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",  "entrop_tempcor", "entrop_tempcor", "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",        "sphum_hadv",    "sphum_hadv",    "atmos_avg", "all", .true., "none", 2,
-# "dynamics_every",        "sphum_vadv",    "sphum_vadv",    "atmos_avg", "all", .true., "none", 2,
-
-=============================================================================================
-
-====> This file can be used with diag_manager/v2.0a (or higher) <====
-
-
-  FORMATS FOR FILE ENTRIES (not all input values are used)
-  ------------------------
-
-"file_name", output_freq, "output_units", format, "time_units", "long_name",
-
-
-output_freq:  > 0  output frequency in "output_units"
-              = 0  output frequency every time step
-              =-1  output frequency at end of run
-
-output_units = units used for output frequency
-               (years, months, days, minutes, hours, seconds)
-
-time_units   = units used to label the time axis
-               (days, minutes, hours, seconds)
-
-
-  FORMAT FOR FIELD ENTRIES (not all input values are used)
-  ------------------------
-
-"module_name", "field_name", "output_name", "file_name" "time_sampling", time_avg, "other_opts", packing
-
-time_avg = .true. or .false.
-
-packing  = 1  double precision
-         = 2  float
-         = 4  packed 16-bit integers
-         = 8  packed 1-byte (not tested?)
-
-
-
-
-
-
-
-
+"atmos_daily",    24, "hours", 1, "days", "time",
+"atmos_davg",     24, "hours", 1, "days", "time",
+"atmos_dext",     24, "hours", 1, "days", "time",
+"atmos_avg",      -1, "hours", 1, "days", "time",
+#diagnostic field entries. 
+# quantities needed for plevel interpolation,
+ "dynamics",        "bk",         "bk",             "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "pk",         "pk",             "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "ps",         "ps",             "atmos_daily",    "all", .false., "none", 2,
+# dynamics variables
+ "dynamics",        "ucomp",      "ucomp",          "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "temp",       "temp",           "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "sphum",      "sphum",          "atmos_daily",    "all", .false., "none", 2,
+ "dynamics",        "ucomp",      "ucomp",          "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "temp",       "temp",           "atmos_avg",      "all", .true.,  "none", 2,
+ "dynamics",        "sphum",      "sphum",          "atmos_avg",      "all", .true.,  "none", 2,
+# surface variables
+ "simple_surface",  "t_surf",     "t_surf",         "atmos_davg",     "all", .true., "none", 2,
+ "simple_surface",  "t_surf",     "t_surf_max",     "atmos_dext",     "all", "max",  "none", 2,
+ "simple_surface",  "t_surf",     "t_surf_min",     "atmos_dext",     "all", "min",  "none", 2,
+# moisture variables
+  "moist",          "precip",     "precip",         "atmos_davg",     "all", .true., "none", 2,
+  "moist",          "precip",     "precip_max",     "atmos_dext",     "all", "max",  "none", 2,
+#=============================================================================================
+#
+#  FORMATS FOR FILE ENTRIES (not all input values are used)
+#  ------------------------
+#
+#"file_name", output_freq, "output_units", format, "time_units", "long_name"
+#
+#
+#   output_freq:  > 0  output frequency in "output_units"
+#                 = 0  output frequency every time step
+#                 =-1  output frequency at end of run
+#
+#   output_units = units used for output frequency
+#                  (years, months, days, minutes, hours, seconds)
+#
+#   time_units   = units used to label the time axis
+#                  (days, minutes, hours, seconds)
+#
+#
+#  FORMAT FOR FIELD ENTRIES (not all input values are used)
+#  ------------------------
+#
+#"module_name", "field_name", "output_name", "file_name", "time_sampling", time_avg, "other_opts", packing
+#
+#   time_avg = .true. or .false.
+#
+#   packing  = 1  double precision
+#            = 2  float
+#            = 4  packed 16-bit integers
+#            = 8  packed 1-byte (not tested?)
