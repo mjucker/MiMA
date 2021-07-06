@@ -1,6 +1,6 @@
 # Input namelists from selected publications
 
-This folder contains selected input namelist files from published studies. This is not an exhaustive list and we encourage all MiMA users to provide their namelist files along with any necessary additional input files in permanent openly accessible repositories.
+This folder contains selected input namelist files from published studies. This is not an exhaustive list as it only includes major code updates. We encourage all MiMA users to provide their namelist files along with any necessary additional input files in permanent openly accessible repositories.
 
 | File  |  Reference  |  MiMA version  |  Short description  |
 |:--|:--|:--|:--|
