@@ -9,6 +9,7 @@
 # quantities needed for plevel interpolation,
  "dynamics",        "bk",         "bk",             "atmos_daily",    "none",.false., "none", 2,
  "dynamics",        "pk",         "pk",             "atmos_daily",    "none",.false., "none", 2,
+ "dynamics",        "zsurf",      "zsurf",          "atmos_daily",    "none",.false., "none", 2,
  "dynamics",        "ps",         "ps",             "atmos_daily",    "all", .false., "none", 2,
 # dynamics variables
  "dynamics",        "ucomp",      "ucomp",          "atmos_daily",    "all", .false., "none", 2,
