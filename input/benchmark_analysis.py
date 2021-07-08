@@ -6,7 +6,8 @@ from matplotlib import pyplot as plt
 
 def OpenFiles(name):
     ds = xr.open_mfdataset('*/*.{0}.nc'.format(name),decode_times=False)
-    ds.time.attrs['calendar'] = '360_day'
+    if '360' in ds.time.attrs['calendar']:
+        ds.time.attrs['calendar'] = '360_day'
     return xr.decode_cf(ds,use_cftime=True)
 
 def GlobalMean(ds):

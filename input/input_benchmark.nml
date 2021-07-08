@@ -1,6 +1,6 @@
  &coupler_nml
    days   = 365,
-   dt_atmos = 1200,
+   dt_atmos = 900,
    current_date = 0001,1,1,0,0,0
    calendar = 'noleap' /
 
@@ -57,6 +57,7 @@
      surface_choice   = 1,
      Tm               = 285.,
      heat_capacity    = 4.e08,
+     trop_capacity    = 1.e08,
      land_capacity    = 8.e06,
      const_albedo     = 0.27,
      albedo_choice    = 5,
@@ -66,13 +67,11 @@
      albedo_cntrSH     =  70.,
      lat_glacier      = -70,
      land_option      = 'interpolated',
-     do_warmpool      = .false.,
-     roughness_choice = 3,
-     mom_roughness_land = 5.e3,
-     q_roughness_land = 1.e-12  /   
+     do_warmpool      = .false.  /   
 
 &qflux_nml
-     qflux_amp        = 26. /
+     qflux_amp        = 30.,
+     qflux_width      = 16./ 
 
 &damping_driver_nml
      do_rayleigh   = .true.,
