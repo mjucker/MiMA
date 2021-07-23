@@ -4,14 +4,16 @@ platform=nci
 plevel=plevel.sh
 NCPUS=32
 
-mkdir ../benchmark
-cp -r * ../benchmark/
-cd ../benchmark
+WKDIR=../../exp/benchmark
+
+mkdir $WORKDIR
+cp -r * $WORKDIR
+cd $WORKDIR
 cp input_benchmark.nml input.nml
 mkdir RESTART
-cp ../exp/exec.${platform}/mima.x .
-cp ../bin/mppnccombine.${platform} .
-cp ../postprocessing/plevel_interpolation/scripts/plevel.sh .
+cp ../exec.${platform}/mima.x .
+cp ../../bin/mppnccombine.${platform} .
+cp ../../postprocessing/plevel_interpolation/scripts/plevel.sh .
 
 
 #run 30 years
