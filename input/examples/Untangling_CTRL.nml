@@ -1,0 +1,239 @@
+
+&coupler_nml
+   days   =   360,
+   dt_atmos = 600,
+   current_date = 0001,1,1,0,0,0
+   calendar = 'thirty_day' /
+
+#  Note: For one dynamic time step per physics time step,
+#        num_steps_per_call      = 1,
+#        For two dynamic time steps per physics time step,
+#        num_steps_per_call      = 2,
+#   damping_coeff           = 2.3148148e-05,
+#   eddy_sponge_coeff       =  4.e+06,
+
+
+ &spectral_dynamics_nml
+   damping_option          = 'resolution_dependent',
+   damping_order           = 4,
+   eddy_sponge_coeff       = 0.e+16,
+   zmu_sponge_coeff        = 0.e+16,
+   zmv_sponge_coeff        = 0.e+16,
+   do_mass_correction      = .true.,
+   do_energy_correction    = .true.,
+   do_water_correction     = .true.,
+   water_correction_limit  = 200.e2,
+   vert_advect_uv          = 'second_centered',
+   vert_advect_t           = 'second_centered',
+   use_virtual_temperature = .false.,
+   use_implicit            = .true.,
+   longitude_origin        =  0.0,
+   robert_coeff            = .03,
+   alpha_implicit          = .5,
+   reference_sea_level_press=100000.,
+   lon_max                 = 128,
+   lat_max                 = 64,
+   num_levels              = 80,
+   num_fourier             = 42,
+   num_spherical           = 43,
+   fourier_inc             = 1,
+   triang_trunc            =.true.,
+   topography_option       = 'flat',
+   ocean_topog_smoothing   = .93,
+   initial_sphum           = 2.e-6,
+   vert_coord_option       = 'input',
+   surf_res                = 0.4,
+   scale_heights           =11.0,
+   exponent                = 6.5 /
+
+ &vert_coordinate_nml
+        pk = 0.        ,      2.962649  ,      5.075355  ,      8.413222  ,
+           13.51992   ,     21.0995    ,     32.03257   ,     47.38437   ,
+           68.40246   ,     96.5028    ,    133.244     ,    180.2909    ,
+          239.3696    ,    312.2167    ,    400.5276    ,    505.906     ,
+          629.8186    ,    773.5591    ,    938.221     ,   1124.683     ,
+         1333.606     ,   1565.438     ,   1820.434     ,   2098.678     ,
+         2400.117     ,   2724.591     ,   3071.872     ,   3441.698     ,
+         3833.812     ,   4247.989     ,   4684.071     ,   5141.988     ,
+         5621.783     ,   6123.629     ,   6647.844     ,   7194.898     ,
+         7765.431     ,   8360.249     ,   8980.331     ,   9626.833     ,
+        10301.09      ,  11004.61      ,  11739.09      ,  12506.38      ,
+        13308.54      ,  14147.78      ,  15026.49      ,  15947.26      ,
+        16912.83      ,  17926.15      ,  18990.34      ,  20054.06449904,
+        20601.12350879,  21102.08137344,  21546.74054999,  21923.33500818,
+        22218.30237918,  22416.05592359,  22498.73572464,  22445.90985884,
+        22234.26109775,  21837.2232942 ,  21224.58877359,  20362.0519798 ,
+        19210.71368471,  17726.53044591,  15859.68140958,  13553.84802719,
+        10745.50475058,   7362.95473071,   3325.40828548,      0.        ,
+            0.        ,      0.        ,      0.        ,      0.        ,
+            0.        ,      0.        ,      0.        ,      0.        ,
+            0.
+        bk = 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.00054656,  0.00683656,  0.01420169,  0.02278279,
+        0.03273895,  0.04424928,  0.05751524,  0.07276384,  0.0902501 ,
+        0.11026039,  0.13311667,  0.15917991,  0.18885538,  0.22259746,
+        0.2609153 ,  0.30437949,  0.35362972,  0.40938125,  0.47243585,
+        0.54369062,  0.6095682 ,  0.6440351 ,  0.68045   ,  0.7189235 ,
+        0.759572  ,  0.8025188 ,  0.8478937 ,  0.8958341 ,  0.9464852 ,  1
+/
+
+
+
+ &spectral_init_cond_nml
+   initial_temperature=264. /
+
+ &gaussian_topog_nml
+   height   =    0.,    0.,   0.,   0.,
+   olat     =   45.,   45., -45., -45.,
+   olon     =   90.,  270.,  90., 270.,
+   wlat     =   20.,   20.,   5.,   5.,
+   wlon     =   20.,   20.,   5.,   5.,
+   rlat     =    0.,    0.,  15.,  15.,
+   rlon     =    0.,    0.,  20.,  20. /
+
+
+#---------- physics namelist --------------
+
+
+ &simple_surface_nml
+     do_qflux         = .true.,
+     surface_choice   = 1,
+     Tm               = 285.,
+     heat_capacity    = 4.e08,
+     trop_capacity    = 4.e08,
+     land_capacity    = 1.e07,
+     trop_cap_limit   = 15.,
+     heat_cap_limit   = 60.,
+     land_option      = 'none',
+     slandlon         =   0,
+     elandlon         = 360,
+     slandlat         =  30,
+     elandlat         =  60,
+     roughness_choice = 1,
+     const_roughness  = 3.21e-05,
+     albedo_choice    = 1,
+     const_albedo     = 0.205/
+
+ &qflux_nml
+     qflux_amp   = 30. /
+
+ &rrtm_radiation_nml
+     co2ppmv                = 300.,
+     do_read_ozone          = .true.,
+     ozone_file             = 'ozone_1990',
+     dt_rad                 =  7200,
+     lonstep                = 1/
+
+ &astro_nml
+     solr_cnst   = 1360. /
+
+
+ &damping_driver_nml
+     do_rayleigh   = .true.,
+     trayfric      = -0.5,
+     sponge_pbottom=  50.,
+     do_conserve_energy = .true.,
+     do_cg_drag    = .false.,
+     do_const_drag = .false.,
+     const_drag_amp = 3.e-04 /
+
+ &cg_drag_nml
+     Bt_0  = 0.0002,
+     Bt_nh = 0.006,
+     Bt_sh = 0.006,
+     phi0n = 30.,
+     phi0s =-30.,
+     dphin = 10.,
+     dphis =-10.,
+     source_level_pressure = 315.e+02,
+     cg_drag_freq = 21600 /
+
+ &moist_processes_nml
+     do_bm           =.true.,
+     do_bmmass       =.false.,
+     do_bmomp        =.false.,
+     do_mca          =.false.,
+     do_lsc          =.true.,
+     do_strat        =.false.,
+     do_ras          =.false.,
+     do_diag_clouds  =.false.,
+     do_rh_clouds    =.false.,
+     use_df_stuff = .true. /
+
+ &betts_miller_nml
+       tau_bm = 7200.,
+       rhbm   = .7   ,
+       do_simp = .false.,
+       do_shallower = .true.,
+       do_changeqref = .false.,
+       do_envsat = .false.,
+       do_taucape = .false.,
+       capetaubm = 900.,
+       tau_min = 2400./
+
+ &moist_conv_nml
+       beta = 0.0,
+       use_df_stuff = .true./
+
+ &lscale_cond_nml
+       do_evap = .true.,
+       use_df_stuff = .true. /
+
+ &vert_diff_driver_nml
+        do_conserve_energy = .true.,
+	use_virtual_temp_vert_diff = .false. /
+
+ &diffusivity_nml
+     do_entrain = .false
+     use_df_stuff = .true. /
+
+
+ &surface_flux_nml
+     use_virtual_temp = .false.,
+     use_df_stuff = .true.,
+     old_dtaudv = .true. /
+
+ &ras_nml
+    rn_frac_bot = 0.25,
+    rn_pbot = 800.0e2,
+    rn_ptop = 500.0e2,
+    rn_frac_top = 0.99   /
+
+ &vert_turb_driver_nml
+    use_tau          = .false.,
+    gust_scheme      = 'constant',
+    constant_gust    = 0.,
+    do_mellor_yamada = .false.,
+    do_shallow_conv  = .false.,
+    use_df_stuff = .true.,
+    do_diffusivity = .true./
+
+ &ocean_rough_nml
+      rough_scheme = 'beljaars' /
+
+ &physics_driver_nml
+     do_grey_radiation = .false.,
+     do_rrtm_radiation = .true.,
+     do_damping = .true. /
+
+
+# general stuff
+
+ &fms_io_nml
+    threading_write = 'single',
+    fileset_write = 'single'
+/
+
+ &fms_nml
+         print_memory_usage=.true.,
+         domains_stack_size = 800000
+/
