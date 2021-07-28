@@ -1,6 +1,8 @@
 # Input namelists from selected publications
 
-This folder contains selected input namelist files from published studies. This is not an exhaustive list as it only includes major code updates. We encourage all MiMA users to provide their namelist files along with any necessary additional input files in permanent openly accessible repositories.
+This folder contains selected input namelist files from published studies. This is not an exhaustive list as it only includes major code updates. Note that these experiments might need auxiliaries (such as ozone or topography) which can be found in the [auxiliaries](../auxiliaries) folder. 
+
+We encourage all MiMA users to provide their namelist files along with any necessary additional input files in permanent openly accessible repositories.
 
 | File  |  Reference  |  MiMA version  |  Short description  |
 |:--|:--|:--|:--|
