@@ -20,14 +20,14 @@
 
     do_mass_correction      =.true.,
 
-    do_energy_correction    =.true., 
+    do_energy_correction    =.true.,
 
-    do_water_correction     =.true.,  
+    do_water_correction     =.true.,
     water_correction_limit  = 200.e2,
 
-    initial_sphum           = 2.e-06,  
+    initial_sphum           = 2.e-06,
 
-    use_virtual_temperature =.false., 
+    use_virtual_temperature =.false.,
 
     vert_advect_uv          = 'second_centered',
 
@@ -91,7 +91,7 @@
 
      do_read_ozone          = .true.,
 
-     ozone_file             = 'ozone_preindustrialCMIP5_annualaverage',
+     ozone_file             = 'ozone_pi',
 
      dt_rad_avg             =  4500,
 
@@ -118,7 +118,7 @@
      heat_capacity    = 3.e08,
 
      land_capacity    = 1.e07,
-    
+
      trop_capacity    = 1.e08,
      trop_cap_limit   = 20.
 
@@ -135,7 +135,7 @@
 
      mom_roughness_land = 5.e3,
 
-     q_roughness_land = 1.e-35   /   
+     q_roughness_land = 1.e-35   /
 
 #higher_albedo of 0.65 is too warm over antarctica, but 0.75 too cold
 
@@ -147,9 +147,9 @@
 
       warmpool_localization_choice = 3,
 
-     warmpool_k       = 1.66666, 
+     warmpool_k       = 1.66666,
 
-     warmpool_amp     = 18., 
+     warmpool_amp     = 18.,
 
      warmpool_width   = 35.,
 
@@ -159,19 +159,19 @@
 
      warmpool_centr   = 0.,
 
-    gulf_k       = 4.0, 
+    gulf_k       = 4.0,
 
-      gulf_amp     = 70., 
+      gulf_amp     = 70.,
 
      kuroshio_amp = 40.,
 
      trop_atlantic_amp = 50.,
 
-     gulf_phase   = 310., 
+     gulf_phase   = 310.,
 
      north_sea_heat =0.0/
 
-# spcz_weight    = 0.4,warmpool_amp     = 25., 
+# spcz_weight    = 0.4,warmpool_amp     = 25.,
 #north_sea_heat = 0.7,
 
 
@@ -185,7 +185,7 @@
 
      do_conserve_energy = .true.,
 
-     do_cg_drag    = .true., 
+     do_cg_drag    = .true.,
 
      do_mg_drag = .false./
 
@@ -193,19 +193,19 @@
 
 &topography_nml
 
-	topog_file = 'INPUT/navy_topography.data.nc', 
+	topog_file = 'INPUT/navy_topography.data.nc',
 
 	water_file = 'INPUT/navy_pctwater.data.nc' /
 
 
 
-#Bn intiall 0, 5.4, 8.4 
+#Bn intiall 0, 5.4, 8.4
 
-#flag            
+#flag
 
  &cg_drag_nml
 
-     Bt_0  = 0.0043,  
+     Bt_0  = 0.0043,
 
      Bt_nh = 0.0035,
 
@@ -235,7 +235,7 @@
 
     kelvin_kludge = 1.0,
 
-   
+
 
      source_level_pressure = 315.e+02,
 
@@ -245,13 +245,13 @@
 
 
 
- 
+
 
  &moist_processes_nml
 
-     do_bm           =.true.,   
+     do_bm           =.true.,
 
-     do_bmmass       =.false., 
+     do_bmmass       =.false.,
 
      do_bmomp        =.false.,
 
@@ -259,7 +259,7 @@
 
      do_lsc          =.true.,
 
-     do_strat        =.false., 
+     do_strat        =.false.,
 
      do_ras          =.false.,
 
@@ -275,23 +275,23 @@
 
        tau_bm = 7200.,
 
-       rhbm   = .7   , 
+       rhbm   = .7   ,
 
-       do_simp = .false., 
+       do_simp = .false.,
 
-       do_shallower = .true., 
+       do_shallower = .true.,
 
        do_changeqref = .false.,
 
-       do_envsat = .false., 
+       do_envsat = .false.,
 
-       do_taucape = .false., 
+       do_taucape = .false.,
 
-       capetaubm = 900., 
+       capetaubm = 900.,
 
        tau_min = 2400./
 
- 
+
 
 &moist_conv_nml
 
@@ -299,7 +299,7 @@
 
        use_df_stuff = .true./
 
-  
+
 
  &monin_obukhov_nml
 
@@ -359,7 +359,7 @@
 
     do_shallow_conv  = .false.,
 
-    use_df_stuff = .true., 
+    use_df_stuff = .true.,
 
     do_diffusivity = .true./
 
@@ -398,7 +398,3 @@
     threading_write = 'single',
 
     fileset_write = 'single' /
-
-
-
-
