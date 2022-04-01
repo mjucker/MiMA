@@ -3,7 +3,7 @@
 set echo 
 #--------------------------------------------------------------------------------------------------------
 # define variables
-set platform  = nci                                   # A unique identifier for your platform
+set platform  = nci_bench                             # A unique identifier for your platform
 set npes      = $PBS_NCPUS                            # number of processors
 set template  = $cwd/../bin/mkmf.template.$platform   # path to template for your platform
 set mkmf      = $cwd/../bin/mkmf                      # path to executable mkmf

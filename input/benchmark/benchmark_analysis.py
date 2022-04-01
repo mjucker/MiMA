@@ -63,7 +63,7 @@ for v,var in enumerate(['precip','t_surf']):
     tmp.plot.contourf(ax=axs[v],levels=21)
     axs[v].set_title(var)
     (tmp-bench[var]).plot.contourf(ax=axsb[v],levels=21)
-    axs[v].set_title(r'$\Delta$'+var)
+    axsb[v].set_title(r'$\Delta$'+var)
 fig.suptitle('Climatological seasonal cycle')
 fig.savefig('P_Ts_seasonal.pdf')
 figb.suptitle('Climatological seasonal cycle difference')
