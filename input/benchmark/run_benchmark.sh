@@ -1,10 +1,10 @@
 ulimit -s unlimited
 
-platform=nci
+platform=nci_bench
 plevel=plevel.sh
 NCPUS=32
 
-WKDIR=../../exp/benchmark
+WORKDIR=../../exp/benchmark
 
 mkdir $WORKDIR
 cp -r * $WORKDIR
@@ -48,7 +48,7 @@ do
         sh ${plevel} -a -i ${fileName} slp hght
         if [ $? -ne 0 ]
         then
-	    sh plevel.sh -a -i ${fileName}
+	    sh ${plevel} -a -i ${fileName}
         fi
         mv plevel.nc ${fileName/.nc/.plev.nc}
     done
