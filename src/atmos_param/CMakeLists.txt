@@ -36,8 +36,8 @@ betts_miller/bm_omp.f90
 betts_miller/betts_miller.f90
 betts_miller/bm_massflux.f90
 monin_obukhov/monin_obukhov.f90
-# lscale_cond/lscale_cond.f90
-lscale_cond/null/lscale_cond.f90
+lscale_cond/lscale_cond.f90
+# lscale_cond/null/lscale_cond.f90
 radiation_driver/radiation_driver.f90
 local_heating/local_heating.f90
 astronomy/astronomy.f90
@@ -101,14 +101,14 @@ rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_rad.nomcica.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_spcvrt.f90
 # rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_rad.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_cldprmc.f90
-rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_read_nc.f90
+# rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_read_nc.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_setcoef.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_init.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_reftra.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_vrtqdr.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_taumol.f90
-# Long Time to Compile so Done Elsewhere
-# rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_k_g.f90
+# Long Time to Compile so special flags in main CMakeLists
+rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_k_g.f90
 rrtm_radiation/rrtmg_sw/gcm_model/modules/rrsw_kg22.f90
 rrtm_radiation/rrtmg_sw/gcm_model/modules/rrsw_kg20.f90
 rrtm_radiation/rrtmg_sw/gcm_model/modules/rrsw_kg26.f90
@@ -137,11 +137,12 @@ rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_cldprmc.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_setcoef.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/mcica_subcol_gen_lw.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_init.f90
-rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_read_nc.f90
+# Not required if rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_k_g.f90 used
+# rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_read_nc.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_taumol.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rtrnmc.f90
-# Long Time to Compile so Done Elsewhere
-# rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_k_g.f90
+# Long Time to Compile so special flags in main CMakeLists
+rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_k_g.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/mcica_random_numbers.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_cldprop.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rtrn.f90
