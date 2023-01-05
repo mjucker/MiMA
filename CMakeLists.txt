@@ -89,7 +89,7 @@ add_subdirectory( src/shared )
 # Set coompile options for executable
 target_compile_options( mima.x PRIVATE
 -fpp
--safe_cray_ptr
+-safe-cray-ptr
 -ftz
 -assume byterecl
 -i4

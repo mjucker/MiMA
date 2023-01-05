@@ -57,7 +57,7 @@ sea_esf_rad/sealw99.f90
 sea_esf_rad/rh_based_clouds.f90
 sea_esf_rad/diag_clouds_W.f90
 sea_esf_rad/isccp_clouds.f90
-sea_esf_rad/specified_clouds_W.f90
+# sea_esf_rad/specified_clouds_W.f90
 sea_esf_rad/donner_deep_clouds_W.f90
 sea_esf_rad/radiation_diag.f90
 sea_esf_rad/longwave_tables.f90
@@ -70,14 +70,14 @@ sea_esf_rad/esfsw_driver.f90
 sea_esf_rad/zetac_clouds_W.f90
 sea_esf_rad/longwave_params.f90
 sea_esf_rad/aerosol.F90
-sea_esf_rad/original_fms_rad.f90
+# sea_esf_rad/original_fms_rad.f90
 sea_esf_rad/cloud_spec.f90
 sea_esf_rad/null/standalone_clouds.f90
 # sea_esf_rad/null/bulkphys_rad.f90
-sea_esf_rad/null/rh_based_clouds.f90
+# sea_esf_rad/null/rh_based_clouds.f90
 # sea_esf_rad/null/diag_clouds_W.f90
 # FIXME this is the overlay thing, this file is replaced by the above e.g. sea_esf_rad/null/specified_clouds_W.f90
-# sea_esf_rad/null/specified_clouds_W.f90
+sea_esf_rad/null/specified_clouds_W.f90
 # sea_esf_rad/null/donner_deep_clouds_W.f90
 # sea_esf_rad/null/lhsw_driver.f90
 sea_esf_rad/null/original_fms_rad.f90
@@ -93,14 +93,13 @@ stable_bl_turb/stable_bl_turb.f90
 dry_adj/dry_adj.f90
 # dry_adj/null/dry_adj.f90
 rrtm_radiation/astro.f90
-rrtm_radiation/rrtm_radiation.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/mcica_subcol_gen_sw.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_spcvmc.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_cldprop.f90
 # rrtm_radiation/rrtmg_sw/gcm_model/src/mcica_random_numbers.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_rad.nomcica.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_spcvrt.f90
-rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_rad.f90
+# rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_rad.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_cldprmc.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_read_nc.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_setcoef.f90
@@ -108,8 +107,8 @@ rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_init.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_reftra.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_vrtqdr.f90
 rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_taumol.f90
-rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_k_g.f90
-rrtm_radiation/rrtmg_sw/gcm_model/data/rrtmg_sw.nc
+# Long Time to Compile so Done Elsewhere
+# rrtm_radiation/rrtmg_sw/gcm_model/src/rrtmg_sw_k_g.f90
 rrtm_radiation/rrtmg_sw/gcm_model/modules/rrsw_kg22.f90
 rrtm_radiation/rrtmg_sw/gcm_model/modules/rrsw_kg20.f90
 rrtm_radiation/rrtmg_sw/gcm_model/modules/rrsw_kg26.f90
@@ -141,14 +140,15 @@ rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_init.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_read_nc.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_taumol.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rtrnmc.f90
-rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_k_g.f90
+# Long Time to Compile so Done Elsewhere
+# rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_k_g.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/mcica_random_numbers.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_cldprop.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rtrn.f90
-rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rad.f90
+# rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rad.f90
+rrtm_radiation/rrtm_radiation.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rtrnmr.f90
 rrtm_radiation/rrtmg_lw/gcm_model/src/rrtmg_lw_rad.nomcica.f90
-rrtm_radiation/rrtmg_lw/gcm_model/data/rrtmg_lw.nc
 rrtm_radiation/rrtmg_lw/gcm_model/modules/rrlw_kg03.f90
 rrtm_radiation/rrtmg_lw/gcm_model/modules/rrlw_con.f90
 rrtm_radiation/rrtmg_lw/gcm_model/modules/rrlw_kg14.f90

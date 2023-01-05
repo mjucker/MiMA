@@ -9,6 +9,7 @@ time_manager/get_cal_time.f90
 time_manager/time_manager.f90
 tridiagonal/tridiagonal.f90
 axis_utils/axis_utils.F90
+column_diagnostics/column_diagnostics.f90
 field_manager/parse.inc
 field_manager/field_manager.F90
 fms/read_data_3d.inc
