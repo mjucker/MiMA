@@ -18,14 +18,14 @@ Get the latest version from [GitHub](https://github.com/mjucker/MiMA/releases/la
   * Being parallel, `MPI` needs to be there too.
 
 * Build Systems
-  * There are two build systems that may be used to compile MiMA, `CMake`, and `mkmf`.
+  * There are two build systems that may be used to compile MiMA, CMake, and `mkmf`.
   * Instructions for building with both of these are provided below.
 
 ### CMake
-Building using CMake shoulkd follow the same process, regardles of the platform MiMA is being build on.
+Building using CMake should follow the same process, regardless of the platform MiMA is being built on.
 
 * Dependencies
-  * In addition to the above list, building with CMake requires `CMake` to be installed on the system.
+  * In addition to the above list, building with CMake requires `cmake` to be installed on the system.
 
 * To build MiMA using CMake after cloning the repository and navigating into it (e.g. via `cd MiMA/`) run the following commands:
   ```
@@ -34,7 +34,7 @@ Building using CMake shoulkd follow the same process, regardles of the platform 
   cmake ..
   make
   ```
-  This takes you into the MiMA directory, creates a build directory, runs the CMake script `CMakeLists.txt` to generate a Makefile for the system and then builds using the makefile.
+  This takes you into the MiMA directory, creates a build directory, runs the CMake script `CMakeLists.txt` to generate a makefile for the system and then builds using the makefile.
 
 * The output executable will be at `build/mima.x`
 
