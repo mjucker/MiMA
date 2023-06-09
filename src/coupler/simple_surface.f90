@@ -36,7 +36,6 @@ use qflux_mod, only: qflux_init,qflux,warmpool
 use physics_driver_mod, only: do_local_heating
 use local_heating_mod, only: horizontal_heating,ngauss,hamp,pcenter
 
-use  transforms_mod, only: get_grid_boundaries, grid_domain,get_grid_domain, get_lon_max, get_lat_max  
 use     mpp_domains_mod, only: mpp_global_field
 
 implicit none
