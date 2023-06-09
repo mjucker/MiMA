@@ -16,13 +16,57 @@ Get the latest version from [GitHub](https://github.com/mjucker/MiMA/releases/la
   * The code in its present form will only compile with Intel `ifort` and `icc` compilers. This description will assume `ifort` and `icc` are available.
   * MiMA reads and writes to `netCDF`, so `netCDF` needs to be installed on the system.
   * Being parallel, `MPI` needs to be there too.
-  * The flags need to be adjusted in the `bin/mkmf.template.$PLATFORM` file of choice. Typically, `$PLATFORM` will be slightly different on each machine, as libraries may not be found at the same location.
 
-* Compilation flags: The relevant flags are defined in `bin/mkmf.template.$PLATFORM`, and might or might not use environment variables. For instance, `netCDF` libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate `mkmf.template.something`, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
+* Build Systems
+  * There are two build systems that may be used to compile MiMA, CMake, and `mkmf`.
+  * Instructions for building with both of these are provided below.
 
-* Compile script: A compilescript is provided in `exp/compilescript.csh`. Make sure to set the first variable, `platform`, to whatever name you gave the mkmf template in the previous step. In our example, set it to `something`. The output executable will be in `exp/exec.$PLATFORM/mima.x`
+### CMake
+Building using CMake should follow the same process, regardless of the platform MiMA is being built on.
 
-* Adding files: If you work on your own version of MiMA, make sure every extension is in a new file, so as to not disturb the main branch and any other fork that might exist. When adding a source file, add the path to the file in `exp/path_names`, and it will be compiled the next time you run `./compilescript.csh`.
+* Dependencies
+  * In addition to the above list, building with CMake requires `cmake` to be installed on the system.
+
+* To build MiMA using CMake after cloning the repository and navigating into it (e.g. via `cd MiMA/`) run the following commands:
+  ```
+  mkdir build
+  cd build
+  cmake ..
+  make
+  ```
+  This takes you into the MiMA directory, creates a build directory, runs the CMake script `CMakeLists.txt` to generate a makefile for the system and then builds using the makefile.
+
+* The output executable will be at `build/mima.x`
+
+### mkmf
+Building using mkmf requires the user to amend the `compilescript.csh` scipt as appropriate for the platform they are building on, and possibly defining a mkmf template for their platform.
+
+* MiMA can be built using mkmf via the following steps:
+
+  * Select the appropriate mkmf template file for your platform from `bin/`.
+    These are of the form `bin/mkmf.template.$PLATFORM`, where `$PLATFORM` is typically slightly different on each machine as libraries may not be found at the same locations.
+
+  * Adjust the relevant compilation flags in the `bin/mkmf.template.$PLATFORM` file of choice as appropriate. 
+    * These may or may not use environment variables. For instance, `netCDF` libraries or debug flags could be read from environment variables for more dynamic compilation. The first thing to do is to create an appropriate `mkmf.template.something`, which contains the relevant flags. Look at some of the template files that are already there to get an idea how to set the flags.
+
+  * Compile script: A compilescript is provided in `exp/compilescript.csh`. Make sure to set the first variable, `platform`, to match the `$PLATFORM` of the mkmf template in the previous step. In our example, set it to `something`.
+
+  * MiMA can now be built with the following commands:
+    ```
+    cd exp
+    ./compilescript.csh
+    ```
+
+* The output executable will be in `exp/exec.$PLATFORM/mima.x`
+
+
+### Adding files to the build process
+
+* If you work on your own version of MiMA, make sure every extension is in a new file, so as to not disturb the main branch and any other fork that might exist.
+* When adding a source file you should:
+  * add the file to the `CMakeLists.txt` file in its local directory,
+  * add the path to the file in `exp/path_names`,
+  To ensure that it will be compiled the next time you build using CMake or run `./compilescript.csh`.
 
 
 ## Test run
