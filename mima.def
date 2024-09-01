@@ -1,0 +1,45 @@
+Bootstrap: docker
+From: robcking/eddy-builder
+Stage: build
+
+
+%files
+./src /opt/MiMA/src
+./bin /opt/MiMA/bin
+./exp /opt/MiMA/exp
+./postprocessing /opt/MiMA/postprocessing
+
+%post
+ HDF5_INC=/opt/hdf5/include
+ HDF5_LIB=/opt/hdf5/lib
+ NETCDF_INC=/opt/netcdf-c/include
+ NETCDF_LIB=/opt/netcdf-c/lib
+ NETCDF_FORTRAN_INC=/opt/netcdf-fortran/include
+ NETCDF_FORTRAN_LIB=/opt/netcdf-fortran/lib 
+ mkdir /opt/MiMA/build
+ cd /opt/MiMA/build
+ export cppDefs="-Duse_libMPI -Duse_netCDF -DgFortran"
+ export FFLAGS="-O2 -i4 -r8 -g `nf-config --fflags` `nc-config --fflags`  `nc-config --cflags` -cpp"
+ export CFLAGS="-g `nc-config --cflags` `nf-config --cflags`"
+ export LDFLAGS="-shared-intel `nf-config --flibs` `nc-config --libs` "
+ mkmf=/opt/MiMA/bin/mkmf
+ sourcedir=/opt/MiMA/src
+ pathnames=/opt/MiMA/exp/path_names
+ 
+ icx -g -O2 -o mppnccombine.singularity -I/opt/homebrew/include -I${NETCDF_INC} -I${NETCDF_FORTRAN_INC} -I${HDF5_INC} -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB} -L${HDF5_LIB}  -lnetcdf -lnetcdff /opt/MiMA/postprocessing/mppnccombine.c
+ echo "mppnccombine.singularity compiled"
+ chmod +x mppnccombine.singularity
+
+
+ ${mkmf} -p mima.x -t "/opt/MiMA/bin/mkmf.template.singularity" -c "${cppDefs}" -a $sourcedir $pathnames ${NETCDF_INC} ${NETCDF_LIB} ${NETCDF_FORTRAN_INC} ${NETCDF_FORTRAN_LIB} ${HDF5_INC} ${HDF5_LIB} $sourcedir/shared/mpp/include $sourcedir/shared/include
+ make -f Makefile clean
+ make -f Makefile 
+ chmod +x /opt/MiMA/build/mima.x
+
+%environment
+  PATH=/opt/netcdf-fortran/bin:/opt/netcdf-c/bin:/opt/intel/oneapi/mpi/latest/bin:/opt/intel/oneapi/compiler/latest/linux/bin/intel64:${PATH}
+  LD_LIBRARY_PATH=/opt/netcdf-c/lib:/opt/hdf5/lib:/opt/netcdf-fortran/lib:/opt/io_libs/lib:${LD_LIBRARY_PATH}
+
+%runscript
+  ulimit -s unlimited
+  /opt/MiMA/build/mima.x

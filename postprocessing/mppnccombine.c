@@ -38,6 +38,7 @@
   Last Updated: 05/15/08
 */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -410,6 +411,7 @@ int process_file(char *ncname, unsigned char appendnc,
         {
          fprintf(stderr,"Warning: missing the \"NumFilesInSet\" global attribute.\n");
         }
+
      }
    *nfiles=nfiles2;
 
@@ -439,7 +441,7 @@ int process_file(char *ncname, unsigned char appendnc,
      {
       ncoutfile->nvars=ncinfile->nvars; ncoutfile->recdim=ncinfile->recdim;
      }
-
+  
    /* Get some information about the variables */
    for (v=0; v < ncinfile->nvars; v++)
      {
