@@ -35,3 +35,4 @@ bin/mppnccombine.nyu
 .vscode
 *.dSYM
 rundir/
+build/

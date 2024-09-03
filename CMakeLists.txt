@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.2)
 cmake_policy (SET CMP0076 NEW)
 
 # MiMA claims to only compile with ifort / icc currently.
-set ( CMAKE_Fortran_COMPILER "ifort" )
-set ( CMAKE_C_COMPILER "icc" )
+# set ( CMAKE_Fortran_COMPILER "ifort" )
+# set ( CMAKE_C_COMPILER "icc" )
+
 project(MiMA Fortran C)
 
 if(NOT CMAKE_BUILD_TYPE)
