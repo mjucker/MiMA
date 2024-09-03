@@ -26,18 +26,18 @@ jobs:
     - name: Add Intel Packages to APT
       run: (echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list ) && sudo apt update
     - name: Configure Intel Compilers
-      run: sudo apt install intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran intel-oneapi-mkl-devel && source /opt/intel/oneapi/setvars.sh
+      run: sudo apt install intel-oneapi-compiler-dpcpp-cpp intel-oneapi-compiler-fortran intel-oneapi-mkl-devel 
     
     - name: Install Dependencies
-      run:  sudo apt install libhdf5-dev libnetcdf-dev libnetcdff-dev libudunits2-dev && echo $PATH
+      run:  sudo apt install libhdf5-dev libnetcdf-dev libnetcdff-dev libudunits2-dev
       
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=icx -DCMAKE_Fortran_COMPILER=ifx
+      run: source /opt/intel/oneapi/setvars.sh && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=icx -DCMAKE_Fortran_COMPILER=ifx
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config Reqlease
+      run: source /opt/intel/oneapi/setvars.sh && cmake --build ${{github.workspace}}/build --config Reqlease
 
 
