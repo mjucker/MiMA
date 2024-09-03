@@ -27,7 +27,7 @@ cu_mo_trans/cu_mo_trans.f90
 mg_drag/mg_drag.f90
 cloud_generator/betaDistribution.f90
 cloud_generator/null/cloud_generator.f90
-topo_drag/null/topo_drag.f90
+topo_drag/topo_drag.f90
 # diffusivity/null/diffusivity.f90
 diffusivity/diffusivity.f90
 physics_driver/physics_driver.f90
