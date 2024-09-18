@@ -1,11 +1,6 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.16)
 #policy CMP0076 - target_sources source files are relative to file where target_sources is run
 cmake_policy (SET CMP0076 NEW)
-
-# MiMA claims to only compile with ifort / icc currently.
-# set ( CMAKE_Fortran_COMPILER "ifort" )
-# set ( CMAKE_C_COMPILER "icc" )
-
 project(MiMA Fortran C)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -16,7 +11,6 @@ endif()
 add_executable ( mima.x )
 target_include_directories( mima.x PUBLIC src/shared/include src/shared/mpp/include )
 add_library( mima_c ) # The C parts of MiMA, so we can apply different options for them.
-target_compile_definitions( mima_c PRIVATE __IFC )
 target_compile_definitions( mima.x PRIVATE use_libMPI use_netCDF gFortran ) # gFortran appears to be unused
 
 # Also generate the postprocessing executable
@@ -27,7 +21,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Set to install in bin directory as per current MiMA behaviour
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/bin" CACHE PATH "..." FORCE)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/exec" CACHE PATH "..." FORCE)
 endif()
 
 # Find MPI, OpenMP, and python libraries and link
@@ -40,28 +34,41 @@ target_link_libraries( mima.x PRIVATE Python::Python )
 find_package (OpenMP REQUIRED COMPONENTS Fortran)
 target_link_libraries( mima.x PRIVATE OpenMP::OpenMP_Fortran )
 
-# Find the NetCDF installations and set the relevant variables for compilation
-# Then link to executables
-# Requires more legwork as NetCDF not provided by default
-find_package(PkgConfig)
-pkg_search_module(NETCDF_FORTRAN netcdf-fortran)
-if (NETCDF_FORTRAN_FOUND)
-    set(NETCDF_LIBRARIES "${NETCDF_FORTRAN_LDFLAGS}")
-    set(NETCDF_INCLUDES "${NETCDF_FORTRAN_INCLUDE_DIRS}")
-else()
-    set(NETCDF_F90 "YES")
-    find_package(NetCDF REQUIRED)
+find_package(NetCDF REQUIRED COMPONENTS C Fortran)
+target_link_libraries(mima.x PRIVATE NetCDF::NetCDF_Fortran NetCDF::NetCDF_C)
+target_link_libraries(mppnccombine PRIVATE NetCDF::NetCDF_C)
+
+if(NOT CMAKE_Fortran_COMPILER)
+    set(CMAKE_Fortran_COMPILER "gfortran")
 endif()
-pkg_search_module(NETCDF_C netcdf)
-if (NETCDF_C_FOUND)
-    list(APPEND NETCDF_LIBRARIES "${NETCDF_C_LDFLAGS}")
-    list(APPEND NETCDF_INCLUDES "${NETCDF_C_INCLUDE_DIRS}")
+if(MPI_Fortran_COMPILER)
+    set(CMAKE_Fortran_COMPILER ${MPI_Fortran_COMPILER})
+    message(STATUS "Using MPI Fortran compiler: ${MPI_Fortran_COMPILER}")   
 endif()
 
-target_link_libraries( mima.x PRIVATE mima_c ${NETCDF_LIBRARIES} )
-target_include_directories( mima.x PRIVATE ${NETCDF_INCLUDES} )
-target_link_libraries( mppnccombine PRIVATE ${NETCDF_LIBRARIES} )
-target_include_directories( mppnccombine PRIVATE ${NETCDF_INCLUDES} )
+
+if(APPLE)
+    message(STATUS "Configuring for MacOS")
+    if(NOT CMAKE_C_COMPILER)
+        set(CMAKE_C_COMPILER "clang")
+    endif()
+    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build architectures for MacOS")
+endif()
+
+if(NOT CMAKE_C_COMPILER)
+    set(CMAKE_C_COMPILER "gcc")
+endif()
+
+
+if(CMAKE_Fortran_COMPILER_ID  MATCHES "Intel|IntelLLVM")
+    message(STATUS "Configuring for Intel Fortran")
+    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -i4 -r8 -fpp -fPIC")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O3 -xHost")
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+    message(STATUS "Configuring for GNU Fortran")
+    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -fallow-argument-mismatch -fbacktrace -fdefault-real-8 -fdefault-double-8 -fcray-pointer -fallow-invalid-boz -fno-range-check -ffree-line-length-none")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O3 -march=native")
+endif()
 
 # Add various subdirectories with long lists of source files
 add_subdirectory( src/coupler )
@@ -84,15 +91,12 @@ COMPILE_FLAGS -O0
 add_subdirectory( src/atmos_shared )
 add_subdirectory( src/atmos_spectral )
 add_subdirectory( src/ice_param )
-# include/fms_platform.h
 add_subdirectory( src/shared )
 
-# Set coompile options for executable
-target_compile_options( mima.x PRIVATE
--fpp
--safe-cray-ptr
--ftz
--assume byterecl
--i4
--r8
-)
+target_link_libraries(mima.x PRIVATE mima_c)
+install(TARGETS mima.x mppnccombine RUNTIME DESTINATION .) 
+install(FILES input/diag_table DESTINATION . )
+install(FILES input/field_table DESTINATION .)
+install(DIRECTORY DESTINATION RESTART)
+install(FILES input/input.nml DESTINATION . )  
+install(DIRECTORY input/INPUT/ DESTINATION .) 
