@@ -159,7 +159,9 @@ integer                     :: num_field = 0
 character(len=max_len_name) :: field_name   (max_num_field)
 character(len=16)           :: field_format (max_num_field)
 real                        :: field_sum    (max_num_field)
-integer                     :: field_count  (max_num_field)
+! 64-bit: summed over all PEs, the count is (time steps) x (global columns),
+! which exceeds 2**31 for runs longer than ~4 years at T42 with dt_atmos=500
+integer(kind=8)             :: field_count  (max_num_field)
 
 !---------------------------------------------------------------------
 !    variables defining output formats.
@@ -1182,7 +1184,8 @@ type (time_type), intent(in) :: Time
       real    :: field_avg(max_num_field)
       real    :: xtime, rcount
       integer :: nn, ninc, nst, nend, fields_to_print
-      integer :: i, kount
+      integer :: i
+      integer(kind=8) :: kount
 
 !--------------------------------------------------------------------
 !   local variables:
@@ -1215,7 +1218,7 @@ type (time_type), intent(in) :: Time
         rcount = real(field_count(i))
         call mpp_sum (rcount)
         call mpp_sum (field_sum(i))
-        field_count(i) = nint(rcount)
+        field_count(i) = nint(rcount, kind=8)
 
 !--------------------------------------------------------------------
 !    verify that all the data expected for an integral has been 
@@ -1236,7 +1239,7 @@ type (time_type), intent(in) :: Time
 !    and data accumulators.
 !----------------------------------------------------------------------
         field_avg(fields_to_print) = field_sum(i)/  &
-                                     (sum_area*float(kount))
+                                     (sum_area*real(kount))
         field_sum  (i) = 0.0
         field_count(i) = 0
       end do
